@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GPS-tracker/GPS-tracker.iml" filepath="$PROJECT_DIR$/GPS-tracker/GPS-tracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GPS-tracker/Sarvar-GPS-Tracker.iml" filepath="$PROJECT_DIR$/GPS-tracker/Sarvar-GPS-Tracker.iml" />
     </modules>
   </component>
 </project>
