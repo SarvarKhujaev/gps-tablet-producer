@@ -1,14 +1,14 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import com.ssd.mvd.gpstabletsservice.constants.Details;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-import lombok.Data;
-import reactor.core.publisher.Flux;
+import com.ssd.mvd.gpstabletsservice.constants.Details;
 
+import reactor.core.publisher.Flux;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
 
 @Data
 public class CardDetails {

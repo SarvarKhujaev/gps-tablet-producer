@@ -32,7 +32,7 @@ public final class RedisDataControl {
 
     private RedisDataControl () {
         Config config = new Config();
-        config.useSingleServer().setAddress( "redis://10.254.1.227:6367" ).setClientName( "default" ).setPassword( "8tRk62" );
+        config.useSingleServer().setAddress( "redis://localhost:6379" );//.setClientName( "default" ).setPassword( "8tRk62" );
         this.redissonReactiveClient = Redisson.createReactive( config );
         this.polygonForPatrulMap = this.redissonReactiveClient.getMap( "polygonForPatrulMap" ); // for polygons with schedule
         this.polygonTypeMap = this.redissonReactiveClient.getMap( "polygonTypeMap" ); // for polygons

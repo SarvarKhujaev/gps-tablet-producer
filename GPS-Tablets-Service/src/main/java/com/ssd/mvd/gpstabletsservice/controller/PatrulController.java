@@ -3,11 +3,15 @@ package com.ssd.mvd.gpstabletsservice.controller;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
+import com.ssd.mvd.gpstabletsservice.database.SerDes;
+import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.response.PatrulInfo;
+import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -16,8 +20,10 @@ import reactor.core.publisher.Mono;
 @RestController
 public class PatrulController {
 
-//    @MessageMapping ( value = "getTaskDetails" )
-//    public Mono< CardDetails > getTaskDetails ( Data data ) { return new CardDetails( data.getObject() instanceof SelfEmploymentTask ? SerDes.getSerDes().deserializeSelfEmployment( data.getObject() ) : SerDes.getSerDes().deserializeCard( data.getObject() ), data.getType() ); }
+    @MessageMapping ( value = "getTaskDetails" )
+    public Mono< CardDetails > getTaskDetails ( Data data ) {
+        Patrul patrul = SerDes.getSerDes().deserialize( data.getObject() );
+        return patrul.getCard() != null ? Archive.getAchieve().getCard( patrul.getCard() ).flatMap( card -> Mono.just( new CardDetails( card, data.getType() ) ) ) : Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> Mono.just( new CardDetails( selfEmploymentTask, data.getType() ) ) ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( String token ) { return RedisDataControl.getRedis().arrived( token ); }

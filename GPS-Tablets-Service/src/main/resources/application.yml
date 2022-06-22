@@ -1,6 +1,6 @@
 server:
     port: 9090
-    address: 10.254.1.229
+    address: localhost
 
 spring:
     data:
@@ -20,7 +20,7 @@ spring:
     rsocket:
         server:
             port: 6060
-            address: 10.254.1.229
+            address: localhost
 
     kafka:
         bootstrap-servers: 10.254.1.209:9092, 10.254.1.211:9092, 10.254.1.212:9092

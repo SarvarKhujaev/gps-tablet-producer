@@ -46,6 +46,8 @@ public class SerDes {
 
     public PolygonType deserializePolygonType( String value ) { return this.getGson().fromJson( value, PolygonType.class ); }
 
+    public Patrul deserialize ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
+
     public Card deserializeCard ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
     public SelfEmploymentTask deserializeSelfEmployment ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
