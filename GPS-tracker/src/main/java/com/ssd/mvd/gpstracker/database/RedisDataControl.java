@@ -45,7 +45,6 @@ public final class RedisDataControl {
 
     public Flux< PoliceType > getAllPoliceTypes () { return this.policeTypes.iterator().map( PoliceType::new ); }
 
-    
     public Flux< ReqCar > getAllCars () { return this.carMap.valueIterator().map( data -> SerDes.getSerDes().deserializeCar( data ) ); }
 
     public Flux< Patrul > getAllPatruls () { return this.patrulMap.valueIterator().map( value -> SerDes.getSerDes().deserialize( value ) ); }
@@ -93,7 +92,11 @@ public final class RedisDataControl {
             : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( passportNumber + " does not exists" ).build() ).build() ) ); } // deleting current car
 
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return this.polygonForPatrulMap.containsKey( uuid ).flatMap( aBoolean -> aBoolean ?
-        this.polygonForPatrulMap.get( uuid ).map( s -> SerDes.getSerDes().deserializePolygon( s )).map( Polygon::getPatrulList ).map(patruls -> Flux.fromStream( patruls.stream() ).flatMap(patrul -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ) ) ).flatMap(value -> this.polygonForPatrulMap.remove( uuid ).flatMap(a -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( "polygon: " + uuid + " was deleted" ).code( 200 ).build() ).build() ) ) )
+        this.polygonForPatrulMap.get( uuid )
+                .map( s -> SerDes.getSerDes().deserializePolygon( s ) )
+                .map( Polygon::getPatrulList )
+                .map( patruls -> Flux.fromStream( patruls.stream() ).flatMap(patrul -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ) ) )
+                .flatMap(value -> this.polygonForPatrulMap.remove( uuid ).flatMap(a -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( "polygon: " + uuid + " was deleted" ).code( 200 ).build() ).build() ) ) )
         : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "this polygon does not exists" ).code( 201 ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > deletePoliceType ( String policeTypes ) { return this.policeTypes.contains( policeTypes ).flatMap( aBoolean -> aBoolean ? this.policeTypes.remove( policeTypes ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( aBoolean ).status( Status.builder().code( 200 ).message( policeTypes + " was deleted" ).build() ).build() ) )
