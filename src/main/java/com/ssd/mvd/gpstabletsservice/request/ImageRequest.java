@@ -16,5 +16,5 @@ public class ImageRequest { // SAM - 91
     private final String token;
     private String path;
 
-    public Mono< String > getAbsolutePath () { return RedisDataControl.getRedis().getPatrul( RedisDataControl.getRedis().decode( this.getToken() ) ).map( patrul -> ( this.path = "/home/sarvar/Загрузки/MobileApp/src/main/resources/images/" + this.getPath() + "/" + patrul.getPassportNumber() + "_" + ( this.dateOfCreation = new Date() ) ) ); }
+    public Mono< String > getAbsolutePath () { return RedisDataControl.getRedis().getPatrul( RedisDataControl.getRedis().decode( this.getToken() ) ).map( patrul -> ( this.path = "/home/trsrvuser/downloads/Tablets/images/" + this.getPath() + "/" + patrul.getPassportNumber() + "_" + ( this.dateOfCreation = new Date() ) ) ); }
 }

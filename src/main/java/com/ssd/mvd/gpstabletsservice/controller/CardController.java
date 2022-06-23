@@ -28,7 +28,7 @@ public class CardController {
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return RedisDataControl.getRedis().getPatrul( RedisDataControl.getRedis().decode( token ) ).flatMap( patrul -> {
-        if ( patrul.getSelfEmploymentId() != null ) return Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder().data( Data.builder().object( selfEmploymentTask ).type( "selfEmployment" ).build() ).status( Status.builder().code( 200 ).message( "U have 102 Task" ).build() ).success( true ).build() ) );
-        else if ( patrul.getCard() != null ) return Archive.getAchieve().getCard( patrul.getCard() ).flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder().object( card ).type( "card" ).build() ).status( Status.builder().code( 200 ).message( "U have 102 Task" ).build() ).success( true ).build() ) );
+        if ( patrul.getSelfEmploymentId() != null ) return Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( selfEmploymentTask ).type( "selfEmployment" ).build() ).status( Status.builder().code( 200 ).message( "U have 102 Task" ).build() ).success( true ).build() ) );
+        else if ( patrul.getCard() != null ) return Archive.getAchieve().getCard( patrul.getCard() ).flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( card ).type( "card" ).build() ).status( Status.builder().code( 200 ).message( "U have 102 Task" ).build() ).success( true ).build() ) );
         else return Mono.just( ApiResponseModel.builder().data( null ).status( Status.builder().code( 200 ).message( "U have 102 Task" ).build() ).success( true ).build() ); } ); }
 }

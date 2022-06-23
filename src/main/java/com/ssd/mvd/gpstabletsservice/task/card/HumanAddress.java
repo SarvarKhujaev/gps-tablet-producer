@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HumanAddress {
-    private Integer sSettlementId;
-    private Integer sCountriesId;
-    private Integer sMahallyaId;
-    private Integer sOblastiId;
     private Integer sRegionId;
+    private Integer sOblastiId;
+    private Integer sMahallyaId;
+    private Integer sCountriesId;
+    private Integer sSettlementId;
 
     private String street;
     private String sNote;

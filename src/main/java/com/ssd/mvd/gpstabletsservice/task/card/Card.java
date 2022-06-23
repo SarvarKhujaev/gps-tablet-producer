@@ -2,41 +2,39 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.Data;
 import java.util.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Card { // заполняется оператором
-    private Boolean hostpitalApplication; // показывает где был сделан звонок на улице или уже в больнице
+    private String fabula;   //????
+    private String userFio;  //Ariza berivchining F.I.SH
 
-    private String fabula; // description
-    private String status = "new"; // Tayinlangan, Yangi by default, Bajarilgan
-    private String userFullName; // имя, отчество и фамилия того кто звонил
+    private Double latitude;   // Hodisa bo'lgan joy
+    private Double longitude;   // Hodisa bo'lgan joy
 
-    private Double latitude; // местонахождение того кто звонил
-    private Double longitude;
+    private Boolean hospitalApplication;   // Ariza shifoxonadan kelgan-kelmaganligi
 
-    private Long gomNum; // ??
-    private Long deadQuanity; // количество погибших
-    private Long traumaQuanity; // уровень нанесенного уровня
+    private Integer branchId;   //???
+    private Integer sEventFormsAddId;  //??
+    private Integer initSeventFormsId;  //??
 
-    private Date eventEnd; // начало звонка
-    private Date eventStart; // конец звонка
-    private Date dateCreateCard; // дата создания бланка
+    private Date eventEnd;   // Tugallangan vaqt
+    private Date eventStart;  // Yaratilish vaqt
+    private Date dateCreateCard;   // Qachon yaratilgani
 
-    private Integer cardId; // создается со стороны оператора
-    private Integer branchId; // ???
-    private Integer firstOfAll; // ??
-    private Integer seventFromsAddId; // ???
-    private Integer initSeventFormsId; // ???
+    private Long gomNum;  //??
+    private Long cardId;
+    private Long firstOfAll;  //??
+    private Long deadQuantity;   //O'lganlar soni
+    private Long traumaQuantity;   //Jarohatlanganlar soni
 
-    private EventHuman eventHuman; // нужно уточнить на счет Нападавшего
-    private EventAddress eventAddress; // адрес происшествия
-    private List< VictimHumans > victimHumans; // список пострадавщих
+    private EventHuman eventHuman;   // Aybdor inson
+    private EventAddress eventAddress;   //Voqea manzili
+    private List< VictimHumans > victimHumans;  // Jabirlanuchi inson
 
     private UUID uuid = null;
 

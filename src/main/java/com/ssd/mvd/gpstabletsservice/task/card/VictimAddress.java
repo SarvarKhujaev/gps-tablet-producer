@@ -8,13 +8,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VictimAddress {
-    private Integer sSettlementId; // ??
-    private Integer sCountriesId; // id of country
-    private Integer sMahallyaId; // mahalla id
-    private Integer sOblastiId; // oblast id
-    private Integer sRegionId;
-    private String street;
-    private String sNote; // note about Victim
-    private String house; // house data
     private String flat;
+    private String sNote;
+    private String house;
+    private String street;
+
+    private Integer sRegionId;
+    private Integer sOblastiId;
+    private Integer sMahallyaId;
+    private Integer sCountriesId;
+    private Integer sSettlementId;
 }

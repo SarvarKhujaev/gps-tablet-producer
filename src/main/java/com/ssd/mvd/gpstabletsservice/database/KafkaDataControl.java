@@ -21,9 +21,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.KafkaStreams;
-import reactor.core.publisher.Mono;
 
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -75,10 +73,19 @@ public class KafkaDataControl {
     }
 
     private void start () {
-        KStream< String, String > kStream = this.builder.stream( "api_102_card_0.0.3", Consumed.with( Serdes.String(), Serdes.String() ) );
-        kStream.peek( ( key, value ) -> this.logger.info( value ) ).mapValues( value -> Archive.getAchieve().save( SerDes.getSerDes().deserializeCard( value ) ) );
+        KStream< String, String > kStream = this.builder.stream( "api_emehmon_registration_0.0.1", Consumed.with( Serdes.String(), Serdes.String() ) );
+        kStream.peek( ( key, value ) -> this.logger.info( value ) );
         this.kafkaStreams = new KafkaStreams( this.builder.build(), this.setStreamProperties() );
-        this.kafkaStreams.start(); }
+        this.kafkaStreams.start();
+        try {
+            Thread.sleep( 2 * 1000 );
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            this.kafkaStreams.close();
+            this.clear();
+        }
+    }
 
     private KafkaTemplate< String, String > kafkaTemplate () {
         Map< String, Object > map = new HashMap<>();
@@ -124,16 +131,15 @@ public class KafkaDataControl {
         } ); }
 
     public void clear () {
-        try { Mono.just( this.client.deleteTopics( this.client.listTopics().names().get() ) ).subscribe(); } catch (InterruptedException | ExecutionException e ) { e.printStackTrace(); }
-        finally { this.logger.info( "Kafka was closed" );
+//        try { Mono.just( this.client.deleteTopics( this.client.listTopics().names().get() ) ).subscribe(); } catch (InterruptedException | ExecutionException e ) { e.printStackTrace(); }
+//        finally { this.logger.info( "Kafka was closed" );
             CassandraDataControl.getInstance().delete();
             RedisDataControl.getRedis().clear();
             Archive.getAchieve().clear();
             this.kafkaTemplate.destroy();
             this.kafkaTemplate.flush();
-            this.kafkaStreams.close();
-            this.kafkaStreams.close();
+//            this.kafkaStreams.close();
             this.properties.clear();
             this.client.close();
-            instance = null; } }
+            instance = null; } //}
 }

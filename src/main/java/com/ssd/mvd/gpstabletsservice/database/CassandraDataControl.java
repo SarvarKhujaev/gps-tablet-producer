@@ -36,7 +36,7 @@ public final class CassandraDataControl {
 
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
 
-    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( 9042 ).addContactPoint( "localhost" ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
+    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( 9942 ).addContactPoint( "10.254.1.227" ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
                 .withSocketOptions( new SocketOptions().setReadTimeoutMillis( 30000 ) ).withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
                 .withPoolingOptions( new PoolingOptions().setMaxConnectionsPerHost( HostDistance.LOCAL, 1024 ).setMaxRequestsPerConnection( HostDistance.REMOTE, 256 ).setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
                 .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':1 };" );
@@ -116,7 +116,7 @@ public final class CassandraDataControl {
 
     public Flux< Row > getPatruls ( String param ) { return Flux.fromStream( this.session.execute( "SELECT nsf FROM TABLETS.patruls WHERE nsf LIKE '%" + param  + "%';" ).all().stream() ); }
 
-    public Flux< Row > getHistory ( Request request ) { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + ".tracker" + UUID.fromString( request.getStartTime() ) + " WHERE userId = '" + UUID.fromString( request.getStartTime() ) + "' AND date >= '" + request.getStartTime() + "' AND date <= '" + request.getEndTime() + "';" ).all().stream() ); }
+    public Flux< Row > getHistory ( Request request ) { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + ".tracker" + UUID.fromString( String.valueOf( request.getObject() ) ) + " WHERE userId = '" + UUID.fromString( String.valueOf( request.getObject() ) ) + "' AND date >= '" + request.getStartTime() + "' AND date <= '" + request.getEndTime() + "';" ).all().stream() ); }
 
     public void resetData () { Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )

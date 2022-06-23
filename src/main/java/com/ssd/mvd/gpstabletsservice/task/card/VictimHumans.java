@@ -10,12 +10,11 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VictimHumans {
-    private String phone; // номер пострадавшего
-    private String lastName; // фамилия
-    private String firstName; // имя
-    private String middleName; // отчество
-
-    private Integer victimId; // дается со стороны оператора
-    private Date dateOfBirth; // год рождения
-    private VictimAddress victimAddress; // адрес пострадавшего
+    private String phone;
+    private String lastName;
+    private Integer victimId;
+    private String firstName;
+    private String middleName;
+    private String dateOfBirth;
+    private VictimAddress victimAddress;
 }

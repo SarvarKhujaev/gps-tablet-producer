@@ -16,7 +16,8 @@ public class CardDetails {
     private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID",
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ", "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОШИБЩИХ", "ФАБУЛА" );
 
-    public CardDetails ( SelfEmploymentTask selfEmploymentTask, String language ) {}
+    public CardDetails ( SelfEmploymentTask selfEmploymentTask, String language ) {
+    }
 
     public CardDetails ( Card card, String language ) {
         this.getDetails().putIfAbsent( Details.DETAILS, new ArrayList<>() );
@@ -38,13 +39,13 @@ public class CardDetails {
                         case  "ШИРОТА" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getLongitude() ) );
                         case  "ДОЛГОТА" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getLatitude() ) );
                         case  "ВИД ПРОИСШЕСТВИЯ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, "102 Task" ) );
-                        case  "Ф.И.О" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getUserFullName() ) );
                         case  "КОНЕЦ СОБЫТИЯ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getEventEnd() ) );
                         case  "НАЧАЛО СОБЫТИЯ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getEventStart() ) );
                         case  "ДАТА И ВРЕМЯ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getDateCreateCard() ) );
-                        case  "КОЛ.СТВО ПОШИБЩИХ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getDeadQuanity() ) );
+                        case  "КОЛ.СТВО ПОШИБЩИХ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getDeadQuantity() ) );
                         case  "КОЛ.СТВО ПОСТРАДАВШИХ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getVictimHumans().size() ) );
-                        case  "ПОДРАЗДЕЛЕНИЕ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getPatruls().get(0).getPoliceType() ) ); } } );
+                        case  "ПОДРАЗДЕЛЕНИЕ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getPatruls().get(0).getPoliceType() ) );
+                        case  "Ф.И.О" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getEventHuman().getFirstName() + " " + card.getEventHuman().getLastName() + " " + card.getEventHuman().getMiddleName() ) ); } } );
 
                 case ADDRESS_OF_INCIDENT -> {
                     this.getDetails().get( Details.APPLICANT_DATA ).add( new Item( "Улица", card.getEventAddress().getStreet() ) );
@@ -63,7 +64,7 @@ public class CardDetails {
                     this.getDetails().get( Details.APPLICANT_DATA ).add( new Item( "Отчество", card.getEventHuman().getLastName() ) );
                     this.getDetails().get( Details.APPLICANT_DATA ).add( new Item( "Фамилия", card.getEventHuman().getMiddleName() ) );
                     this.getDetails().get( Details.APPLICANT_DATA ).add( new Item( "ID Заявителя", card.getEventHuman().getHumanId() ) );
-                    this.getDetails().get( Details.APPLICANT_DATA ).add( new Item( "Отделение", card.getEventHuman().getHospitalDept() ) );
+                    this.getDetails().get( Details.APPLICANT_DATA ).add( new Item( "Отделение", card.getEventHuman().getHospitaldept() ) );
                     this.getDetails().get( Details.APPLICANT_DATA ).add( new Item( "Тип лечения", card.getEventHuman().getTreatmentkind() ) );
                     this.getDetails().get( Details.APPLICANT_DATA ).add( new Item( "Кто звонил", card.getEventHuman().getFirstName() + " " + card.getEventHuman().getMiddleName() ) ); }
 

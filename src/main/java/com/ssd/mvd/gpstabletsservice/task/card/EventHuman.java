@@ -15,13 +15,13 @@ public class EventHuman {
     private String lastName;
     private String firstName;
     private String middleName;
+    private String dateOfBirth;
 
     private Integer humanId;
     private Integer hospital;
-    private Integer hospitalDept;
+    private Integer hospitaldept;
     private Integer treatmentkind;
     private Integer professionidcaller;
 
-    private Date dateOfBirth;
     private HumanAddress humanAddress;
 }

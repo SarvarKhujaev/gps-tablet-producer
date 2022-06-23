@@ -4,8 +4,8 @@ import lombok.Builder;
 
 @lombok.Data
 @Builder
-public class Data<T, V> {
+public class Data< T, V > {
     private String type;
     private V subject;
-    private T object;
+    private T data;
 }
