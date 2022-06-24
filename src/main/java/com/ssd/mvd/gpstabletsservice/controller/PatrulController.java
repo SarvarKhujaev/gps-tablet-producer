@@ -23,7 +23,7 @@ public class PatrulController {
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< CardDetails > getTaskDetails ( Data data ) {
         Patrul patrul = SerDes.getSerDes().deserialize( data.getData() );
-        return patrul.getCard() != null ? Archive.getAchieve().getCard( patrul.getCard() ).flatMap( card -> Mono.just( new CardDetails( card, data.getType() ) ) ) : Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> Mono.just( new CardDetails( selfEmploymentTask, data.getType() ) ) ); }
+        return patrul.getCard() != null ? Archive.getAchieve().getCard( patrul.getCard() ).flatMap( card -> Mono.just( new CardDetails( card, data.getType() ) ) ) : Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> Mono.just( new CardDetails( selfEmploymentTask, data.getType(), patrul.getPassportNumber() ) ) ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( String token ) { return RedisDataControl.getRedis().arrived( token ); }

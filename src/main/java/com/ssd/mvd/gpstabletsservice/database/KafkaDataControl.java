@@ -22,6 +22,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.KafkaStreams;
 
+import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -76,16 +77,7 @@ public class KafkaDataControl {
         KStream< String, String > kStream = this.builder.stream( "api_emehmon_registration_0.0.1", Consumed.with( Serdes.String(), Serdes.String() ) );
         kStream.peek( ( key, value ) -> this.logger.info( value ) );
         this.kafkaStreams = new KafkaStreams( this.builder.build(), this.setStreamProperties() );
-        this.kafkaStreams.start();
-        try {
-            Thread.sleep( 2 * 1000 );
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            this.kafkaStreams.close();
-            this.clear();
-        }
-    }
+        this.kafkaStreams.start(); }
 
     private KafkaTemplate< String, String > kafkaTemplate () {
         Map< String, Object > map = new HashMap<>();
@@ -97,7 +89,7 @@ public class KafkaDataControl {
     public void writeToKafka ( Card card ) {
         this.kafkaTemplate.send( Status.CARD_FINAL.name().toLowerCase(), SerDes.getSerDes().serialize( card ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
-            public void onFailure( Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
+            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + card.getCardId() + " with offset: " + result.getRecordMetadata().offset() ); }
@@ -106,7 +98,7 @@ public class KafkaDataControl {
     public Notification writeToKafka ( Notification notification ) {
         this.kafkaTemplate.send( Status.NOTIFICATION.name().toLowerCase(), SerDes.getSerDes().serialize( notification ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
-            public void onFailure( Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
+            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + notification.getTitle() + " with offset: " + result.getRecordMetadata().offset() ); }
@@ -115,7 +107,7 @@ public class KafkaDataControl {
     public SelfEmploymentTask writeToKafka ( SelfEmploymentTask selfEmploymentTask ) {
         this.kafkaTemplate.send( Status.SELF_EMPLOYMENT.name().toLowerCase(), SerDes.getSerDes().serialize( selfEmploymentTask ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
-            public void onFailure( Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
+            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + selfEmploymentTask.getUuid() + " with offset: " + result.getRecordMetadata().offset() ); }
@@ -124,15 +116,13 @@ public class KafkaDataControl {
     public void writeToKafka ( String passportSeries, ReqLocationExchange trackers ) {
         this.kafkaTemplate.send( passportSeries, SerDes.getSerDes().serialize( trackers ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
-            public void onFailure( Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
+            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + trackers.getDate() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); }
 
     public void clear () {
-//        try { Mono.just( this.client.deleteTopics( this.client.listTopics().names().get() ) ).subscribe(); } catch (InterruptedException | ExecutionException e ) { e.printStackTrace(); }
-//        finally { this.logger.info( "Kafka was closed" );
             CassandraDataControl.getInstance().delete();
             RedisDataControl.getRedis().clear();
             Archive.getAchieve().clear();
@@ -141,5 +131,5 @@ public class KafkaDataControl {
 //            this.kafkaStreams.close();
             this.properties.clear();
             this.client.close();
-            instance = null; } //}
+            instance = null; }
 }

@@ -25,6 +25,8 @@ public class SelfEmploymentTask {
 
     private UUID uuid;
     private Date incidentDate; // the date when the task was created
+    private Date arrivedTime; // фиксировванное время когда он прибыл на дело
+
     private List< String > images;
     private List< String > patruls;
     private List< ReportForCard > reportForCards;

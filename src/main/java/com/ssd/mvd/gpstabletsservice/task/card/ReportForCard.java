@@ -12,7 +12,6 @@ public class ReportForCard { // creates when some of Patrul from current Card ha
     private Double lat;
 
     private String title; // the name of Report
-    private String cardType; // from 102, SelfEmployment or Camera
     private String description;
 
     private Date date; // the date when report was created

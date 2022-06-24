@@ -65,7 +65,7 @@ public class Patrul {
                     this.setSelfEmploymentId( null ); }
             } case ARRIVED -> {
                 this.setStatus( Status.ARRIVED );
-                Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder().patrul( this ).inTime( this.check() ).totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) ).build() ) ); }
+                if ( this.getCard() != null ) Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder().patrul( this ).inTime( this.check() ).totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) ).build() ) ); }
         } return this; }
 
     private Boolean check () { return switch ( this.getPoliceType() ) {

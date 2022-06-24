@@ -75,11 +75,12 @@ public class Archive implements Runnable {
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
         if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
             patrul.setTaskDate( new Date() );
+            selfEmploymentTask.setArrivedTime( new Date() ); // fixing time when the patrul reached the necessary point
             patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.BUSY );
             this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
             CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
             patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ).setSelfEmploymentId( selfEmploymentTask.getUuid() );
-//            this.save( Notification.builder().patrul( patrul ).status( false ).title( patrul.getName() + " set the Task to himself" ).notificationWasCreated( new Date() ).build() );
+            this.save( Notification.builder().patrul( patrul ).status( false ).title( patrul.getName() + " set the Task to himself" ).notificationWasCreated( new Date() ).build() );
             return RedisDataControl.getRedis().update( patrul );
         } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong Data for Task" ).code( 201 ).build() ).build() ); }
 
