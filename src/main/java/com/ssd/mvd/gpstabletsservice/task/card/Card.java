@@ -40,7 +40,7 @@ public class Card { // заполняется оператором
 
     public UUID getUuid () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    private List< Patrul > patruls = new ArrayList<>(); // link to list of Patruls who is gonna deal with this Card
+    private List< String > patruls = new ArrayList<>(); // link to list of Patruls who is gonna deal with this Card
     private List< ReportForCard > reportForCards = new ArrayList<>();
     private Map< String, PatrulStatus > patrulStatuses = new HashMap<>(); // ths list of all patruls Time consumption
 

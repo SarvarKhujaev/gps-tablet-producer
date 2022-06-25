@@ -1,12 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.SelfEmploymentRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -18,9 +18,6 @@ import java.util.UUID;
 
 @RestController
 public class SelfEmploymentController {
-
-//    @MessageMapping ( value = "getDetails" )
-//    public Mono<> getDetails ( Patrul patrul ) {}
 
     @MessageMapping ( value = "getSelfEmployment" ) // returns the current Card
     public Mono< SelfEmploymentTask > getSelfEmployment ( UUID uuid ) { return Archive.getAchieve().get( uuid ); }
@@ -38,9 +35,14 @@ public class SelfEmploymentController {
     public Mono< ApiResponseModel > addNewPatrulToSelfEmployment ( SelfEmploymentRequest selfEmploymentRequest ) { return Archive.getAchieve().save( selfEmploymentRequest.getUuid(), selfEmploymentRequest.getPatrul() ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )
-    public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return reportForCard.getCardType().equals( "selfEmployment" ) ? Archive.getAchieve().get( reportForCard.getCardId() )
-            .flatMap( selfEmploymentTask -> {
-                selfEmploymentTask.getReportForCards().add( reportForCard );
-                return RedisDataControl.getRedis().getPatrul( reportForCard.getPassportSeries() ).flatMap( patrul -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).success( CassandraDataControl.getInstance().addValue( patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FINISHED ), SerDes.getSerDes().serialize( patrul ) ) ).status( Status.builder().code( 200 ).message( patrul.getName() + " report's was saved to selfEmploymentTask" ).build() ).build() ) );
-            } ) : Archive.getAchieve().getCard( reportForCard.getCardId() ).flatMap( card -> RedisDataControl.getRedis().getPatrul( reportForCard.getPassportSeries() ).flatMap( patrul -> Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().code( 200 ).message( patrul.getName() + " report's was saved for Card" ).build() ).build() ) ) ); }
+    public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) {
+        return RedisDataControl.getRedis().getPatrul( reportForCard.getPassportSeries() ).flatMap( patrul -> patrul.getCard() != null ? Archive.getAchieve().getCard( reportForCard.getCardId() ).flatMap( card -> {
+            patrul.changeTaskStatus( Status.FINISHED );
+            card.getReportForCards().add( reportForCard );
+            return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true ).status( com.ssd.mvd.gpstabletsservice.response.Status.builder().message( "Report from: " + patrul.getName() + " was saved" ).code( 201 ).build() ).build() ) );
+        } ) : Archive.getAchieve().get( reportForCard.getCardId() ).flatMap( selfEmploymentTask -> {
+            patrul.changeTaskStatus( Status.FINISHED );
+            selfEmploymentTask.getReportForCards().add( reportForCard );
+            return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).status( com.ssd.mvd.gpstabletsservice.response.Status.builder().message( "Report from: " + patrul.getName() + " was saved" ).code( 201 ).build() ).build() ) );
+        } ) ); }
 }

@@ -67,14 +67,11 @@ public class KafkaDataControl {
         this.kafkaTemplate = this.kafkaTemplate();
         this.logger.info( "KafkaDataControl was created" );
         this.client = KafkaAdminClient.create( this.setProperties() );
-        this.getNewTopic( Status.SELF_EMPLOYMENT.name().toLowerCase() );
         this.getNewTopic( Status.NOTIFICATION.name().toLowerCase() );
-        this.getNewTopic( Status.CARD_FINAL.name().toLowerCase() );
-//        this.start();
-    }
+        this.getNewTopic( Status.CARD_FINAL.name().toLowerCase() ); }
 
     private void start () {
-        KStream< String, String > kStream = this.builder.stream( "api_emehmon_registration_0.0.1", Consumed.with( Serdes.String(), Serdes.String() ) );
+        KStream< String, String > kStream = this.builder.stream( Status.CARD_FINAL.name(), Consumed.with( Serdes.String(), Serdes.String() ) );
         kStream.peek( ( key, value ) -> this.logger.info( value ) );
         this.kafkaStreams = new KafkaStreams( this.builder.build(), this.setStreamProperties() );
         this.kafkaStreams.start(); }
@@ -103,15 +100,6 @@ public class KafkaDataControl {
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + notification.getTitle() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return notification; }
-
-    public SelfEmploymentTask writeToKafka ( SelfEmploymentTask selfEmploymentTask ) {
-        this.kafkaTemplate.send( Status.SELF_EMPLOYMENT.name().toLowerCase(), SerDes.getSerDes().serialize( selfEmploymentTask ) ).addCallback( new ListenableFutureCallback<>() {
-            @Override
-            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
-
-            @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + selfEmploymentTask.getUuid() + " with offset: " + result.getRecordMetadata().offset() ); }
-        } ); return selfEmploymentTask; }
 
     public void writeToKafka ( String passportSeries, ReqLocationExchange trackers ) {
         this.kafkaTemplate.send( passportSeries, SerDes.getSerDes().serialize( trackers ) ).addCallback( new ListenableFutureCallback<>() {

@@ -86,7 +86,7 @@ public final class CassandraDataControl {
 
     public void addValue ( ReqExchangeLocation position ) { Archive.getAchieve().save( position ); // checking for existence of the same Tracker in database
         Flux.fromStream( position.getReqLocationExchanges().stream() ).onErrorStop().subscribe( value -> {
-            KafkaDataControl.getInstance().writeToKafka( position.getPassport(), value ); // wrint ing all new Data to Kafka
+            KafkaDataControl.getInstance().writeToKafka( position.getPassport(), value ); // writeToKafka all new Data to Kafka
             this.logger.info( "Cassandra got: " + position.getPassport() + "\t" + value.getDate() );
             this.session.executeAsync("INSERT INTO " + this.dbName + "." + this.tablets + position.getPassport() + "(userId, date, latitude, longitude) VALUES ('" + position.getPassportSeries() + "', '" + value.getDate() + "', " + value.getLat() + ", " + value.getLan() + ");"); } ); }
 
@@ -116,7 +116,7 @@ public final class CassandraDataControl {
 
     public Flux< Row > getPatruls ( String param ) { return Flux.fromStream( this.session.execute( "SELECT nsf FROM TABLETS.patruls WHERE nsf LIKE '%" + param  + "%';" ).all().stream() ); }
 
-    public Flux< Row > getHistory ( Request request ) { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + ".tracker" + UUID.fromString( String.valueOf( request.getObject() ) ) + " WHERE userId = '" + UUID.fromString( String.valueOf( request.getObject() ) ) + "' AND date >= '" + request.getStartTime() + "' AND date <= '" + request.getEndTime() + "';" ).all().stream() ); }
+    public Flux< Row > getHistory ( Request request ) { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + ".tracker" + UUID.fromString( String.valueOf( request.getObject() ) ) + " WHERE userId = '" + UUID.fromString( String.valueOf( request.getObject() ) ) + "' AND date >= '" + request.getAdditional() + "' AND date <= '" + request.getData() + "';" ).all().stream() ); }
 
     public void resetData () { Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
