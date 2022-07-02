@@ -21,7 +21,7 @@ import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 public class Archive implements Runnable {
     public Boolean flag = true;
     private static Archive archive = new Archive();
-    private final Map< UUID, Card > cardMap = new HashMap<>(); // for Cards
+    private final Map< Long, Card > cardMap = new HashMap<>(); // for Cards
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
     private final Map< String, Trackers > inspector = new HashMap<>(); // for Trackers
@@ -44,7 +44,7 @@ public class Archive implements Runnable {
 
     public Flux< Notification > getCard() { return Flux.fromStream( this.notificationList.stream() ).sort(); }
 
-    public Mono< Card > getCard ( UUID cardId ) { return this.cardMap.containsKey( cardId ) ? Mono.just( this.cardMap.get( cardId ) ) : Mono.empty() ; }
+    public Mono< Card > getCard ( Long cardId ) { return this.cardMap.containsKey( cardId ) ? Mono.just( this.cardMap.get( cardId ) ) : Mono.empty() ; }
 
     public Mono< SelfEmploymentTask > get ( UUID uuid ) { return this.selfEmploymentTaskMap.containsKey( uuid ) ? Mono.just( this.selfEmploymentTaskMap.get( uuid ) ) : Mono.empty(); }
 
@@ -64,10 +64,10 @@ public class Archive implements Runnable {
 
     // uses to link Card to current Patrul object, either additional Patrul in case of necessary
     public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
-        patrul.setCard( card.getUuid() );
+        patrul.setCard( card.getCardId() );
         patrul.changeTaskStatus( ATTACHED );
         card.getPatruls().add( patrul.getPassportNumber() );
-        this.cardMap.putIfAbsent( card.getUuid(), card );
+        this.cardMap.putIfAbsent( card.getCardId(), card );
         KafkaDataControl.getInstance().writeToKafka( card );
         KafkaDataControl.getInstance().writeToKafka( Notification.builder().object( card ).patrul( patrul ).notificationWasCreated( new Date() ).title( card.getCardId() + " was linked to: " + patrul.getName() ).build() );
         return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( this.notificationList.add( Notification.builder().patrul( patrul ).status( false ).title( patrul.getName() + "Topshiriq qabul qildi" ).build() ) ).status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
@@ -76,7 +76,8 @@ public class Archive implements Runnable {
 
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
         if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
-            selfEmploymentTask.setArrivedTime( new Date() ); // fixing time when the patrul reached the necessary point
+            selfEmploymentTask.setTaskStatus( ARRIVED );
+            selfEmploymentTask.setArrivedTime( new Date() ); // fixing time when the patrul reached
             patrul.changeTaskStatus( ARRIVED ).setSelfEmploymentId( selfEmploymentTask.getUuid() );
             this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
             this.save( Notification.builder().patrul( patrul ).status( false ).title( patrul.getName() + " set the Task to himself" ).object( selfEmploymentTask ).notificationWasCreated( new Date() ).build() );
@@ -126,18 +127,20 @@ public class Archive implements Runnable {
     public void run () {
         while ( this.getFlag() ) { RedisDataControl.getRedis().getAllPatruls().subscribe( patrul -> {
             this.getPatrulMonitoring().get( patrul.getStatus() ).add( patrul );
-            if ( !patrul.getStatus().equals( com.ssd.mvd.gpstabletsservice.constants.Status.NOT_AVAILABLE ) ) {
+            if ( !patrul.getStatus().equals( NOT_AVAILABLE ) ) {
                 patrul.setLastActiveDate( new Date() );
                 patrul.setTotalActivityTime( patrul.getTotalActivityTime() + TimeInspector.getInspector().getTimestampForArchive() );
-                if ( !patrul.getStatus().equals( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) ) this.getPatrulMonitoring().get( patrul.getTaskStatus() ).add( patrul );
+                if ( patrul.getStatus().equals( BUSY ) ) this.getPatrulMonitoring().get( patrul.getTaskStatus() ).add( patrul );
                 RedisDataControl.getRedis().update( patrul ).subscribe(); } } );
             try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); } finally { this.getPatrulMonitoring().values().forEach( List::clear ); }
             Flux.fromStream( this.cardMap.values().stream() ).filter( card -> card.getPatruls().size() == card.getReportForCards().size() ).subscribe( card -> {
+                card.setStatus( FINISHED );
                 KafkaDataControl.getInstance().writeToKafka( card ); // saving into Kafka all cards which are done
-                this.cardMap.remove( card.getUuid() );
+                this.cardMap.remove( card.getCardId() );
                 card.clear(); } );
             Flux.fromStream( () -> this.inspector.values().stream().peek( trackers -> CassandraDataControl.getInstance().addValue( trackers.setStatus( TimeInspector.getInspector().compareTime( trackers.getDate() ) ) ) ) ).doOnError( throwable -> this.clear() ).subscribe();
             Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ).filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ).subscribe( selfEmploymentTask -> {
+                selfEmploymentTask.setTaskStatus( FINISHED );
                 CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
                 this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() );
                 selfEmploymentTask.clear(); } ); } }

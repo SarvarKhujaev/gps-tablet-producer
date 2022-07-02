@@ -86,7 +86,7 @@ public final class CassandraDataControl {
 
     public void addValue ( ReqExchangeLocation position ) { Archive.getAchieve().save( position ); // checking for existence of the same Tracker in database
         Flux.fromStream( position.getReqLocationExchanges().stream() ).onErrorStop().subscribe( value -> {
-            KafkaDataControl.getInstance().writeToKafka( position.getPassport(), value ); // writeToKafka all new Data to Kafka
+            KafkaDataControl.getInstance().writeToKafka( value ); // writeToKafka all new Data to Kafka
             this.logger.info( "Cassandra got: " + position.getPassport() + "\t" + value.getDate() );
             this.session.executeAsync("INSERT INTO " + this.dbName + "." + this.tablets + position.getPassport() + "(userId, date, latitude, longitude) VALUES ('" + position.getPassportSeries() + "', '" + value.getDate() + "', " + value.getLat() + ", " + value.getLan() + ");"); } ); }
 
@@ -108,7 +108,7 @@ public final class CassandraDataControl {
         case RETURNED_TO_WORK -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'returned to work at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
         case ARRIVED -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'arrived to given task location at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
         // by default it means t o log in to account
-        default -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES ('" + new Date().toInstant() + "', '" + status + "', 'log in at: " + patrul.getStartedToWorkDate().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
+        default -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES ('" + new Date().toInstant() + "', '" + status + "', 'log in at: " + patrul.getStartedToWorkDate().toInstant() + " with simCard " + patrul.getSimCardNumber() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
     public PatrulActivityStatistics getPatrulStatistics ( Patrul patrul ) { return new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT totalActivityTime FROM " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE status=logout;" ).all().stream() ) ); }
 
@@ -118,11 +118,16 @@ public final class CassandraDataControl {
 
     public Flux< Row > getHistory ( Request request ) { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + ".tracker" + UUID.fromString( String.valueOf( request.getObject() ) ) + " WHERE userId = '" + UUID.fromString( String.valueOf( request.getObject() ) ) + "' AND date >= '" + request.getAdditional() + "' AND date <= '" + request.getData() + "';" ).all().stream() ); }
 
+    public Flux< Patrul > getPatruls () { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + ";" ).all().stream() )
+            .map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) ); }
+
+    public Flux< ReqCar > getCars () { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.car + ";" ).all().stream() )
+            .map( row -> SerDes.getSerDes().deserializeCar( row.getString( "object" ) ) ); }
+
     public void resetData () { Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
             .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0 )
             .delayElements( Duration.ofMillis( 100 ) ).mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe(); }
-
 
     public void delete () {
         this.session.close();

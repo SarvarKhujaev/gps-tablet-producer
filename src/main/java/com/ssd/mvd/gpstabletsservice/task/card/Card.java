@@ -1,6 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
@@ -36,9 +36,7 @@ public class Card { // заполняется оператором
     private EventAddress eventAddress;   //Voqea manzili
     private List< VictimHumans > victimHumans;  // Jabirlanuchi inson
 
-    private UUID uuid = null;
-
-    public UUID getUuid () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
+    private Status status;
 
     private List< String > patruls = new ArrayList<>(); // link to list of Patruls who is gonna deal with this Card
     private List< ReportForCard > reportForCards = new ArrayList<>();

@@ -8,6 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class GpsTabletsServiceApplication {
     public static void main(String[] args) throws InterruptedException {
         new Thread( Archive.getAchieve(), "archive" ).start(); // launching Archieve to monitor all patruls, Card and SelfEmployment
-        SpringApplication.run(GpsTabletsServiceApplication.class, args);
+        SpringApplication.run( GpsTabletsServiceApplication.class, args );
     }
 }

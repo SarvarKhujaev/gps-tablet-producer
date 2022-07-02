@@ -20,6 +20,8 @@ public class SerDes {
 
     public String serialize ( Card object ) { return this.gson.toJson( object ); }
 
+    public String serialize ( com.ssd.mvd.gpstabletsservice.entity.Data object ) { return this.gson.toJson( object ); }
+
     public String serialize ( Patrul object ) { return this.gson.toJson( object ); }
 
     public String serialize ( ReqCar object ) { return this.gson.toJson( object ); }

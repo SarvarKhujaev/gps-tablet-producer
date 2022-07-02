@@ -50,7 +50,7 @@ public class PatrulController {
     public Mono< ApiResponseModel > patrulLogin ( PatrulLoginRequest patrulLoginRequest ) { return RedisDataControl.getRedis().login( patrulLoginRequest ); }
 
     @MessageMapping( value = "usersList" ) // returns the list of all created Users
-    public Flux< Patrul > getUsersList () { return RedisDataControl.getRedis().getAllPatruls(); }
+    public Flux< Patrul > getUsersList () { return CassandraDataControl.getInstance().getPatruls(); }
 
     @MessageMapping ( value = "patrulStatus" ) // returns all Patruls with the current status
     public Flux< Patrul > patrulStatus ( String status ) { return Archive.getAchieve().getPatrulStatus( status ); }

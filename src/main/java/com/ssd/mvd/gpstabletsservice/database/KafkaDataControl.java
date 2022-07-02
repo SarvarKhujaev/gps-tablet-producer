@@ -1,10 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.payload.ReqLocationExchange;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.entity.Data;
 
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -14,13 +14,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.KafkaStreams;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
@@ -39,22 +33,11 @@ public class KafkaDataControl {
     private final Logger logger = Logger.getLogger( KafkaDataControl.class.toString() );
     public final String PATH = "10.254.1.209:9092, 10.254.1.211:9092, 10.254.1.212:9092";
 
-    private KafkaStreams kafkaStreams;
-    private final StreamsBuilder builder = new StreamsBuilder();
-
     private Properties setProperties () {
         this.properties = new Properties();
         this.properties.put( AdminClientConfig.CLIENT_ID_CONFIG, this.ID );
         this.properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.PATH );
         return properties; }
-
-    private Properties setStreamProperties () {
-        this.properties.clear();
-        this.properties.put( StreamsConfig.APPLICATION_ID_CONFIG, this.ID );
-        this.properties.put( StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, this.PATH );
-        this.properties.put( StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName() );
-        this.properties.put( StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName() );
-        return this.properties; }
 
     public String getNewTopic ( String imei ) {
         this.client.createTopics( Collections.singletonList( TopicBuilder.name( imei ).partitions(5 ).replicas(3 ).build() ) );
@@ -68,13 +51,9 @@ public class KafkaDataControl {
         this.logger.info( "KafkaDataControl was created" );
         this.client = KafkaAdminClient.create( this.setProperties() );
         this.getNewTopic( Status.NOTIFICATION.name().toLowerCase() );
-        this.getNewTopic( Status.CARD_FINAL.name().toLowerCase() ); }
-
-    private void start () {
-        KStream< String, String > kStream = this.builder.stream( Status.CARD_FINAL.name(), Consumed.with( Serdes.String(), Serdes.String() ) );
-        kStream.peek( ( key, value ) -> this.logger.info( value ) );
-        this.kafkaStreams = new KafkaStreams( this.builder.build(), this.setStreamProperties() );
-        this.kafkaStreams.start(); }
+        this.getNewTopic( Status.CARD_FINAL.name().toLowerCase() );
+        this.getNewTopic( Status.NEW_CARS.name().toLowerCase() );
+        this.getNewTopic( "GpsTabletsData" ); }
 
     private KafkaTemplate< String, String > kafkaTemplate () {
         Map< String, Object > map = new HashMap<>();
@@ -89,8 +68,17 @@ public class KafkaDataControl {
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + card.getCardId() + " with offset: " + result.getRecordMetadata().offset() ); }
+            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: " + card.getCardId() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); }
+
+    public Data writeToKafka ( Data data ) {
+        this.kafkaTemplate.send( "new_cars", SerDes.getSerDes().serialize( data ) ).addCallback( new ListenableFutureCallback<>() {
+            @Override
+            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
+
+            @Override
+            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Data: " + data.getType() + " with offset: " + result.getRecordMetadata().offset() ); }
+        } ); return null; }
 
     public Notification writeToKafka ( Notification notification ) {
         this.kafkaTemplate.send( Status.NOTIFICATION.name().toLowerCase(), SerDes.getSerDes().serialize( notification ) ).addCallback( new ListenableFutureCallback<>() {
@@ -101,8 +89,8 @@ public class KafkaDataControl {
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + notification.getTitle() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return notification; }
 
-    public void writeToKafka ( String passportSeries, ReqLocationExchange trackers ) {
-        this.kafkaTemplate.send( passportSeries, SerDes.getSerDes().serialize( trackers ) ).addCallback( new ListenableFutureCallback<>() {
+    public void writeToKafka ( ReqLocationExchange trackers ) {
+        this.kafkaTemplate.send( "GpsTabletsData", SerDes.getSerDes().serialize( trackers ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 

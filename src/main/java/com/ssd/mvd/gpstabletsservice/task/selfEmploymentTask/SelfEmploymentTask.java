@@ -1,5 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +15,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties ( ignoreUnknown = true )
 public class SelfEmploymentTask {
     private Double lanOfPatrul; // in case if the accident is at Patrul place. then lan lat will be the same
     private Double latOfPatrul;
@@ -20,7 +24,7 @@ public class SelfEmploymentTask {
 
     private String title; // title of incident
     private String address; // the address of incident
-    private String taskStatus; // might be just arrived or finished
+    private Status taskStatus; // might be just arrived or finished
     private String description; // info about incident
 
     private UUID uuid;
@@ -29,6 +33,7 @@ public class SelfEmploymentTask {
 
     private List< String > images;
     private List< String > patruls;
+    @JsonDeserialize
     private List< ReportForCard > reportForCards;
 
     public void clear() {

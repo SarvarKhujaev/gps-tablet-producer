@@ -17,20 +17,19 @@ public class CardDetails {
         this.getDetails().putIfAbsent( Details.SELF_EMPLOYMENT, new ArrayList<>() );
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() ).subscribe( details -> {
             switch ( details ) {
-                case NUMBER -> this.getDetails().get( Details.NUMBER ).add( new Item( "№", selfEmploymentTask.getUuid() ) );
-                case ADDRESS -> this.getDetails().get( Details.ADDRESS ).add( new Item( "Адрес", selfEmploymentTask.getIncidentDate() ) );
-                case DESCRIPTION -> this.getDetails().get( Details.DESCRIPTION ).add( new Item( "Описание", selfEmploymentTask.getDescription() ) );
-                case REPORT_TIME -> this.getDetails().get( Details.REPORT_TIME ).add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
-                case ARRIVED_TIME -> this.getDetails().get( Details.ARRIVED_TIME ).add( new Item( "Время прибытия", selfEmploymentTask.getArrivedTime() ) );
-                case ACCEPTED_TIME -> this.getDetails().get( Details.ACCEPTED_TIME ).add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
-                case SELF_EMPLOYMENT -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
-                case ARRIVED_POINT_LATITUDE -> this.getDetails().get( Details.ARRIVED_POINT_LATITUDE ).add( new Item( "Точка прибытия", selfEmploymentTask.getLatOfAccident() ) );
-                case ACCEPTED_POINT_LATITUDE -> this.getDetails().get( Details.ACCEPTED_POINT_LATITUDE ).add( new Item( "Принятая точка", selfEmploymentTask.getLatOfPatrul() ) );
-                case ARRIVED_POINT_LONGITUDE -> this.getDetails().get( Details.ARRIVED_POINT_LONGITUDE ).add( new Item( "Точка прибытия", selfEmploymentTask.getLanOfAccident() ) );
-                case ACCEPTED_POINT_LONGITUDE -> this.getDetails().get( Details.ACCEPTED_POINT_LONGITUDE ).add( new Item( "Принятая точка", selfEmploymentTask.getLanOfPatrul() ) );
+                case NUMBER -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "№", selfEmploymentTask.getUuid() ) );
+                case ADDRESS -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Адрес", selfEmploymentTask.getIncidentDate() ) );
+                case DESCRIPTION -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Описание", selfEmploymentTask.getDescription() ) );
+                case ARRIVED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время прибытия", selfEmploymentTask.getArrivedTime() ) );
+                case ACCEPTED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
+                case REPORT_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время отрпавки рапорта", selfEmploymentTask.getIncidentDate() ) );
+                case ACCEPTED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятая точка", selfEmploymentTask.getLatOfPatrul() ) );
+                case ARRIVED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Точка прибытия", selfEmploymentTask.getLatOfAccident() ) );
+                case ACCEPTED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятая точка", selfEmploymentTask.getLanOfPatrul() ) );
+                case ARRIVED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Точка прибытия", selfEmploymentTask.getLanOfAccident() ) );
                 case REPORT -> Flux.fromStream( selfEmploymentTask.getReportForCards().stream() ).filter( reportForCard -> reportForCard.getPassportSeries().equals( passportSeries ) ).subscribe( reportForCard -> {
-                    this.getDetails().get( Details.REPORT ).add( new Item( "Отчет", reportForCard ) );
-                    this.getDetails().get( Details.REPORT_TIME ).add( new Item( "Время отчета", reportForCard ) ); } ); } } ); }
+                    this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Отчет", reportForCard ) );
+                    this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время отчета", reportForCard ) ); } ); } } ); }
 
     public CardDetails ( Card card, String language ) {
         this.getDetails().putIfAbsent( Details.DETAILS, new ArrayList<>() );
@@ -57,7 +56,7 @@ public class CardDetails {
                         case  "ДАТА И ВРЕМЯ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getDateCreateCard() ) );
                         case  "КОЛ.СТВО ПОШИБЩИХ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getDeadQuantity() ) );
                         case  "КОЛ.СТВО ПОСТРАДАВШИХ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getVictimHumans().size() ) );
-                        case  "ПОДРАЗДЕЛЕНИЕ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getPatruls().get(0).getPoliceType() ) );
+//                        case  "ПОДРАЗДЕЛЕНИЕ" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getPatruls().get(0).getPoliceType() ) );
                         case  "Ф.И.О" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getEventHuman().getFirstName() + " " + card.getEventHuman().getLastName() + " " + card.getEventHuman().getMiddleName() ) ); } } );
 
                 case ADDRESS_OF_INCIDENT -> {

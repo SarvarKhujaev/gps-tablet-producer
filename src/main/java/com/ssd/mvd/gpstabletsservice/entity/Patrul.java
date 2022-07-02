@@ -19,7 +19,7 @@ public class Patrul {
     private Date startedToWorkDate; // the time
     private Date dateOfRegistration;
 
-    private UUID card;
+    private Long card;
     private UUID organ; // choosing from dictionary
     private UUID selfEmploymentId;
     @JsonDeserialize
@@ -39,13 +39,16 @@ public class Patrul {
     private String fatherName;
     private String dateOfBirth;
     private String phoneNumber;
-    private Status status; // busy, free by default, available or not available
-    private Status taskStatus; // ths status of the Card or SelfEmployment
+    private String findFaceTask;
+    private String simCardNumber;
     private String passportNumber;
     private String patrulImageLink;
     private String surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName(); // Ф.И.О
 
-    private Map< UUID, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
+    private Status status; // busy, free by default, available or not available
+    private Status taskStatus; // ths status of the Card or SelfEmployment
+
+    private Map< String, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
 
     public String getSurnameNameFatherName () { return ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
 
@@ -59,9 +62,9 @@ public class Patrul {
                 this.setStatus( Status.FREE );
                 if ( this.getCard() != null ) {
                     Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> card1.getPatrulStatuses().get( this.getPassportNumber() ).setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) ) );
-                    this.getListOfTasks().putIfAbsent( this.getCard(), "card" );
+                    this.getListOfTasks().putIfAbsent( this.getCard().toString(), "card" );
                     this.setCard( null );
-                } else { this.getListOfTasks().putIfAbsent( this.getSelfEmploymentId(), "selfEmployment" );
+                } else { this.getListOfTasks().putIfAbsent( this.getSelfEmploymentId().toString(), "selfEmployment" );
                     this.setSelfEmploymentId( null ); }
             } case ARRIVED -> {
                 this.setTaskDate( new Date() );

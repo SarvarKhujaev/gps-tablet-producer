@@ -1,6 +1,6 @@
 server:
     port: 9090
-    address: 10.254.1.229
+    address: 0.0.0.0
 
 spring:
     data:
