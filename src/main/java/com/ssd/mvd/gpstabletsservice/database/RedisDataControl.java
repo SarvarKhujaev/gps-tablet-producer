@@ -42,11 +42,16 @@ public final class RedisDataControl {
         this.patrulMap = this.redissonReactiveClient.getMap( "patrulMap" ); // for patrul
         this.carMap = this.redissonReactiveClient.getMap( "carMap" ); } // for cars
 
-    public Flux< PoliceType > getAllPoliceTypes () { return this.policeTypes.iterator().map( PoliceType::new ); }
+    public Mono< List< PoliceType > > getAllPoliceTypes () { return this.policeTypes.iterator().mapNotNull( PoliceType::new ).collectList(); }
 
-    public Flux< ReqCar > getAllCars () { return this.carMap.valueIterator().map( data -> SerDes.getSerDes().deserializeCar( data ) ); }
+    public Flux< ReqCar > getAllCars () { return this.carMap.valueIterator().map(data -> SerDes.getSerDes().deserializeCar( data ) ); }
 
-    public Flux< Patrul > getAllPatruls () { return this.patrulMap.valueIterator().map( value -> SerDes.getSerDes().deserialize( value ) ); }
+    public Mono< List< ReqCar > > getAllCarsList () { return this.carMap.valueIterator().map(data -> SerDes.getSerDes().deserializeCar( data ) ).collectList(); }
+
+    public Flux<Patrul> getAllPatruls () { return this.patrulMap.valueIterator().map(value -> SerDes.getSerDes().deserialize( value ) ); }
+
+    public Mono< List< Patrul > > getAllUsersList() { return this.patrulMap.valueIterator().map(value -> SerDes.getSerDes().deserialize( value ) ).collectList(); }
+
 
     public Flux< Polygon > getAllPolygons () { return this.polygonMap.valueIterator().map( value -> SerDes.getSerDes().deserializePolygon( value ) ); }
 
@@ -60,7 +65,7 @@ public final class RedisDataControl {
 
     public Mono< PolygonType > getPolygonType ( UUID uuid ) { return this.polygonTypeMap.get( uuid ).flatMap( value -> value != null ? Mono.just( SerDes.getSerDes().deserializePolygonType( value ) ) : Mono.empty() ); }
 
-    public Mono< Patrul > getPatrul ( String passportNumber ) { return this.patrulMap.containsKey( passportNumber ).flatMap( value -> value ? this.patrulMap.get( passportNumber ).map( s -> SerDes.getSerDes().deserialize( s ) ) : Mono.empty() ); }
+    public Mono< Patrul > getPatrul ( String passportNumber ) { return this.patrulMap.get( passportNumber ).map( s -> SerDes.getSerDes().deserialize( s ) ); }
 
     public Mono< Polygon > getPolygon ( String uuid, String type ) { return type.equals( "polygon" ) ? this.polygonMap.get( uuid ).flatMap( s -> Mono.just( SerDes.getSerDes().deserializePolygon( s ) ) ) : this.polygonForPatrulMap.get( uuid ).flatMap( s -> Mono.just( SerDes.getSerDes().deserializePolygon( s ) ) ); }
 

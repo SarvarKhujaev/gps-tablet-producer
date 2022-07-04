@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+    app:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}:latest
+        networks:
+            - proxy_network
+        environment:
+            SERVER_PORT: ${SERVER_PORT}
+            KAFKA_BROKER: ${KAFKA_BROKER}
+
+        deploy:
+            replicas: 2
+            placement:
+                constraints: [node.labels.mgmt != true ]
+
+networks:
+    proxy_network:
+        external: true

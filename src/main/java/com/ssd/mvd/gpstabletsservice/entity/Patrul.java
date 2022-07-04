@@ -19,14 +19,19 @@ public class Patrul {
     private Date startedToWorkDate; // the time
     private Date dateOfRegistration;
 
+    private Double latitude;
+    private Double longitude;
+    private Double distance; // distance between two points in latitude and longitude
+
     private Long card;
+    private Long totalActivityTime;
+
     private UUID organ; // choosing from dictionary
     private UUID selfEmploymentId;
     @JsonDeserialize
     private Region region; // choosing from dictionary
 
     private Boolean inPolygon = false;
-    private Long totalActivityTime;
 
     private String name;
     private String rank;

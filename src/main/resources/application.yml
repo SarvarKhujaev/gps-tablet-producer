@@ -1,13 +1,13 @@
 server:
-    port: 9090
-    address: 0.0.0.0
+    port: ${SERVER_PORT} # all trackers are going to send its data by its  port
+    address: ${SERVER_ADDRESS}
 
 spring:
     data:
         cassandra:
-            port: 9942
-            keyspace-name: TABLETS
-            contact-points: 10.254.1.227
+            port: ${CASSANDRA_PORT}
+            keyspace-name: { CASSANDRA_KEYSPACE }
+            contact-points: ${CASSANDRA_HOST}
             schema-action: CREATE_IF_NOT_EXISTS
 
             request:
@@ -23,7 +23,7 @@ spring:
             address: 10.254.1.229
 
     kafka:
-        bootstrap-servers: 10.254.1.209:9092, 10.254.1.211:9092, 10.254.1.212:9092
+        bootstrap-servers: ${KAFKA_BROKER}
 
         producer:
             key-serializer: org.apache.kafka.common.serialization.StringSerializer

@@ -80,15 +80,6 @@ public class KafkaDataControl {
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Data: " + data.getType() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return null; }
 
-    public Notification writeToKafka ( Notification notification ) {
-        this.kafkaTemplate.send( Status.NOTIFICATION.name().toLowerCase(), SerDes.getSerDes().serialize( notification ) ).addCallback( new ListenableFutureCallback<>() {
-            @Override
-            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
-
-            @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + notification.getTitle() + " with offset: " + result.getRecordMetadata().offset() ); }
-        } ); return notification; }
-
     public void writeToKafka ( ReqLocationExchange trackers ) {
         this.kafkaTemplate.send( "GpsTabletsData", SerDes.getSerDes().serialize( trackers ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
@@ -98,13 +89,21 @@ public class KafkaDataControl {
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + trackers.getDate() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); }
 
+    public Notification writeToKafka ( Notification notification ) {
+        this.kafkaTemplate.send( Status.NOTIFICATION.name().toLowerCase(), SerDes.getSerDes().serialize( notification ) ).addCallback( new ListenableFutureCallback<>() {
+            @Override
+            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
+
+            @Override
+            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + notification.getTitle() + " with offset: " + result.getRecordMetadata().offset() ); }
+        } ); return notification; }
+
     public void clear () {
             CassandraDataControl.getInstance().delete();
             RedisDataControl.getRedis().clear();
             Archive.getAchieve().clear();
             this.kafkaTemplate.destroy();
             this.kafkaTemplate.flush();
-//            this.kafkaStreams.close();
             this.properties.clear();
             this.client.close();
             instance = null; }

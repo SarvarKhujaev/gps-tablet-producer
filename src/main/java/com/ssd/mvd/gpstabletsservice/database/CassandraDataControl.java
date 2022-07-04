@@ -127,7 +127,10 @@ public final class CassandraDataControl {
     public void resetData () { Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
             .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0 )
-            .delayElements( Duration.ofMillis( 100 ) ).mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe(); }
+            .delayElements( Duration.ofMillis( 100 ) ).mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe();
+        Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + ";" ).all().stream() )
+                .map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) )
+                .subscribe( patrul -> RedisDataControl.getRedis().addValue( patrul ).subscribe( System.out::println ) ); }
 
     public void delete () {
         this.session.close();

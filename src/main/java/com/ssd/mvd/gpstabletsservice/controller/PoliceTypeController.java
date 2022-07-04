@@ -5,13 +5,14 @@ import com.ssd.mvd.gpstabletsservice.entity.PoliceType;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 public class PoliceTypeController {
     @MessageMapping ( value = "getPoliceTypeList" )
-    public Flux< PoliceType > getPoliceTypeList () { return RedisDataControl.getRedis().getAllPoliceTypes(); }
+    public Mono< List< PoliceType > > getPoliceTypeList () { return RedisDataControl.getRedis().getAllPoliceTypes(); }
 
     @MessageMapping( value = "addPoliceType" )
     public Mono< ApiResponseModel > addPoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().addValue( policeType ); }

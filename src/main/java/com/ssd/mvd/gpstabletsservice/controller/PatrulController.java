@@ -16,6 +16,10 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.Comparator;
+import java.util.List;
+
+import static java.lang.Math.*;
 
 @RestController
 public class PatrulController {
@@ -50,7 +54,10 @@ public class PatrulController {
     public Mono< ApiResponseModel > patrulLogin ( PatrulLoginRequest patrulLoginRequest ) { return RedisDataControl.getRedis().login( patrulLoginRequest ); }
 
     @MessageMapping( value = "usersList" ) // returns the list of all created Users
-    public Flux< Patrul > getUsersList () { return CassandraDataControl.getInstance().getPatruls(); }
+    public Mono< List< Patrul > > getUsersList () { return RedisDataControl.getRedis().getAllUsersList(); }
+
+    @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
+    public Flux< Patrul > getAllUsersList () { return RedisDataControl.getRedis().getAllPatruls(); }
 
     @MessageMapping ( value = "patrulStatus" ) // returns all Patruls with the current status
     public Flux< Patrul > patrulStatus ( String status ) { return Archive.getAchieve().getPatrulStatus( status ); }
@@ -75,4 +82,13 @@ public class PatrulController {
 
     @MessageMapping ( value = "checkToken" )
     public Mono< ApiResponseModel > checkToken ( String token ) { return RedisDataControl.getRedis().checkToken( token ); }
+
+    private static final Double p = PI / 180;
+
+    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 - cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2 + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p ) * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
+
+    @MessageMapping ( value = "findTheClosestPatruls" )
+    public Mono< List< Patrul > > findTheClosestPatruls ( Point point ) { return this.getAllUsersList().map( patrul -> {
+        patrul.setDistance(  this.calculate( point, patrul ) );
+        return patrul; } ).collectSortedList( Comparator.comparing( Patrul::getDistance ) ); }
 }
