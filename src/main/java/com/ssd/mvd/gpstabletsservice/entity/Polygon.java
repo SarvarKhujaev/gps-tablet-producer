@@ -13,7 +13,11 @@ import java.util.UUID;
 public class Polygon {
     private UUID uuid;
     private UUID organ;
-    private Region region;
+
+    private Long regionId;
+    private Long mahallaId;
+    private Long districtId; // tuman
+
 
     private String name;
     private PolygonType polygonType;

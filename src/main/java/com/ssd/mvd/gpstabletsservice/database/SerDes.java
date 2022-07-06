@@ -34,6 +34,8 @@ public class SerDes {
 
     public String serialize ( Notification object ) { return this.gson.toJson( object ); }
 
+    public String serialize( PoliceType policeType ) { return this.gson.toJson( policeType ); }
+
     public String serialize ( ReqLocationExchange object ) { return this.gson.toJson( object ); }
 
     public Patrul deserialize ( String object ) { return this.gson.fromJson( object, Patrul.class ); }
@@ -43,6 +45,8 @@ public class SerDes {
     public Polygon deserializePolygon ( String object ) { return this.gson.fromJson( object, Polygon.class ); }
 
     public AtlasLustra deserializeLustra ( String object ) { return this.gson.fromJson( object, AtlasLustra.class ); }
+
+    public PoliceType deserializePoliceType ( String object ) { return this.gson.fromJson( object, PoliceType.class ); }
 
     public PolygonType deserializePolygonType( String value ) { return this.getGson().fromJson( value, PolygonType.class ); }
 

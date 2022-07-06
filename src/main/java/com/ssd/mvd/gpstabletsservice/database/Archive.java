@@ -48,7 +48,8 @@ public class Archive implements Runnable {
 
     public Mono< SelfEmploymentTask > get ( UUID uuid ) { return this.selfEmploymentTaskMap.containsKey( uuid ) ? Mono.just( this.selfEmploymentTaskMap.get( uuid ) ) : Mono.empty(); }
 
-    public Flux< Patrul > getPatrulStatus ( String status ) { return Flux.fromStream( this.getPatrulMonitoring().get( status ).stream() ); }
+    public Flux< Patrul > getPatrulStatus ( com.ssd.mvd.gpstabletsservice.constants.Status status ) {
+        return Flux.fromStream( this.getPatrulMonitoring().get( status ).stream() ); }
 
     // to get all existing SelfEmploymentTask
     public Flux< SelfEmploymentTask > getAllSelfEmploymentTask () { return Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ); }

@@ -17,9 +17,6 @@ public class CarController {
     @MessageMapping( value = "carList" ) // the list of all cars
     public Flux< ReqCar > getAllCars () { return RedisDataControl.getRedis().getAllCars(); }
 
-    @MessageMapping( value = "allCarList" ) // the list of all cars
-    public Mono< List< ReqCar > > getAllCarsList () { return RedisDataControl.getRedis().getAllCarsList(); }
-
     @MessageMapping ( value = "getCurrentCar" )
     public Mono< ReqCar > getCurrentCar ( String gosno ) { return RedisDataControl.getRedis().getCar( gosno ); }
 

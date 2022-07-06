@@ -17,10 +17,10 @@ import org.redisson.config.Config;
 
 public final class RedisDataControl {
     private String key;
-    private final RListReactive< String > policeTypes;
     private final RMapReactive< String, String > carMap;
     private final RMapReactive< UUID, String > lustraMap;
     private final RMapReactive< String, String > patrulMap;
+    private final RMapReactive< UUID, String > policeTypes;
     private final RMapReactive< String, String > polygonMap;
     private final RMapReactive< UUID, String > polygonTypeMap;
     private final RedissonReactiveClient redissonReactiveClient;
@@ -36,26 +36,21 @@ public final class RedisDataControl {
         this.redissonReactiveClient = Redisson.createReactive( config );
         this.polygonForPatrulMap = this.redissonReactiveClient.getMap( "polygonForPatrulMap" ); // for polygons with schedule
         this.polygonTypeMap = this.redissonReactiveClient.getMap( "polygonTypeMap" ); // for polygons
+        this.policeTypes = this.redissonReactiveClient.getMap( "policeType" );
         this.polygonMap = this.redissonReactiveClient.getMap( "polygonMap" ); // for polygons
-        this.policeTypes = this.redissonReactiveClient.getList( "policeType" );
         this.lustraMap = this.redissonReactiveClient.getMap( "lustraMap" ); // for lustra cameras
         this.patrulMap = this.redissonReactiveClient.getMap( "patrulMap" ); // for patrul
         this.carMap = this.redissonReactiveClient.getMap( "carMap" ); } // for cars
 
-    public Mono< List< PoliceType > > getAllPoliceTypes () { return this.policeTypes.iterator().mapNotNull( PoliceType::new ).collectList(); }
+    public Flux< PoliceType > getAllPoliceTypes () { return this.policeTypes.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializePoliceType( s ) ) ); }
 
-    public Flux< ReqCar > getAllCars () { return this.carMap.valueIterator().map(data -> SerDes.getSerDes().deserializeCar( data ) ); }
-
-    public Mono< List< ReqCar > > getAllCarsList () { return this.carMap.valueIterator().map(data -> SerDes.getSerDes().deserializeCar( data ) ).collectList(); }
-
-    public Flux<Patrul> getAllPatruls () { return this.patrulMap.valueIterator().map(value -> SerDes.getSerDes().deserialize( value ) ); }
-
-    public Mono< List< Patrul > > getAllUsersList() { return this.patrulMap.valueIterator().map(value -> SerDes.getSerDes().deserialize( value ) ).collectList(); }
-
+    public Flux< AtlasLustra > getAllLustra () { return this.lustraMap.valueIterator().map( value -> SerDes.getSerDes().deserializeLustra( value ) ); }
 
     public Flux< Polygon > getAllPolygons () { return this.polygonMap.valueIterator().map( value -> SerDes.getSerDes().deserializePolygon( value ) ); }
 
-    public Flux< AtlasLustra > getAllLustra () { return this.lustraMap.valueIterator().map( value -> SerDes.getSerDes().deserializeLustra( value ) ); }
+    public Flux< ReqCar > getAllCars () { return this.carMap.valueIterator().flatMap( data -> Mono.just( SerDes.getSerDes().deserializeCar( data ) ) ); }
+
+    public Flux< Patrul > getAllPatruls () { return this.patrulMap.valueIterator().flatMap( value -> Mono.just( SerDes.getSerDes().deserialize( value ) ) ); }
 
     public Flux< PolygonType > getAllPolygonTypes () { return this.polygonTypeMap.valueIterator().map( value -> SerDes.getSerDes().deserializePolygonType( value ) ); }
 
@@ -73,7 +68,7 @@ public final class RedisDataControl {
             this.carMap.get( gosno ).map( s -> SerDes.getSerDes().deserializeCar( s ) ).flatMap( reqCar1 ->
                 this.getPatrul( reqCar1.getPatrulPassportSeries() ).flatMap( patrul1 -> {
                     patrul1.setCarNumber( null );
-                    return this.carMap.fastRemove( gosno ).log().onErrorStop().flatMap( aLong -> Mono.just( ApiResponseModel.builder().success( true ).data( KafkaDataControl.getInstance().writeToKafka( Data.builder().data( patrul1 ).subject( reqCar1 ).build() ) ).status( Status.builder().code( 200 ).message( gosno + " was deleted" ).build() ).build() ) ); } ) )
+                    return this.carMap.remove( gosno ).log().onErrorStop().flatMap( aLong -> Mono.just( ApiResponseModel.builder().success( true ).data( KafkaDataControl.getInstance().writeToKafka( Data.builder().data( patrul1 ).subject( reqCar1 ).build() ) ).status( Status.builder().code( 200 ).message( gosno + " was deleted" ).build() ).build() ) ); } ) )
             : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( gosno + " does not exists" ).build() ).build() ) ); } // deleting current car
 
     public Mono< ApiResponseModel > deleteLustra ( UUID uuid ) { return this.lustraMap.containsKey( uuid ).flatMap( aBoolean -> aBoolean ?
@@ -92,7 +87,7 @@ public final class RedisDataControl {
             : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "this polygon does not exists" ).code( 201 ).build() ).build() ) ); } // deleting current polygon
 
     public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return this.patrulMap.containsKey( passportNumber ).flatMap( aBoolean -> aBoolean ?
-            this.patrulMap.fastRemove( passportNumber ).log().onErrorStop().flatMap( aLong -> Mono.just( ApiResponseModel.builder().status( Status.builder().code( 200 ).message( passportNumber + " was deleted" ).build() ).build() ) )
+            this.patrulMap.remove( passportNumber ).log().onErrorStop().flatMap( aLong -> Mono.just( ApiResponseModel.builder().status( Status.builder().code( 200 ).message( passportNumber + " was deleted" ).build() ).build() ) )
             : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( passportNumber + " does not exists" ).build() ).build() ) ); } // deleting current car
 
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return this.polygonForPatrulMap.containsKey( uuid ).flatMap( aBoolean -> aBoolean ?
@@ -103,8 +98,11 @@ public final class RedisDataControl {
                 .flatMap( value -> this.polygonForPatrulMap.remove( uuid ).flatMap( a -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( "polygon: " + uuid + " was deleted" ).code( 200 ).build() ).build() ) ) )
         : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "this polygon does not exists" ).code( 201 ).build() ).build() ) ); }
 
-    public Mono< ApiResponseModel > deletePoliceType ( String policeTypes ) { return this.policeTypes.contains( policeTypes ).flatMap( aBoolean -> aBoolean ? this.policeTypes.remove( policeTypes ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().code( 200 ).message( policeTypes + " was deleted" ).build() ).build() ) )
-            : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( policeTypes + " does not exists" ).build() ).build() ) ); } // deleting current police type
+    public Mono< ApiResponseModel > deletePoliceType ( PoliceType policeType ) { return this.policeTypes.containsKey( policeType.getUuid() ).flatMap( aBoolean -> aBoolean ?
+        this.getAllPatruls().filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) ).count()
+                .flatMap( aLong -> aLong == 0 ? this.policeTypes.remove( policeType.getUuid() ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().code( 200 ).message( policeTypes + " was deleted" ).build() ).build() ) )
+                : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( policeType.getPoliceType() + " is used. that's why u cannot delete it at all )))" ).build() ).build() ) )
+    : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( policeType.getPoliceType() + " does not exists" ).build() ).build() ) ); } // deleting current police type
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) { return this.patrulMap.fastPutIfAbsent( patrul.getPassportNumber(), ( key = SerDes.getSerDes().serialize( patrul ) ) ).log().onErrorStop().flatMap( aBoolean -> aBoolean ?
             Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( patrul, this.key ) ).status( Status.builder().message( "new patrul was added" ).code( 200 ).build() ).build() )
@@ -114,7 +112,7 @@ public final class RedisDataControl {
             Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Car data" ).code( 201 ).build() ).success( false ).build() )
             : this.patrulMap.get( reqCar.getPatrulPassportSeries() ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul1 -> {
                 patrul1.setCarNumber( reqCar.getGosNumber() );
-                return this.patrulMap.fastPutIfExists( reqCar.getPatrulPassportSeries(), ( this.key = SerDes.getSerDes().serialize( patrul1 ) ) ).flatMap( aBoolean1 -> {
+                return this.patrulMap.fastPutIfExists( patrul1.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul1 ) ) ).flatMap( aBoolean1 -> {
                     CassandraDataControl.getInstance().addValue( patrul1, this.key ); // saving updated version of Patrul
                     return this.carMap.fastPutIfAbsent( reqCar.getGosNumber(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) ).flatMap( value -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).data( KafkaDataControl.getInstance().writeToKafka( Data.builder().type( reqCar.getTrackerId() ).data( patrul1 ).subject( reqCar ).build() ) ).status( Status.builder().message( "Car was saved" ).code( 200 ).build() ).build() ) ); } ); } ) ); }
 
@@ -122,8 +120,8 @@ public final class RedisDataControl {
             Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( polygon ).isDone() ).status( Status.builder().message( "new polygon: " + polygon.getUuid() + " was added" ).code( 200 ).build() ).build() )
             : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "this polygon is already exists" ).code( 201 ).build() ).build() ) ); }
 
-    public Mono< ApiResponseModel > addValue ( PoliceType policeType ) { return this.policeTypes.contains( policeType.getPoliceType() ).flatMap( aBoolean -> !aBoolean ? this.policeTypes.add( CassandraDataControl.getInstance().addValue( policeType ).getPoliceType() ).flatMap( aBoolean1 ->  Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().message( "PoliceType was saved" ).code( 200 ).build() ).build() ) )
-            : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "This policeType is already exists" ).code( 201 ).build() ).build() ) ); }
+    public Mono< ApiResponseModel > addValue ( PoliceType policeType ) { return this.policeTypes.fastPutIfAbsent( policeType.getUuid(), CassandraDataControl.getInstance().addValue( policeType, SerDes.getSerDes().serialize( policeType ) ) ).flatMap( aBoolean -> aBoolean ?
+            Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().message( "PoliceType was saved" ).code( 200 ).build() ).build() ) : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "This policeType is already exists" ).code( 201 ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > addValue ( PolygonType polygonType ) { return this.polygonTypeMap.fastPutIfAbsent( polygonType.getUuid(), ( key = SerDes.getSerDes().serialize( polygonType ) ) ).flatMap( aBoolean -> aBoolean ?
             Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( polygonType ) ).status( Status.builder().message( polygonType.getUuid().toString() ).code( 200 ).build() ).build() )
@@ -258,4 +256,8 @@ public final class RedisDataControl {
         this.policeTypes.delete().onErrorStop().subscribe();
         this.redissonReactiveClient.shutdown();
         redisDataControl = null; }
+
+    public Mono< ApiResponseModel > updatePoliceTypes( PoliceType policeType ) {
+        this.getAllPatruls().filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) ).subscribe( patrul -> patrul.setPoliceType( policeType.getPoliceType() ) );
+        return this.policeTypes.fastPutIfExists( policeType.getUuid(), SerDes.getSerDes().serialize( policeType ) ).flatMap( aBoolean -> Mono.just( ApiResponseModel.builder().build() ) ); }
 }

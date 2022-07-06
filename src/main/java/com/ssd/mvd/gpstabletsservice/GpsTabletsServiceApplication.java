@@ -1,7 +1,7 @@
 package com.ssd.mvd.gpstabletsservice;
 
-import org.springframework.boot.SpringApplication;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication

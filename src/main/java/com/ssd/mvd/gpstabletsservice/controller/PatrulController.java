@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
@@ -53,14 +54,11 @@ public class PatrulController {
     @MessageMapping ( value = "LOGIN" ) // for checking login data of Patrul with his Login and password
     public Mono< ApiResponseModel > patrulLogin ( PatrulLoginRequest patrulLoginRequest ) { return RedisDataControl.getRedis().login( patrulLoginRequest ); }
 
-    @MessageMapping( value = "usersList" ) // returns the list of all created Users
-    public Mono< List< Patrul > > getUsersList () { return RedisDataControl.getRedis().getAllUsersList(); }
-
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
     public Flux< Patrul > getAllUsersList () { return RedisDataControl.getRedis().getAllPatruls(); }
 
     @MessageMapping ( value = "patrulStatus" ) // returns all Patruls with the current status
-    public Flux< Patrul > patrulStatus ( String status ) { return Archive.getAchieve().getPatrulStatus( status ); }
+    public Flux< Patrul > patrulStatus ( Status status ) { return Archive.getAchieve().getPatrulStatus( status ); }
 
     @MessageMapping( value = "addUser" ) // adding new user
     public Mono< ApiResponseModel > addUser ( Patrul patrul ) { return RedisDataControl.getRedis().addValue( patrul ); }

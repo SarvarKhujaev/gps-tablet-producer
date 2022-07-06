@@ -1,39 +1,19 @@
+#server:
+#    port: 9090 # all trackers are going to send its data by its  port
+#    address: 10.254.1.229
+#
+#spring:
+#    rsocket:
+#        server:
+#            port: 6060
+#            address: 10.254.1.229
+
 server:
     port: ${SERVER_PORT} # all trackers are going to send its data by its  port
     address: ${SERVER_ADDRESS}
 
 spring:
-    data:
-        cassandra:
-            port: ${CASSANDRA_PORT}
-            keyspace-name: { CASSANDRA_KEYSPACE }
-            contact-points: ${CASSANDRA_HOST}
-            schema-action: CREATE_IF_NOT_EXISTS
-
-            request:
-                timeout: 10s
-
-            connection:
-                connect-timeout: 10s
-                init-query-timeout: 10s
-
     rsocket:
         server:
-            port: 6060
-            address: 10.254.1.229
-
-    kafka:
-        bootstrap-servers: ${KAFKA_BROKER}
-
-        producer:
-            key-serializer: org.apache.kafka.common.serialization.StringSerializer
-            value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-        consumer:
-            group-id: SSD.TABLETS
-            auto-offset-reset: earliest
-            key-deserializer: org.apache.kafka.common.serialization.StringSerializer
-            value-deserializer: org.apache.kafka.common.serialization.StringSerializer
-
-        admin:
-            client-id: SSD.TABLETS
+            port: ${RSOCKET_PORT}
+            address: ${SERVER_ADDRESS}

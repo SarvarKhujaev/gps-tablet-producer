@@ -56,9 +56,9 @@ public final class CassandraDataControl {
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + "(passportNumber text PRIMARY KEY, NSF text, object text);" ); // the table for patruls
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonForPatrul + "(id uuid PRIMARY KEY, object text);" ); // the table for polygons for patrul
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonType + "(id uuid PRIMARY KEY, polygonType text);" ); // the table for police types
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.policeTypes + "(id uuid PRIMARY KEY, policeType text);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.selfEmployment + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.car + "(gosNumber text PRIMARY KEY, object text);" ); // the table for cars
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.policeTypes + "(policeTypes text PRIMARY KEY);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.lustre + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + ".trackers(imei text PRIMARY KEY, status text);" ); // the table for trackers
         this.logger.info( "Cassandra is ready" ); }
@@ -73,9 +73,9 @@ public final class CassandraDataControl {
     public ResultSetFuture addValue ( Polygon polygon ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygon + "(id, polygonName, polygonType) " +
             "VALUES (" + polygon.getUuid() + ", '" + polygon.getName() + "', '" + polygon.getPolygonType() + "');" ); }
 
-    public PoliceType addValue ( PoliceType policeTypes ) {
-        this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.policeTypes + "(policeTypes) " + "VALUES ('" + policeTypes + "');" );
-        return policeTypes; }
+    public String addValue ( PoliceType policeType, String value ) {
+        this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.policeTypes + "(id, policeType) " + "VALUES (" + policeType.getUuid() + ", '" + value + "');" );
+        return value; }
 
     public Boolean addValue ( ReqCar reqCar, String key ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.car + "(gosNumber, object) VALUES ('" + reqCar.getGosNumber() + "', '" + key + "');" ).isDone(); }
 
@@ -118,19 +118,10 @@ public final class CassandraDataControl {
 
     public Flux< Row > getHistory ( Request request ) { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + ".tracker" + UUID.fromString( String.valueOf( request.getObject() ) ) + " WHERE userId = '" + UUID.fromString( String.valueOf( request.getObject() ) ) + "' AND date >= '" + request.getAdditional() + "' AND date <= '" + request.getData() + "';" ).all().stream() ); }
 
-    public Flux< Patrul > getPatruls () { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + ";" ).all().stream() )
-            .map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) ); }
-
-    public Flux< ReqCar > getCars () { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.car + ";" ).all().stream() )
-            .map( row -> SerDes.getSerDes().deserializeCar( row.getString( "object" ) ) ); }
-
     public void resetData () { Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
             .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0 )
-            .delayElements( Duration.ofMillis( 100 ) ).mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe();
-        Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + ";" ).all().stream() )
-                .map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) )
-                .subscribe( patrul -> RedisDataControl.getRedis().addValue( patrul ).subscribe( System.out::println ) ); }
+            .delayElements( Duration.ofMillis( 100 ) ).mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe(); }
 
     public void delete () {
         this.session.close();

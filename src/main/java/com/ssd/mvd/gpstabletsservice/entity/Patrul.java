@@ -23,13 +23,15 @@ public class Patrul {
     private Double longitude;
     private Double distance; // distance between two points in latitude and longitude
 
-    private Long card;
-    private Long totalActivityTime;
 
     private UUID organ; // choosing from dictionary
     private UUID selfEmploymentId;
-    @JsonDeserialize
-    private Region region; // choosing from dictionary
+
+    private Long card;
+    private Long regionId;
+    private Long mahallaId;
+    private Long districtId; // choosing from dictionary
+    private Long totalActivityTime;
 
     private Boolean inPolygon = false;
 
