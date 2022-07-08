@@ -23,7 +23,6 @@ public class Patrul {
     private Double longitude;
     private Double distance; // distance between two points in latitude and longitude
 
-
     private UUID organ; // choosing from dictionary
     private UUID selfEmploymentId;
 

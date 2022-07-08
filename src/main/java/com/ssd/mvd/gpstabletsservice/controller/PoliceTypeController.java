@@ -15,11 +15,11 @@ public class PoliceTypeController {
     @MessageMapping ( value = "getPoliceTypeList" )
     public Flux< PoliceType > getPoliceTypeList () { return RedisDataControl.getRedis().getAllPoliceTypes(); }
 
-    @MessageMapping ( value = "updatePoliceType" )
-    public Mono< ApiResponseModel > updatePoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().updatePoliceTypes( policeType ); }
-
     @MessageMapping( value = "addPoliceType" )
     public Mono< ApiResponseModel > addPoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().addValue( policeType ); }
+
+    @MessageMapping ( value = "updatePoliceType" )
+    public Mono< ApiResponseModel > updatePoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().updatePoliceTypes( policeType ); }
 
     @MessageMapping ( value = "deletePoliceType" )
     public Mono< ApiResponseModel > deletePoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().deletePoliceType( policeType ); }

@@ -30,5 +30,7 @@ public class CarController {
     public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return RedisDataControl.getRedis().update( reqCar ); }
 
     @MessageMapping( value = "deleteCar" )
-    public Mono< ApiResponseModel > deleteCar ( String gosno ) { return RedisDataControl.getRedis().deleteCar( gosno ); }
+    public Mono< ApiResponseModel > deleteCar ( String gosno ) {
+        System.out.println( gosno );
+        return RedisDataControl.getRedis().deleteCar( gosno ); }
 }
