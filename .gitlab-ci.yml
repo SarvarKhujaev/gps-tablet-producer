@@ -1,0 +1,61 @@
+variables:
+  MAVEN_OPTS: "-Djava.awt.headless=true -Dmaven.repo.local=./.m2/repository"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+cache:
+  paths:
+    - ./.m2/repository
+  key: "$CI_BUILD_REF_NAME"
+
+stages:
+  - build
+  - test
+  - deploy
+
+build-job:
+  stage: build
+  tags:
+    - build
+  only:
+    - master
+    - dev
+  script:
+    - "mvn clean compile $MAVEN_CLI_OPTS"
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 hour
+
+unittest-job:
+  stage: test
+  tags:
+    - test
+  dependencies:
+    - build-job
+  only:
+    - master
+    - dev
+  environment:
+    name: production
+  script:
+    - "mvn package $MAVEN_CLI_OPTS"
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 day
+
+deploy-job:
+  stage: deploy
+  tags:
+    - deploy
+  dependencies:
+    - unittest-job
+  only:
+    - master
+  environment:
+    name: production
+  script:
+    - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+    - "docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:latest ."
+    - "docker push $CI_REGISTRY/$CI_PROJECT_PATH:latest"
+    - "docker stack deploy -c docker-stack.yml $CI_PROJECT_NAME --with-registry-auth"
