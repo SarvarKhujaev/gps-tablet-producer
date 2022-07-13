@@ -3,14 +3,10 @@ package com.ssd.mvd.gpstabletsservice.entity;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
-import lombok.Data;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import lombok.Data;
+import java.util.*;
 
 @Data
 public class Patrul {
@@ -20,8 +16,8 @@ public class Patrul {
     private Date dateOfRegistration;
 
     private Double latitude;
+    private Double distance;
     private Double longitude;
-    private Double distance; // distance between two points in latitude and longitude
 
     private UUID organ; // choosing from dictionary
     private UUID selfEmploymentId;

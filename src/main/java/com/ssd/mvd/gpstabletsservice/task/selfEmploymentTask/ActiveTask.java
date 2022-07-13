@@ -25,11 +25,11 @@ public class ActiveTask<T> {
     public ActiveTask ( Card card ) {
         this.setType( "card" );
         this.setStatus( card.getStatus() );
-        this.setTaskId( (T) card.getCardId() );
+        this.setTaskId( (T) card.getId() );
         this.setLatitude( card.getLatitude() );
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
-        this.setCreatedDate( card.getDateCreateCard() );
+        this.setCreatedDate( card.getCreated_date() );
         this.setAddress( card.getEventAddress().getFlat() + " " + card.getEventAddress().getHouse() + " " + card.getEventAddress().getStreet() ); }
 
     public ActiveTask ( SelfEmploymentTask card ) {

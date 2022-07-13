@@ -15,5 +15,5 @@ public class PatrulActivityStatistics {
 
     public PatrulActivityStatistics ( Patrul patrul, Flux< Row > rowFlux ) {
         this.setPatrul( patrul );
-        rowFlux.subscribe( row -> this.getDateList().add( row.getLong( "totalActivityTime" ) ) ); }
+        rowFlux.filter( row -> row.getString( "status" ).equals( "logout" ) ).subscribe( row -> this.getDateList().add( row.getLong( "totalActivityTime" ) ) ); }
 }

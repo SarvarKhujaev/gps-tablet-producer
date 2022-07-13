@@ -35,7 +35,7 @@ public class SelfEmploymentController {
     @MessageMapping ( value = "addReportForSelfEmployment" )
     public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return RedisDataControl.getRedis().getPatrul( reportForCard.getPassportSeries() ).flatMap( patrul -> patrul.getCard() != null ? Archive.getAchieve().getCard( patrul.getCard() ).flatMap( card -> {
             patrul.changeTaskStatus( Status.FINISHED );
-            card.getReportForCards().add( reportForCard );
+            card.getReportForCardList().add( reportForCard );
             KafkaDataControl.getInstance().writeToKafka( card );
             return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true ).status( com.ssd.mvd.gpstabletsservice.response.Status.builder().message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) );
         } ) : Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> {

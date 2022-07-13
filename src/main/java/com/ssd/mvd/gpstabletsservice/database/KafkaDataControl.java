@@ -62,17 +62,17 @@ public class KafkaDataControl {
         map.put( ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class );
         return new KafkaTemplate<>( new DefaultKafkaProducerFactory<>( map ) ); }
 
-    public void writeToKafka ( Card card ) {
+    public Card writeToKafka ( Card card ) {
         this.kafkaTemplate.send( Status.CARD_FINAL.name().toLowerCase(), SerDes.getSerDes().serialize( card ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: " + card.getCardId() + " with offset: " + result.getRecordMetadata().offset() ); }
-        } ); }
+            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: " + card.getId() + " with offset: " + result.getRecordMetadata().offset() ); }
+        } ); return card; }
 
     public Data writeToKafka ( Data data ) {
-        this.kafkaTemplate.send( "new_cars", SerDes.getSerDes().serialize( data ) ).addCallback( new ListenableFutureCallback<>() {
+        this.kafkaTemplate.send( Status.NEW_CARS.name().toLowerCase(), SerDes.getSerDes().serialize( data ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 

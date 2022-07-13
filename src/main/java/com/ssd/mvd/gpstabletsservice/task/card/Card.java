@@ -1,52 +1,53 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
-import java.util.*;
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+import lombok.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Card { // заполняется оператором
+public class Card {
     private String fabula;   //????
-    private String userFio;  //Ariza berivchining F.I.SH
+    private String userFio;//Ariza berivchining F.I.SH
 
-    private Double latitude;   // Hodisa bo'lgan joy
-    private Double longitude;   // Hodisa bo'lgan joy
-
-    private Boolean hospitalApplication;   // Ariza shifoxonadan kelgan-kelmaganligi
+    private Long id;
+    private Long gomNum;  //??
+    private Long firstOfAll;  //??
 
     private Integer branchId;   //???
     private Integer sEventFormsAddId;  //??
     private Integer initSeventFormsId;  //??
 
-    private Date eventEnd;   // Tugallangan vaqt
-    private Date eventStart;  // Yaratilish vaqt
-    private Date dateCreateCard;   // Qachon yaratilgani
-
-    private Long gomNum;  //??
-    private Long cardId;
-    private Long firstOfAll;  //??
-    private Long deadQuantity;   //O'lganlar soni
-    private Long traumaQuantity;   //Jarohatlanganlar soni
-
-    private EventHuman eventHuman;   // Aybdor inson
-    private EventAddress eventAddress;   //Voqea manzili
-    private List< VictimHumans > victimHumans;  // Jabirlanuchi inson
+    private Double latitude;   // Hodisa bo'lgan joy
+    private Double longitude;   // Hodisa bo'lgan joy
 
     private Status status;
+    private Boolean hospitalApplication;   // Ariza shifoxonadan kelgan-kelmaganligi
 
-    private List< String > patruls = new ArrayList<>(); // link to list of Patruls who is gonna deal with this Card
-    private List< ReportForCard > reportForCards = new ArrayList<>();
-    private Map< String, PatrulStatus > patrulStatuses = new HashMap<>(); // ths list of all patruls Time consumption
+    private Date created_date;   // Qachon yaratilgani
+    private Date eventStart;  // Yaratilish vaqt
+    private Date eventEnd;   // Tugallangan vaqt
 
-    public void clear () { // cleaning the hall memory
-        // it is necessary to add request to Asomiddin service to send final object of Card with status
-        this.getVictimHumans().forEach( victimHumans1 -> victimHumans1.setVictimAddress( null ) );
-        this.getEventHuman().setHumanAddress( null );
-        this.setVictimHumans( null );
-        this.setEventAddress( null );
-        this.setEventHuman( null ); }
+    private Long traumaQuantity;   //Jarohatlanganlar soni
+    private Long deadQuantity;   //O'lganlar soni
+
+    @JsonDeserialize
+    private EventAddress eventAddress;   //Voqea manzili
+    @JsonDeserialize
+    private EventHuman eventHuman;   // Aybdor inson
+
+    @JsonDeserialize
+    private List< Patrul > patruls;
+    @JsonDeserialize
+    private List< VictimHumans > victimHumans;  // Jabirlanuchi inson
+    @JsonDeserialize
+    private List< ReportForCard > reportForCardList;
+    @JsonDeserialize
+    private Map< String, PatrulStatus > patrulStatuses;
 }

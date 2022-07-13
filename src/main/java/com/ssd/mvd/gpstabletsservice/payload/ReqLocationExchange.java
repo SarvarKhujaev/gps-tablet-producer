@@ -7,12 +7,12 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ReqLocationExchange {
-    private String date;
+    private Long date;
     private Double lan;
     private Double lat;
 
     public ReqLocationExchange ( Row row ) {
         this.setLat( row.getDouble( "latitude" ) );
         this.setLan( row.getDouble( "longitude" ) );
-        this.setDate( String.valueOf( row.getTimestamp( "date" ) ) ); }
+        this.setDate( row.getTimestamp( "date" ).toInstant().getEpochSecond() ); }
 }

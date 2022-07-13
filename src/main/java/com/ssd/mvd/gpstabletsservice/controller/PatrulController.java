@@ -1,10 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
+import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.response.PatrulInfo;
 import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -17,10 +18,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import static java.lang.Math.*;
 import java.util.Comparator;
 import java.util.List;
-
-import static java.lang.Math.*;
 
 @RestController
 public class PatrulController {
@@ -72,11 +72,11 @@ public class PatrulController {
     @MessageMapping( value = "deletePatrul" )
     public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return RedisDataControl.getRedis().deletePatrul( passportNumber ); }
 
+    @MessageMapping ( value = "getPatrulStatistics" )
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return RedisDataControl.getRedis().getPatrulStatistics( passportNumber ); }
+
     @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
     public Flux< PatrulInfo > getPatrulByPortion ( String name ) { return CassandraDataControl.getInstance().getPatruls( name ).map( row -> new PatrulInfo( row.getString( "NSF" ) ) ); }
-
-    @MessageMapping ( value = "getPatrulStatistics" )
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( String passportNumber ) { return RedisDataControl.getRedis().getPatrulStatistics( passportNumber ); }
 
     @MessageMapping ( value = "checkToken" )
     public Mono< ApiResponseModel > checkToken ( String token ) { return RedisDataControl.getRedis().checkToken( token ); }

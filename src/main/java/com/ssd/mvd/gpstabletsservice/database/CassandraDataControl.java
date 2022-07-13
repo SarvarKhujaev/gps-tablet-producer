@@ -13,6 +13,8 @@ import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.logging.Logger;
 import java.time.Duration;
 import java.util.UUID;
@@ -81,15 +83,14 @@ public final class CassandraDataControl {
 
     public Boolean addValue ( SelfEmploymentTask selfEmploymentTask, String key ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.selfEmployment + "(id, object) VALUES(" + selfEmploymentTask.getUuid() + ", '" + key + "');" ).isDone(); }
 
-    public Boolean addValue ( Patrul patrul, String key ) { //this.session.execute( "CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + patrul.getPassportNumber().toLowerCase() + "(date timestamp PRIMARY KEY, status text, message text, totalActivityTime double );" ); // creating new journal for new patrul
-        System.out.println( patrul.getPassportNumber() );
+    public Boolean addValue ( Patrul patrul, String key ) { this.session.executeAsync( "CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date timestamp PRIMARY KEY, status text, message text, totalActivityTime double );" ); // creating new journal for new patrul
         return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + "(passportNumber, NSF, object) VALUES('" + patrul.getPassportNumber() + "', '" + patrul.getSurnameNameFatherName() + "', '" + key + "');" ).isDone(); }
 
     public void addValue ( ReqExchangeLocation position ) { Archive.getAchieve().save( position ); // checking for existence of the same Tracker in database
         Flux.fromStream( position.getReqLocationExchanges().stream() ).onErrorStop().subscribe( value -> {
             KafkaDataControl.getInstance().writeToKafka( value ); // writeToKafka all new Data to Kafka
             this.logger.info( "Cassandra got: " + position.getPassport() + "\t" + value.getDate() );
-            this.session.executeAsync("INSERT INTO " + this.dbName + "." + this.tablets + position.getPassport() + "(userId, date, latitude, longitude) VALUES ('" + position.getPassportSeries() + "', '" + value.getDate() + "', " + value.getLat() + ", " + value.getLan() + ");"); } ); }
+            this.session.executeAsync("INSERT INTO " + this.dbName + "." + this.tablets + position.getPassport() + "(userId, date, latitude, longitude) VALUES ('" + position.getPassportSeries() + "', '" + new Date( value.getDate() ).toInstant() + "', " + value.getLat() + ", " + value.getLan() + ");"); } ); }
 
     public ResultSetFuture addValue ( AtlasLustra atlasLustra, String key ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.lustre + "(id, object) " + "VALUES ('" + atlasLustra.getUUID() + "', " + key + ");" ); }
 
@@ -111,7 +112,9 @@ public final class CassandraDataControl {
         // by default it means t o log in to account
         default -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES ('" + new Date().toInstant() + "', '" + status + "', 'log in at: " + patrul.getStartedToWorkDate().toInstant() + " with simCard " + patrul.getSimCardNumber() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
-    public PatrulActivityStatistics getPatrulStatistics ( Patrul patrul ) { return new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT totalActivityTime FROM " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE status=logout;" ).all().stream() ) ); }
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return RedisDataControl.getRedis().getPatrul( request.getData() ).flatMap( patrul -> request == null ?
+                Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + patrul.getPassportNumber() ).all().stream() ) ) )
+                : Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE date >= '" + SerDes.getSerDes().convertDate( request.getObject().toString() ).toInstant() + "' and date <= '" + SerDes.getSerDes().convertDate( request.getSubject().toString() ).toInstant() + "';" ).all().stream() ) ) ) ); }
 
     public void delete ( String parameter, String value ) { this.session.execute( "DELETE FROM " + this.dbName + "." + parameter + " WHERE imei='" + value + "';" ); }
 

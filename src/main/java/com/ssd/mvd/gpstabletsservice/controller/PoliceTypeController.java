@@ -19,7 +19,7 @@ public class PoliceTypeController {
     public Mono< ApiResponseModel > addPoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().addValue( policeType ); }
 
     @MessageMapping ( value = "updatePoliceType" )
-    public Mono< ApiResponseModel > updatePoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().updatePoliceTypes( policeType ); }
+    public Mono< ApiResponseModel > updatePoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().update( policeType ); }
 
     @MessageMapping ( value = "deletePoliceType" )
     public Mono< ApiResponseModel > deletePoliceType ( PoliceType policeType ) { return RedisDataControl.getRedis().deletePoliceType( policeType ); }

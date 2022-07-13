@@ -1,20 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Date;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class VictimHumans {
-    private String phone;
-    private String lastName;
     private Integer victimId;
+    private String lastName;
     private String firstName;
     private String middleName;
     private String dateOfBirth;
+    private String phone;
     private VictimAddress victimAddress;
 }

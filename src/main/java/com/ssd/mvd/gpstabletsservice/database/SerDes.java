@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class SerDes {
     private final Gson gson = new Gson();
@@ -53,6 +55,8 @@ public class SerDes {
     public Patrul deserialize ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
     public Card deserializeCard ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
+
+    public Date convertDate ( String value ) { return this.objectMapper.convertValue( value, new TypeReference<>() {} ); }
 
     public ReqLocationExchange deserializeReqLocation( String position ) { return this.getGson().fromJson( position, ReqLocationExchange.class ); }
 

@@ -65,13 +65,12 @@ public class Archive implements Runnable {
 
     // uses to link Card to current Patrul object, either additional Patrul in case of necessary
     public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
-        patrul.setCard( card.getCardId() );
-        patrul.changeTaskStatus( ATTACHED );
-        card.getPatruls().add( patrul.getPassportNumber() );
-        this.cardMap.putIfAbsent( card.getCardId(), card );
-        KafkaDataControl.getInstance().writeToKafka( card );
-        KafkaDataControl.getInstance().writeToKafka( Notification.builder().object( card ).patrul( patrul ).notificationWasCreated( new Date() ).title( card.getCardId() + " was linked to: " + patrul.getName() ).build() );
-        return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( this.notificationList.add( Notification.builder().patrul( patrul ).status( false ).title( patrul.getName() + "Topshiriq qabul qildi" ).build() ) ).status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
+        patrul.setCard( card.getId() ); // savinf card id into patrul object
+        patrul.changeTaskStatus( ATTACHED ); // changing his status to ATTACHED
+        card.getPatruls().add( patrul ); // saving each patrul to card list
+        this.cardMap.putIfAbsent( card.getId(), KafkaDataControl.getInstance().writeToKafka( card ) );
+        this.save( Notification.builder().object( card ).patrul( patrul ).notificationWasCreated( new Date() ).title( card.getId() + " was linked to: " + patrul.getName() ).build() );
+        return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
 
     public void save ( Notification notification ) { this.getNotificationList().add( KafkaDataControl.getInstance().writeToKafka( notification ) ); }
 
@@ -103,9 +102,9 @@ public class Archive implements Runnable {
 
     public Stream< ReqLocationExchange > getPos () { return this.getMap().values().stream(); }
 
-    public Flux< Trackers > getAllTrackers () { return Flux.fromStream( this.getInspector().values().stream() ); }
-
     public Mono< ReqLocationExchange > getPos ( String id ) { return Mono.justOrEmpty( this.map.get( id ) ); }
+
+    public Flux< Trackers > getAllTrackers () { return Flux.fromStream( this.getInspector().values().stream() ); }
 
     public synchronized void save ( String topicName, String position ) { this.map.put( topicName, SerDes.getSerDes().deserializeReqLocation( position ) ); }
 
@@ -134,11 +133,9 @@ public class Archive implements Runnable {
                 if ( patrul.getStatus().equals( BUSY ) ) this.getPatrulMonitoring().get( patrul.getTaskStatus() ).add( patrul );
                 RedisDataControl.getRedis().update( patrul ).subscribe(); } } );
             try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); } finally { this.getPatrulMonitoring().values().forEach( List::clear ); }
-            Flux.fromStream( this.cardMap.values().stream() ).filter( card -> card.getPatruls().size() == card.getReportForCards().size() ).subscribe( card -> {
+            Flux.fromStream( this.cardMap.values().stream() ).filter( card -> card.getPatruls().size() == card.getReportForCardList().size() ).subscribe( card -> {
                 card.setStatus( FINISHED );
-                KafkaDataControl.getInstance().writeToKafka( card ); // saving into Kafka all cards which are done
-                this.cardMap.remove( card.getCardId() );
-                card.clear(); } );
+                this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getId() ); } );
             Flux.fromStream( () -> this.inspector.values().stream().peek( trackers -> CassandraDataControl.getInstance().addValue( trackers.setStatus( TimeInspector.getInspector().compareTime( trackers.getDate() ) ) ) ) ).doOnError( throwable -> this.clear() ).subscribe();
             Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ).filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ).subscribe( selfEmploymentTask -> {
                 selfEmploymentTask.setTaskStatus( FINISHED );
