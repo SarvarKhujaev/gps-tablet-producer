@@ -66,6 +66,8 @@ public class Archive implements Runnable {
     // uses to link Card to current Patrul object, either additional Patrul in case of necessary
     public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
         patrul.setCard( card.getId() ); // savinf card id into patrul object
+        patrul.setLatitudeOfTask( card.getLatitude() );
+        patrul.setLongitudeOfTask( card.getLongitude() );
         patrul.changeTaskStatus( ATTACHED ); // changing his status to ATTACHED
         card.getPatruls().add( patrul ); // saving each patrul to card list
         this.cardMap.putIfAbsent( card.getId(), KafkaDataControl.getInstance().writeToKafka( card ) );

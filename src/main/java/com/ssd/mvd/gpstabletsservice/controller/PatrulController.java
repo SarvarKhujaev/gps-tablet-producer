@@ -83,7 +83,7 @@ public class PatrulController {
 
     private static final Double p = PI / 180;
 
-    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 - cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2 + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p ) * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
+    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 - cos( ( second.getLatitudeOfTask() - first.getLatitude() ) * p ) / 2 + cos( first.getLatitude() * p ) * cos( second.getLatitudeOfTask() * p ) * ( 1 - cos( ( second.getLongitudeOfTask() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
 
     @MessageMapping ( value = "findTheClosestPatruls" )
     public Mono< List< Patrul > > findTheClosestPatruls ( Point point ) { return this.getAllUsersList().map( patrul -> {

@@ -15,9 +15,9 @@ public class Patrul {
     private Date startedToWorkDate; // the time
     private Date dateOfRegistration;
 
-    private Double latitude;
     private Double distance;
-    private Double longitude;
+    private Double latitudeOfTask;
+    private Double longitudeOfTask;
 
     private UUID organ; // choosing from dictionary
     private UUID selfEmploymentId;

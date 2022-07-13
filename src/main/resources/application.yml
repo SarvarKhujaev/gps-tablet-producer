@@ -1,12 +1,3 @@
-#server:
-#    port: 9090
-#    address: 10.254.1.229
-#
-#spring:
-#    rsocket:
-#        server:
-#            port: 6060
-#            address: 10.254.1.229
 
 server:
     port: ${SERVER_PORT} # all trackers are going to send its data by its  port
