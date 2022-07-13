@@ -5,12 +5,16 @@ services:
         image: ${CI_REGISTRY}/${CI_PROJECT_PATH}:latest
         networks:
             - proxy_network
+        ports:
+            - ${SERVER_PORT}:${SERVER_PORT}
+            - ${RSOCKET_PORT}:${RSOCKET_PORT}
         environment:
             SERVER_PORT: ${SERVER_PORT}
+            RSOCKET_PORT: ${RSOCKET_PORT}
             KAFKA_BROKER: ${KAFKA_BROKER}
 
         deploy:
-            replicas: 2
+            replicas: ${REPLICAS}
             placement:
                 constraints: [node.labels.mgmt != true ]
 
