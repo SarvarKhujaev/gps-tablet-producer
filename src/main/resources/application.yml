@@ -4,11 +4,18 @@ server:
 
 spring:
     data:
-      cassandra:
-          port: ${CASSANDRA_PORT}
-          keyspace-name: ${KEYSPACE_NAME}
-          contact-points: ${CASSANDRA_HOST}
-          schema-action: CREATE_IF_NOT_EXISTS
+        cassandra:
+            port: ${CASSANDRA_PORT}
+            keyspace-name: ${KEYSPACE_NAME}
+            contact-points: ${CASSANDRA_HOST}
+            schema-action: CREATE_IF_NOT_EXISTS
+
+            request:
+                timeout: ${REQUEST_TIMEOUT_FOR_CASSANDRA}
+
+            connection:
+                connect-timeout: ${CONNECTION_TIMEOUT_FOR_CASSANDRA}
+                init-query-timeout: ${INIT_QUERY_TIMEOUT_FOR_CASSANDRA}
 
     kafka:
         bootstrap-servers: ${KAFKA_BROKER}

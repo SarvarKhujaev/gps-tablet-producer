@@ -40,12 +40,12 @@ public final class CassandraDataControl {
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
 
     @Value( "${CASSANDRA_PORT}" )
-    private Integer cassandraPort;
+    private String cassandraPort;
 
     @Value( "${CASSANDRA_HOST}" )
     private String cassandraHost;
 
-    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( this.cassandraPort ).addContactPoint( this.cassandraHost ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
+    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( Integer.parseInt( this.cassandraPort ) ).addContactPoint( this.cassandraHost ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
                 .withSocketOptions( new SocketOptions().setReadTimeoutMillis( 30000 ) ).withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
                 .withPoolingOptions( new PoolingOptions().setMaxConnectionsPerHost( HostDistance.LOCAL, 1024 ).setMaxRequestsPerConnection( HostDistance.REMOTE, 256 ).setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
                 .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':1 };" );
