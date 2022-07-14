@@ -1,10 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.response.Status;
+import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
 import java.util.*;
@@ -12,6 +12,7 @@ import org.redisson.api.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.redisson.Redisson;
 import org.redisson.config.Config;
@@ -31,9 +32,18 @@ public final class RedisDataControl {
 
     public static RedisDataControl getRedis () { return redisDataControl != null ? redisDataControl : ( redisDataControl = new RedisDataControl() ); }
 
+    @Value( "${REDIS_PORT}" )
+    private String redisPort;
+    @Value( "${REDIS_HOST}" )
+    private String redisHost;
+    @Value( "${variables.redis_client_name}")
+    private String redisClientName;
+    @Value( "${variables.redis_password}")
+    private String redisPassword;
+
     private RedisDataControl () {
         Config config = new Config();
-        config.useSingleServer().setAddress( "redis://10.254.1.227:6367" ).setClientName( "default" ).setPassword( "8tRk62" );
+        config.useSingleServer().setAddress( "redis://" + this.redisHost + ":" + this.redisPort ).setClientName( this.redisClientName ).setPassword( this.redisPassword );
         this.redissonReactiveClient = Redisson.createReactive( config );
         this.polygonForPatrulMap = this.redissonReactiveClient.getMap( "polygonForPatrulMap" ); // for polygons with schedule
         this.polygonTypeMap = this.redissonReactiveClient.getMap( "polygonTypeMap" ); // for polygons

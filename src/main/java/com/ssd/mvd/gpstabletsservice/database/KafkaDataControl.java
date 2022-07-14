@@ -8,9 +8,10 @@ import com.ssd.mvd.gpstabletsservice.entity.Data;
 
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.KafkaAdminClient;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -27,11 +28,13 @@ import java.util.Map;
 public class KafkaDataControl {
     private Properties properties;
     private final AdminClient client;
-    public final String ID = "SSD.GPS.TABLETS";
     private final KafkaTemplate< String, String > kafkaTemplate;
     private static KafkaDataControl instance = new KafkaDataControl();
     private final Logger logger = Logger.getLogger( KafkaDataControl.class.toString() );
-    public final String PATH = "10.254.1.209:9092, 10.254.1.211:9092, 10.254.1.212:9092";
+    @Value( "${KAFKA_BROKER}")
+    public String PATH;
+    @Value( "${GROUP_ID_FOR_KAFKA}" )
+    public String ID;
 
     private Properties setProperties () {
         this.properties = new Properties();

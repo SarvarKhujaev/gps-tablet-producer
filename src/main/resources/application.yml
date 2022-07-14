@@ -1,19 +1,40 @@
 server:
-    port: 9090
-    address: 10.254.1.229
+    port: ${SERVER_PORT}
+    address: ${SERVER_ADDRESS}
 
 spring:
+    data:
+      cassandra:
+          port: ${CASSANDRA_PORT}
+          keyspace-name: ${KEYSPACE_NAME}
+          contact-points: ${CASSANDRA_HOST}
+          schema-action: CREATE_IF_NOT_EXISTS
+
+    kafka:
+        bootstrap-servers: ${KAFKA_BROKER}
+
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+        consumer:
+            group-id: ${GROUP_ID_FOR_KAFKA}
+            auto-offset-reset: earliest
+            key-deserializer: org.apache.kafka.common.serialization.StringSerializer
+            value-deserializer: org.apache.kafka.common.serialization.StringSerializer
+
+        admin:
+            client-id: ${GROUP_ID_FOR_KAFKA}
+
     rsocket:
         server:
-            port: 6060
-            address: 10.254.1.229
+            port: ${RSOCKET_PORT}
+            address: ${SERVER_ADDRESS}
 
-#server:
-#    port: ${SERVER_PORT} # all trackers are going to send its data by its  port
-#    address: ${SERVER_ADDRESS}
-#
-#spring:
-#    rsocket:
-#        server:
-#            port: ${RSOCKET_PORT}
-#            address: ${SERVER_ADDRESS}
+    redis:
+        port: ${REDIS_PORT}
+        host: ${REDIS_HOST}
+
+variables:
+    redis_password: ${REDIS_PASSWORD}
+    redis_client_name: ${REDIS_CLIENT_NAME}

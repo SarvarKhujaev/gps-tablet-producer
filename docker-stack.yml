@@ -12,6 +12,10 @@ services:
             SERVER_PORT: ${SERVER_PORT}
             RSOCKET_PORT: ${RSOCKET_PORT}
             KAFKA_BROKER: ${KAFKA_BROKER}
+            KEYSPACE_NAME: ${KEYSPACE_NAME}
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
+            REDIS_CLIENT_NAME: ${REDIS_CLIENT_NAME}
+            GROUP_ID_FOR_KAFKA: ${GROUP_ID_FOR_KAFKA}
 
         deploy:
             replicas: ${REPLICAS}
