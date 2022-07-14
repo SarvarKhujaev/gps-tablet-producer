@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.payload.ReqLocationExchange;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -8,13 +9,14 @@ import com.ssd.mvd.gpstabletsservice.entity.Data;
 
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.core.env.Environment;
+
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.apache.kafka.clients.admin.AdminClient;
 
 import org.jetbrains.annotations.NotNull;
@@ -31,9 +33,9 @@ public class KafkaDataControl {
     private final KafkaTemplate< String, String > kafkaTemplate;
     private static KafkaDataControl instance = new KafkaDataControl();
     private final Logger logger = Logger.getLogger( KafkaDataControl.class.toString() );
-    @Value( "${KAFKA_BROKER}")
+    private final Environment environment = GpsTabletsServiceApplication.context.getEnvironment();
+
     public String PATH;
-    @Value( "${GROUP_ID_FOR_KAFKA}" )
     public String ID;
 
     private Properties setProperties () {
@@ -50,6 +52,8 @@ public class KafkaDataControl {
     public static KafkaDataControl getInstance () { return instance != null ? instance : ( instance = new KafkaDataControl() ); }
 
     private KafkaDataControl () {
+        this.ID = environment.getProperty( "variables.GROUP_ID_FOR_KAFKA" );
+        this.PATH = environment.getProperty( "variables.KAFKA_BROKER" );
         this.kafkaTemplate = this.kafkaTemplate();
         this.logger.info( "KafkaDataControl was created" );
         this.client = KafkaAdminClient.create( this.setProperties() );
@@ -101,13 +105,13 @@ public class KafkaDataControl {
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + notification.getTitle() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return notification; }
 
-    public void clear () {
-            CassandraDataControl.getInstance().delete();
-            RedisDataControl.getRedis().clear();
-            Archive.getAchieve().clear();
-            this.kafkaTemplate.destroy();
-            this.kafkaTemplate.flush();
-            this.properties.clear();
-            this.client.close();
-            instance = null; }
+//    public void clear () {
+//            CassandraDataControl.getInstance().delete();
+//            RedisDataControl.getRedis().clear();
+//            Archive.getAchieve().clear();
+//            this.kafkaTemplate.destroy();
+//            this.kafkaTemplate.flush();
+//            this.properties.clear();
+//            this.client.close();
+//            instance = null; }
 }

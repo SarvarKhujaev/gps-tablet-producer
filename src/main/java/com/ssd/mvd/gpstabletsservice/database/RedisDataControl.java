@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -8,12 +9,12 @@ import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
 import java.util.*;
-import org.redisson.api.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 
+import org.redisson.api.*;
 import org.redisson.Redisson;
 import org.redisson.config.Config;
 
@@ -27,23 +28,17 @@ public final class RedisDataControl {
     private final RMapReactive< UUID, String > polygonTypeMap;
     private final RedissonReactiveClient redissonReactiveClient;
     private final RMapReactive< String, String > polygonForPatrulMap;
+    private final Environment environment = GpsTabletsServiceApplication.context.getEnvironment();
 
     private static RedisDataControl redisDataControl = new RedisDataControl();
 
     public static RedisDataControl getRedis () { return redisDataControl != null ? redisDataControl : ( redisDataControl = new RedisDataControl() ); }
 
-    @Value( "${REDIS_PORT}" )
-    private String redisPort;
-    @Value( "${REDIS_HOST}" )
-    private String redisHost;
-    @Value( "${variables.redis_client_name}")
-    private String redisClientName;
-    @Value( "${variables.redis_password}")
-    private String redisPassword;
-
     private RedisDataControl () {
         Config config = new Config();
-        config.useSingleServer().setAddress( "redis://" + this.redisHost + ":" + this.redisPort ).setClientName( this.redisClientName ).setPassword( this.redisPassword );
+        config.useSingleServer().setAddress( "redis://" + this.environment.getProperty( "variables.CASSANDRA_HOST" ) + ":" + this.environment.getProperty( "variables.REDIS_PORT" ) )
+                .setClientName( environment.getProperty( "variables.REDIS_CLIENT_NAME" ) )
+                .setPassword( environment.getProperty( "variables.REDIS_PASSWORD" ) );
         this.redissonReactiveClient = Redisson.createReactive( config );
         this.polygonForPatrulMap = this.redissonReactiveClient.getMap( "polygonForPatrulMap" ); // for polygons with schedule
         this.polygonTypeMap = this.redissonReactiveClient.getMap( "polygonTypeMap" ); // for polygons

@@ -5,6 +5,7 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
+import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.payload.ReqExchangeLocation;
@@ -12,7 +13,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,16 +37,10 @@ public final class CassandraDataControl {
     public final String polygonForPatrul = "POLYGONFORPATRUl";
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
-
+    private final Environment environment = GpsTabletsServiceApplication.context.getEnvironment();
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
 
-    @Value( "${CASSANDRA_PORT}" )
-    private String cassandraPort;
-
-    @Value( "${CASSANDRA_HOST}" )
-    private String cassandraHost;
-
-    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( Integer.parseInt( this.cassandraPort ) ).addContactPoint( this.cassandraHost ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
+    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( Integer.parseInt( environment.getProperty( "variables.CASSANDRA_HOST" ) ) ).addContactPoint( environment.getProperty( "variables.CASSANDRA_HOST" ) ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
                 .withSocketOptions( new SocketOptions().setReadTimeoutMillis( 30000 ) ).withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
                 .withPoolingOptions( new PoolingOptions().setMaxConnectionsPerHost( HostDistance.LOCAL, 1024 ).setMaxRequestsPerConnection( HostDistance.REMOTE, 256 ).setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
                 .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':1 };" );

@@ -8,6 +8,7 @@ spring:
             port: ${CASSANDRA_PORT}
             keyspace-name: ${KEYSPACE_NAME}
             contact-points: ${CASSANDRA_HOST}
+            local-datacenter: ${CASSANDRA_DC}
             schema-action: CREATE_IF_NOT_EXISTS
 
             request:
@@ -17,31 +18,44 @@ spring:
                 connect-timeout: ${CONNECTION_TIMEOUT_FOR_CASSANDRA}
                 init-query-timeout: ${INIT_QUERY_TIMEOUT_FOR_CASSANDRA}
 
-    kafka:
-        bootstrap-servers: ${KAFKA_BROKER}
+        kafka:
+            bootstrap-servers: ${KAFKA_BROKER}
 
-        producer:
-            key-serializer: org.apache.kafka.common.serialization.StringSerializer
-            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+            producer:
+                key-serializer: org.apache.kafka.common.serialization.StringSerializer
+                value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
-        consumer:
-            group-id: ${GROUP_ID_FOR_KAFKA}
-            auto-offset-reset: earliest
-            key-deserializer: org.apache.kafka.common.serialization.StringSerializer
-            value-deserializer: org.apache.kafka.common.serialization.StringSerializer
+            consumer:
+                group-id: ${GROUP_ID_FOR_KAFKA}
+                auto-offset-reset: earliest
+                key-deserializer: org.apache.kafka.common.serialization.StringSerializer
+                value-deserializer: org.apache.kafka.common.serialization.StringSerializer
 
-        admin:
-            client-id: ${GROUP_ID_FOR_KAFKA}
+            admin:
+                client-id: ${GROUP_ID_FOR_KAFKA}
 
+        rsocket:
+            server:
+                port: ${RSOCKET_PORT}
+                address: ${SERVER_ADDRESS}
     rsocket:
         server:
             port: ${RSOCKET_PORT}
             address: ${SERVER_ADDRESS}
-
     redis:
         port: ${REDIS_PORT}
         host: ${REDIS_HOST}
+        password: ${REDIS_PASSWORD}
+        client-name: ${REDIS_CLIENT_NAME}
 
 variables:
-    redis_password: ${REDIS_PASSWORD}
-    redis_client_name: ${REDIS_CLIENT_NAME}
+    REDIS_HOST: ${REDIS_HOST}
+    REDIS_PORT: ${REDIS_PORT}
+    REDIS_PASSWORD: ${REDIS_PASSWORD}
+    REDIS_CLIENT_NAME: ${REDIS_CLIENT_NAME}
+
+    KAFKA_BROKER: ${KAFKA_BROKER}
+    GROUP_ID_FOR_KAFKA: ${GROUP_ID_FOR_KAFKA}
+
+    CASSANDRA_PORT: ${CASSANDRA_PORT}
+    CASSANDRA_HOST: ${CASSANDRA_HOST}
