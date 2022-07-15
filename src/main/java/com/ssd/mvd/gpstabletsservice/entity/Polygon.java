@@ -18,7 +18,6 @@ public class Polygon {
     private Long mahallaId;
     private Long districtId; // tuman
 
-
     private String name;
     private PolygonType polygonType;
 

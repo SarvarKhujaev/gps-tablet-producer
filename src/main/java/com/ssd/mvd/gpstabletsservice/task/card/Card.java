@@ -15,7 +15,6 @@ import java.util.Map;
 public class Card {
     private String fabula;   //????
     private String userFio;//Ariza berivchining F.I.SH
-
     private Long id;
     private Long gomNum;  //??
     private Long firstOfAll;  //??

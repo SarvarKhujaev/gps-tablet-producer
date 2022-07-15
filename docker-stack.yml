@@ -11,7 +11,7 @@ services:
         environment:
             SERVER_PORT: ${SERVER_PORT}
             RSOCKET_PORT: ${RSOCKET_PORT}
-            SERVER_ADDRESS: ${SERVER_ADDRESS}
+            SERVER_ADDRESS: ${SERVER_ADDR}
 
             KAFKA_BROKER: ${KAFKA_BROKER}
             GROUP_ID_FOR_KAFKA: ${GROUP_ID_FOR_KAFKA}

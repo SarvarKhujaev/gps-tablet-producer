@@ -48,8 +48,7 @@ public class Archive implements Runnable {
 
     public Mono< SelfEmploymentTask > get ( UUID uuid ) { return this.selfEmploymentTaskMap.containsKey( uuid ) ? Mono.just( this.selfEmploymentTaskMap.get( uuid ) ) : Mono.empty(); }
 
-    public Flux< Patrul > getPatrulStatus ( com.ssd.mvd.gpstabletsservice.constants.Status status ) {
-        return Flux.fromStream( this.getPatrulMonitoring().get( status ).stream() ); }
+    public Flux< Patrul > getPatrulStatus ( com.ssd.mvd.gpstabletsservice.constants.Status status ) { return Flux.fromStream( this.getPatrulMonitoring().get( status ).stream() ); }
 
     // to get all existing SelfEmploymentTask
     public Flux< SelfEmploymentTask > getAllSelfEmploymentTask () { return Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ); }
@@ -65,7 +64,7 @@ public class Archive implements Runnable {
 
     // uses to link Card to current Patrul object, either additional Patrul in case of necessary
     public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
-        patrul.setCard( card.getId() ); // savinf card id into patrul object
+        patrul.setCard( card.getId() ); // saving card id into patrul object
         patrul.setLatitudeOfTask( card.getLatitude() );
         patrul.setLongitudeOfTask( card.getLongitude() );
         patrul.changeTaskStatus( ATTACHED ); // changing his status to ATTACHED

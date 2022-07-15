@@ -40,7 +40,7 @@ public final class CassandraDataControl {
     private final Environment environment = GpsTabletsServiceApplication.context.getEnvironment();
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
 
-    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( Integer.parseInt( environment.getProperty( "variables.CASSANDRA_HOST" ) ) ).addContactPoint( environment.getProperty( "variables.CASSANDRA_HOST" ) ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
+    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( Integer.parseInt( environment.getProperty( "variables.CASSANDRA_PORT" ) ) ).addContactPoint( environment.getProperty( "variables.CASSANDRA_HOST" ) ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
                 .withSocketOptions( new SocketOptions().setReadTimeoutMillis( 30000 ) ).withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
                 .withPoolingOptions( new PoolingOptions().setMaxConnectionsPerHost( HostDistance.LOCAL, 1024 ).setMaxRequestsPerConnection( HostDistance.REMOTE, 256 ).setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
                 .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':1 };" );

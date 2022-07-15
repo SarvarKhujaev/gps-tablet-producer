@@ -1,6 +1,6 @@
 server:
     port: ${SERVER_PORT}
-    address: ${SERVER_ADDRESS}
+    address: ${SERVER_ADDR}
 
 spring:
     data:
