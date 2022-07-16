@@ -34,14 +34,11 @@ spring:
             admin:
                 client-id: ${GROUP_ID_FOR_KAFKA}
 
-        rsocket:
-            server:
-                port: ${RSOCKET_PORT}
-                address: ${SERVER_ADDRESS}
     rsocket:
         server:
             port: ${RSOCKET_PORT}
-            address: ${SERVER_ADDRESS}
+            address: ${SERVER_ADDR}
+
     redis:
         port: ${REDIS_PORT}
         host: ${REDIS_HOST}

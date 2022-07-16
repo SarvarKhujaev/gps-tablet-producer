@@ -10,8 +10,8 @@ services:
             - ${RSOCKET_PORT}:${RSOCKET_PORT}
         environment:
             SERVER_PORT: ${SERVER_PORT}
+            SERVER_ADDR: ${SERVER_ADDR}
             RSOCKET_PORT: ${RSOCKET_PORT}
-            SERVER_ADDRESS: ${SERVER_ADDR}
 
             KAFKA_BROKER: ${KAFKA_BROKER}
             GROUP_ID_FOR_KAFKA: ${GROUP_ID_FOR_KAFKA}
