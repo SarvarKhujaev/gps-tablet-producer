@@ -46,7 +46,7 @@ public class CardDetails {
             switch ( details ) {
                 case DETAILS -> this.getDetailsList().forEach( s -> {
                     switch ( s ) {
-                        case  "ID" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getId() ) );
+                        case  "ID" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getCardId() ) );
                         case  "ФАБУЛА" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getFabula() ) );
                         case  "ШИРОТА" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getLongitude() ) );
                         case  "ДОЛГОТА" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getLatitude() ) );

@@ -64,13 +64,14 @@ public class Archive implements Runnable {
 
     // uses to link Card to current Patrul object, either additional Patrul in case of necessary
     public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
-        patrul.setCard( card.getId() ); // saving card id into patrul object
+        patrul.setCard( card.getCardId() ); // saving card id into patrul object
         patrul.setLatitudeOfTask( card.getLatitude() );
         patrul.setLongitudeOfTask( card.getLongitude() );
         patrul.changeTaskStatus( ATTACHED ); // changing his status to ATTACHED
         card.getPatruls().add( patrul ); // saving each patrul to card list
-        this.cardMap.putIfAbsent( card.getId(), KafkaDataControl.getInstance().writeToKafka( card ) );
-        this.save( Notification.builder().object( card ).patrul( patrul ).notificationWasCreated( new Date() ).title( card.getId() + " was linked to: " + patrul.getName() ).build() );
+        card.setStatus( CREATED );
+        this.cardMap.putIfAbsent( card.getCardId(), KafkaDataControl.getInstance().writeToKafka( card ) );
+        this.save( Notification.builder().object( card ).patrul( patrul ).notificationWasCreated( new Date() ).title( card.getCardId() + " was linked to: " + patrul.getName() ).build() );
         return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
 
     public void save ( Notification notification ) { this.getNotificationList().add( KafkaDataControl.getInstance().writeToKafka( notification ) ); }
@@ -128,7 +129,7 @@ public class Archive implements Runnable {
     public void run () {
         while ( this.getFlag() ) { RedisDataControl.getRedis().getAllPatruls().subscribe( patrul -> {
             this.getPatrulMonitoring().get( patrul.getStatus() ).add( patrul );
-            if ( !patrul.getStatus().equals( NOT_AVAILABLE ) ) {
+            if ( patrul.getStatus().compareTo( NOT_AVAILABLE ) != 0 ) {
                 patrul.setLastActiveDate( new Date() );
                 patrul.setTotalActivityTime( patrul.getTotalActivityTime() + TimeInspector.getInspector().getTimestampForArchive() );
                 if ( patrul.getStatus().equals( BUSY ) ) this.getPatrulMonitoring().get( patrul.getTaskStatus() ).add( patrul );
@@ -136,7 +137,7 @@ public class Archive implements Runnable {
             try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); } finally { this.getPatrulMonitoring().values().forEach( List::clear ); }
             Flux.fromStream( this.cardMap.values().stream() ).filter( card -> card.getPatruls().size() == card.getReportForCardList().size() ).subscribe( card -> {
                 card.setStatus( FINISHED );
-                this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getId() ); } );
+                this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getCardId() ); } );
             Flux.fromStream( () -> this.inspector.values().stream().peek( trackers -> CassandraDataControl.getInstance().addValue( trackers.setStatus( TimeInspector.getInspector().compareTime( trackers.getDate() ) ) ) ) ).doOnError( throwable -> this.clear() ).subscribe();
             Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ).filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ).subscribe( selfEmploymentTask -> {
                 selfEmploymentTask.setTaskStatus( FINISHED );

@@ -13,28 +13,27 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Card {
-    private String fabula;   //????
-    private String userFio;//Ariza berivchining F.I.SH
-    private Long id;
+    private Long cardId;
     private Long gomNum;  //??
     private Long firstOfAll;  //??
+    private Long deadQuantity;   //O'lganlar soni
+    private Long traumaQuantity;   //Jarohatlanganlar soni
 
     private Integer branchId;   //???
     private Integer sEventFormsAddId;  //??
     private Integer initSeventFormsId;  //??
 
+    private Status status;
+    private String fabula;   //????
+    private String userFio; //Ariza berivchining F.I.SH
+
     private Double latitude;   // Hodisa bo'lgan joy
     private Double longitude;   // Hodisa bo'lgan joy
-
-    private Status status;
     private Boolean hospitalApplication;   // Ariza shifoxonadan kelgan-kelmaganligi
 
-    private Date created_date;   // Qachon yaratilgani
-    private Date eventStart;  // Yaratilish vaqt
     private Date eventEnd;   // Tugallangan vaqt
-
-    private Long traumaQuantity;   //Jarohatlanganlar soni
-    private Long deadQuantity;   //O'lganlar soni
+    private Date eventStart;  // Yaratilish vaqt
+    private Date created_date;   // Qachon yaratilgani
 
     @JsonDeserialize
     private EventAddress eventAddress;   //Voqea manzili
@@ -42,11 +41,11 @@ public class Card {
     private EventHuman eventHuman;   // Aybdor inson
 
     @JsonDeserialize
-    private List< Patrul > patruls;
+    private List< Patrul > patruls; // the list of patruls who linked to this event
     @JsonDeserialize
     private List< VictimHumans > victimHumans;  // Jabirlanuchi inson
     @JsonDeserialize
-    private List< ReportForCard > reportForCardList;
+    private List< ReportForCard > reportForCardList; // the list of reports for the current card
     @JsonDeserialize
-    private Map< String, PatrulStatus > patrulStatuses;
+    private Map< String, PatrulStatus > patrulStatuses; // the final status with info the time and Statuses
 }

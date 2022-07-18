@@ -25,7 +25,7 @@ public class ActiveTask<T> {
     public ActiveTask ( Card card ) {
         this.setType( "card" );
         this.setStatus( card.getStatus() );
-        this.setTaskId( (T) card.getId() );
+        this.setTaskId( (T) card.getCardId() );
         this.setLatitude( card.getLatitude() );
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );

@@ -1,7 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
+import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.response.Status;
@@ -32,9 +32,9 @@ public final class RedisDataControl {
 
     public static RedisDataControl getRedis () { return redisDataControl != null ? redisDataControl : ( redisDataControl = new RedisDataControl() ); }
 
-    private RedisDataControl () {
-        Config config = new Config();
-        config.useSingleServer().setAddress( "redis://" + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_HOST" ) + ":" + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PORT" ) )
+    private RedisDataControl () { Config config = new Config();
+        config.useSingleServer().setAddress( "redis://" + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_HOST" ) + ":"
+                        + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PORT" ) )
                 .setClientName( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_CLIENT_NAME" ) )
                 .setPassword( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PASSWORD" ) );
         this.redissonReactiveClient = Redisson.createReactive( config );
@@ -279,8 +279,4 @@ public final class RedisDataControl {
     public Mono< ApiResponseModel > checkToken ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() ).status( Status.builder().message( "All right!!!" ).code( 200 ).build() ).success( true ).build() ) )
             : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong token" ).code( 201 ).build() ).success( false ).build() ) ); }
-
-//    public void clear () {
-//        this.redissonReactiveClient.shutdown();
-//        redisDataControl = null; }
 }

@@ -13,7 +13,6 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
-import org.springframework.core.env.Environment;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -37,13 +36,16 @@ public final class CassandraDataControl {
     public final String polygonForPatrul = "POLYGONFORPATRUl";
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
-    private final Environment environment = GpsTabletsServiceApplication.context.getEnvironment();
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
 
-    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder().withPort( Integer.parseInt( environment.getProperty( "variables.CASSANDRA_PORT" ) ) ).addContactPoint( environment.getProperty( "variables.CASSANDRA_HOST" ) ).withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
-                .withSocketOptions( new SocketOptions().setReadTimeoutMillis( 30000 ) ).withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
-                .withPoolingOptions( new PoolingOptions().setMaxConnectionsPerHost( HostDistance.LOCAL, 1024 ).setMaxRequestsPerConnection( HostDistance.REMOTE, 256 ).setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
-                .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':1 };" );
+    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder()
+            .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
+            .addContactPoint( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_HOST" ) )
+            .withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
+            .withSocketOptions( new SocketOptions().setReadTimeoutMillis( 30000 ) )
+            .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
+            .withPoolingOptions( new PoolingOptions().setMaxConnectionsPerHost( HostDistance.LOCAL, 1024 ).setMaxRequestsPerConnection( HostDistance.REMOTE, 256 ).setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
+            .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':1 };" );
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + "(passportNumber text, NSF text, object text, PRIMARY KEY( (passportNumber), NSF ) );" ); // the table for patruls
         this.session.execute("""
                 CREATE CUSTOM INDEX IF NOT EXISTS patrul_name_idx ON TABLETS.PATRULS(NSF) USING 'org.apache.cassandra.index.sasi.SASIIndex'

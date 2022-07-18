@@ -70,7 +70,7 @@ public class KafkaDataControl {
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: " + card.getId() + " with offset: " + result.getRecordMetadata().offset() ); }
+            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: " + card.getCardId() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return card; }
 
     public Data writeToKafka ( Data data ) {
@@ -99,14 +99,4 @@ public class KafkaDataControl {
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + notification.getTitle() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return notification; }
-
-//    public void clear () {
-//            CassandraDataControl.getInstance().delete();
-//            RedisDataControl.getRedis().clear();
-//            Archive.getAchieve().clear();
-//            this.kafkaTemplate.destroy();
-//            this.kafkaTemplate.flush();
-//            this.properties.clear();
-//            this.client.close();
-//            instance = null; }
 }

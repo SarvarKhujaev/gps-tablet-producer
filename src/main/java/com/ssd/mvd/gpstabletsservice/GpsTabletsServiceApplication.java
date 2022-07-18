@@ -11,6 +11,6 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-        new Thread( Archive.getAchieve(), "archive" ).start(); // launching Archieve to monitor all patruls, Card and SelfEmployment
+        new Thread( Archive.getAchieve(), "archive" ).start(); // launching Archive to monitor all patruls, Card and SelfEmployment
     }
 }
