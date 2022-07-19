@@ -6,7 +6,7 @@ services:
         networks:
             - proxy_network
         ports:
-            - ${SERVER_PORT}:${SERVER_PORT}
+            - ${RSOCKET_PORT}:${RSOCKET_PORT}
         environment:
             SERVER_PORT: ${SERVER_PORT}
             SERVER_ADDR: ${SERVER_ADDR}
