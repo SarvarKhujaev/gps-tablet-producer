@@ -13,7 +13,6 @@ import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.payload.ReqExchangeLocation;
 import com.ssd.mvd.gpstabletsservice.payload.ReqLocationExchange;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 
@@ -94,10 +93,6 @@ public class Archive implements Runnable {
                 this.save( Notification.builder().notificationWasCreated( new Date() ).patrul( patrul ).title( patrul.getName() + " was removed from: " + selfEmploymentTask.getUuid() ).status( false ).build() );
                 return RedisDataControl.getRedis().update( patrul ); } )
             : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "there is no such a task" ).code( 201 ).build() ).build() ); }
-
-    public void save ( ReqExchangeLocation id ) {
-        if ( !this.inspector.containsKey( id.getPassport() ) ) this.inspector.putIfAbsent( id.getPassport(), CassandraDataControl.getInstance().addValue( new Trackers( id.getPassport() ) ) );
-        else this.inspector.get( id.getPassport() ).setStatus( true ); } // updating just time
 
     public Boolean switchOffInspector ( String trackerId ) { CassandraDataControl.getInstance().delete( CassandraDataControl.getInstance().tablets, trackerId );
         return this.getInspector().remove( Long.parseLong( trackerId ) ).setStatus( false ).getKafkaConsumer().status; }

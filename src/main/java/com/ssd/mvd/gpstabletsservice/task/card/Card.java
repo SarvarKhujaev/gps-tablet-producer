@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import lombok.*;
 
@@ -13,8 +14,10 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Card {
-    private Long CardId;
+    @JsonProperty( "CardId" )
+    private Long cardId;
     private Long gomNum;  //??
+    @JsonProperty("FirstOfAll")
     private Long firstOfAll;  //??
     private Long deadQuantity;   //O'lganlar soni
     private Long traumaQuantity;   //Jarohatlanganlar soni
@@ -33,6 +36,7 @@ public class Card {
 
     private Date eventEnd;   // Tugallangan vaqt
     private Date eventStart;  // Yaratilish vaqt
+    @JsonProperty( "dateCreateCard" )
     private Date created_date;   // Qachon yaratilgani
 
     @JsonDeserialize
