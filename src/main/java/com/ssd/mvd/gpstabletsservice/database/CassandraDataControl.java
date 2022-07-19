@@ -5,10 +5,9 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
-import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
-import com.ssd.mvd.gpstabletsservice.payload.ReqExchangeLocation;
+import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
@@ -90,12 +89,6 @@ public final class CassandraDataControl {
     public Boolean addValue ( Patrul patrul, String key ) { this.session.executeAsync( "CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date timestamp PRIMARY KEY, status text, message text, totalActivityTime double );" ); // creating new journal for new patrul
         return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + "(passportNumber, NSF, object) VALUES('" + patrul.getPassportNumber() + "', '" + patrul.getSurnameNameFatherName() + "', '" + key + "');" ).isDone(); }
 
-    public void addValue ( ReqExchangeLocation position ) { Archive.getAchieve().save( position ); // checking for existence of the same Tracker in database
-        Flux.fromStream( position.getReqLocationExchanges().stream() ).onErrorStop().subscribe( value -> {
-            KafkaDataControl.getInstance().writeToKafka( value ); // writeToKafka all new Data to Kafka
-            this.logger.info( "Cassandra got: " + position.getPassport() + "\t" + value.getDate() );
-            this.session.executeAsync("INSERT INTO " + this.dbName + "." + this.tablets + position.getPassport() + "(userId, date, latitude, longitude) VALUES ('" + position.getPassportSeries() + "', '" + new Date( value.getDate() ).toInstant() + "', " + value.getLat() + ", " + value.getLan() + ");"); } ); }
-
     public ResultSetFuture addValue ( AtlasLustra atlasLustra, String key ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.lustre + "(id, object) " + "VALUES ('" + atlasLustra.getUUID() + "', " + key + ");" ); }
 
     public ResultSetFuture addValue ( Polygon polygon, String object ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygonForPatrul + "(id, object) " + "VALUES (" + polygon.getUuid() + ", '" + object + "');" ); }
@@ -128,6 +121,7 @@ public final class CassandraDataControl {
 
     public void resetData () { Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
+            .doOnError( throwable -> this.delete() )
             .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0 )
             .delayElements( Duration.ofMillis( 100 ) ).mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe(); }
 

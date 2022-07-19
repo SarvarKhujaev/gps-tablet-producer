@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Card {
-    private Long cardId;
+    private Long CardId;
     private Long gomNum;  //??
     private Long firstOfAll;  //??
     private Long deadQuantity;   //O'lganlar soni

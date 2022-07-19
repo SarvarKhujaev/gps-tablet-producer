@@ -1,7 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
-import com.ssd.mvd.gpstabletsservice.payload.ReqLocationExchange;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
@@ -81,15 +80,6 @@ public class KafkaDataControl {
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Data: " + data.getData() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return null; }
-
-    public void writeToKafka ( ReqLocationExchange trackers ) {
-        this.kafkaTemplate.send( "GpsTabletsData", SerDes.getSerDes().serialize( trackers ) ).addCallback( new ListenableFutureCallback<>() {
-            @Override
-            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
-
-            @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + trackers.getDate() + " with offset: " + result.getRecordMetadata().offset() ); }
-        } ); }
 
     public Notification writeToKafka ( Notification notification ) {
         this.kafkaTemplate.send( Status.NOTIFICATION.name().toLowerCase(), SerDes.getSerDes().serialize( notification ) ).addCallback( new ListenableFutureCallback<>() {
