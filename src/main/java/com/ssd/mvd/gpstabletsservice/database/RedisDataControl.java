@@ -109,7 +109,10 @@ public final class RedisDataControl {
                 : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( policeType.getPoliceType() + " is used. that's why u cannot delete it at all )))" ).build() ).build() ) )
     : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( policeType.getPoliceType() + " does not exists" ).build() ).build() ) ); } // deleting current police type
 
-    public Mono< ApiResponseModel > addValue ( Patrul patrul ) { return this.patrulMap.fastPutIfAbsent( patrul.getPassportNumber(), ( key = SerDes.getSerDes().serialize( patrul ) ) ).log().onErrorStop().flatMap( aBoolean -> aBoolean ?
+    public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
+        patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
+        patrul.setTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
+        return this.patrulMap.fastPutIfAbsent( patrul.getPassportNumber(), ( key = SerDes.getSerDes().serialize( patrul ) ) ).log().onErrorStop().flatMap( aBoolean -> aBoolean ?
             Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( patrul, this.key ) ).status( Status.builder().message( "new patrul was added" ).code( 200 ).build() ).build() )
         : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "this patrul already exists" ).code( 201 ).build() ).build() ) ); }
 

@@ -16,6 +16,8 @@ public class Patrul {
     private Date dateOfRegistration;
 
     private Double distance;
+    private Double latitude; // the current location of the user
+    private Double longitude; // the current location of the user
     private Double latitudeOfTask;
     private Double longitudeOfTask;
 
