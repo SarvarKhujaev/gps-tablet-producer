@@ -28,6 +28,7 @@ public class Card {
 
     private Status status;
     private String fabula;   //????
+    private String address; // coming from Front end
     private String userFio; //Ariza berivchining F.I.SH
 
     private Double latitude;   // Hodisa bo'lgan joy

@@ -7,12 +7,15 @@ import java.util.Date;
 
 @Data
 @Builder
-public class Notification< T > {
+public class Notification {
+    private String type; // might be from 102 or Camera
     private String title; // description of Patrul action
-    private Integer index; // unique index number
-    private Patrul patrul;
-    private Boolean status; // shows this notification was read or not by default not read
-    private Date notificationWasCreated; // the date when this current notification was created
+    private String address;
+    private String passportSeries;
 
-    private T object;
+    private Double latitudeOfTask;
+    private Double longitudeOfTask;
+
+    private Long id; // id of any task
+    private Date notificationWasCreated; // the date when this current notification was created
 }

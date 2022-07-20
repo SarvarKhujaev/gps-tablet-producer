@@ -272,7 +272,7 @@ public final class RedisDataControl {
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this.patrulMap.get( request.getData() ).map(s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> CassandraDataControl.getInstance().getPatrulStatistics( request ) ); }
 
     public Mono< ApiResponseModel > accepted ( String token ) { return this.patrulMap.get( this.decode( token ) ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
-        Archive.getAchieve().save( Notification.builder().patrul( patrul ).status( false ).title( "Task was accepted" ).notificationWasCreated( new Date() ).build() );
+        Archive.getAchieve().save( Notification.builder().title( "Task was accepted" ).notificationWasCreated( new Date() ).build() );
         return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED ) ).status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ); } ); }
 
     public Mono< ApiResponseModel > arrived ( String token ) { return this.patrulMap.get( this.decode( token ) ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> {
