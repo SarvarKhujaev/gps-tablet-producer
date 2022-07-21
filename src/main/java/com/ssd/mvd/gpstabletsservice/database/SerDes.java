@@ -36,6 +36,8 @@ public class SerDes {
 
     public String serialize( PoliceType policeType ) { return this.gson.toJson( policeType ); }
 
+    public Card deserializeCard ( String object ) { return this.gson.fromJson( object, Card.class ); }
+
     public Patrul deserialize ( String object ) { return this.gson.fromJson( object, Patrul.class ); }
 
     public ReqCar deserializeCar ( String object ) { return this.gson.fromJson( object, ReqCar.class ); }

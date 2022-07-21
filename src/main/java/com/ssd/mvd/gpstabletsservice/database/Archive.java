@@ -65,6 +65,7 @@ public class Archive implements Runnable {
         patrul.changeTaskStatus( ATTACHED ); // changing his status to ATTACHED
         card.getPatruls().add( patrul ); // saving each patrul to card list
         card.setStatus( CREATED );
+        RedisDataControl.getRedis().addValue( card );
         this.cardMap.putIfAbsent( card.getCardId(), KafkaDataControl.getInstance().writeToKafka( card ) );
         this.save( Notification.builder()
                 .type( "card 102" )

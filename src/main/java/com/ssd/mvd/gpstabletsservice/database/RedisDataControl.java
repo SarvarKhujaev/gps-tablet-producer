@@ -9,6 +9,8 @@ import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
 import java.util.*;
+
+import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +22,7 @@ import org.redisson.config.Config;
 public final class RedisDataControl {
     private String key;
     private final RMapReactive< String, String > carMap;
+    private final RMapReactive< Long, String > cardMap;
     private final RMapReactive< UUID, String > lustraMap;
     private final RMapReactive< String, String > patrulMap;
     private final RMapReactive< UUID, String > policeTypes;
@@ -44,7 +47,8 @@ public final class RedisDataControl {
         this.polygonMap = this.redissonReactiveClient.getMap( "polygonMap" ); // for polygons
         this.lustraMap = this.redissonReactiveClient.getMap( "lustraMap" ); // for lustra cameras
         this.patrulMap = this.redissonReactiveClient.getMap( "patrulMap" ); // for patrul
-        this.carMap = this.redissonReactiveClient.getMap( "carMap" ); } // for cars
+        this.cardMap = this.redissonReactiveClient.getMap( "cardMap" );
+        this.carMap = this.redissonReactiveClient.getMap( "carMap" ); }
 
     public Flux< ReqCar > getAllCars () { return this.carMap.valueIterator().flatMap( data -> Mono.just( SerDes.getSerDes().deserializeCar( data ) ) ); }
 
@@ -157,21 +161,6 @@ public final class RedisDataControl {
                     .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() ).success( true ).build() ) ); } );
         } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong Patrul data" ).code( 200 ).build() ).build() ); } ); }
 
-    public Mono< ApiResponseModel > update ( ReqCar reqCar ) { return this.carMap.containsKey( reqCar.getGosNumber() ).flatMap( aBoolean -> aBoolean ?
-            this.carMap.get( reqCar.getGosNumber() ).map( s -> SerDes.getSerDes().deserializeCar( s ) ).flatMap( reqCar1 -> {
-                if ( !reqCar1.getPatrulPassportSeries().equals( reqCar.getPatrulPassportSeries() ) ) return this.patrulMap.get( reqCar1.getPatrulPassportSeries() )
-                        .map( s -> SerDes.getSerDes().deserialize( s ) )
-                        .flatMap( patrul -> { patrul.setCarNumber( null );
-                            return this.update( patrul ).flatMap( aBoolean1 -> this.patrulMap.get( reqCar.getPatrulPassportSeries() )
-                                    .map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul1 -> { patrul1.setCarNumber( reqCar.getGosNumber() );
-                                        return this.update( patrul1 )
-                                                .flatMap( aBoolean2 -> this.carMap.fastPutIfExists( reqCar.getGosNumber(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
-                                                        .flatMap( aBoolean3 -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Car was updated" ).code( 200 ).build() )
-                                                                .success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) ) ); } ) );
-                        } ); else return this.carMap.fastPutIfExists( reqCar.getGosNumber(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
-                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) );
-            } ) : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().code( 201 ).message( "Wrong Car data" ).build() ).build() ) ); }
-
     public Mono< ApiResponseModel > update ( Polygon polygon ) { return this.polygonMap.containsKey( polygon.getUuid().toString() ).flatMap( a -> a ?
             this.polygonMap.fastPutIfExists( polygon.getUuid().toString(), SerDes.getSerDes().serialize( polygon ) ).flatMap( aBoolean -> aBoolean ?
                     Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().message( polygon.getName() + " was updated" ).code( 200 ).build() ).build() )
@@ -266,7 +255,7 @@ public final class RedisDataControl {
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this.patrulMap.get( request.getData() ).map(s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> CassandraDataControl.getInstance().getPatrulStatistics( request ) ); }
 
     public Mono< ApiResponseModel > accepted ( String token ) { return this.patrulMap.get( this.decode( token ) ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
-        Archive.getAchieve().save( Notification.builder().title( "Task was accepted" ).notificationWasCreated( new Date() ).build() );
+        patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED );
         return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED ) ).status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ); } ); }
 
     public Mono< ApiResponseModel > arrived ( String token ) { return this.patrulMap.get( this.decode( token ) ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> {
@@ -276,4 +265,8 @@ public final class RedisDataControl {
     public Mono< ApiResponseModel > checkToken ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() ).status( Status.builder().message( "All right!!!" ).code( 200 ).build() ).success( true ).build() ) )
             : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong token" ).code( 201 ).build() ).success( false ).build() ) ); }
+
+    public void addValue ( Card card ) { this.cardMap.fastPutIfAbsent( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
+
+    public Mono< Card > getCard ( Long cardId ) { return this.cardMap.get( cardId ).flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
 }

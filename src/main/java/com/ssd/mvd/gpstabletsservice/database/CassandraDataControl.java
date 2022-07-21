@@ -113,7 +113,8 @@ public final class CassandraDataControl {
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
             .doOnError( throwable -> this.delete() )
             .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0 )
-            .delayElements( Duration.ofMillis( 100 ) ).mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe(); }
+            .delayElements( Duration.ofMillis( 100 ) )
+            .mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().put( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe(); }
 
     public void delete () {
         this.session.close();
