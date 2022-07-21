@@ -16,11 +16,9 @@ import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import static java.lang.Math.*;
-import java.util.Comparator;
-import java.util.List;
 
 @RestController
 public class PatrulController {
@@ -80,13 +78,4 @@ public class PatrulController {
 
     @MessageMapping ( value = "checkToken" )
     public Mono< ApiResponseModel > checkToken ( String token ) { return RedisDataControl.getRedis().checkToken( token ); }
-
-    private static final Double p = PI / 180;
-
-    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 - cos( ( second.getLatitudeOfTask() - first.getLatitude() ) * p ) / 2 + cos( first.getLatitude() * p ) * cos( second.getLatitudeOfTask() * p ) * ( 1 - cos( ( second.getLongitudeOfTask() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
-
-    @MessageMapping ( value = "findTheClosestPatruls" )
-    public Mono< List< Patrul > > findTheClosestPatruls ( Point point ) { return this.getAllUsersList().map( patrul -> {
-        patrul.setDistance(  this.calculate( point, patrul ) );
-        return patrul; } ).collectSortedList( Comparator.comparing( Patrul::getDistance ) ); }
 }

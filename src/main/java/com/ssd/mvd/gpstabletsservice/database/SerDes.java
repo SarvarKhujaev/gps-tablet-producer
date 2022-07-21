@@ -1,16 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
-import com.ssd.mvd.gpstabletsservice.payload.ReqLocationExchange;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import lombok.Data;
 
 import java.util.Date;
+import lombok.Data;
 
 @Data
 public class SerDes {
@@ -21,8 +21,6 @@ public class SerDes {
     public static SerDes getSerDes () { return serDes != null ? serDes : ( serDes = new SerDes() ); }
 
     public String serialize ( Card object ) { return this.gson.toJson( object ); }
-
-    public String serialize ( com.ssd.mvd.gpstabletsservice.entity.Data object ) { return this.gson.toJson( object ); }
 
     public String serialize ( Patrul object ) { return this.gson.toJson( object ); }
 
@@ -53,8 +51,6 @@ public class SerDes {
     public Patrul deserialize ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
     public Date convertDate ( String value ) { return this.objectMapper.convertValue( value, new TypeReference<>() {} ); }
-
-    public ReqLocationExchange deserializeReqLocation( String position ) { return this.getGson().fromJson( position, ReqLocationExchange.class ); }
 
     public String serialize ( SelfEmploymentTask selfEmploymentTask ) { try { return this.objectMapper.writeValueAsString( selfEmploymentTask ); } catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
 

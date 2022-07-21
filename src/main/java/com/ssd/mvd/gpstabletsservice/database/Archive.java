@@ -5,7 +5,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.stream.Stream;
 import java.security.SecureRandom;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
@@ -13,7 +12,6 @@ import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.payload.ReqLocationExchange;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 
 @Data
@@ -23,8 +21,6 @@ public class Archive implements Runnable {
     private final Map< Long, Card > cardMap = new HashMap<>(); // for Cards
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
-    private final Map< String, Trackers > inspector = new HashMap<>(); // for Trackers
-    private final Map< String, ReqLocationExchange > map = new HashMap<>(); // for saving data from KafkaConsumer
     private final LinkedHashSet< Notification > notificationList = new LinkedHashSet<>(); // for all notifications
     private final Map< UUID, SelfEmploymentTask > selfEmploymentTaskMap = new HashMap<>();
     private final Map< com.ssd.mvd.gpstabletsservice.constants.Status, List< Patrul > > patrulMonitoring = new HashMap<>(); // to check all Patruls
@@ -104,31 +100,10 @@ public class Archive implements Runnable {
                 return RedisDataControl.getRedis().update( patrul ); } )
             : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "there is no such a task" ).code( 201 ).build() ).build() ); }
 
-    public Boolean switchOffInspector ( String trackerId ) { CassandraDataControl.getInstance().delete( CassandraDataControl.getInstance().tablets, trackerId );
-        return this.getInspector().remove( Long.parseLong( trackerId ) ).setStatus( false ).getKafkaConsumer().status; }
-
-    public Stream< ReqLocationExchange > getPos () { return this.getMap().values().stream(); }
-
-    public Mono< ReqLocationExchange > getPos ( String id ) { return Mono.justOrEmpty( this.map.get( id ) ); }
-
-    public Flux< Trackers > getAllTrackers () { return Flux.fromStream( this.getInspector().values().stream() ); }
-
-    public synchronized void save ( String topicName, String position ) { this.map.put( topicName, SerDes.getSerDes().deserializeReqLocation( position ) ); }
-
     public String generateToken () {
         byte[] bytes = new byte[ 24 ];
         this.secureRandom.nextBytes( bytes );
         return this.encoder.encodeToString( bytes ); }
-
-    public void clear () {
-        archive = null;
-        this.setFlag( false );
-        this.getMap().clear();
-        this.getCardMap().clear();
-        this.getInspector().clear();
-        this.getNotificationList().clear();
-        this.getPatrulMonitoring().clear();
-        this.getSelfEmploymentTaskMap().clear(); }
 
     @Override
     public void run () {
@@ -143,7 +118,6 @@ public class Archive implements Runnable {
             Flux.fromStream( this.cardMap.values().stream() ).filter( card -> card.getPatruls().size() == card.getReportForCardList().size() ).subscribe( card -> {
                 card.setStatus( FINISHED );
                 this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getCardId() ); } );
-            Flux.fromStream( () -> this.inspector.values().stream().peek( trackers -> CassandraDataControl.getInstance().addValue( trackers.setStatus( TimeInspector.getInspector().compareTime( trackers.getDate() ) ) ) ) ).doOnError( throwable -> this.clear() ).subscribe();
             Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ).filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ).subscribe( selfEmploymentTask -> {
                 selfEmploymentTask.setTaskStatus( FINISHED );
                 CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );

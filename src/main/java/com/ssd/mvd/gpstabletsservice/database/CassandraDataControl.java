@@ -17,7 +17,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.logging.Logger;
 import java.time.Duration;
-import java.util.UUID;
 import java.util.Date;
 
 public final class CassandraDataControl {
@@ -68,11 +67,6 @@ public final class CassandraDataControl {
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + ".trackers(imei text PRIMARY KEY, status text);" ); // the table for trackers
         this.logger.info( "Cassandra is ready" ); }
 
-    public Trackers addValue ( Trackers trackers ) {
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.tablets + trackers.getTopicName() + "(userId text, date timestamp, latitude double, longitude double, PRIMARY KEY( (userId), date ) );");
-        this.session.executeAsync( "INSERT INTO " + this.dbName + ".trackers" + "(imei, status) " + "VALUES ('" + trackers.getTopicName()  + "', '" + trackers.getKafkaConsumer().status + "');" );
-        return trackers; }
-
     public Boolean addValue ( PolygonType polygonType ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygonType + "(id, polygonType) VALUES('" + polygonType.getUuid() + "', '" + polygonType.getName() + "');" ).isDone(); }
 
     public ResultSetFuture addValue ( Polygon polygon ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygon + "(id, polygonName, polygonType) " +
@@ -113,11 +107,7 @@ public final class CassandraDataControl {
                 Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + patrul.getPassportNumber() ).all().stream() ) ) )
                 : Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE date >= '" + SerDes.getSerDes().convertDate( request.getObject().toString() ).toInstant() + "' and date <= '" + SerDes.getSerDes().convertDate( request.getSubject().toString() ).toInstant() + "';" ).all().stream() ) ) ) ); }
 
-    public void delete ( String parameter, String value ) { this.session.execute( "DELETE FROM " + this.dbName + "." + parameter + " WHERE imei='" + value + "';" ); }
-
     public Flux< Row > getPatruls ( String param ) { return Flux.fromStream( this.session.execute( "SELECT nsf FROM TABLETS.patruls WHERE nsf LIKE '%" + param  + "%';" ).all().stream() ); }
-
-    public Flux< Row > getHistory ( Request request ) { return Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + ".tracker" + UUID.fromString( String.valueOf( request.getObject() ) ) + " WHERE userId = '" + UUID.fromString( String.valueOf( request.getObject() ) ) + "' AND date >= '" + request.getAdditional() + "' AND date <= '" + request.getData() + "';" ).all().stream() ); }
 
     public void resetData () { Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )

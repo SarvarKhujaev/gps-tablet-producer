@@ -1,11 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
+import lombok.Data;
 import java.util.Date;
 import java.util.List;
 
-import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
-import lombok.Data;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 @Data
 public class ActiveTask<T> {

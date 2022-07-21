@@ -4,7 +4,6 @@ import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
-import com.ssd.mvd.gpstabletsservice.entity.Data;
 
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -39,10 +38,9 @@ public class KafkaDataControl {
         properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.PATH );
         return properties; }
 
-    public String getNewTopic ( String imei ) {
+    public void getNewTopic ( String imei ) {
         this.client.createTopics( Collections.singletonList( TopicBuilder.name( imei ).partitions(5 ).replicas(3 ).build() ) );
-        this.logger.info( "Topic: " + imei + " was created" );
-        return imei; }
+        this.logger.info( "Topic: " + imei + " was created" ); }
 
     public static KafkaDataControl getInstance () { return instance != null ? instance : ( instance = new KafkaDataControl() ); }
 
