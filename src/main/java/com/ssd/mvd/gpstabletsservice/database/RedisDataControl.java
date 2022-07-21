@@ -68,17 +68,9 @@ public final class RedisDataControl {
 
     public Mono< Polygon > getPolygon ( String uuid, String type ) { return type.equals( "polygon" ) ? this.polygonMap.get( uuid ).flatMap( s -> Mono.just( SerDes.getSerDes().deserializePolygon( s ) ) ) : this.polygonForPatrulMap.get( uuid ).flatMap( s -> Mono.just( SerDes.getSerDes().deserializePolygon( s ) ) ); }
 
-    public Mono< ApiResponseModel > deleteCar ( String gosno ) { return this.carMap.containsKey( gosno ).log().onErrorStop().flatMap( aBoolean -> aBoolean ?
-            this.carMap.remove( gosno ).map( s -> SerDes.getSerDes().deserializeCar( s ) ).flatMap( reqCar1 ->
-                this.getPatrul( reqCar1.getPatrulPassportSeries() ).flatMap( patrul1 -> {
-                    patrul1.setCarNumber( null );
-                    return patrulMap.fastPutIfExists( patrul1.getPassportNumber(), SerDes.getSerDes().serialize( patrul1 ) ).log().onErrorStop()
-                            .flatMap( aLong -> Mono.just( ApiResponseModel.builder().success( true ).data( KafkaDataControl.getInstance().writeToKafka( Data.builder().type( "deleteCar" ).data( patrul1 ).subject( reqCar1 ).build() ) ).status( Status.builder().code( 200 ).message( gosno + " was deleted" ).build() ).build() ) ); } ) )
-            : Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( gosno + " does not exists" ).build() ).build() ) ); } // deleting current car
-
     public Mono< ApiResponseModel > deleteLustra ( UUID uuid ) { return this.lustraMap.containsKey( uuid ).flatMap( aBoolean -> aBoolean ?
         this.lustraMap.get( uuid ).map( s -> SerDes.getSerDes().deserializeLustra( s )).flatMap( atlasLustra ->
-                this.carMap.get( atlasLustra.getCarGosNumber() ).map( s -> SerDes.getSerDes().deserializeCar( s ) ).flatMap(reqCar -> {
+                this.carMap.get( atlasLustra.getCarGosNumber() ).map( s -> SerDes.getSerDes().deserializeCar( s ) ).flatMap( reqCar -> {
                     reqCar.setLustraId( null );
                     return this.carMap.fastPutIfExists( reqCar.getGosNumber(), SerDes.getSerDes().serialize( reqCar ) ).flatMap( aBoolean1 -> this.lustraMap.fastRemove( uuid ).log().onErrorStop().flatMap( aLong -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Lustra was deleted" ).build() ).build() ) ) ); } ) )
         : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Lustra data" ).code( 201 ).build() ).success( false ).build() ) ); }
@@ -121,7 +113,7 @@ public final class RedisDataControl {
                 patrul.setCarNumber( reqCar.getGosNumber() );
                 CassandraDataControl.getInstance().addValue( reqCar, this.key ); // saving updated version of car
                 return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
-                        .flatMap( aBoolean1 -> aBoolean1 ? Mono.just( ApiResponseModel.builder().success( true ).data( KafkaDataControl.getInstance().writeToKafka( Data.builder().type( reqCar.getTrackerId() ).data( patrul ).subject( reqCar ).build() ) ).status( Status.builder().message( "Car was saved" ).code( 200 ).build() ).build() )
+                        .flatMap( aBoolean1 -> aBoolean1 ? Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().message( "Car was saved" ).code( 200 ).build() ).build() )
                                 : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Patrul data" ).code( 201 ).build() ).success( false ).build() ) );
             } ) : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Car data" ).code( 201 ).build() ).success( false ).build() ) ); }
 
@@ -159,7 +151,6 @@ public final class RedisDataControl {
             if ( patrul1.getCarNumber() != null && patrul1.getCarNumber().length() > 0 ) return this.getCar( patrul1.getCarNumber() )
                     .flatMap( reqCar -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
                             .flatMap( value -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
-                            .data( KafkaDataControl.getInstance().writeToKafka( Data.builder().type( "updatePatrul" ).subject( reqCar ).data( patrul ).build() ) )
                             .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() ).success( true ).build() ) ) );
             else return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
                     .flatMap( value -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
@@ -173,9 +164,12 @@ public final class RedisDataControl {
                         .flatMap( patrul -> { patrul.setCarNumber( null );
                             return this.update( patrul ).flatMap( aBoolean1 -> this.patrulMap.get( reqCar.getPatrulPassportSeries() )
                                     .map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul1 -> { patrul1.setCarNumber( reqCar.getGosNumber() );
-                                        return this.update( patrul1 ).flatMap( aBoolean2 -> this.carMap.fastPutIfExists( reqCar.getGosNumber(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) ).flatMap( aBoolean3 -> Mono.just( ApiResponseModel.builder().data( KafkaDataControl.getInstance().writeToKafka( Data.builder().type( "updateCar" ).subject( reqCar ).build() ) )
-                                                .status( Status.builder().message( "Car was updated" ).code( 200 ).build() ).success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) ) ); } ) );
-                        } ); else return this.carMap.fastPutIfExists( reqCar.getGosNumber(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().data( KafkaDataControl.getInstance().writeToKafka( Data.builder().type( "updateCar" ).subject( reqCar ).build() ) ).status( Status.builder().message( "Car was updated" ).code( 200 ).build() ).success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) );
+                                        return this.update( patrul1 )
+                                                .flatMap( aBoolean2 -> this.carMap.fastPutIfExists( reqCar.getGosNumber(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
+                                                        .flatMap( aBoolean3 -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Car was updated" ).code( 200 ).build() )
+                                                                .success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) ) ); } ) );
+                        } ); else return this.carMap.fastPutIfExists( reqCar.getGosNumber(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
+                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) );
             } ) : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().code( 201 ).message( "Wrong Car data" ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > update ( Polygon polygon ) { return this.polygonMap.containsKey( polygon.getUuid().toString() ).flatMap( a -> a ?

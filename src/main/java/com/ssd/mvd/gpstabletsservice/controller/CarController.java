@@ -23,14 +23,12 @@ public class CarController {
     @MessageMapping( value = "searchByGosnoCar" )
     public Mono< ReqCar > searchByGosno ( String gosno ) { return RedisDataControl.getRedis().getCar( gosno ); }
 
-    @MessageMapping( value = "addCar" )
-    public Mono< ApiResponseModel > addCar ( ReqCar reqCar ) { return RedisDataControl.getRedis().addValue( reqCar ); }
-
-    @MessageMapping ( value = "updateCar" )
-    public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return RedisDataControl.getRedis().update( reqCar ); }
-
-    @MessageMapping( value = "deleteCar" )
-    public Mono< ApiResponseModel > deleteCar ( String gosno ) {
-        System.out.println( gosno );
-        return RedisDataControl.getRedis().deleteCar( gosno ); }
+//    @MessageMapping( value = "addCar" )
+//    public Mono< ApiResponseModel > addCar ( ReqCar reqCar ) { return RedisDataControl.getRedis().addValue( reqCar ); }
+//
+//    @MessageMapping ( value = "updateCar" )
+//    public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return RedisDataControl.getRedis().update( reqCar ); }
+//
+//    @MessageMapping( value = "deleteCar" )
+//    public Mono< ApiResponseModel > deleteCar ( String gosno ) { return RedisDataControl.getRedis().deleteCar( gosno ); }
 }

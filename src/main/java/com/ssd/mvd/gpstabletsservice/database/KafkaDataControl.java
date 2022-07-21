@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KafkaDataControl {
-    private Properties properties;
     private final AdminClient client;
     private final KafkaTemplate< String, String > kafkaTemplate;
     private static KafkaDataControl instance = new KafkaDataControl();
@@ -35,9 +34,9 @@ public class KafkaDataControl {
     public final String ID = GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.GROUP_ID_FOR_KAFKA" );
 
     private Properties setProperties () {
-        this.properties = new Properties();
-        this.properties.put( AdminClientConfig.CLIENT_ID_CONFIG, this.ID );
-        this.properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.PATH );
+        Properties properties = new Properties();
+        properties.put( AdminClientConfig.CLIENT_ID_CONFIG, this.ID );
+        properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.PATH );
         return properties; }
 
     public String getNewTopic ( String imei ) {
@@ -53,7 +52,6 @@ public class KafkaDataControl {
         this.client = KafkaAdminClient.create( this.setProperties() );
         this.getNewTopic( Status.NOTIFICATION.name().toLowerCase() );
         this.getNewTopic( Status.CARD_FINAL.name().toLowerCase() );
-        this.getNewTopic( Status.NEW_CARS.name().toLowerCase() );
         this.getNewTopic( "GpsTabletsData" ); }
 
     private KafkaTemplate< String, String > kafkaTemplate () {
@@ -71,15 +69,6 @@ public class KafkaDataControl {
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: " + card.getCardId() + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return card; }
-
-    public Data writeToKafka ( Data data ) {
-        this.kafkaTemplate.send( Status.NEW_CARS.name().toLowerCase(), SerDes.getSerDes().serialize( data ) ).addCallback( new ListenableFutureCallback<>() {
-            @Override
-            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
-
-            @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Data: " + data.getData() + " with offset: " + result.getRecordMetadata().offset() ); }
-        } ); return null; }
 
     public Notification writeToKafka ( Notification notification ) {
         this.kafkaTemplate.send( Status.NOTIFICATION.name().toLowerCase(), SerDes.getSerDes().serialize( notification ) ).addCallback( new ListenableFutureCallback<>() {

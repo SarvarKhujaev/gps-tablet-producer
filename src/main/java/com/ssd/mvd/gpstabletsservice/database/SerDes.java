@@ -38,8 +38,6 @@ public class SerDes {
 
     public String serialize( PoliceType policeType ) { return this.gson.toJson( policeType ); }
 
-    public String serialize ( ReqLocationExchange object ) { return this.gson.toJson( object ); }
-
     public Patrul deserialize ( String object ) { return this.gson.fromJson( object, Patrul.class ); }
 
     public ReqCar deserializeCar ( String object ) { return this.gson.fromJson( object, ReqCar.class ); }
@@ -54,13 +52,9 @@ public class SerDes {
 
     public Patrul deserialize ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
-    public Card deserializeCard ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
-
     public Date convertDate ( String value ) { return this.objectMapper.convertValue( value, new TypeReference<>() {} ); }
 
     public ReqLocationExchange deserializeReqLocation( String position ) { return this.getGson().fromJson( position, ReqLocationExchange.class ); }
-
-    public SelfEmploymentTask deserializeSelfEmployment ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
     public String serialize ( SelfEmploymentTask selfEmploymentTask ) { try { return this.objectMapper.writeValueAsString( selfEmploymentTask ); } catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
 
