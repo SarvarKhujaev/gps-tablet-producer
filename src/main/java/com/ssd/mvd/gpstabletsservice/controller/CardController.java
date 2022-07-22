@@ -26,13 +26,15 @@ public class CardController {
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest request ) {
-        System.out.println( request.getPatruls() );
         return Flux.fromStream( request.getPatruls().stream() )
-                .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-                .flatMap( patrul -> {
+                .map( s -> {
+                    System.out.println( "Passport: " + s );
+                    return RedisDataControl.getRedis().getPatrul( s );
+                } )
+                .flatMap( patrul -> patrul.flatMap( patrul1 -> {
                     System.out.println( patrul );
-                    return patrul.flatMap( patrul1 -> Archive.getAchieve().save( patrul1, request.getCard() ) );
-                } ); }
+                    return Archive.getAchieve().save( patrul1, request.getCard() );
+                } ) ); }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return RedisDataControl.getRedis().getPatrul( RedisDataControl.getRedis().decode( token ) )

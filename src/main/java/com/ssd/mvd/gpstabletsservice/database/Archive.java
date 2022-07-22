@@ -63,7 +63,7 @@ public class Archive implements Runnable {
         patrul.changeTaskStatus( ATTACHED ); // changing his status to ATTACHED
         card.getPatruls().add( patrul ); // saving each patrul to card list
         card.setStatus( CREATED );
-        System.out.println( card );
+        System.out.println( "Card: " + card );
         this.cardMap.putIfAbsent( card.getCardId(), KafkaDataControl.getInstance().writeToKafka( card ) );
         this.save( Notification.builder()
                 .type( "card 102" )
