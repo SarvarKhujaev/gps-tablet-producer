@@ -61,12 +61,15 @@ public class Patrul {
         switch ( ( this.taskStatus = status ) ) {
             case ATTACHED -> this.setStatus( Status.BUSY );
             case ACCEPTED -> {
-                this.setStatus( Status.BUSY );
+                this.setStatus( Status.ACCEPTED );
                 this.setTaskDate( new Date() ); // fixing time when patrul started this task
             } case FINISHED -> {
                 this.setStatus( Status.FREE );
                 if ( this.getCard() != null ) {
-                    Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> card1.getPatrulStatuses().get( this.getPassportNumber() ).setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) ) );
+                    Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> {
+                        card1.getPatrulStatuses().get( this.getPassportNumber() )
+                                .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) );
+                        RedisDataControl.getRedis().update( card1 ); } );
                     this.getListOfTasks().putIfAbsent( this.getCard().toString(), "card" );
                     this.setTaskDate( null );
                     this.setCard( null );
@@ -74,12 +77,13 @@ public class Patrul {
                     this.setSelfEmploymentId( null );
                     this.setTaskDate( null ); }
             } case ARRIVED -> {
-                this.setTaskDate( new Date() );
                 this.setStatus( Status.ARRIVED );
                 if ( this.getCard() != null ) Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> {
                     card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder()
-                            .patrul( this ).inTime( this.check() )
-                            .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) ).build() );
+                            .patrul( this )
+                            .inTime( this.check() )
+                            .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) )
+                            .build() );
                     RedisDataControl.getRedis().update( card1 ); } ); }
         } return this; }
 

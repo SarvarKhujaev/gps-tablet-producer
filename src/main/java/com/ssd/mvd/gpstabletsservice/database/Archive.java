@@ -74,7 +74,9 @@ public class Archive implements Runnable {
                 .longitudeOfTask( card.getLongitude() )
                 .passportSeries( patrul.getPassportNumber() )
                 .title( card.getCardId() + " was linked to: " + patrul.getName() ).build() );
-        return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
+        return RedisDataControl.getRedis().update( patrul )
+                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
+                        .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
 
     public void save ( Notification notification ) { this.getNotificationList().add( KafkaDataControl.getInstance().writeToKafka( notification ) ); }
 
