@@ -83,6 +83,8 @@ public class Archive implements Runnable {
             System.out.println( selfEmploymentTask );
             selfEmploymentTask.setArrivedTime( new Date() ); // fixing time when the patrul reached
             patrul.changeTaskStatus( ARRIVED ).setSelfEmploymentId( selfEmploymentTask.getUuid() );
+            patrul.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() );
+            patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
             this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
             this.save( Notification.builder()
                     .title( patrul.getName() + " set the Task to himself" )

@@ -1,8 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
+import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
+import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
-import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 
 import java.time.Duration;
 import lombok.Data;
@@ -75,7 +76,11 @@ public class Patrul {
             } case ARRIVED -> {
                 this.setTaskDate( new Date() );
                 this.setStatus( Status.ARRIVED );
-                if ( this.getCard() != null ) Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder().patrul( this ).inTime( this.check() ).totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) ).build() ) ); }
+                if ( this.getCard() != null ) Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> {
+                    card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder()
+                            .patrul( this ).inTime( this.check() )
+                            .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) ).build() );
+                    RedisDataControl.getRedis().update( card1 ); } ); }
         } return this; }
 
     private Boolean check () { return switch ( this.getPoliceType() ) {
