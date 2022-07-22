@@ -34,8 +34,8 @@ public class CardController {
             .flatMap( patrul -> {
                 if ( patrul.getSelfEmploymentId() != null ) return Archive.getAchieve().get( patrul.getSelfEmploymentId() )
                         .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( new ActiveTask( selfEmploymentTask ) ).type( "selfEmployment" ).build() )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "U have SElfEmployment Task" ).build() ).success( true ).build() ) );
-                else if ( patrul.getCard() != null ) return Archive.getAchieve().getCard( patrul.getCard() ).flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( new ActiveTask( card ) ).type( "card" ).build() )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "U have SelfEmployment Task" ).build() ).success( true ).build() ) );
+                else if ( patrul.getCard() != null ) return RedisDataControl.getRedis().getCard( patrul.getCard() ).flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( new ActiveTask( card ) ).type( "card" ).build() )
                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "U have 102 Task" ).build() ).success( true ).build() ) );
                 else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().code( 201 ).message( "U have no task, so u can do smth else, my darling )))" ).build() ).build() ); } ); }
 }
