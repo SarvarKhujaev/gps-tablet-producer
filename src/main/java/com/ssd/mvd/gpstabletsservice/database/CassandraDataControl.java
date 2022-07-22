@@ -112,8 +112,9 @@ public final class CassandraDataControl {
     public void resetData () { Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
             .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
             .doOnError( throwable -> this.delete() )
-            .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0 )
-            .delayElements( Duration.ofMillis( 100 ) ).mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe(); }
+            .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0 && selfEmploymentTask.getTaskStatus().compareTo( Status.FINISHED ) != 0 )
+            .delayElements( Duration.ofMillis( 100 ) )
+            .mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe(); }
 
     public void delete () {
         this.session.close();

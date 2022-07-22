@@ -65,6 +65,7 @@ public class Archive implements Runnable {
         patrul.changeTaskStatus( ATTACHED ); // changing his status to ATTACHED
         card.getPatruls().add( patrul ); // saving each patrul to card list
         card.setStatus( CREATED );
+        System.out.println( card );
         this.cardMap.putIfAbsent( card.getCardId(), KafkaDataControl.getInstance().writeToKafka( card ) );
         this.save( Notification.builder()
                 .type( "card 102" )
@@ -81,7 +82,6 @@ public class Archive implements Runnable {
 
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
         if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
-            selfEmploymentTask.setTaskStatus( ARRIVED );
             selfEmploymentTask.setArrivedTime( new Date() ); // fixing time when the patrul reached
             patrul.changeTaskStatus( ARRIVED ).setSelfEmploymentId( selfEmploymentTask.getUuid() );
             this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
@@ -118,9 +118,11 @@ public class Archive implements Runnable {
             Flux.fromStream( this.cardMap.values().stream() ).filter( card -> card.getPatruls().size() == card.getReportForCardList().size() ).subscribe( card -> {
                 card.setStatus( FINISHED );
                 this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getCardId() ); } );
-            Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ).filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ).subscribe( selfEmploymentTask -> {
-                selfEmploymentTask.setTaskStatus( FINISHED );
-                CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
-                this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() );
-                selfEmploymentTask.clear(); } ); } }
+            Flux.fromStream( this.selfEmploymentTaskMap.values().stream() )
+                    .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
+                    .subscribe( selfEmploymentTask -> {
+                        selfEmploymentTask.setTaskStatus( FINISHED );
+                        CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
+                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() );
+                        selfEmploymentTask.clear(); } ); } }
 }
