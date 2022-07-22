@@ -25,7 +25,9 @@ public class CardController {
     public Mono< Card > getCurrentCard ( Long cardId ) { return RedisDataControl.getRedis().getCard( cardId ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
-    public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest request ) { return Flux.fromStream( request.getPatruls().stream() )
+    public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest request ) {
+        System.out.println( request );
+        return Flux.fromStream( request.getPatruls().stream() )
                 .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
                 .flatMap( patrul -> patrul.flatMap( patrul1 -> Archive.getAchieve().save( patrul1, request.getCard() ) ) ); }
 
