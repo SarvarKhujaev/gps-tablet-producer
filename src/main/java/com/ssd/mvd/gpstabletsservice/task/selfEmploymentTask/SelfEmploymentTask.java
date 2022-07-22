@@ -35,10 +35,4 @@ public class SelfEmploymentTask {
     private List< String > patruls;
     @JsonDeserialize
     private List< ReportForCard > reportForCards;
-
-    public void clear() {
-        this.setUuid( null );
-        this.getImages().clear();
-        this.getPatruls().clear();
-        this.getReportForCards().clear(); }
 }

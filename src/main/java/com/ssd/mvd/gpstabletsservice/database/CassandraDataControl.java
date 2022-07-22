@@ -27,7 +27,6 @@ public final class CassandraDataControl {
     public final String patrols = "PATRULS"; // for table with Patruls info
     public final String polygon = "POLYGON";
     private final String dbName = "TABLETS";
-    public final String tablets = "tablets";
     public final String policeTypes = "POLICETYPES";
     public final String polygonType = "POLYGONTYPE";
     public final String selfEmployment = "SELFEMPLOYMENT";

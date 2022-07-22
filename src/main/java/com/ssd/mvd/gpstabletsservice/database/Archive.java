@@ -125,6 +125,5 @@ public class Archive implements Runnable {
                     .subscribe( selfEmploymentTask -> {
                         selfEmploymentTask.setTaskStatus( FINISHED );
                         CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
-                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() );
-                        selfEmploymentTask.clear(); } ); } }
+                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); } }
 }
