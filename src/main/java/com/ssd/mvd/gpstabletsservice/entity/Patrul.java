@@ -39,6 +39,7 @@ public class Patrul {
     private String token;
     private String surname;
     private String password;
+    private String carType; // модель машины
     private String carNumber;
     private String policeType; // choosing from dictionary
     private String fatherName;
