@@ -268,5 +268,7 @@ public final class RedisDataControl {
 
     public void addValue ( Card card ) { this.cardMap.fastPutIfAbsent( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
 
+    public Flux< Card > getAllCards() { return this.cardMap.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
+
     public Mono< Card > getCard ( Long cardId ) { return this.cardMap.get( cardId ).flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
 }

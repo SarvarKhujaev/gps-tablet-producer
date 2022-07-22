@@ -37,8 +37,6 @@ public class Archive implements Runnable {
         this.getPatrulMonitoring().put( com.ssd.mvd.gpstabletsservice.constants.Status.FREE, new ArrayList<>() );
         CassandraDataControl.getInstance().resetData(); }
 
-    public Flux< Notification > getCard() { return Flux.fromStream( this.notificationList.stream() ).sort(); }
-
     public Mono< Card > getCard ( Long cardId ) { return this.cardMap.containsKey( cardId ) ? Mono.just( this.cardMap.get( cardId ) ) : Mono.empty() ; }
 
     public Mono< SelfEmploymentTask > get ( UUID uuid ) { return this.selfEmploymentTaskMap.containsKey( uuid ) ? Mono.just( this.selfEmploymentTaskMap.get( uuid ) ) : Mono.empty(); }

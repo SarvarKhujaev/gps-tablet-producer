@@ -19,10 +19,10 @@ import reactor.core.publisher.Mono;
 public class CardController {
 
     @MessageMapping ( value = "getListOfCards" )
-    public Flux< Card > getListOfCards () { return Archive.getAchieve().getAllCards(); }
+    public Flux< Card > getListOfCards () { return RedisDataControl.getRedis().getAllCards(); }
 
     @MessageMapping ( value = "getCurrentCard" )
-    public Mono< Card > getCurrentCard ( Long cardId ) { return Archive.getAchieve().getCard( cardId ); }
+    public Mono< Card > getCurrentCard ( Long cardId ) { return RedisDataControl.getRedis().getCard( cardId ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest request ) { return Flux.fromStream( request.getPatruls().stream() )
