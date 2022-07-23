@@ -28,6 +28,7 @@ public class Card {
 
     private Status status;
     private String fabula;   //????
+    private String address;
     private String userFio; //Ariza berivchining F.I.SH
 
     private Double latitude;   // Hodisa bo'lgan joy
@@ -43,8 +44,6 @@ public class Card {
     private EventAddress eventAddress;   //Voqea manzili
     @JsonDeserialize
     private EventHuman eventHuman;   // Aybdor inson
-    @JsonDeserialize
-    private Address address;
 
     @JsonDeserialize
     private List< Patrul > patruls; // the list of patruls who linked to this event
