@@ -263,12 +263,7 @@ public final class RedisDataControl {
 
     public Mono< ApiResponseModel > arrived ( String token ) { return this.patrulMap.get( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
-            .flatMap( patrul -> Archive.getAchieve().get( patrul.getSelfEmploymentId() )
-                    .flatMap( selfEmploymentTask -> {
-                        if ( patrul.getSelfEmploymentId() != null ) {
-                            selfEmploymentTask.setArrivedTime( new Date() );
-                            selfEmploymentTask.setTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ); }
-                        return this.update( patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ) ); } ) ); }
+            .flatMap( patrul -> this.update( patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ) ) ); }
 
     public Mono< ApiResponseModel > checkToken ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() ).status( Status.builder().message( "All right!!!" ).code( 200 ).build() ).success( true ).build() ) )

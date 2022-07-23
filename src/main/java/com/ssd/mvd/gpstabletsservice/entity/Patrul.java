@@ -87,7 +87,11 @@ public class Patrul {
                             .inTime( this.check() )
                             .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) )
                             .build() );
-                    RedisDataControl.getRedis().update( card1 ); } ); }
+                    RedisDataControl.getRedis().update( card1 ); } );
+                else Archive.getAchieve().get( this.getSelfEmploymentId() ).subscribe( selfEmploymentTask -> {
+                    selfEmploymentTask.setArrivedTime( new Date() );
+                    selfEmploymentTask.setTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ); } );
+            }
         } return this; }
 
     private Boolean check () { return switch ( this.getPoliceType() ) {
