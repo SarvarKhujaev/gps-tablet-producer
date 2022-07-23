@@ -74,6 +74,9 @@ public class KafkaDataControl {
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got: " + notification.getTitle() + " with offset: " + result.getRecordMetadata().offset() ); }
+            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got notification: "
+                    + notification.getTitle()
+                    + " at: " + notification.getNotificationWasCreated()
+                    + " with offset: " + result.getRecordMetadata().offset() ); }
         } ); return notification; }
 }
