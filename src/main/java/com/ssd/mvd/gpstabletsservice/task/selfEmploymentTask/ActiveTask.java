@@ -37,8 +37,7 @@ public class ActiveTask {
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
         this.setAddressOfTask( card.getAddress() );
-        this.setCreatedDate( card.getCreated_date() );
-        this.setAddress( card.getEventAddress().getFlat() + " " + card.getEventAddress().getHouse() + " " + card.getEventAddress().getStreet() ); }
+        this.setCreatedDate( card.getCreated_date() ); }
 
     public ActiveTask ( SelfEmploymentTask card ) {
         this.setUuid( card.getUuid() );
