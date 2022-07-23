@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Comparator;
+
 @RestController
 public class CardController {
     @MessageMapping ( value = "getListOfCards" )
-    public Flux< ActiveTask > getListOfCards () { return RedisDataControl.getRedis().getActiveTasks(); }
+    public Flux< ActiveTask > getListOfCards () { return RedisDataControl.getRedis().getActiveTasks().sort( Comparator.comparing( ActiveTask::getCreatedDate ) ); }
 
     @MessageMapping ( value = "getCurrentCard" )
     public Mono< Card > getCurrentCard ( Long cardId ) { return RedisDataControl.getRedis().getCard( cardId ); }
