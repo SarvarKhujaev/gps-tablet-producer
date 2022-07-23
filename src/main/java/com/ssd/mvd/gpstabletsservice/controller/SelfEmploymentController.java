@@ -35,21 +35,22 @@ public class SelfEmploymentController {
     public Mono< ApiResponseModel > addNewPatrulToSelfEmployment ( SelfEmploymentRequest selfEmploymentRequest ) { return Archive.getAchieve().save( selfEmploymentRequest.getUuid(), selfEmploymentRequest.getPatrul() ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )
-    public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return RedisDataControl.getRedis().getPatrul( reportForCard.getPassportSeries() )
-            .flatMap( patrul -> patrul.getCard() != null ? Archive.getAchieve().getCard( patrul.getCard() ).flatMap( card -> {
-            patrul.changeTaskStatus( Status.FINISHED );
-            card.getReportForCardList().add( reportForCard );
-            KafkaDataControl.getInstance().writeToKafka( card );
-            return RedisDataControl.getRedis().update( patrul )
-                    .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) );
+    public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return RedisDataControl.getRedis()
+            .getPatrul( reportForCard.getPassportSeries() )
+            .flatMap( patrul -> patrul.getCard() != null ? RedisDataControl.getRedis().getCard( patrul.getCard() ).flatMap( card -> {
+                patrul.changeTaskStatus( Status.FINISHED );
+                card.getReportForCardList().add( reportForCard );
+                KafkaDataControl.getInstance().writeToKafka( card );
+                return RedisDataControl.getRedis().update( patrul )
+                        .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) );
         } ) : Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> {
             patrul.changeTaskStatus( Status.FINISHED );
             selfEmploymentTask.getReportForCards().add( reportForCard );
             return RedisDataControl.getRedis().update( patrul )
                     .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
                             .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) );
-        } ) ); }
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) ); } ) ); }
 }
