@@ -68,7 +68,7 @@ public class Archive implements Runnable {
         this.save( Notification.builder()
                 .type( "card 102" )
                 .id( card.getCardId() )
-                .address( card.getAddress() )
+                .address( card.getAddress() != null ? card.getAddress() : "unknown" )
                 .latitudeOfTask( card.getLatitude() )
                 .notificationWasCreated( new Date() )
                 .longitudeOfTask( card.getLongitude() )
