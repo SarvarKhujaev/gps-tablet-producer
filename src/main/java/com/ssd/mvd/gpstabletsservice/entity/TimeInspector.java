@@ -12,10 +12,10 @@ public class TimeInspector {
     private Long timestamp = 30L; // time interval of how much time has to be matched to set User like offline 30 mins by default
     private Long timestampForArchive = 60L;
 
-    private Integer endTimeForEvening;
-    private Integer endTimeForMorning;
-    private Integer startTimeForEvening;
-    private Integer startTimeForMorning;
+    private Integer endTimeForEvening = 24;
+    private Integer endTimeForMorning = 16;
+    private Integer startTimeForEvening = 16;
+    private Integer startTimeForMorning = 0;
 
     private static TimeInspector inspector = new TimeInspector();
 
@@ -28,6 +28,4 @@ public class TimeInspector {
     // for checking current time of task ending
     public Boolean checkDate ( Instant instant ) { return TimeInspector.getInspector().getEndTimeForEvening() >= this.setDate().getHours() && this.date.getHours() >= TimeInspector.getInspector().getStartTimeForMorning() ?
                 ( this.getTimeDifference( instant ) <= 10 ) : ( this.getTimeDifference( instant ) <= 7 ); }
-
-    public boolean compareTime ( Instant instant ) { return Math.abs( Duration.between( Instant.now(), instant ).getSeconds() ) < this.getTimestamp(); }
 }
