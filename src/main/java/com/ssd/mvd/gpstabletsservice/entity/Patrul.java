@@ -80,7 +80,7 @@ public class Patrul {
                     this.setTaskDate( null ); }
             } case ARRIVED -> {
                 this.setStatus( Status.ARRIVED );
-                if ( this.getCard() != null ) Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> {
+                if ( this.getCard() != null ) RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
                     card1.setStatus( Status.ARRIVED );
                     card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder()
                             .patrul( this )
