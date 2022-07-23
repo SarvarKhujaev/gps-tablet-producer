@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,4 +58,8 @@ public class SerDes {
     public String serialize ( SelfEmploymentTask selfEmploymentTask ) { try { return this.objectMapper.writeValueAsString( selfEmploymentTask ); } catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
 
     public SelfEmploymentTask deserializeSelfEmployment ( String position ) { try { return this.objectMapper.reader().forType( SelfEmploymentTask.class ).readValue( position ); } catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
+
+    public String serialize( ActiveTask activeTask ) { return this.gson.toJson( activeTask ); }
+
+    public ActiveTask deserializeActiveTask ( String value ) { return this.gson.fromJson( value, ActiveTask.class ); }
 }

@@ -1,26 +1,28 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
+import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.nio.charset.StandardCharsets;
 
-import org.redisson.api.*;
-import org.redisson.Redisson;
 import org.redisson.config.Config;
+import org.redisson.Redisson;
+import org.redisson.api.*;
 
 public final class RedisDataControl {
     private String key;
+    private final RMapReactive< String, String > activeTasks;
     private final RMapReactive< String, String > carMap;
     private final RMapReactive< Long, String > cardMap;
     private final RMapReactive< UUID, String > lustraMap;
@@ -43,6 +45,7 @@ public final class RedisDataControl {
         this.redissonReactiveClient = Redisson.createReactive( config );
         this.polygonForPatrulMap = this.redissonReactiveClient.getMap( "polygonForPatrulMap" ); // for polygons with schedule
         this.polygonTypeMap = this.redissonReactiveClient.getMap( "polygonTypeMap" ); // for polygons
+        this.activeTasks = this.redissonReactiveClient.getMap( "activeTasks" );
         this.policeTypes = this.redissonReactiveClient.getMap( "policeType" );
         this.polygonMap = this.redissonReactiveClient.getMap( "polygonMap" ); // for polygons
         this.lustraMap = this.redissonReactiveClient.getMap( "lustraMap" ); // for lustra cameras
@@ -271,11 +274,17 @@ public final class RedisDataControl {
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() ).status( Status.builder().message( "All right!!!" ).code( 200 ).build() ).success( true ).build() ) )
             : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong token" ).code( 201 ).build() ).success( false ).build() ) ); }
 
-    public void addValue ( Card card ) { this.cardMap.fastPutIfAbsent( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
+    public void addValue ( Card card ) {
+        this.addValue( card.getCardId().toString(), new ActiveTask( card ) );
+        this.cardMap.fastPutIfAbsent( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
 
-    public void update ( Card card ) { this.cardMap.fastPutIfExists( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
-
-    public Flux< Card > getAllCards() { return this.cardMap.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
+    public void update ( Card card ) {
+        this.addValue( card.getCardId().toString(), new ActiveTask( card ) );
+        this.cardMap.fastPutIfExists( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
 
     public Mono< Card > getCard ( Long cardId ) { return this.cardMap.get( cardId ).flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
+
+    public void addValue ( String id, ActiveTask activeTask ) { this.activeTasks.fastPut( id, SerDes.getSerDes().serialize( activeTask ) ).subscribe(); }
+
+    public Flux< ActiveTask > getActiveTasks() { return this.activeTasks.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeActiveTask( s ) ) ); }
 }

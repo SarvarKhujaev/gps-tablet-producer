@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import lombok.Data;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,11 +47,10 @@ public class Archive implements Runnable {
     // to get all existing SelfEmploymentTask
     public Flux< SelfEmploymentTask > getAllSelfEmploymentTask () { return Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ); }
 
-    public Flux< Card > getAllCards () { return Flux.fromStream( this.cardMap.values().stream() ); }
-
     // link new Patrul to existing SelfEmployment object
     public Mono< ApiResponseModel > save ( UUID uuid, Patrul patrul ) { return this.get( uuid ).flatMap( selfEmploymentTask -> {
-        selfEmploymentTask.getPatruls().add( patrul.changeTaskStatus( ATTACHED ).getPassportNumber() );
+        selfEmploymentTask.getPatruls().add( patrul.changeTaskStatus( ATTACHED ) );
+        RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
         CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
         this.save( Notification.builder().notificationWasCreated( new Date() ).title( patrul.getName() + "joined the selfEmployment" + selfEmploymentTask.getTitle() ).build() );
         return RedisDataControl.getRedis().update( patrul ); } ); }
@@ -82,15 +82,12 @@ public class Archive implements Runnable {
 
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
         if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
-            System.out.println( selfEmploymentTask );
             selfEmploymentTask.setArrivedTime( new Date() ); // fixing time when the patrul reached
             patrul.changeTaskStatus( ARRIVED ).setSelfEmploymentId( selfEmploymentTask.getUuid() );
             patrul.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() );
             patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
             this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
-            this.save( Notification.builder()
-                    .title( patrul.getName() + " set the Task to himself" )
-                    .notificationWasCreated( new Date() ).build() );
+            RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
             return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( "SelfEmployment was saved" ).code( 200 ).build() ).success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).build() ) );
         } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong Data for Task" ).code( 201 ).build() ).build() ); }
 
@@ -98,6 +95,7 @@ public class Archive implements Runnable {
     public Mono< ApiResponseModel > removePatrulFromSelfEmployment ( UUID uuid, Patrul patrul ) { return this.selfEmploymentTaskMap.containsKey( uuid ) ?
             this.get( uuid ).flatMap( selfEmploymentTask -> {
                 selfEmploymentTask.getPatruls().remove( patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FINISHED ) );
+                RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
                 CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
                 this.save( Notification.builder().notificationWasCreated( new Date() ).title( patrul.getName() + " was removed from: " + selfEmploymentTask.getUuid() ).build() );
                 return RedisDataControl.getRedis().update( patrul ); } )
@@ -122,7 +120,7 @@ public class Archive implements Runnable {
                 card.setStatus( FINISHED );
                 System.out.println( card );
                 this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getCardId() ); } );
-            Flux.fromStream( this.selfEmploymentTaskMap.values().stream() )
+            this.getAllSelfEmploymentTask()
                     .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
                     .subscribe( selfEmploymentTask -> {
                         selfEmploymentTask.setTaskStatus( FINISHED );

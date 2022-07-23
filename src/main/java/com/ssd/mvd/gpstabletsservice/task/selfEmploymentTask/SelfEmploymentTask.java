@@ -3,6 +3,7 @@ package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,11 +29,11 @@ public class SelfEmploymentTask {
     private String description; // info about incident
 
     private UUID uuid;
-    private Date incidentDate; // the date when the task was created
     private Date arrivedTime; // фиксировванное время когда он прибыл на дело
+    private Date incidentDate; // the date when the task was created
 
     private List< String > images;
-    private List< String > patruls;
+    private List< Patrul > patruls;
     @JsonDeserialize
     private List< ReportForCard > reportForCards;
 }

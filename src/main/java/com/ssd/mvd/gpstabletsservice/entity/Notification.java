@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
+import com.ssd.mvd.gpstabletsservice.task.card.Address;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,9 +11,9 @@ import java.util.Date;
 public class Notification {
     private String type; // might be from 102 or Camera
     private String title; // description of Patrul action
-    private String address;
     private String passportSeries;
 
+    private Address address;
     private Double latitudeOfTask;
     private Double longitudeOfTask;
 
