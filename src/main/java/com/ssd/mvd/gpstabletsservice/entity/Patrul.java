@@ -68,6 +68,7 @@ public class Patrul {
                 this.setStatus( Status.FREE );
                 if ( this.getCard() != null ) {
                     Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> {
+                        card1.setStatus( Status.FINISHED );
                         card1.getPatrulStatuses().get( this.getPassportNumber() )
                                 .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) );
                         RedisDataControl.getRedis().update( card1 ); } );
@@ -80,6 +81,7 @@ public class Patrul {
             } case ARRIVED -> {
                 this.setStatus( Status.ARRIVED );
                 if ( this.getCard() != null ) Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> {
+                    card1.setStatus( Status.ARRIVED );
                     card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder()
                             .patrul( this )
                             .inTime( this.check() )
