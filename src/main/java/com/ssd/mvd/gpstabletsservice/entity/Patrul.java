@@ -49,14 +49,15 @@ public class Patrul {
     private String simCardNumber;
     private String passportNumber;
     private String patrulImageLink;
-    private String surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName(); // Ф.И.О
+    private String surnameNameFatherName; // Ф.И.О
 
     private Status status; // busy, free by default, available or not available
     private Status taskStatus; // ths status of the Card or SelfEmployment
 
     private Map< String, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
 
-    public String getSurnameNameFatherName () { return ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
+    public String getSurnameNameFatherName () { return this.surnameNameFatherName != null ? this.surnameNameFatherName
+            : ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
 
     public Patrul changeTaskStatus ( Status status ) {
         switch ( ( this.taskStatus = status ) ) {
