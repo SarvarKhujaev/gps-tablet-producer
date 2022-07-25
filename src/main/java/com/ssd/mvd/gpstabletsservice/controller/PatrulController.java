@@ -25,7 +25,7 @@ public class PatrulController {
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< CardDetails > getTaskDetails ( Data data ) {
         Patrul patrul = SerDes.getSerDes().deserialize( data.getData() );
-        return patrul.getCard() != null ? Archive.getAchieve().getCard( patrul.getCard() )
+        return patrul.getCard() != null ? RedisDataControl.getRedis().getCard( patrul.getCard() )
                 .flatMap( card -> Mono.just( new CardDetails( card, data.getType() ) ) )
                 : Archive.getAchieve().get( patrul.getSelfEmploymentId() )
                 .flatMap( selfEmploymentTask -> Mono.just( new CardDetails( selfEmploymentTask, data.getType(), patrul.getPassportNumber() ) ) ); }
@@ -66,6 +66,9 @@ public class PatrulController {
     @MessageMapping ( value = "updatePatrul" )
     public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) { return RedisDataControl.getRedis().update( patrul ); }
 
+    @MessageMapping ( value = "checkToken" )
+    public Mono< ApiResponseModel > checkToken ( String token ) { return RedisDataControl.getRedis().checkToken( token ); }
+
     @MessageMapping ( value = "getCurrentUser" )
     public Mono< Patrul > getCurrentUser ( String passportSeries ) { return RedisDataControl.getRedis().getPatrul( passportSeries ); }
 
@@ -77,7 +80,4 @@ public class PatrulController {
 
     @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
     public Flux< PatrulInfo > getPatrulByPortion ( String name ) { return CassandraDataControl.getInstance().getPatruls( name ).map( row -> new PatrulInfo( row.getString( "NSF" ) ) ); }
-
-    @MessageMapping ( value = "checkToken" )
-    public Mono< ApiResponseModel > checkToken ( String token ) { return RedisDataControl.getRedis().checkToken( token ); }
 }
