@@ -5,6 +5,7 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
@@ -60,9 +61,9 @@ public final class CassandraDataControl {
                     'analyzed': 'true',
                     'tokenization_normalize_lowercase': 'true' };""");
 
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventFace + "(id text PRIMARY KEY, camera int, matched boolean, date timestamp, confidence double, object text);" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventBody + "(id text PRIMARY KEY, camera int, matched boolean, date timestamp, confidence double, object text);" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventCar + "(id text PRIMARY KEY, camera int, matched boolean, date timestamp, confidence double, object text);" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventFace + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventBody + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventCar + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygon + "(id uuid PRIMARY KEY, polygonName text, polygonType text);" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + "(passportNumber text PRIMARY KEY, NSF text, object text);" ); // the table for patruls
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonForPatrul + "(id uuid PRIMARY KEY, object text);" ); // the table for polygons for patrul
@@ -74,7 +75,7 @@ public final class CassandraDataControl {
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + ".trackers(imei text PRIMARY KEY, status text);" ); // the table for trackers
         this.logger.info( "Cassandra is ready" ); }
 
-//    public Boolean addValue ( EventFace eventFace ) { return this.session.executeAsync(  ) }
+    public Boolean addValue ( EventFace eventFace ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.eventFace + "( id text, camera, matched, date, confidence, object )" ).isDone(); }
 
     public Boolean addValue ( PolygonType polygonType ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygonType + "(id, polygonType) VALUES('" + polygonType.getUuid() + "', '" + polygonType.getName() + "');" ).isDone(); }
 
