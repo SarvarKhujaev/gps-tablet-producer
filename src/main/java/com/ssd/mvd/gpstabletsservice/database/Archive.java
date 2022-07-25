@@ -118,7 +118,7 @@ public class Archive implements Runnable {
             try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); } finally { this.getPatrulMonitoring().values().forEach( List::clear ); }
             Flux.fromStream( this.cardMap.values().stream() ).filter( card -> card.getPatruls().size() == card.getReportForCardList().size() ).subscribe( card -> {
                 card.setStatus( FINISHED );
-                System.out.println( card );
+                RedisDataControl.getRedis().remove( card.getCardId() );
                 this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getCardId() ); } );
             this.getAllSelfEmploymentTask()
                     .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )

@@ -22,15 +22,16 @@ import org.redisson.api.*;
 
 public final class RedisDataControl {
     private String key;
-    private final RMapReactive< String, String > carMap;
     private final RMapReactive< Long, String > cardMap;
+    private final RMapReactive< String, String > carMap;
     private final RMapReactive< UUID, String > lustraMap;
     private final RMapReactive< String, String > patrulMap;
     private final RMapReactive< UUID, String > policeTypes;
-    private final RMapReactive< String, String > activeTasks;
     private final RMapReactive< String, String > polygonMap;
+    private final RMapReactive< String, String > activeTasks;
     private final RMapReactive< UUID, String > polygonTypeMap;
     private final RMapReactive< String, String > polygonForPatrulMap;
+    private RedissonReactiveClient redissonReactiveClient;
 
     private static RedisDataControl redisDataControl = new RedisDataControl();
 
@@ -41,16 +42,16 @@ public final class RedisDataControl {
                         + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PORT" ) )
                 .setClientName( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_CLIENT_NAME" ) )
                 .setPassword( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PASSWORD" ) );
-        RedissonReactiveClient redissonReactiveClient = Redisson.createReactive( config );
-        this.polygonForPatrulMap = redissonReactiveClient.getMap( "polygonForPatrulMap" ); // for polygons with schedule
-        this.polygonTypeMap = redissonReactiveClient.getMap( "polygonTypeMap" ); // for polygons
-        this.activeTasks = redissonReactiveClient.getMap( "activeTasks" );
-        this.policeTypes = redissonReactiveClient.getMap( "policeType" );
-        this.polygonMap = redissonReactiveClient.getMap( "polygonMap" ); // for polygons
-        this.lustraMap = redissonReactiveClient.getMap( "lustraMap" ); // for lustra cameras
-        this.patrulMap = redissonReactiveClient.getMap( "patrulMap" ); // for patrul
-        this.cardMap = redissonReactiveClient.getMap( "cardMap" );
-        this.carMap = redissonReactiveClient.getMap( "carMap" ); }
+        this.redissonReactiveClient = Redisson.createReactive( config );
+        this.polygonForPatrulMap = this.redissonReactiveClient.getMap( "polygonForPatrulMap" ); // for polygons with schedule
+        this.polygonTypeMap = this.redissonReactiveClient.getMap( "polygonTypeMap" ); // for polygons
+        this.activeTasks = this.redissonReactiveClient.getMap( "activeTasks" );
+        this.policeTypes = this.redissonReactiveClient.getMap( "policeType" );
+        this.polygonMap = this.redissonReactiveClient.getMap( "polygonMap" ); // for polygons
+        this.lustraMap = this.redissonReactiveClient.getMap( "lustraMap" ); // for lustra cameras
+        this.patrulMap = this.redissonReactiveClient.getMap( "patrulMap" ); // for patrul
+        this.cardMap = this.redissonReactiveClient.getMap( "cardMap" );
+        this.carMap = this.redissonReactiveClient.getMap( "carMap" ); }
 
     public Flux< ReqCar > getAllCars () { return this.carMap.valueIterator().flatMap( data -> Mono.just( SerDes.getSerDes().deserializeCar( data ) ) ); }
 
@@ -277,6 +278,8 @@ public final class RedisDataControl {
         this.cardMap.fastPutIfExists( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
 
     public Mono< Card > getCard ( Long cardId ) { return this.cardMap.get( cardId ).flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
+
+    public void remove ( Long cardId ) { this.cardMap.remove( cardId ).subscribe(); }
 
     public void addValue ( String id, ActiveTask activeTask ) { this.activeTasks.fastPut( id, SerDes.getSerDes().serialize( activeTask ) ).subscribe(); }
 

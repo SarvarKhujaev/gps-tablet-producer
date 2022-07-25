@@ -27,10 +27,15 @@ public final class CassandraDataControl {
     public final String patrols = "PATRULS"; // for table with Patruls info
     public final String polygon = "POLYGON";
     private final String dbName = "TABLETS";
+    public final String eventCar = "eventCar";
+    public final String eventFace = "eventFace";
+    public final String eventBody = "eventBody";
     public final String policeTypes = "POLICETYPES";
     public final String polygonType = "POLYGONTYPE";
     public final String selfEmployment = "SELFEMPLOYMENT";
     public final String polygonForPatrul = "POLYGONFORPATRUl";
+    private final String findFaceTaskFromAssomidin = "findFaceTaskFromAssomidin";
+    private final String findFaceTaskFromShamsiddin = "findFaceTaskFromShamsiddin";
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
@@ -55,6 +60,9 @@ public final class CassandraDataControl {
                     'analyzed': 'true',
                     'tokenization_normalize_lowercase': 'true' };""");
 
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventFace + "(id text PRIMARY KEY, camera int, matched boolean, date timestamp, confidence double, object text);" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventBody + "(id text PRIMARY KEY, camera int, matched boolean, date timestamp, confidence double, object text);" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventCar + "(id text PRIMARY KEY, camera int, matched boolean, date timestamp, confidence double, object text);" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygon + "(id uuid PRIMARY KEY, polygonName text, polygonType text);" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + "(passportNumber text PRIMARY KEY, NSF text, object text);" ); // the table for patruls
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonForPatrul + "(id uuid PRIMARY KEY, object text);" ); // the table for polygons for patrul
@@ -65,6 +73,8 @@ public final class CassandraDataControl {
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.lustre + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + ".trackers(imei text PRIMARY KEY, status text);" ); // the table for trackers
         this.logger.info( "Cassandra is ready" ); }
+
+//    public Boolean addValue ( EventFace eventFace ) { return this.session.executeAsync(  ) }
 
     public Boolean addValue ( PolygonType polygonType ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygonType + "(id, polygonType) VALUES('" + polygonType.getUuid() + "', '" + polygonType.getName() + "');" ).isDone(); }
 
