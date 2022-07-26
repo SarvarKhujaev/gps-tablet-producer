@@ -47,8 +47,9 @@ public final class CassandraDataControl {
             .withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
             .withSocketOptions( new SocketOptions().setReadTimeoutMillis( 30000 ) )
             .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
-            .withPoolingOptions( new PoolingOptions().setMaxConnectionsPerHost( HostDistance.LOCAL, 1024 ).setMaxRequestsPerConnection( HostDistance.REMOTE, 256 ).setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
-            .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':1 };" );
+            .withPoolingOptions( new PoolingOptions().setMaxConnectionsPerHost( HostDistance.LOCAL, 1024 )
+                    .setMaxRequestsPerConnection( HostDistance.REMOTE, 16 ).setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
+            .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':3 };" );
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + "(passportNumber text, NSF text, object text, PRIMARY KEY( (passportNumber), NSF ) );" ); // the table for patruls
         this.session.execute("""
                 CREATE CUSTOM INDEX IF NOT EXISTS patrul_name_idx ON TABLETS.PATRULS(NSF) USING 'org.apache.cassandra.index.sasi.SASIIndex'
@@ -75,7 +76,9 @@ public final class CassandraDataControl {
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + ".trackers(imei text PRIMARY KEY, status text);" ); // the table for trackers
         this.logger.info( "Cassandra is ready" ); }
 
-    public Boolean addValue ( EventFace eventFace ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.eventFace + "( id text, camera, matched, date, confidence, object )" ).isDone(); }
+    public Boolean addValue ( EventFace face ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.eventFace
+            + "( id text, camera, matched, date, confidence, object ) VALUES('"
+            + face.getId() + "', " + face.getCamera() + ", " + face.getMatched() + ", '" + face.getCreated_date().toInstant() + "', " ).isDone(); }
 
     public Boolean addValue ( PolygonType polygonType ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygonType + "(id, polygonType) VALUES('" + polygonType.getUuid() + "', '" + polygonType.getName() + "');" ).isDone(); }
 

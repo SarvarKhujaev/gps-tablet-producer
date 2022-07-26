@@ -15,6 +15,7 @@ public class ActiveTask {
     private Double longitude;
 
     private String type;
+    private String title;
     private String address;
     private String description;
 
@@ -39,6 +40,7 @@ public class ActiveTask {
 
     public ActiveTask ( SelfEmploymentTask card ) {
         this.setUuid( card.getUuid() );
+        this.setTitle( card.getTitle() );
         this.setType( "selfEmployment" );
         this.setAddress( card.getAddress() );
         this.setStatus( card.getTaskStatus() );
