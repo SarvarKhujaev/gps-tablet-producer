@@ -21,14 +21,29 @@ public class ActiveTask {
 
     private UUID uuid;
     private Long taskId;
-    private Status status;
     private Date createdDate;
+
+    private Status status;
+    private Status patrulStatus;
 
     private List< String > images;
     private List< Patrul > patrulList;
 
     public ActiveTask ( Card card ) {
         this.setType( "card" );
+        this.setPatrulStatus( status );
+        this.setStatus( card.getStatus() );
+        this.setTaskId( card.getCardId() );
+        this.setAddress( card.getAddress() );
+        this.setLatitude( card.getLatitude() );
+        this.setPatrulList( card.getPatruls() );
+        this.setDescription( card.getFabula() );
+        this.setLongitude( card.getLongitude() );
+        this.setCreatedDate( card.getCreated_date() ); }
+
+    public ActiveTask ( Card card, Status status ) {
+        this.setType( "card" );
+        this.setPatrulStatus( status );
         this.setStatus( card.getStatus() );
         this.setTaskId( card.getCardId() );
         this.setAddress( card.getAddress() );

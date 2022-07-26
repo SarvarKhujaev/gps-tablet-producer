@@ -49,6 +49,7 @@ public class Archive implements Runnable {
 
     // link new Patrul to existing SelfEmployment object
     public Mono< ApiResponseModel > save ( UUID uuid, Patrul patrul ) { return this.get( uuid ).flatMap( selfEmploymentTask -> {
+        patrul.changeTaskStatus( ATTACHED );
         selfEmploymentTask.getPatruls().add( patrul.changeTaskStatus( ATTACHED ) );
         RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
         CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );

@@ -40,7 +40,7 @@ public class CardController {
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
                                         .message( "U have SelfEmployment Task" ).build() ).success( true ).build() ) );
                 else if ( patrul.getCard() != null ) return RedisDataControl.getRedis().getCard( patrul.getCard() )
-                        .flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( new ActiveTask( card ) ).type( "card" ).build() )
+                        .flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( new ActiveTask( card, patrul.getStatus() ) ).type( "card" ).build() )
                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
                                 .message( "U have 102 Task" ).build() ).success( true ).build() ) );
                 else return Mono.just( ApiResponseModel.builder().success( false )

@@ -5,6 +5,8 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
@@ -77,6 +79,14 @@ public final class CassandraDataControl {
         this.logger.info( "Cassandra is ready" ); }
 
     public Boolean addValue ( EventFace face ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.eventFace
+            + "( id text, camera, matched, date, confidence, object ) VALUES('"
+            + face.getId() + "', " + face.getCamera() + ", " + face.getMatched() + ", '" + face.getCreated_date().toInstant() + "', " ).isDone(); }
+
+    public Boolean addValue ( EventCar face ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.eventCar
+            + "( id text, camera, matched, date, confidence, object ) VALUES('"
+            + face.getId() + "', " + face.getCamera() + ", " + face.getMatched() + ", '" + face.getCreated_date().toInstant() + "', " ).isDone(); }
+
+    public Boolean addValue ( EventBody face ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.eventBody
             + "( id text, camera, matched, date, confidence, object ) VALUES('"
             + face.getId() + "', " + face.getCamera() + ", " + face.getMatched() + ", '" + face.getCreated_date().toInstant() + "', " ).isDone(); }
 

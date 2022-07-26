@@ -23,12 +23,19 @@ import reactor.core.publisher.Mono;
 @RestController
 public class PatrulController {
     @MessageMapping ( value = "getTaskDetails" )
-    public Mono< CardDetails > getTaskDetails ( Data data ) {
+    public Mono< ApiResponseModel > getTaskDetails ( Data data ) {
         Patrul patrul = SerDes.getSerDes().deserialize( data.getData() );
         return patrul.getCard() != null ? RedisDataControl.getRedis().getCard( patrul.getCard() )
-                .flatMap( card -> Mono.just( new CardDetails( card, data.getType() ) ) )
+                .flatMap( card -> Mono.just( ApiResponseModel.builder()
+                        .success( true )
+                        .data( Data.builder().data( new CardDetails( card, data.getType() ) ).build() )
+                        .build() ) )
                 : Archive.getAchieve().get( patrul.getSelfEmploymentId() )
-                .flatMap( selfEmploymentTask -> Mono.just( new CardDetails( selfEmploymentTask, data.getType(), patrul.getPassportNumber() ) ) ); }
+                .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
+                                .success( true )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
+                                .data( Data.builder().data( new CardDetails( selfEmploymentTask, data.getType(), patrul.getPassportNumber() ) ).build() )
+                        .build() ) ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( String token ) { return RedisDataControl.getRedis().arrived( token ); }
