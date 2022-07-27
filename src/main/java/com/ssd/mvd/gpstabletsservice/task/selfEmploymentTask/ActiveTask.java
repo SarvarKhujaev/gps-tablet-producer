@@ -65,4 +65,17 @@ public class ActiveTask {
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );
         this.setCreatedDate( card.getIncidentDate() ); }
+
+    public ActiveTask ( SelfEmploymentTask card, Status status ) {
+        this.setUuid( card.getUuid() );
+        this.setPatrulStatus( status );
+        this.setTitle( card.getTitle() );
+        this.setType( "selfEmployment" );
+        this.setAddress( card.getAddress() );
+        this.setStatus( card.getTaskStatus() );
+        this.setPatrulList( card.getPatruls() );
+        this.setLatitude( card.getLatOfAccident() );
+        this.setDescription( card.getDescription() );
+        this.setLongitude( card.getLanOfAccident() );
+        this.setCreatedDate( card.getIncidentDate() ); }
 }

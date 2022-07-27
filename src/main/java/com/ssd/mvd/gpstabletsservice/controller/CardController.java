@@ -39,7 +39,7 @@ public class CardController {
             .flatMap( patrul -> {
                 if ( patrul.getSelfEmploymentId() != null ) return Archive.getAchieve().get( patrul.getSelfEmploymentId() )
                         .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
-                                .data( Data.builder().data( new ActiveTask( selfEmploymentTask ) ).type( "selfEmployment" ).build() )
+                                .data( Data.builder().data( new ActiveTask( selfEmploymentTask, patrul.getStatus() ) ).type( "selfEmployment" ).build() )
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
                                         .message( "U have SelfEmployment Task" ).build() ).success( true ).build() ) );
                 else if ( patrul.getCard() != null ) return RedisDataControl.getRedis().getCard( patrul.getCard() )
