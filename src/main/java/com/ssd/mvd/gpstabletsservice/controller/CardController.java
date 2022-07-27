@@ -19,6 +19,9 @@ import java.util.Comparator;
 
 @RestController
 public class CardController {
+    @MessageMapping ( value = "getAllCards" )
+    public Flux< Card > getAllCards () { return RedisDataControl.getRedis().getAllCards(); }
+
     @MessageMapping ( value = "getListOfCards" )
     public Flux< ActiveTask > getListOfCards () { return RedisDataControl.getRedis().getActiveTasks().sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
 

@@ -22,7 +22,6 @@ public class Archive implements Runnable {
     private final Map< Long, Card > cardMap = new HashMap<>(); // for Cards
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
-    private final LinkedHashSet< Notification > notificationList = new LinkedHashSet<>(); // for all notifications
     private final Map< UUID, SelfEmploymentTask > selfEmploymentTaskMap = new HashMap<>();
     private final Map< com.ssd.mvd.gpstabletsservice.constants.Status, List< Patrul > > patrulMonitoring = new HashMap<>(); // to check all Patruls
 
@@ -80,7 +79,7 @@ public class Archive implements Runnable {
                 .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
                         .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
 
-    public void save ( Notification notification ) { this.getNotificationList().add( KafkaDataControl.getInstance().writeToKafka( notification ) ); }
+    public void save ( Notification notification ) { KafkaDataControl.getInstance().writeToKafka( notification ); }
 
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
         if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
