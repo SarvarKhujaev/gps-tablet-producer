@@ -29,13 +29,14 @@ public class Archive implements Runnable {
     public static Archive getAchieve () { return archive != null ? archive : ( archive = new Archive() ); }
 
     private Archive() {
-        this.getPatrulMonitoring().put( com.ssd.mvd.gpstabletsservice.constants.Status.NOT_AVAILABLE, new ArrayList<>() );
-        this.getPatrulMonitoring().put( com.ssd.mvd.gpstabletsservice.constants.Status.AVAILABLE, new ArrayList<>() );
-        this.getPatrulMonitoring().put( com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, new ArrayList<>() );
-        this.getPatrulMonitoring().put( com.ssd.mvd.gpstabletsservice.constants.Status.FINISHED, new ArrayList<>() );
-        this.getPatrulMonitoring().put( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED, new ArrayList<>() );
-        this.getPatrulMonitoring().put( com.ssd.mvd.gpstabletsservice.constants.Status.BUSY, new ArrayList<>() );
-        this.getPatrulMonitoring().put( com.ssd.mvd.gpstabletsservice.constants.Status.FREE, new ArrayList<>() );
+        this.getPatrulMonitoring().put( NOT_AVAILABLE, new ArrayList<>() );
+        this.getPatrulMonitoring().put( AVAILABLE, new ArrayList<>() );
+        this.getPatrulMonitoring().put( ATTACHED, new ArrayList<>() );
+        this.getPatrulMonitoring().put( FINISHED, new ArrayList<>() );
+        this.getPatrulMonitoring().put( ARRIVED, new ArrayList<>() );
+        this.getPatrulMonitoring().put( ACCEPTED, new ArrayList<>() );
+        this.getPatrulMonitoring().put( BUSY, new ArrayList<>() );
+        this.getPatrulMonitoring().put( FREE, new ArrayList<>() );
         CassandraDataControl.getInstance().resetData(); }
 
     public Mono< Card > getCard ( Long cardId ) { return this.cardMap.containsKey( cardId ) ? Mono.just( this.cardMap.get( cardId ) ) : Mono.empty() ; }
