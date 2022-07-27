@@ -3,6 +3,7 @@ package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 import lombok.Data;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
@@ -27,11 +28,10 @@ public class ActiveTask {
     private Status patrulStatus;
 
     private List< String > images;
-    private List< Patrul > patrulList;
+    private Map< String, Patrul > patrulList;
 
     public ActiveTask ( Card card ) {
         this.setType( "card" );
-        this.setPatrulStatus( status );
         this.setStatus( card.getStatus() );
         this.setTaskId( card.getCardId() );
         this.setAddress( card.getAddress() );
@@ -39,7 +39,8 @@ public class ActiveTask {
         this.setPatrulList( card.getPatruls() );
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
-        this.setCreatedDate( card.getCreated_date() ); }
+        this.setCreatedDate( card.getCreated_date() );
+        this.setPatrulStatus( this.getPatrulStatus() ); }
 
     public ActiveTask ( Card card, Status status ) {
         this.setType( "card" );

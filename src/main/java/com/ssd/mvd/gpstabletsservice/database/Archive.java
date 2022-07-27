@@ -31,14 +31,12 @@ public class Archive implements Runnable {
         this.getPatrulMonitoring().put( NOT_AVAILABLE, new ArrayList<>() );
         this.getPatrulMonitoring().put( AVAILABLE, new ArrayList<>() );
         this.getPatrulMonitoring().put( ATTACHED, new ArrayList<>() );
+        this.getPatrulMonitoring().put( ACCEPTED, new ArrayList<>() );
         this.getPatrulMonitoring().put( FINISHED, new ArrayList<>() );
         this.getPatrulMonitoring().put( ARRIVED, new ArrayList<>() );
-        this.getPatrulMonitoring().put( ACCEPTED, new ArrayList<>() );
         this.getPatrulMonitoring().put( BUSY, new ArrayList<>() );
         this.getPatrulMonitoring().put( FREE, new ArrayList<>() );
         CassandraDataControl.getInstance().resetData(); }
-
-    public Mono< Card > getCard ( Long cardId ) { return this.cardMap.containsKey( cardId ) ? Mono.just( this.cardMap.get( cardId ) ) : Mono.empty() ; }
 
     public Mono< SelfEmploymentTask > get ( UUID uuid ) { return this.selfEmploymentTaskMap.containsKey( uuid ) ? Mono.just( this.selfEmploymentTaskMap.get( uuid ) ) : Mono.empty(); }
 
@@ -50,7 +48,7 @@ public class Archive implements Runnable {
     // link new Patrul to existing SelfEmployment object
     public Mono< ApiResponseModel > save ( UUID uuid, Patrul patrul ) { return this.get( uuid ).flatMap( selfEmploymentTask -> {
         patrul.changeTaskStatus( ATTACHED );
-        selfEmploymentTask.getPatruls().add( patrul.changeTaskStatus( ATTACHED ) );
+        selfEmploymentTask.getPatruls().put( patrul.getPassportNumber(), patrul.changeTaskStatus( ATTACHED ) );
         RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
         CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
         this.save( Notification.builder().notificationWasCreated( new Date() ).title( patrul.getName() + "joined the selfEmployment" + selfEmploymentTask.getTitle() ).build() );
@@ -62,7 +60,7 @@ public class Archive implements Runnable {
         patrul.setLatitudeOfTask( card.getLatitude() );
         patrul.setLongitudeOfTask( card.getLongitude() );
         patrul.changeTaskStatus( ATTACHED ); // changing his status to ATTACHED
-        card.getPatruls().add( patrul ); // saving each patrul to card list
+        card.getPatruls().put( patrul.getPassportNumber(), patrul ); // saving each patrul to card list
         card.setStatus( CREATED );
         this.cardMap.putIfAbsent( card.getCardId(), KafkaDataControl.getInstance().writeToKafka( card ) );
         RedisDataControl.getRedis().addValue( card );

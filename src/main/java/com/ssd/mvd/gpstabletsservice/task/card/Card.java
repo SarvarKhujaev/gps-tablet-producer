@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-import lombok.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -46,7 +46,7 @@ public class Card {
     private EventHuman eventHuman;   // Aybdor inson
 
     @JsonDeserialize
-    private List< Patrul > patruls; // the list of patruls who linked to this event
+    private Map< String, Patrul > patruls; // the list of patruls who linked to this event
     @JsonDeserialize
     private List< VictimHumans > victimHumans;  // Jabirlanuchi inson
     @JsonDeserialize

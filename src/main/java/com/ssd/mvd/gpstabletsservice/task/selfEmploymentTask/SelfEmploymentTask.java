@@ -13,6 +13,7 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -35,7 +36,8 @@ public class SelfEmploymentTask {
     private Date incidentDate; // the date when the task was created
 
     private List< String > images;
-    private List< Patrul > patruls;
     @JsonDeserialize
     private List< ReportForCard > reportForCards;
+
+    private Map< String, Patrul > patruls;
 }

@@ -65,11 +65,15 @@ public class Patrul {
             case ACCEPTED -> {
                 this.setStatus( Status.ACCEPTED );
                 this.setTaskDate( new Date() ); // fixing time when patrul started this task
+                RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
+                    card1.getPatruls().put( this.getPassportNumber(), this );
+                    RedisDataControl.getRedis().update( card1 ); } );
             } case FINISHED -> {
                 this.setStatus( Status.FREE );
                 if ( this.getCard() != null ) {
-                    Archive.getAchieve().getCard( this.getCard() ).subscribe( card1 -> {
+                    RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
                         card1.setStatus( Status.FINISHED );
+                        card1.getPatruls().put( this.getPassportNumber(), this );
                         card1.getPatrulStatuses().get( this.getPassportNumber() )
                                 .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) );
                         RedisDataControl.getRedis().update( card1 ); } );
@@ -82,7 +86,7 @@ public class Patrul {
             } case ARRIVED -> {
                 this.setStatus( Status.ARRIVED );
                 if ( this.getCard() != null ) RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
-                    card1.setStatus( Status.ARRIVED );
+                    card1.getPatruls().put( this.getPassportNumber(), this );
                     card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder()
                             .patrul( this )
                             .inTime( this.check() )
@@ -91,8 +95,7 @@ public class Patrul {
                     RedisDataControl.getRedis().update( card1 ); } );
                 else Archive.getAchieve().get( this.getSelfEmploymentId() ).subscribe( selfEmploymentTask -> {
                     selfEmploymentTask.setArrivedTime( new Date() );
-                    selfEmploymentTask.setTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ); } );
-            }
+                    selfEmploymentTask.setTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ); } ); }
         } return this; }
 
     private Boolean check () { return switch ( this.getPoliceType() ) {
