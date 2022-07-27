@@ -25,7 +25,7 @@ public class SelfEmploymentController {
 
     @MessageMapping ( value = "addSelfEmployment" ) // saves new Task and link the Patrul who created it
     public Mono< ApiResponseModel > addSelfEmployment ( SelfEmploymentTask selfEmploymentTask ) { return RedisDataControl.getRedis()
-            .getPatrul( selfEmploymentTask.getPatruls().get( 0 ).getPassportNumber() )
+            .getPatrul( selfEmploymentTask.getPatruls().keySet().iterator().next() )
             .flatMap( patrul -> Archive.getAchieve().save( selfEmploymentTask, patrul ) ); }
 
     @MessageMapping ( value = "removePatrulFromSelfEmployment" )

@@ -37,7 +37,7 @@ public class SelfEmploymentTask {
 
     private List< String > images;
     @JsonDeserialize
-    private List< ReportForCard > reportForCards;
-
     private Map< String, Patrul > patruls;
+    @JsonDeserialize
+    private List< ReportForCard > reportForCards;
 }
