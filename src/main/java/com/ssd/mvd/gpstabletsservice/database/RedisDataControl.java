@@ -235,7 +235,10 @@ public final class RedisDataControl {
                 if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {
                     patrul.setStartedToWorkDate( new Date() );
                     patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
-                    patrul.setToken( Base64.getEncoder().encodeToString( ( patrul.getPassportNumber() + "_" + patrul.getPassword() + "_" + Archive.getAchieve().generateToken() ).getBytes( StandardCharsets.UTF_8 ) ) );
+                    patrul.setToken( Base64.getEncoder().encodeToString( ( patrul.getPassportNumber()
+                            + "_" + patrul.getPassword()
+                            + "_" + patrul.getUuid()
+                            + "_" + Archive.getAchieve().generateToken() ).getBytes( StandardCharsets.UTF_8 ) ) );
                     return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() ).success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) ).status( Status.builder().message( "Welcome to Family: " + patrul.getName() ).code( 200 ).build() ).build() ) );
                 } else return Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( "Wrong Login or password" ).build() ).success( false ).build() );
             } ) : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Login or Password" ).code( 201 ).build() ).build() ) ); }

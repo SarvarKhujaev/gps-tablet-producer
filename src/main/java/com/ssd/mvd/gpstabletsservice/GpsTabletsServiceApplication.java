@@ -5,6 +5,8 @@ import com.ssd.mvd.gpstabletsservice.database.Archive;
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.UUID;
+
 @SpringBootApplication
 public class GpsTabletsServiceApplication {
     public static ApplicationContext context;
