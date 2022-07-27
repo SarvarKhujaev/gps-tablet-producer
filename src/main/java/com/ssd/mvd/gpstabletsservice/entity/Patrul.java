@@ -65,7 +65,7 @@ public class Patrul {
             case ACCEPTED -> {
                 this.setStatus( Status.ACCEPTED );
                 this.setTaskDate( new Date() ); // fixing time when patrul started this task
-                RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
+                if ( this.getCard() != null ) RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
                     card1.getPatruls().put( this.getPassportNumber(), this );
                     RedisDataControl.getRedis().update( card1 ); } );
             } case FINISHED -> {

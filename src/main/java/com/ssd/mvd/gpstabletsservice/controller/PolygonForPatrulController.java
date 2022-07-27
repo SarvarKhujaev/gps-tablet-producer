@@ -25,7 +25,8 @@ public class PolygonForPatrulController { // SAM - 76
     public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) { return RedisDataControl.getRedis().updatePolygonForPatrul( polygon ); }
 
     @MessageMapping ( value = "addPatrulToPolygon" )
-    public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) { return RedisDataControl.getRedis().addPatrulToPolygon( scheduleForPolygonPatrul ); }
+    public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) { return RedisDataControl.getRedis()
+            .addPatrulToPolygon( scheduleForPolygonPatrul ); }
 
     @MessageMapping ( value = "addPolygonForPatrul" )
     public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) { return RedisDataControl.getRedis().addValue( polygon, "new polygon for patrul: " + polygon.getUuid() + " was added" ); }

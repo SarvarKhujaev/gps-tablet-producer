@@ -82,12 +82,16 @@ public class Archive implements Runnable {
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
         if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
             selfEmploymentTask.setArrivedTime( new Date() ); // fixing time when the patrul reached
-            patrul.changeTaskStatus( ARRIVED ).setSelfEmploymentId( selfEmploymentTask.getUuid() );
+            patrul.setSelfEmploymentId( selfEmploymentTask.getUuid() );
+            patrul.changeTaskStatus( selfEmploymentTask.getTaskStatus() );
             patrul.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() );
             patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
             this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
             RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
-            return RedisDataControl.getRedis().update( patrul ).flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( "SelfEmployment was saved" ).code( 200 ).build() ).success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).build() ) );
+            return RedisDataControl.getRedis().update( patrul )
+                    .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                            .status( Status.builder().message( "SelfEmployment was saved" ).code( 200 ).build() )
+                            .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).build() ) );
         } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong Data for Task" ).code( 201 ).build() ).build() ); }
 
     // taking off some Patrul from current Card
