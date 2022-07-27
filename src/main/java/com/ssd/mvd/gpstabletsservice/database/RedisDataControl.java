@@ -281,6 +281,8 @@ public final class RedisDataControl {
 
     public void remove ( Long cardId ) { this.cardMap.remove( cardId ).subscribe(); }
 
+    public Flux< Card > getAllCards () { return this.cardMap.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
+
     public void addValue ( String id, ActiveTask activeTask ) { this.activeTasks.fastPut( id, SerDes.getSerDes().serialize( activeTask ) ).subscribe(); }
 
     public Flux< ActiveTask > getActiveTasks() { return this.activeTasks.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeActiveTask( s ) ) ); }

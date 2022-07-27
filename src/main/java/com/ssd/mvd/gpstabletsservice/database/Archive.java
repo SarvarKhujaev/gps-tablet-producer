@@ -117,14 +117,17 @@ public class Archive implements Runnable {
                 if ( patrul.getStatus().equals( BUSY ) ) this.getPatrulMonitoring().get( patrul.getTaskStatus() ).add( patrul );
                 RedisDataControl.getRedis().update( patrul ).subscribe(); } } );
             try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); } finally { this.getPatrulMonitoring().values().forEach( List::clear ); }
-            Flux.fromStream( this.cardMap.values().stream() ).filter( card -> card.getPatruls().size() == card.getReportForCardList().size() ).subscribe( card -> {
-                card.setStatus( FINISHED );
-                RedisDataControl.getRedis().remove( card.getCardId() );
-                this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getCardId() ); } );
+            RedisDataControl.getRedis().getAllCards()
+                    .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
+                    .subscribe( card -> {
+                        card.setStatus( FINISHED );
+                        RedisDataControl.getRedis().remove( card.getCardId() );
+                        this.cardMap.remove( KafkaDataControl.getInstance().writeToKafka( card ).getCardId() ); } );
             this.getAllSelfEmploymentTask()
                     .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
                     .subscribe( selfEmploymentTask -> {
                         selfEmploymentTask.setTaskStatus( FINISHED );
                         CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
                         this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); } }
+
 }
