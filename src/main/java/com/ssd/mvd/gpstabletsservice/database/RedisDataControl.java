@@ -273,8 +273,6 @@ public final class RedisDataControl {
         this.addValue( card.getCardId().toString(), new ActiveTask( card ) );
         this.cardMap.fastPutIfAbsent( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
 
-    public Flux< Card > getAllCards () { return this.cardMap.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
-
     public void update ( Card card ) {
         this.addValue( card.getCardId().toString(), new ActiveTask( card ) );
         this.cardMap.fastPutIfExists( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
