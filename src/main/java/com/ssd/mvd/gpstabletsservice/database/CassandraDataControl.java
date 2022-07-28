@@ -43,7 +43,13 @@ public final class CassandraDataControl {
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
 
-    private CassandraDataControl () { ( this.session = ( this.cluster = Cluster.builder()
+    private CassandraDataControl () {
+        System.out.println( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_REMOTE" ) );
+        System.out.println( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_REMOTE" ) );
+        System.out.println( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_REMOTE" ) );
+        System.out.println( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_LOCAL" ) );
+        System.out.println( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_REQ" ) );
+        ( this.session = ( this.cluster = Cluster.builder()
             .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
             .addContactPoint( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_HOST" ) )
             .withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
