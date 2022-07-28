@@ -27,9 +27,11 @@ public class CardDetails {
                 case ARRIVED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Точка прибытия", selfEmploymentTask.getLatOfAccident() ) );
                 case ACCEPTED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятая точка", selfEmploymentTask.getLanOfPatrul() ) );
                 case ARRIVED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Точка прибытия", selfEmploymentTask.getLanOfAccident() ) );
-                case REPORT -> Flux.fromStream( selfEmploymentTask.getReportForCards().stream() ).filter( reportForCard -> reportForCard.getPassportSeries().equals( passportSeries ) ).subscribe( reportForCard -> {
-                    this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Отчет", reportForCard ) );
-                    this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время отчета", reportForCard ) ); } ); } } ); }
+                case REPORT -> Flux.fromStream( selfEmploymentTask.getReportForCards().stream() )
+                        .filter( reportForCard -> reportForCard.getPassportSeries().equals( passportSeries ) )
+                        .subscribe( reportForCard -> {
+                            this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Отчет", reportForCard ) );
+                            this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время отчета", reportForCard ) ); } ); } } ); }
 
     public CardDetails ( Card card, String language ) {
         this.getDetails().putIfAbsent( Details.DETAILS, new ArrayList<>() );
