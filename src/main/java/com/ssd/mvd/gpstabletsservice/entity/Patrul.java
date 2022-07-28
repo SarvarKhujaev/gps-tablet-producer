@@ -22,7 +22,6 @@ public class Patrul {
     private Double latitudeOfTask;
     private Double longitudeOfTask;
 
-    private UUID uuid;
     private UUID organ; // choosing from dictionary
     private UUID selfEmploymentId;
 
