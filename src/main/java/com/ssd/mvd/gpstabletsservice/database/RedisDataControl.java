@@ -242,10 +242,15 @@ public final class RedisDataControl {
                 } else return Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( "Wrong Login or password" ).build() ).success( false ).build() );
             } ) : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Login or Password" ).code( 201 ).build() ).build() ) ); }
 
-    public Mono< ApiResponseModel > logout ( String token ) { return this.patrulMap.get( this.decode( token ) ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
+    public Mono< ApiResponseModel > logout ( String token ) { return this.patrulMap.get( this.decode( token ) )
+            .map( s -> SerDes.getSerDes().deserialize( s ) )
+            .flatMap( patrul -> {
             patrul.setToken( null );
             patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.NOT_AVAILABLE );
-            return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGOUT ) ).status( Status.builder().message( "See you soon my darling )))" ).code( 200 ).build() ).build() ) ); } ); }
+            return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                    .flatMap( aBoolean -> Mono.just( ApiResponseModel.builder()
+                            .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGOUT ) )
+                            .status( Status.builder().message( "See you soon my darling )))" ).code( 200 ).build() ).build() ) ); } ); }
 
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) { return this.polygonForPatrulMap
             .containsKey( scheduleForPolygonPatrul.getUuid() ).flatMap( aBoolean -> aBoolean ?

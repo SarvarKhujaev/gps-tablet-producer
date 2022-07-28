@@ -1,11 +1,9 @@
 package com.ssd.mvd.gpstabletsservice;
 
-import org.springframework.boot.SpringApplication;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
+import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.util.UUID;
 
 @SpringBootApplication
 public class GpsTabletsServiceApplication {
