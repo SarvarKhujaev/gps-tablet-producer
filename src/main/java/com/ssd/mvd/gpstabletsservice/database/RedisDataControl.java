@@ -110,7 +110,6 @@ public final class RedisDataControl {
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
         patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
-        patrul.setTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
         return this.patrulMap.fastPutIfAbsent( patrul.getPassportNumber(), ( key = SerDes.getSerDes().serialize( patrul ) ) ).log().onErrorStop().flatMap( aBoolean -> aBoolean ?
             Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( patrul, this.key ) ).status( Status.builder().message( "new patrul was added" ).code( 200 ).build() ).build() )
         : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "this patrul already exists" ).code( 201 ).build() ).build() ) ); }
@@ -273,12 +272,36 @@ public final class RedisDataControl {
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this.patrulMap.get( request.getData() ).map(s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> CassandraDataControl.getInstance().getPatrulStatistics( request ) ); }
 
     public Mono< ApiResponseModel > accepted ( String token ) { return this.patrulMap.get( this.decode( token ) ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
-        patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED );
-        return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED ) ).status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ); } ); }
+        if ( patrul.getSelfEmploymentId() != null ) return Archive.getAchieve().get( patrul.getSelfEmploymentId() )
+                .map( selfEmploymentTask -> patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED, selfEmploymentTask ) )
+                .flatMap( patrul1 -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul1 ) )
+                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                            .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED ) )
+                            .status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ) );
+
+        else return this.getCard( patrul.getCard() )
+                .map( card -> patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED, card ) )
+                .flatMap( patrul1 -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED ) )
+                                .status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ) ); } ); }
 
     public Mono< ApiResponseModel > arrived ( String token ) { return this.patrulMap.get( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
-            .flatMap( patrul -> this.update( patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ) ) ); }
+            .flatMap( patrul -> {
+                if ( patrul.getSelfEmploymentId() != null ) return Archive.getAchieve().get( patrul.getSelfEmploymentId() )
+                        .map( selfEmploymentTask -> patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED, selfEmploymentTask ) )
+                        .flatMap( patrul1 -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul1 ) )
+                                .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                        .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ) )
+                                        .status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ) );
+
+                else return this.getCard( patrul.getCard() )
+                        .map( card -> patrul.changeTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED, card ) )
+                        .flatMap( patrul1 -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                                .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                        .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ) )
+                                        .status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ) ); } ); }
 
     public Mono< ApiResponseModel > checkToken ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() ).status( Status.builder().message( "All right!!!" ).code( 200 ).build() ).success( true ).build() ) )
@@ -299,6 +322,8 @@ public final class RedisDataControl {
     public Flux< Card > getAllCards () { return this.cardMap.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
 
     public void addValue ( String id, ActiveTask activeTask ) { this.activeTasks.fastPut( id, SerDes.getSerDes().serialize( activeTask ) ).subscribe(); }
+
+    public void remove ( String id ) { this.activeTasks.remove( id ).subscribe(); }
 
     public Flux< ActiveTask > getActiveTasks() { return this.activeTasks.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeActiveTask( s ) ) ); }
 }

@@ -1,11 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.response.Status;
+import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.entity.Data;
 
@@ -14,13 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.util.Comparator;
 
 @RestController
 public class CardController {
-    @MessageMapping ( value = "getAllCards" )
-    public Flux< Card > getAllCards () { return RedisDataControl.getRedis().getAllCards(); }
+    @MessageMapping ( value = "removePatrulFromCard" )
+    public Mono< ApiResponseModel > removePatrulFromCard ( Request request ) { return RedisDataControl.getRedis().getPatrul( request.getData() )
+            .flatMap( patrul -> Archive.getAchieve().removePatrulFromCard( Long.parseLong( request.getAdditional() ), patrul ) ); }
+
+    @MessageMapping ( value = "addNewPatrulToCard" )
+    public Mono< ApiResponseModel > addNewPatrulToCard ( Request request ) { return RedisDataControl.getRedis().getPatrul( request.getData() )
+            .flatMap( patrul -> Archive.getAchieve().addNewPatrulToCard( Long.parseLong( request.getAdditional() ), patrul ) ); }
 
     @MessageMapping ( value = "getListOfCards" )
     public Flux< ActiveTask > getListOfCards () { return RedisDataControl.getRedis().getActiveTasks().sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
@@ -43,7 +48,9 @@ public class CardController {
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
                                         .message( "U have SelfEmployment Task" ).build() ).success( true ).build() ) );
                 else if ( patrul.getCard() != null ) return RedisDataControl.getRedis().getCard( patrul.getCard() )
-                        .flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( new ActiveTask( card, patrul.getStatus() ) ).type( "card" ).build() )
+                        .flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder()
+                                        .data( new ActiveTask( card, patrul.getStatus() ) )
+                                        .type( "card" ).build() )
                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
                                 .message( "U have 102 Task" ).build() ).success( true ).build() ) );
                 else return Mono.just( ApiResponseModel.builder().success( false )

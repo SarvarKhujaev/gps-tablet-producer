@@ -10,7 +10,7 @@ import java.util.Date;
 public class TimeInspector {
     private Date date; // for comparing with current time
     private Long timestamp = 30L; // time interval of how much time has to be matched to set User like offline 30 mins by default
-    private Long timestampForArchive = 60L;
+    private Long timestampForArchive = 5L;
 
     private Integer endTimeForEvening = 24;
     private Integer endTimeForMorning = 16;

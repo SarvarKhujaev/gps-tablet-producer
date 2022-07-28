@@ -38,7 +38,7 @@ public class SelfEmploymentController {
     public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return RedisDataControl.getRedis()
             .getPatrul( reportForCard.getPassportSeries() )
             .flatMap( patrul -> patrul.getCard() != null ? RedisDataControl.getRedis().getCard( patrul.getCard() ).flatMap( card -> {
-                patrul.changeTaskStatus( Status.FINISHED );
+                patrul.changeTaskStatus( Status.FINISHED, card );
                 card.getReportForCardList().add( reportForCard );
                 KafkaDataControl.getInstance().writeToKafka( card );
                 return RedisDataControl.getRedis().update( patrul )
@@ -46,9 +46,8 @@ public class SelfEmploymentController {
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) );
         } ) : Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> {
-            patrul.changeTaskStatus( Status.FINISHED );
             selfEmploymentTask.getReportForCards().add( reportForCard );
-            return RedisDataControl.getRedis().update( patrul )
+            return RedisDataControl.getRedis().update( patrul.changeTaskStatus( Status.FINISHED, selfEmploymentTask ) )
                     .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
                             .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()

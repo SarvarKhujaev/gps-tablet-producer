@@ -1,13 +1,18 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.task.card.Card;
 
 import java.time.Duration;
 import lombok.Data;
 import java.util.*;
+
+import static com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.CREATED;
 
 @Data
 public class Patrul {
@@ -52,51 +57,58 @@ public class Patrul {
     private String surnameNameFatherName; // Ф.И.О
 
     private Status status; // busy, free by default, available or not available
-    private Status taskStatus; // ths status of the Card or SelfEmployment
 
     private Map< String, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
 
     public String getSurnameNameFatherName () { return this.surnameNameFatherName != null ? this.surnameNameFatherName
             : ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
 
-    public Patrul changeTaskStatus ( Status status ) {
-        switch ( ( this.taskStatus = status ) ) {
-            case ATTACHED -> this.setStatus( Status.BUSY );
-            case ACCEPTED -> {
-                this.setStatus( Status.ACCEPTED );
-                this.setTaskDate( new Date() ); // fixing time when patrul started this task
-                if ( this.getCard() != null ) RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
-                    card1.getPatruls().put( this.getPassportNumber(), this );
-                    RedisDataControl.getRedis().update( card1 ); } );
-            } case FINISHED -> {
+    public Patrul changeTaskStatus ( Status status, Card card ) {
+        switch ( ( this.status = status ) ) {
+            case CANCEL -> {
+                this.setCard( null );
                 this.setStatus( Status.FREE );
-                if ( this.getCard() != null ) {
-                    RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
-                        card1.setStatus( Status.FINISHED );
-                        card1.getPatruls().put( this.getPassportNumber(), this );
-                        card1.getPatrulStatuses().get( this.getPassportNumber() )
-                                .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) );
-                        RedisDataControl.getRedis().update( card1 ); } );
-                    this.getListOfTasks().putIfAbsent( this.getCard().toString(), "card" );
-                    this.setTaskDate( null );
-                    this.setCard( null );
-                } else { this.getListOfTasks().putIfAbsent( this.getSelfEmploymentId().toString(), "selfEmployment" );
-                    this.setSelfEmploymentId( null );
-                    this.setTaskDate( null ); }
-            } case ARRIVED -> {
-                this.setStatus( Status.ARRIVED );
-                if ( this.getCard() != null ) RedisDataControl.getRedis().getCard( this.getCard() ).subscribe( card1 -> {
-                    card1.getPatruls().put( this.getPassportNumber(), this );
-                    card1.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder()
-                            .patrul( this )
-                            .inTime( this.check() )
-                            .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) )
-                            .build() );
-                    RedisDataControl.getRedis().update( card1 ); } );
-                else Archive.getAchieve().get( this.getSelfEmploymentId() ).subscribe( selfEmploymentTask -> {
-                    selfEmploymentTask.setArrivedTime( new Date() );
-                    selfEmploymentTask.setTaskStatus( com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ); } ); }
-        } return this; }
+                card.getPatruls().remove( this.getPassportNumber() ); }
+            case ATTACHED -> {
+                this.setCard( card.getCardId() ); // saving card id into patrul object
+                this.setLatitudeOfTask( card.getLatitude() );
+                this.setLongitudeOfTask( card.getLongitude() ); }
+            case ACCEPTED -> this.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case FINISHED -> {
+                card.getPatrulStatuses().get( this.getPassportNumber() )
+                        .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) );
+                this.getListOfTasks().putIfAbsent( this.getCard().toString(), "card" );
+                this.setStatus( Status.FREE );
+                this.setTaskDate( null );
+                this.setCard( null );
+            } case ARRIVED -> card.getPatrulStatuses().putIfAbsent( this.getPassportNumber(), PatrulStatus.builder()
+                    .patrul( this )
+                    .inTime( this.check() )
+                    .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( this.getTaskDate().toInstant() ) ).build() );
+        } card.getPatruls().put( this.getPassportNumber(), this );
+        RedisDataControl.getRedis().addValue( card.getCardId().toString(), new ActiveTask( card ) );
+        RedisDataControl.getRedis().update( this ).subscribe();
+        RedisDataControl.getRedis().update( card );
+        return this; }
+
+    public Patrul changeTaskStatus ( Status status, SelfEmploymentTask selfEmploymentTask ) {
+        switch ( ( this.status = status ) ) {
+            case CANCEL -> {
+                this.setStatus( Status.FREE );
+                this.setSelfEmploymentId( null );
+                selfEmploymentTask.getPatruls().remove( this.getPassportNumber() ); }
+            case ATTACHED -> {
+                this.setSelfEmploymentId( selfEmploymentTask.getUuid() ); // saving card id into patrul object
+                this.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
+                this.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() ); }
+            case ACCEPTED, ARRIVED -> this.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case FINISHED -> {
+                this.getListOfTasks().putIfAbsent( this.getSelfEmploymentId().toString(), "selfEmployment" );
+                this.setSelfEmploymentId( null );
+                this.setStatus( Status.FREE );
+                this.setTaskDate( null ); }
+        } RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
+        return this; }
 
     private Boolean check () { return switch ( this.getPoliceType() ) {
             case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;

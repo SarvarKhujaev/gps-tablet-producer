@@ -15,6 +15,6 @@ public class Notification {
     private Double latitudeOfTask;
     private Double longitudeOfTask;
 
-    private Long id; // id of any task
+    private String id; // id of any task
     private Date notificationWasCreated; // the date when this current notification was created
 }

@@ -32,7 +32,6 @@ public class SelfEmploymentTask {
     private String description; // info about incident
 
     private UUID uuid;
-    private Date arrivedTime; // фиксировванное время когда он прибыл на дело
     private Date incidentDate; // the date when the task was created
 
     private List< String > images;

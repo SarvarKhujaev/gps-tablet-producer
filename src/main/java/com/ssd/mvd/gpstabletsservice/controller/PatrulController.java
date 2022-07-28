@@ -64,9 +64,6 @@ public class PatrulController {
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
     public Flux< Patrul > getAllUsersList () { return RedisDataControl.getRedis().getAllPatruls(); }
 
-    @MessageMapping ( value = "patrulStatus" ) // returns all Patruls with the current status
-    public Flux< Patrul > patrulStatus ( Status status ) { return Archive.getAchieve().getPatrulStatus( status ); }
-
     @MessageMapping( value = "addUser" ) // adding new user
     public Mono< ApiResponseModel > addUser ( Patrul patrul ) { return RedisDataControl.getRedis().addValue( patrul ); }
 

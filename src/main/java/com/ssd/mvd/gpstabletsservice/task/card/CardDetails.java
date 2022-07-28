@@ -20,13 +20,13 @@ public class CardDetails {
                 case NUMBER -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "№", selfEmploymentTask.getUuid() ) );
                 case ADDRESS -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Адрес", selfEmploymentTask.getIncidentDate() ) );
                 case DESCRIPTION -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Описание", selfEmploymentTask.getDescription() ) );
-                case ARRIVED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время прибытия", selfEmploymentTask.getArrivedTime() ) );
                 case ACCEPTED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
                 case REPORT_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время отрпавки рапорта", selfEmploymentTask.getIncidentDate() ) );
                 case ACCEPTED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятая точка", selfEmploymentTask.getLatOfPatrul() ) );
                 case ARRIVED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Точка прибытия", selfEmploymentTask.getLatOfAccident() ) );
                 case ACCEPTED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятая точка", selfEmploymentTask.getLanOfPatrul() ) );
                 case ARRIVED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Точка прибытия", selfEmploymentTask.getLanOfAccident() ) );
+                case ARRIVED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время прибытия", selfEmploymentTask.getPatruls().get( passportSeries ).getTaskDate() ) );
                 case REPORT -> Flux.fromStream( selfEmploymentTask.getReportForCards().stream() )
                         .filter( reportForCard -> reportForCard.getPassportSeries().equals( passportSeries ) )
                         .subscribe( reportForCard -> {
