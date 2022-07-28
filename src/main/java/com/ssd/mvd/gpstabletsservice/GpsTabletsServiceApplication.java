@@ -1,8 +1,5 @@
 package com.ssd.mvd.gpstabletsservice;
 
-import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
-import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
