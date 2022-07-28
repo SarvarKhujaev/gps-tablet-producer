@@ -27,7 +27,7 @@ public class Archive implements Runnable {
 
     public static Archive getAchieve () { return archive != null ? archive : ( archive = new Archive() ); }
 
-    private Archive() {
+    private Archive () {
         this.getPatrulMonitoring().put( NOT_AVAILABLE, new ArrayList<>() );
         this.getPatrulMonitoring().put( AVAILABLE, new ArrayList<>() );
         this.getPatrulMonitoring().put( ATTACHED, new ArrayList<>() );
