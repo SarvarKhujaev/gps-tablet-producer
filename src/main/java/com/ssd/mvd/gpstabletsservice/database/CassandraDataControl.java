@@ -49,13 +49,6 @@ public final class CassandraDataControl {
         options.setConnectTimeoutMillis( 30000 );
         options.setReadTimeoutMillis( 300000 );
         options.setTcpNoDelay( true );
-        System.out.println( "CASSANDRA_CORE_CONN_REMOTE: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_REMOTE" ) );
-        System.out.println( "CASSANDRA_CORE_CONN_LOCAL: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_LOCAL" ) );
-        System.out.println( "CASSANDRA_MAX_CONN_REMOTE: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_REMOTE" ) );
-        System.out.println( "CASSANDRA_MAX_CONN_LOCAL: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_LOCAL" ) );
-        System.out.println( "CASSANDRA_MAX_REQ: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_REQ" ) );
-        System.out.println( "CASSANDRA_PORT: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) );
-        System.out.println( "CASSANDRA_HOST: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_HOST" ) );
         String[] hosts = new String[3];
         hosts[0] = "10.254.5.1";
         hosts[1] = "10.254.5.2";

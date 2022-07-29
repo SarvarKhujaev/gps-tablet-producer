@@ -1,67 +1,68 @@
+
 server:
-    port: ${SERVER_PORT}
-    address: ${SERVER_ADDR}
+    port: 9090
+    address: localhost
 
 spring:
     data:
         cassandra:
-            port: ${CASSANDRA_PORT}
-            keyspace-name: ${KEYSPACE_NAME}
-            contact-points: ${CASSANDRA_HOST}
-            local-datacenter: ${CASSANDRA_DC}
+            port: 9942
+            keyspace-name: SSD.TABLETS
+            contact-points: 10.254.5.2
+            local-datacenter: datacenter1
             schema-action: CREATE_IF_NOT_EXISTS
 
             request:
-                timeout: ${REQUEST_TIMEOUT_FOR_CASSANDRA}
+                timeout: 10s
 
             connection:
-                connect-timeout: ${CONNECTION_TIMEOUT_FOR_CASSANDRA}
-                init-query-timeout: ${INIT_QUERY_TIMEOUT_FOR_CASSANDRA}
+                connect-timeout: 10s
+                init-query-timeout: 10s
 
         kafka:
-            bootstrap-servers: ${KAFKA_BROKER}
+            bootstrap-servers: 10.254.1.209:9092, 10.254.1.211:9092, 10.254.1.212:9092
 
             producer:
                 key-serializer: org.apache.kafka.common.serialization.StringSerializer
                 value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
             consumer:
-                group-id: ${GROUP_ID_FOR_KAFKA}
+                group-id: SSD.GPS.TABLETS
                 auto-offset-reset: earliest
                 key-deserializer: org.apache.kafka.common.serialization.StringSerializer
                 value-deserializer: org.apache.kafka.common.serialization.StringSerializer
 
             admin:
-                client-id: ${GROUP_ID_FOR_KAFKA}
+                client-id: SSD.GPS.TABLETS
 
     rsocket:
         server:
-            port: ${RSOCKET_PORT}
-            address: ${SERVER_ADDR}
+            port: 6060
+            address: localhost
 
     redis:
-        port: ${REDIS_PORT}
-        host: ${REDIS_HOST}
-        password: ${REDIS_PASSWORD}
-        client-name: ${REDIS_CLIENT_NAME}
+        port: 6367
+        host: 10.254.1.227
+        password: 8tRk62
+        client-name: default
         connect-timeout: 30
 
 variables:
-    REDIS_HOST: ${REDIS_HOST}
-    REDIS_PORT: ${REDIS_PORT}
-    REDIS_PASSWORD: ${REDIS_PASSWORD}
-    REDIS_CLIENT_NAME: ${REDIS_CLIENT_NAME}
+    REDIS_HOST: 10.254.1.227
+    REDIS_PORT: 6367
+    REDIS_PASSWORD: 8tRk62
+    REDIS_CLIENT_NAME: default
 
-    KAFKA_BROKER: ${KAFKA_BROKER}
-    GROUP_ID_FOR_KAFKA: ${GROUP_ID_FOR_KAFKA}
+    KAFKA_BROKER: 10.254.1.209:9092, 10.254.1.211:9092, 10.254.1.212:9092
+    GROUP_ID_FOR_KAFKA: SSD.GPS.TABLETS
 
-    CASSANDRA_PORT: ${CASSANDRA_PORT}
-    CASSANDRA_HOST: ${CASSANDRA_HOST}
+    CASSANDRA_PORT: 9942
+    CASSANDRA_HOST: 10.254.5.2
+    
+    CASSANDRA_MAX_REQ: 16
 
-    CASSANDRA_MAX_REQ: ${CASSANDRA_MAX_REQ}
+    CASSANDRA_MAX_CONN_LOCAL: 1024
+    CASSANDRA_MAX_CONN_REMOTE: 4
 
-    CASSANDRA_MAX_CONN_LOCAL: ${CASSANDRA_MAX_CONN_LOCAL}
-    CASSANDRA_MAX_CONN_REMOTE: ${CASSANDRA_MAX_CONN_REMOTE}
-
-    CASSANDRA_CORE_CONN_LOCAL: ${CASSANDRA_CORE_CONN_LOCAL}
-    CASSANDRA_CORE_CONN_REMOTE: ${CASSANDRA_CORE_CONN_REMOTE}
+    CASSANDRA_CORE_CONN_LOCAL: 4
+    CASSANDRA_CORE_CONN_REMOTE: 2

@@ -118,23 +118,25 @@ public class Archive implements Runnable {
 
     @Override
     public void run () {
-        while ( this.getFlag() ) { RedisDataControl.getRedis().getAllPatruls().subscribe( patrul -> {
-            if ( patrul.getStatus().compareTo( NOT_AVAILABLE ) != 0 ) {
-                patrul.setLastActiveDate( new Date() );
-                patrul.setTotalActivityTime( patrul.getTotalActivityTime() + TimeInspector.getInspector().getTimestampForArchive() );
-                RedisDataControl.getRedis().update( patrul ).subscribe(); } } );
-            try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
-            RedisDataControl.getRedis().getAllCards()
-                    .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
-                    .subscribe( card -> {
-                        card.setStatus( FINISHED );
-                        RedisDataControl.getRedis().remove( card.getCardId() );
-                        RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
-            this.getAllSelfEmploymentTask()
-                    .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
-                    .subscribe( selfEmploymentTask -> {
-                        selfEmploymentTask.setTaskStatus( FINISHED );
-                        RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
-                        CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
-                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); } }
+        while ( this.getFlag() ) {
+//            RedisDataControl.getRedis().getAllPatruls().subscribe( patrul -> {
+//            if ( patrul.getStatus().compareTo( NOT_AVAILABLE ) != 0 ) {
+//                patrul.setLastActiveDate( new Date() );
+//                patrul.setTotalActivityTime( patrul.getTotalActivityTime() + TimeInspector.getInspector().getTimestampForArchive() );
+//                RedisDataControl.getRedis().update( patrul ).subscribe(); } } );
+                try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
+//            RedisDataControl.getRedis().getAllCards()
+//                    .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
+//                    .subscribe( card -> {
+//                        card.setStatus( FINISHED );
+//                        RedisDataControl.getRedis().remove( card.getCardId() );
+//                        RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
+                this.getAllSelfEmploymentTask()
+                        .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
+                        .subscribe( selfEmploymentTask -> {
+                            selfEmploymentTask.setTaskStatus( FINISHED );
+                            RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
+                            CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
+                            this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); }
+        }
 }
