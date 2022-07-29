@@ -44,6 +44,7 @@ spring:
         host: ${REDIS_HOST}
         password: ${REDIS_PASSWORD}
         client-name: ${REDIS_CLIENT_NAME}
+        connect-timeout: 30
 
 variables:
     REDIS_HOST: ${REDIS_HOST}

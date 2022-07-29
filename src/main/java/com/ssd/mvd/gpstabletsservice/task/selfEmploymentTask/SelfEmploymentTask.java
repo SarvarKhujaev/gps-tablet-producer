@@ -34,6 +34,8 @@ public class SelfEmploymentTask {
     private UUID uuid;
     private Date incidentDate; // the date when the task was created
 
+    public UUID getUuid() { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
+
     private List< String > images;
     @JsonDeserialize
     private Map< String, Patrul > patruls;

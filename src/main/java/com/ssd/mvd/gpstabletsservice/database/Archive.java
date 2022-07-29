@@ -22,6 +22,7 @@ public class Archive implements Runnable {
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
     private final Map< UUID, SelfEmploymentTask > selfEmploymentTaskMap = new HashMap<>();
+    private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID", "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ", "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОШИБЩИХ", "ФАБУЛА" );
 
     public static Archive getAchieve () { return archive != null ? archive : ( archive = new Archive() ); }
 
@@ -45,15 +46,14 @@ public class Archive implements Runnable {
                 .latitudeOfTask( selfEmploymentTask.getLatOfAccident() )
                 .longitudeOfTask( selfEmploymentTask.getLanOfAccident() )
                 .address( selfEmploymentTask.getAddress() != null ? selfEmploymentTask.getAddress() : "unknown" )
-                .title( selfEmploymentTask.getUuid() + " was linked to: " + patrul.getName() ).build() );
+                .title( "My dear: " + patrul.getName() + " you got selfEmploymentTask task, so be so kind to check active Task and start to work )))" ).build() );
         return RedisDataControl.getRedis().update( patrul ); } ); }
 
     public void save ( Notification notification ) { KafkaDataControl.getInstance().writeToKafka( notification ); }
 
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
         if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
-            if ( selfEmploymentTask.getTaskStatus().compareTo( ARRIVED ) == 0 ) patrul.changeTaskStatus( ARRIVED, selfEmploymentTask );
-            else patrul.changeTaskStatus( ACCEPTED, selfEmploymentTask );
+            patrul.changeTaskStatus( selfEmploymentTask.getTaskStatus(), selfEmploymentTask );
             this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
             RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
             return RedisDataControl.getRedis().update( patrul )
@@ -81,7 +81,7 @@ public class Archive implements Runnable {
                         .longitudeOfTask( card.getLongitude() )
                         .passportSeries( patrul.getPassportNumber() )
                         .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                        .title( card.getCardId() + " was linked to: " + patrul.getName() ).build() );
+                        .title( "My dear: " + patrul.getName() + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
                 return Mono.just( ApiResponseModel.builder().success( true )
                                 .status( Status.builder().message( patrul.getName() + " linked to " + card.getCardId() ).code( 200 ).build() ).build() ); } ); }
 
@@ -105,7 +105,7 @@ public class Archive implements Runnable {
                 .longitudeOfTask( card.getLongitude() )
                 .passportSeries( patrul.getPassportNumber() )
                 .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                .title( card.getCardId() + " was linked to: " + patrul.getName() ).build() );
+                .title( "My dear: " + patrul.getName() + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
         return RedisDataControl.getRedis().update( patrul )
                 .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
                         .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
@@ -117,11 +117,12 @@ public class Archive implements Runnable {
 
     @Override
     public void run () {
-        while ( this.getFlag() ) { RedisDataControl.getRedis().getAllPatruls().subscribe( patrul -> {
-            if ( patrul.getStatus().compareTo( NOT_AVAILABLE ) != 0 ) {
-                patrul.setLastActiveDate( new Date() );
-                patrul.setTotalActivityTime( patrul.getTotalActivityTime() + TimeInspector.getInspector().getTimestampForArchive() );
-                RedisDataControl.getRedis().update( patrul ).subscribe(); } } );
+        while ( this.getFlag() ) {
+//            RedisDataControl.getRedis().getAllPatruls().subscribe( patrul -> {
+//            if ( patrul.getStatus().compareTo( NOT_AVAILABLE ) != 0 ) {
+//                patrul.setLastActiveDate( new Date() );
+//                patrul.setTotalActivityTime( patrul.getTotalActivityTime() + TimeInspector.getInspector().getTimestampForArchive() );
+//                RedisDataControl.getRedis().update( patrul ).subscribe(); } } );
             try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
             RedisDataControl.getRedis().getAllCards()
                     .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
@@ -129,11 +130,12 @@ public class Archive implements Runnable {
                         card.setStatus( FINISHED );
                         RedisDataControl.getRedis().remove( card.getCardId() );
                         RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
-            this.getAllSelfEmploymentTask()
-                    .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
-                    .subscribe( selfEmploymentTask -> {
-                        selfEmploymentTask.setTaskStatus( FINISHED );
-                        RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
-                        CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
-                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); } }
+                this.getAllSelfEmploymentTask()
+                        .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
+                        .subscribe( selfEmploymentTask -> {
+                            selfEmploymentTask.setTaskStatus( FINISHED );
+                            RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
+                            CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
+                            this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); }
+        }
 }

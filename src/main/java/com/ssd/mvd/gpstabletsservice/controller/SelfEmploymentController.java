@@ -49,7 +49,7 @@ public class SelfEmploymentController {
             selfEmploymentTask.getReportForCards().add( reportForCard );
             return RedisDataControl.getRedis().update( patrul.changeTaskStatus( Status.FINISHED, selfEmploymentTask ) )
                     .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                            .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) )
+//                            .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                     .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) ); } ) ); }
 }

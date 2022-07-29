@@ -1,17 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
+import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.constants.Details;
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 
 import reactor.core.publisher.Flux;
-import java.util.*;
 import lombok.Data;
+import java.util.*;
 
 @Data
 public class CardDetails {
     private Map< Details, List< Item > > details = new HashMap<>();
-    private final List< String > selfEmploymentList = List.of( "№", "Принятое время", "Принятая точка", "Принятая точка", "Время прибытия", "Точка прибытия", "Точка прибытия", "Отчет", "Время отчета", "Описание", "Адрес" );
-    private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID", "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ", "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОШИБЩИХ", "ФАБУЛА" );
 
     public CardDetails ( SelfEmploymentTask selfEmploymentTask, String language, String passportSeries ) {
         this.getDetails().putIfAbsent( Details.SELF_EMPLOYMENT, new ArrayList<>() );
@@ -46,7 +45,7 @@ public class CardDetails {
 
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() ).subscribe( details -> {
             switch ( details ) {
-                case DETAILS -> this.getDetailsList().forEach( s -> {
+                case DETAILS -> Archive.getAchieve().getDetailsList().forEach(s -> {
                     switch ( s ) {
                         case  "ID" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getCardId() ) );
                         case  "ФАБУЛА" -> this.getDetails().get( Details.DETAILS ).add( new Item( s, card.getFabula() ) );
