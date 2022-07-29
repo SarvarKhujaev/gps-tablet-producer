@@ -44,6 +44,10 @@ public final class CassandraDataControl {
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
 
     private CassandraDataControl () {
+        SocketOptions options = new SocketOptions();
+        options.setConnectTimeoutMillis( 30000 );
+        options.setReadTimeoutMillis( 300000 );
+        options.setTcpNoDelay( true );
         System.out.println( "CASSANDRA_CORE_CONN_REMOTE: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_REMOTE" ) );
         System.out.println( "CASSANDRA_CORE_CONN_LOCAL: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_LOCAL" ) );
         System.out.println( "CASSANDRA_MAX_CONN_REMOTE: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_REMOTE" ) );
@@ -55,7 +59,7 @@ public final class CassandraDataControl {
             .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
             .addContactPoint( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_HOST" ) )
             .withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
-            .withSocketOptions( new SocketOptions().setReadTimeoutMillis( 30000 ) )
+            .withSocketOptions( options )
             .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
             .withPoolingOptions( new PoolingOptions()
                     .setCoreConnectionsPerHost( HostDistance.REMOTE, Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_REMOTE" ) ) )
