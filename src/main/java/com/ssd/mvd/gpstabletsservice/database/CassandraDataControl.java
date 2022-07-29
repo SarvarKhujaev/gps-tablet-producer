@@ -44,6 +44,13 @@ public final class CassandraDataControl {
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
 
     private CassandraDataControl () {
+        System.out.println( "CASSANDRA_CORE_CONN_REMOTE: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_REMOTE" ) );
+        System.out.println( "CASSANDRA_CORE_CONN_LOCAL: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_LOCAL" ) );
+        System.out.println( "CASSANDRA_MAX_CONN_REMOTE: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_REMOTE" ) );
+        System.out.println( "CASSANDRA_MAX_CONN_LOCAL: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_LOCAL" ) );
+        System.out.println( "CASSANDRA_MAX_REQ: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_REQ" ) );
+        System.out.println( "CASSANDRA_PORT: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) );
+        System.out.println( "CASSANDRA_HOST: " + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_HOST" ) );
         ( this.session = ( this.cluster = Cluster.builder()
             .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
             .addContactPoint( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_HOST" ) )
