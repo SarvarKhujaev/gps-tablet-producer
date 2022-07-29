@@ -45,7 +45,7 @@ public class Archive implements Runnable {
                 .latitudeOfTask( selfEmploymentTask.getLatOfAccident() )
                 .longitudeOfTask( selfEmploymentTask.getLanOfAccident() )
                 .address( selfEmploymentTask.getAddress() != null ? selfEmploymentTask.getAddress() : "unknown" )
-                .title( selfEmploymentTask.getUuid() + " was linked to: " + patrul.getName() ).build() );
+                .title( "My dear: " + patrul.getName() + " you got selfEmploymentTask task, so be so kind to check active Task and start to work )))" ).build() );
         return RedisDataControl.getRedis().update( patrul ); } ); }
 
     public void save ( Notification notification ) { KafkaDataControl.getInstance().writeToKafka( notification ); }
@@ -81,7 +81,7 @@ public class Archive implements Runnable {
                         .longitudeOfTask( card.getLongitude() )
                         .passportSeries( patrul.getPassportNumber() )
                         .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                        .title( card.getCardId() + " was linked to: " + patrul.getName() ).build() );
+                        .title( "My dear: " + patrul.getName() + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
                 return Mono.just( ApiResponseModel.builder().success( true )
                                 .status( Status.builder().message( patrul.getName() + " linked to " + card.getCardId() ).code( 200 ).build() )
                         .build() ); } ); }
@@ -106,7 +106,7 @@ public class Archive implements Runnable {
                 .longitudeOfTask( card.getLongitude() )
                 .passportSeries( patrul.getPassportNumber() )
                 .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                .title( card.getCardId() + " was linked to: " + patrul.getName() ).build() );
+                .title( "My dear: " + patrul.getName() + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
         return RedisDataControl.getRedis().update( patrul )
                 .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
                         .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
@@ -124,13 +124,13 @@ public class Archive implements Runnable {
 //                patrul.setLastActiveDate( new Date() );
 //                patrul.setTotalActivityTime( patrul.getTotalActivityTime() + TimeInspector.getInspector().getTimestampForArchive() );
 //                RedisDataControl.getRedis().update( patrul ).subscribe(); } } );
-                try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
-//            RedisDataControl.getRedis().getAllCards()
-//                    .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
-//                    .subscribe( card -> {
-//                        card.setStatus( FINISHED );
-//                        RedisDataControl.getRedis().remove( card.getCardId() );
-//                        RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
+            try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
+            RedisDataControl.getRedis().getAllCards()
+                    .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
+                    .subscribe( card -> {
+                        card.setStatus( FINISHED );
+                        RedisDataControl.getRedis().remove( card.getCardId() );
+                        RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
                 this.getAllSelfEmploymentTask()
                         .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
                         .subscribe( selfEmploymentTask -> {

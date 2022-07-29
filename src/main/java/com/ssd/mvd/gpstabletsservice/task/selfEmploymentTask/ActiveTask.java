@@ -49,7 +49,6 @@ public class ActiveTask {
         this.setTaskId( card.getCardId() );
         this.setAddress( card.getAddress() );
         this.setLatitude( card.getLatitude() );
-        this.setPatrulList( card.getPatruls() );
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
         this.setCreatedDate( card.getCreated_date() ); }
@@ -73,7 +72,6 @@ public class ActiveTask {
         this.setType( "selfEmployment" );
         this.setAddress( card.getAddress() );
         this.setStatus( card.getTaskStatus() );
-        this.setPatrulList( card.getPatruls() );
         this.setLatitude( card.getLatOfAccident() );
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );

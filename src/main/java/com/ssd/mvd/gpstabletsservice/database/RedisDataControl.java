@@ -38,13 +38,13 @@ public final class RedisDataControl {
     public static RedisDataControl getRedis () { return redisDataControl != null ? redisDataControl : ( redisDataControl = new RedisDataControl() ); }
 
     private RedisDataControl () { Config config = new Config();
-        config.setNettyThreads( 0 )
-                .setThreads( 0 )
+        config.setNettyThreads( 2 )
+                .setThreads( 2 )
                 .useSingleServer()
                 .setTimeout( 5000 )
                 .setConnectTimeout( 30000 )
                 .setIdleConnectionTimeout( 35000 )
-//                .setKeepAlive( true )
+                .setKeepAlive( true )
                 .setRetryAttempts( 3 )
                 .setRetryInterval( 5000 ) //ms
                 .setConnectionPoolSize( 1000 )
