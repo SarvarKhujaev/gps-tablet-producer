@@ -11,7 +11,6 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-//        RedisDataControl.getRedis().getAllPatruls()
 //                .subscribe( patrul -> {
 //                    patrul.setCard( null );
 //                    patrul.setToken( null );

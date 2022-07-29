@@ -22,6 +22,7 @@ public class Archive implements Runnable {
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
     private final Map< UUID, SelfEmploymentTask > selfEmploymentTaskMap = new HashMap<>();
+    private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID", "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ", "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОШИБЩИХ", "ФАБУЛА" );
 
     public static Archive getAchieve () { return archive != null ? archive : ( archive = new Archive() ); }
 

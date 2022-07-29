@@ -17,11 +17,10 @@ public class ActiveTask {
 
     private String type;
     private String title;
+    private String taskId;
     private String address;
     private String description;
 
-    private UUID uuid;
-    private Long taskId;
     private Date createdDate;
 
     private Status status;
@@ -33,12 +32,12 @@ public class ActiveTask {
     public ActiveTask ( Card card ) {
         this.setType( "card" );
         this.setStatus( card.getStatus() );
-        this.setTaskId( card.getCardId() );
         this.setAddress( card.getAddress() );
         this.setLatitude( card.getLatitude() );
         this.setPatrulList( card.getPatruls() );
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
+        this.setTaskId( card.getCardId().toString() );
         this.setCreatedDate( card.getCreated_date() );
         this.setPatrulStatus( this.getPatrulStatus() ); }
 
@@ -46,32 +45,32 @@ public class ActiveTask {
         this.setType( "card" );
         this.setPatrulStatus( status );
         this.setStatus( card.getStatus() );
-        this.setTaskId( card.getCardId() );
         this.setAddress( card.getAddress() );
         this.setLatitude( card.getLatitude() );
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
+        this.setTaskId( card.getCardId().toString() );
         this.setCreatedDate( card.getCreated_date() ); }
 
     public ActiveTask ( SelfEmploymentTask card ) {
-        this.setUuid( card.getUuid() );
         this.setTitle( card.getTitle() );
         this.setType( "selfEmployment" );
         this.setAddress( card.getAddress() );
         this.setStatus( card.getTaskStatus() );
         this.setPatrulList( card.getPatruls() );
+        this.setTaskId( card.getUuid().toString() );
         this.setLatitude( card.getLatOfAccident() );
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );
         this.setCreatedDate( card.getIncidentDate() ); }
 
     public ActiveTask ( SelfEmploymentTask card, Status status ) {
-        this.setUuid( card.getUuid() );
         this.setPatrulStatus( status );
         this.setTitle( card.getTitle() );
         this.setType( "selfEmployment" );
         this.setAddress( card.getAddress() );
         this.setStatus( card.getTaskStatus() );
+        this.setTaskId( card.getUuid().toString() );
         this.setLatitude( card.getLatOfAccident() );
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );
