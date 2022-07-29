@@ -18,7 +18,7 @@ public class GpsTabletsServiceApplication {
 //                    patrul.setTaskDate( null );
 //                    patrul.setStatus( Status.FREE );
 //                    patrul.setSelfEmploymentId( null );
-//                    patrul.setTaskStatus( Status.FREE );
+//                    patrul.setSurnameNameFatherName( patrul.getName() + " " + patrul.getSurname() + " " + patrul.getFatherName() );
 //                    RedisDataControl.getRedis().update( patrul ).subscribe(); } );
         new Thread( Archive.getAchieve(), "archive" ).start(); // launching Archive to monitor all patruls, Card and SelfEmployment
     }

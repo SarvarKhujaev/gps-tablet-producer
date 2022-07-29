@@ -39,10 +39,10 @@ public final class RedisDataControl {
 
     private RedisDataControl () { Config config = new Config();
         config.useSingleServer()
-                .setTimeout( 1000 )
+                .setTimeout( 5000 )
                 .setKeepAlive( true )
                 .setRetryAttempts( 3 )
-                .setRetryInterval( 30000 ) //ms
+                .setRetryInterval( 5000 ) //ms
                 .setPingConnectionInterval( 5000 )
                 .setAddress( "redis://" + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_HOST" ) + ":"
                         + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PORT" ) )
