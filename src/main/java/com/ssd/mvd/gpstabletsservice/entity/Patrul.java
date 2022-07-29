@@ -101,7 +101,9 @@ public class Patrul {
                 this.setSelfEmploymentId( selfEmploymentTask.getUuid() ); // saving card id into patrul object
                 this.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
                 this.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() ); }
-            case ACCEPTED, ARRIVED -> this.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case ACCEPTED, ARRIVED -> {
+                this.setTaskDate( new Date() ); // fixing time when patrul started this task
+                this.setSelfEmploymentId( selfEmploymentTask.getUuid() ); }
             case FINISHED -> {
                 this.getListOfTasks().putIfAbsent( this.getSelfEmploymentId().toString(), "selfEmployment" );
                 this.setSelfEmploymentId( null );
