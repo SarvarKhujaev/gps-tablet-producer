@@ -244,12 +244,11 @@ public final class RedisDataControl {
     public Mono< ApiResponseModel > logout ( String token ) { return this.patrulMap.get( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
             .flatMap( patrul -> {
-            patrul.setToken( null );
-            patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.NOT_AVAILABLE );
-            return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
-                    .flatMap( aBoolean -> Mono.just( ApiResponseModel.builder()
-                            .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGOUT ) )
-                            .status( Status.builder().message( "See you soon my darling )))" ).code( 200 ).build() ).build() ) ); } ); }
+                patrul.setToken( null );
+                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                        .flatMap( aBoolean -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGOUT ) )
+                                .status( Status.builder().message( "See you soon my darling )))" ).code( 200 ).build() ).build() ) ); } ); } );
 
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) { return this.polygonForPatrulMap
             .containsKey( scheduleForPolygonPatrul.getUuid() ).flatMap( aBoolean -> aBoolean ?

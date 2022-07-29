@@ -38,8 +38,6 @@ public final class CassandraDataControl {
     public final String polygonType = "POLYGONTYPE";
     public final String selfEmployment = "SELFEMPLOYMENT";
     public final String polygonForPatrul = "POLYGONFORPATRUl";
-    private final String findFaceTaskFromAssomidin = "findFaceTaskFromAssomidin";
-    private final String findFaceTaskFromShamsiddin = "findFaceTaskFromShamsiddin";
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
@@ -49,13 +47,9 @@ public final class CassandraDataControl {
         options.setConnectTimeoutMillis( 30000 );
         options.setReadTimeoutMillis( 300000 );
         options.setTcpNoDelay( true );
-        String[] hosts = new String[3];
-        hosts[0] = "10.254.5.1";
-        hosts[1] = "10.254.5.2";
-        hosts[2] = "10.254.5.3";
         ( this.session = ( this.cluster = Cluster.builder()
             .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
-            .addContactPoints( hosts )
+                .addContactPoints( "10.254.5.1, 10.254.5.2, 10.254.5.3".split( ", " ) )
             .withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
             .withSocketOptions( options )
             .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
