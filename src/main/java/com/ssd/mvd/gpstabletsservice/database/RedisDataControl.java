@@ -38,7 +38,13 @@ public final class RedisDataControl {
     public static RedisDataControl getRedis () { return redisDataControl != null ? redisDataControl : ( redisDataControl = new RedisDataControl() ); }
 
     private RedisDataControl () { Config config = new Config();
-        config.useSingleServer().setAddress( "redis://" + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_HOST" ) + ":"
+        config.useSingleServer()
+                .setTimeout( 1000 )
+                .setKeepAlive( true )
+                .setRetryAttempts( 3 )
+                .setRetryInterval( 30000 ) //ms
+                .setPingConnectionInterval( 5000 )
+                .setAddress( "redis://" + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_HOST" ) + ":"
                         + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PORT" ) )
                 .setClientName( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_CLIENT_NAME" ) )
                 .setPassword( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PASSWORD" ) );
