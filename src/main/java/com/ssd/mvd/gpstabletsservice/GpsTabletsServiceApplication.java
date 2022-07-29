@@ -11,6 +11,12 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
+//        RedisDataControl.getRedis().getPatrul( "AC1234987" )
+//                .subscribe( patrul -> {
+//                    patrul.setCard( null );
+//                    patrul.setStatus( Status.FREE );
+//                    patrul.setSelfEmploymentId( null );;
+//                    RedisDataControl.getRedis().update( patrul ).subscribe(); } );
 //                .subscribe( patrul -> {
 //                    patrul.setCard( null );
 //                    patrul.setToken( null );

@@ -53,8 +53,7 @@ public class Archive implements Runnable {
 
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
         if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
-            if ( selfEmploymentTask.getTaskStatus().compareTo( ARRIVED ) == 0 ) patrul.changeTaskStatus( ARRIVED, selfEmploymentTask );
-            else patrul.changeTaskStatus( ACCEPTED, selfEmploymentTask );
+            patrul.changeTaskStatus( selfEmploymentTask.getTaskStatus(), selfEmploymentTask );
             this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
             RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
             return RedisDataControl.getRedis().update( patrul )
