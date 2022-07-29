@@ -1,7 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -10,9 +10,6 @@ import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import java.time.Duration;
 import lombok.Data;
 import java.util.*;
-
-import static com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL;
-import static com.ssd.mvd.gpstabletsservice.constants.Status.CREATED;
 
 @Data
 public class Patrul {

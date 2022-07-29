@@ -38,8 +38,8 @@ public class SelfEmploymentController {
     public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return RedisDataControl.getRedis()
             .getPatrul( reportForCard.getPassportSeries() )
             .flatMap( patrul -> patrul.getCard() != null ? RedisDataControl.getRedis().getCard( patrul.getCard() ).flatMap( card -> {
-                patrul.changeTaskStatus( Status.FINISHED, card );
                 card.getReportForCardList().add( reportForCard );
+                patrul.changeTaskStatus( Status.FINISHED, card );
                 KafkaDataControl.getInstance().writeToKafka( card );
                 return RedisDataControl.getRedis().update( patrul )
                         .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
