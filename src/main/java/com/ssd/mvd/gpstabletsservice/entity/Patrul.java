@@ -36,7 +36,7 @@ public class Patrul {
     private Long districtId; // choosing from dictionary
     private Long totalActivityTime;
 
-    private Boolean inPolygon = false;
+    private Boolean inPolygon;
 
     private String name;
     private String rank;
@@ -100,12 +100,15 @@ public class Patrul {
             case ATTACHED -> {
                 this.setSelfEmploymentId( selfEmploymentTask.getUuid() ); // saving card id into patrul object
                 this.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
-                this.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() ); }
+                this.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() );
+                selfEmploymentTask.getPatruls().put( this.getPassportNumber(), this ); }
             case ACCEPTED, ARRIVED -> {
                 this.setTaskDate( new Date() ); // fixing time when patrul started this task
-                this.setSelfEmploymentId( selfEmploymentTask.getUuid() ); }
+                this.setSelfEmploymentId( selfEmploymentTask.getUuid() );
+                selfEmploymentTask.getPatruls().put( this.getPassportNumber(), this ); }
             case FINISHED -> {
                 this.getListOfTasks().putIfAbsent( this.getSelfEmploymentId().toString(), "selfEmployment" );
+                selfEmploymentTask.getPatruls().put( this.getPassportNumber(), this );
                 this.setSelfEmploymentId( null );
                 this.setStatus( Status.FREE );
                 this.setTaskDate( null ); }
