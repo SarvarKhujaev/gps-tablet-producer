@@ -38,18 +38,7 @@ public final class RedisDataControl {
     public static RedisDataControl getRedis () { return redisDataControl != null ? redisDataControl : ( redisDataControl = new RedisDataControl() ); }
 
     private RedisDataControl () { Config config = new Config();
-        config.setNettyThreads( 2 )
-                .setThreads( 2 )
-                .useSingleServer()
-                .setTimeout( 5000 )
-                .setConnectTimeout( 30000 )
-                .setIdleConnectionTimeout( 35000 )
-                .setKeepAlive( true )
-                .setRetryAttempts( 3 )
-                .setRetryInterval( 5000 ) //ms
-                .setConnectionPoolSize( 2000 )
-                .setPingConnectionInterval( 3000 )
-                .setAddress( "redis://" + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_HOST" ) + ":"
+        config.useSingleServer().setAddress( "redis://" + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_HOST" ) + ":"
                         + GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PORT" ) )
                 .setClientName( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_CLIENT_NAME" ) )
                 .setPassword( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.REDIS_PASSWORD" ) );
@@ -200,12 +189,20 @@ public final class RedisDataControl {
                                 return this.polygonForPatrulMap.fastPutIfExists( polygon.getUuid().toString(), ( this.key = SerDes.getSerDes().serialize( polygon ) ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( polygon ).isDone() ).status( Status.builder().message( "Patruls was added to polygon" ).code( 200 ).build() ).build() ) ); } ) )
                 : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "There is no such a polygon for patrul" ).code( 201 ).build() ).build() ) ); }
 
-    public Mono< ApiResponseModel > update ( PoliceType policeType ) { return this.policeTypes.containsKey( policeType.getUuid() ).flatMap( aBoolean -> aBoolean ? this.getAllPoliceTypes().filter( policeType1 -> policeType1.getPoliceType().equals( policeType.getPoliceType() ) ).count()
-                .flatMap( aLong -> { if ( aLong == 0 ) {
-                    this.getAllPatruls().filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) ).subscribe( patrul -> patrul.setPoliceType( policeType.getPoliceType() ) );
-                    return this.policeTypes.fastPutIfExists( policeType.getUuid(), SerDes.getSerDes().serialize( policeType ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().status( Status.builder().code( 200 ).message( "PoliceType was updated" ).build() ).success( false ).build() ) );
-                } else return Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( "There is such a name so please choose another one ))" ).build() ).build() ); } ) :
-        Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( "This policeType does not exists. so if u wish u can check the list and choose another one ((" ).build() ).build() ) ); }
+    public Mono< ApiResponseModel > update ( PoliceType policeType ) { return this.policeTypes.containsKey( policeType.getUuid() )
+            .flatMap( aBoolean -> aBoolean ? this.getAllPoliceTypes()
+                    .filter( policeType1 -> policeType1.getPoliceType().equals( policeType.getPoliceType() ) )
+                    .count()
+                    .flatMap( aLong -> { if ( aLong == 0 ) {
+                        this.getAllPatruls().filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) )
+                                .subscribe( patrul -> patrul.setPoliceType( policeType.getPoliceType() ) );
+                        return this.policeTypes.fastPutIfExists( policeType.getUuid(), SerDes.getSerDes().serialize( policeType ) )
+                                .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().status( Status.builder().code( 200 )
+                                        .message( "PoliceType was updated" ).build() ).success( false ).build() ) );
+                    } else return Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 )
+                            .message( "There is such a name so please choose another one ))" ).build() ).build() ); } ) :
+        Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 )
+                .message( "This policeType does not exists. so if u wish u can check the list and choose another one ((" ).build() ).build() ) ); }
 
     public String decode ( String token ) { return new String( Base64.getDecoder().decode( token ) ).split( "_" )[ 0 ]; }
 
@@ -250,30 +247,25 @@ public final class RedisDataControl {
 
     // uses when Patrul login to account after some time
     public Mono< ApiResponseModel > login ( PatrulLoginRequest patrulLoginRequest ) { return this.patrulMap.containsKey( patrulLoginRequest.getPassportSeries() ).flatMap( aBoolean -> aBoolean ?
-            this.patrulMap.get( patrulLoginRequest.getPassportSeries() )
-                    .map( s -> SerDes.getSerDes().deserialize( s ) )
-                    .flatMap( patrul -> {
-                        if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {
-                            patrul.setStartedToWorkDate( new Date() );
-                            patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
-                            patrul.setToken( Base64.getEncoder().encodeToString( ( patrul.getPassportNumber()
-                                    + "_" + patrul.getPassword()
-                                    + "_" + Archive.getAchieve().generateToken() ).getBytes( StandardCharsets.UTF_8 ) ) );
-                            return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
-                                    .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() )
-                                            .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
-                                            .status( Status.builder().message( "Welcome to Family: " + patrul.getName() ).code( 200 ).build() ).build() ) );
+            this.patrulMap.get( patrulLoginRequest.getPassportSeries() ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap(patrul -> {
+                if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {
+                    patrul.setStartedToWorkDate( new Date() );
+                    patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
+                    patrul.setToken( Base64.getEncoder().encodeToString( ( patrul.getPassportNumber()
+                            + "_" + patrul.getPassword()
+                            + "_" + Archive.getAchieve().generateToken() ).getBytes( StandardCharsets.UTF_8 ) ) );
+                    return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() ).success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) ).status( Status.builder().message( "Welcome to Family: " + patrul.getName() ).code( 200 ).build() ).build() ) );
                 } else return Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 ).message( "Wrong Login or password" ).build() ).success( false ).build() );
             } ) : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Login or Password" ).code( 201 ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > logout ( String token ) { return this.patrulMap.get( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
             .flatMap( patrul -> {
-            patrul.setToken( null );
-            return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
-                    .flatMap( aBoolean -> Mono.just( ApiResponseModel.builder()
-                            .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGOUT ) )
-                            .status( Status.builder().message( "See you soon my darling )))" ).code( 200 ).build() ).build() ) ); } ); }
+                patrul.setToken( null );
+                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                        .flatMap( aBoolean -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGOUT ) )
+                                .status( Status.builder().message( "See you soon my darling )))" ).code( 200 ).build() ).build() ) ); } ); }
 
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) { return this.polygonForPatrulMap
             .containsKey( scheduleForPolygonPatrul.getUuid() ).flatMap( aBoolean -> aBoolean ?

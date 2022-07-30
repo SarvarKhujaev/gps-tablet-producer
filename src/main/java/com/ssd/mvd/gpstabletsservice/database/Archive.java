@@ -83,8 +83,7 @@ public class Archive implements Runnable {
                         .address( card.getAddress() != null ? card.getAddress() : "unknown" )
                         .title( "My dear: " + patrul.getName() + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
                 return Mono.just( ApiResponseModel.builder().success( true )
-                                .status( Status.builder().message( patrul.getName() + " linked to " + card.getCardId() ).code( 200 ).build() )
-                        .build() ); } ); }
+                                .status( Status.builder().message( patrul.getName() + " linked to " + card.getCardId() ).code( 200 ).build() ).build() ); } ); }
 
     public Mono< ApiResponseModel > removePatrulFromCard ( Long cardId, Patrul patrul ) { return RedisDataControl.getRedis().getCard( cardId )
             .flatMap( card -> {
