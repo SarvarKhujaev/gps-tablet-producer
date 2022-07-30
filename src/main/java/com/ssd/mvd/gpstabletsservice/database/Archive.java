@@ -131,12 +131,12 @@ public class Archive implements Runnable {
                         card.setStatus( FINISHED );
                         RedisDataControl.getRedis().remove( card.getCardId() );
                         RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
-                this.getAllSelfEmploymentTask()
-                        .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
-                        .subscribe( selfEmploymentTask -> {
-                            selfEmploymentTask.setTaskStatus( FINISHED );
-                            RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
-                            CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
-                            this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); }
+            this.getAllSelfEmploymentTask()
+                    .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
+                    .subscribe( selfEmploymentTask -> {
+                        selfEmploymentTask.setTaskStatus( FINISHED );
+                        RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
+                        CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
+                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); }
         }
 }

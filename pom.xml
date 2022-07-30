@@ -32,6 +32,13 @@
 
     <dependencies>
 
+        <!-- https://mvnrepository.com/artifact/com.datastax.oss/java-driver-query-builder -->
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-query-builder</artifactId>
+            <version>4.9.0</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
         <dependency>
             <groupId>org.jetbrains</groupId>

@@ -18,7 +18,6 @@ import com.ssd.mvd.gpstabletsservice.entity.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
 import java.util.logging.Logger;
 import java.time.Duration;
 import java.util.Date;
@@ -38,8 +37,6 @@ public final class CassandraDataControl {
     public final String polygonType = "POLYGONTYPE";
     public final String selfEmployment = "SELFEMPLOYMENT";
     public final String polygonForPatrul = "POLYGONFORPATRUl";
-    private final String findFaceTaskFromAssomidin = "findFaceTaskFromAssomidin";
-    private final String findFaceTaskFromShamsiddin = "findFaceTaskFromShamsiddin";
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
@@ -49,13 +46,9 @@ public final class CassandraDataControl {
         options.setConnectTimeoutMillis( 30000 );
         options.setReadTimeoutMillis( 300000 );
         options.setTcpNoDelay( true );
-        String[] hosts = new String[3];
-        hosts[0] = "10.254.5.1";
-        hosts[1] = "10.254.5.2";
-        hosts[2] = "10.254.5.3";
         ( this.session = ( this.cluster = Cluster.builder()
             .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
-            .addContactPoints( hosts )
+                .addContactPoints( "10.254.5.1, 10.254.5.2, 10.254.5.3".split( ", " ) )
             .withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
             .withSocketOptions( options )
             .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
@@ -118,8 +111,6 @@ public final class CassandraDataControl {
 
     public Boolean addValue ( SelfEmploymentTask selfEmploymentTask, String key ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.selfEmployment + "(id, object) VALUES(" + selfEmploymentTask.getUuid() + ", '" + key + "');" ).isDone(); }
 
-    public Boolean addValue ( UUID selfEmploymentTask, String key ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.selfEmployment + "(id, object) VALUES(" + selfEmploymentTask + ", '" + key + "');" ).isDone(); }
-
     public Boolean addValue ( Patrul patrul, String key ) {
         this.session.executeAsync( "CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date timestamp PRIMARY KEY, status text, message text, totalActivityTime double );" ); // creating new journal for new patrul
         return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + "(passportNumber, NSF, object) VALUES('" + patrul.getPassportNumber() + "', '" + patrul.getSurnameNameFatherName() + "', '" + key + "');" ).isDone(); }
@@ -141,7 +132,7 @@ public final class CassandraDataControl {
         // uses to start to work every day in the morning
         case RETURNED_TO_WORK -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'returned to work at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
         case ARRIVED -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'arrived to given task location at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
-        // by default it means t o log in to account
+        // by default, it means t o log in to account
         default -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES ('" + new Date().toInstant() + "', '" + status + "', 'log in at: " + patrul.getStartedToWorkDate().toInstant() + " with simCard " + patrul.getSimCardNumber() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return RedisDataControl.getRedis().getPatrul( request.getData() ).flatMap( patrul -> request == null ?

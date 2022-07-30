@@ -212,15 +212,19 @@ public final class RedisDataControl {
     // uses when Patrul wants to change his status from active to pause
     public Mono< ApiResponseModel > setInPause ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
-                patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.NOT_AVAILABLE );
-                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) ).status( Status.builder().message( "Patrul set in pause" ).code( 200 ).build() ).build() ) );
+                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
+                                .status( Status.builder().message( "Patrul set in pause" ).code( 200 ).build() ).build() ) );
             } ) : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
 
     // uses when Patrul wants to change his status from pause to active
     public Mono< ApiResponseModel > backToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
-                if ( patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.BUSY ) != 0 ) patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
-                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.RETURNED_TO_WORK ) ).status( Status.builder().message( "Patrul returned to work" ).code( 200 ).build() ).build() ) );
+                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.RETURNED_TO_WORK ) )
+                                .status( Status.builder().message( "Patrul returned to work" ).code( 200 ).build() ).build() ) );
             } ) : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
 
     // sets every day when Patrul start to work in morning
@@ -228,15 +232,20 @@ public final class RedisDataControl {
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
                 patrul.setTotalActivityTime( 0L ); // set to 0 every day
                 patrul.setStartedToWorkDate( new Date() ); // registration of time every day
-                if ( patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.BUSY ) != 0 ) patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
-                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.START_TO_WORK ) ).status( Status.builder().message( "Patrul started to work" ).code( 200 ).build() ).build() ) );
+                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.START_TO_WORK ) )
+                                .status( Status.builder().message( "Patrul started to work" ).code( 200 ).build() ).build() ) );
             } ) : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
 
     // uses when patrul finishes his work in the evening
     public Mono< ApiResponseModel > stopToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s )).flatMap( patrul -> {
                 patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.NOT_AVAILABLE );
-                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) ).flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.STOP_TO_WORK ) ).status( Status.builder().message( "Patrul stopped his job" ).code( 200 ).build() ).build() ) );
+                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
+                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.STOP_TO_WORK ) )
+                                .status( Status.builder().message( "Patrul stopped his job" ).code( 200 ).build() ).build() ) );
             } ) : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
 
     // uses when Patrul login to account after some time
@@ -319,7 +328,9 @@ public final class RedisDataControl {
                                         .status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ) ); } ); }
 
     public Mono< ApiResponseModel > checkToken ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
-            this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() ).status( Status.builder().message( "All right!!!" ).code( 200 ).build() ).success( true ).build() ) )
+            this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) )
+                    .flatMap( patrul -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() )
+                            .status( Status.builder().message( "All right!!!" ).code( 200 ).build() ).success( true ).build() ) )
             : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong token" ).code( 201 ).build() ).success( false ).build() ) ); }
 
     public void addValue ( Card card ) {
@@ -338,7 +349,7 @@ public final class RedisDataControl {
 
     public void addValue ( String id, ActiveTask activeTask ) { this.activeTasks.fastPut( id, SerDes.getSerDes().serialize( activeTask ) ).subscribe(); }
 
-    public void remove ( String id ) { this.activeTasks.remove( id ).subscribe(); }
+    public void remove ( String id ) { this.activeTasks.remove( id ).subscribe( System.out::println ); }
 
     public Flux< ActiveTask > getActiveTasks() { return this.activeTasks.valueIterator().flatMap( s -> Mono.just( SerDes.getSerDes().deserializeActiveTask( s ) ) ); }
 }
