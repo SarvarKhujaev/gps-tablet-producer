@@ -286,7 +286,10 @@ public final class RedisDataControl {
                                                     .status( Status.builder().message( "Patruls was added to polygon" ).code( 200 ).build() ).build() ) ); } ) )
             : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().code( 201 ).message( "Wrong polygon Id" ).build() ).build() ) ); }
 
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this.patrulMap.get( request.getData() ).map(s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> CassandraDataControl.getInstance().getPatrulStatistics( request ) ); }
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this.patrulMap
+            .get( request.getData() )
+            .map( s -> SerDes.getSerDes().deserialize( s ) )
+            .flatMap( patrul -> CassandraDataControl.getInstance().getPatrulStatistics( request ) ); }
 
     public Mono< ApiResponseModel > accepted ( String token ) { return this.patrulMap.get( this.decode( token ) ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
         if ( patrul.getSelfEmploymentId() != null ) return Archive.getAchieve().get( patrul.getSelfEmploymentId() )

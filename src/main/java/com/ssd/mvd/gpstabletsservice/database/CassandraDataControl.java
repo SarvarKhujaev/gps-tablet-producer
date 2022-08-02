@@ -135,9 +135,20 @@ public final class CassandraDataControl {
         // by default, it means t o log in to account
         default -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES ('" + new Date().toInstant() + "', '" + status + "', 'log in at: " + patrul.getStartedToWorkDate().toInstant() + " with simCard " + patrul.getSimCardNumber() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return RedisDataControl.getRedis().getPatrul( request.getData() ).flatMap( patrul -> request == null ?
-                Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + patrul.getPassportNumber() ).all().stream() ) ) )
-                : Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE date >= '" + SerDes.getSerDes().convertDate( request.getObject().toString() ).toInstant() + "' and date <= '" + SerDes.getSerDes().convertDate( request.getSubject().toString() ).toInstant() + "';" ).all().stream() ) ) ) ); }
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return RedisDataControl.getRedis()
+            .getPatrul( request.getData() )
+            .flatMap( patrul -> request.getSubject() == null && request.getSubject() == null ?
+                Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
+                        + this.dbName + "."
+                        + this.patrols + patrul.getPassportNumber() ).all().stream() ) ) )
+                : Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
+                    + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE date >= '"
+                    + SerDes.getSerDes().convertDate( request.getObject().toString() ).toInstant()
+                    + "' and date <= '" + SerDes.getSerDes().convertDate( request.getSubject().toString() ).toInstant() + "';" )
+                    .all().stream() ) ) )
+                    .doOnError( throwable -> Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
+                        + this.dbName + "."
+                        + this.patrols + patrul.getPassportNumber() ).all().stream() ) ) ) ) ); }
 
     public Flux< Row > getPatruls ( String param ) { return Flux.fromStream( this.session.execute( "SELECT nsf FROM TABLETS.patruls WHERE nsf LIKE '%" + param  + "%';" ).all().stream() ); }
 
