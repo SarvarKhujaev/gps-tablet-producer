@@ -4,8 +4,8 @@ import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
+import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
-import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.response.PatrulInfo;
 import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -75,6 +75,10 @@ public class PatrulController {
 
     @MessageMapping ( value = "getCurrentUser" )
     public Mono< Patrul > getCurrentUser ( String passportSeries ) { return RedisDataControl.getRedis().getPatrul( passportSeries ); }
+
+    @MessageMapping ( value = "getPatrulDataByToken" )
+    public Mono< Status > getPatrulDataByToken ( String token ) { return RedisDataControl.getRedis().checkToken( token )
+            .flatMap( apiResponseModel -> Mono.just( apiResponseModel.getStatus() ) ); }
 
     @MessageMapping( value = "deletePatrul" )
     public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return RedisDataControl.getRedis().deletePatrul( passportNumber ); }

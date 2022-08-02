@@ -155,16 +155,23 @@ public final class RedisDataControl {
             this.polygonTypeMap.fastPutIfExists( polygonType.getUuid(), SerDes.getSerDes().serialize( polygonType ) ).flatMap( aBoolean -> Mono.just( ApiResponseModel.builder().status( Status.builder().message( polygonType1.getName() + " was updated" ).build() ).success( aBoolean ).build() ) )
             : Mono.just( ApiResponseModel.builder().status( Status.builder().message( polygonType.getName() + " does not exists" ).build() ).success( false ).build() ) ); }
 
-    public Mono< ApiResponseModel > update ( Patrul patrul ) { return this.patrulMap.containsKey( patrul.getPassportNumber() ).flatMap( aBoolean -> {
-        if ( aBoolean ) { return this.patrulMap.get( patrul.getPassportNumber() ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul1 -> {
-            if ( patrul1.getCarNumber() != null && patrul1.getCarNumber().length() > 0 ) return this.getCar( patrul1.getCarNumber() )
-                    .flatMap( reqCar -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
-                            .flatMap( value -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
-                            .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() ).success( true ).build() ) ) );
-            else return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
-                    .flatMap( value -> Mono.just( ApiResponseModel.builder().success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
-                    .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() ).success( true ).build() ) ); } );
-        } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong Patrul data" ).code( 200 ).build() ).build() ); } ); }
+    public Mono< ApiResponseModel > update ( Patrul patrul ) { return this.patrulMap.containsKey( patrul.getPassportNumber() )
+            .flatMap( aBoolean -> {
+                if ( aBoolean ) { return this.patrulMap.get( patrul.getPassportNumber() )
+                .map( s -> SerDes.getSerDes().deserialize( s ) )
+                .flatMap( patrul1 -> {
+                    if ( patrul1.getCarNumber() != null && patrul1.getCarNumber().length() > 0 ) return this.getCar( patrul1.getCarNumber() )
+                            .flatMap( reqCar -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
+                                    .flatMap( value -> Mono.just( ApiResponseModel.builder()
+                                            .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
+                                    .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() )
+                                            .success( true ).build() ) ) );
+                    else return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
+                        .flatMap( value -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
+                        .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() ).success( true ).build() ) ); } );
+        } else return Mono.just( ApiResponseModel.builder().success( false )
+                        .status( Status.builder().message( "Wrong Patrul data" ).code( 200 ).build() ).build() ); } ); }
 
     public Mono< ApiResponseModel > update ( Polygon polygon ) { return this.polygonMap.containsKey( polygon.getUuid().toString() ).flatMap( a -> a ?
             this.polygonMap.fastPutIfExists( polygon.getUuid().toString(), SerDes.getSerDes().serialize( polygon ) ).flatMap( aBoolean -> aBoolean ?
@@ -323,11 +330,18 @@ public final class RedisDataControl {
                                         .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED ) )
                                         .status( Status.builder().message( "Patrul accepted new task" ).code( 200 ).build() ).build() ) ) ); } ); }
 
-    public Mono< ApiResponseModel > checkToken ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
-            this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) )
-                    .flatMap( patrul -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() )
-                            .status( Status.builder().message( "All right!!!" ).code( 200 ).build() ).success( true ).build() ) )
-            : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong token" ).code( 201 ).build() ).success( false ).build() ) ); }
+    public Mono< ApiResponseModel > checkToken ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) )
+            .flatMap( aBoolean -> aBoolean ?
+                this.patrulMap.get( this.key )
+                        .map( s -> SerDes.getSerDes().deserialize( s ) )
+                        .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
+                                .data( Data.builder().data( patrul ).build() )
+                                .status( Status.builder()
+                                        .message( patrul.getUuid().toString() )
+                                        .code( 200 )
+                                        .build() )
+                                .success( true ).build() ) )
+                : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong token" ).code( 201 ).build() ).success( false ).build() ) ); }
 
     public void addValue ( Card card ) {
         this.addValue( card.getCardId().toString(), new ActiveTask( card ) );
