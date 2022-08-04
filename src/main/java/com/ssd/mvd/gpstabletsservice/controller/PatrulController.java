@@ -75,5 +75,7 @@ public class PatrulController {
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return RedisDataControl.getRedis().getPatrulStatistics( passportNumber ); }
 
     @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
-    public Flux< PatrulInfo > getPatrulByPortion ( String name ) { return CassandraDataControl.getInstance().getPatruls( name ).map( row -> new PatrulInfo( row.getString( "NSF" ) ) ); }
+    public Flux< PatrulInfo > getPatrulByPortion ( String name ) { return CassandraDataControl.getInstance()
+            .getPatruls( name )
+            .map( row -> new PatrulInfo( row.getString( "NSF" ) ) ); }
 }
