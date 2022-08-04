@@ -4,7 +4,7 @@ import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.request.SelfEmploymentRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
-import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -37,19 +37,5 @@ public class SelfEmploymentController {
     @MessageMapping ( value = "addReportForSelfEmployment" )
     public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return RedisDataControl.getRedis()
             .getPatrul( reportForCard.getPassportSeries() )
-            .flatMap( patrul -> patrul.getCard() != null ? RedisDataControl.getRedis().getCard( patrul.getCard() ).flatMap( card -> {
-                card.getReportForCardList().add( reportForCard );
-                patrul.changeTaskStatus( Status.FINISHED, card );
-                KafkaDataControl.getInstance().writeToKafka( card );
-                return RedisDataControl.getRedis().update( patrul )
-                        .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) );
-        } ) : Archive.getAchieve().get( patrul.getSelfEmploymentId() ).flatMap( selfEmploymentTask -> {
-            selfEmploymentTask.getReportForCards().add( reportForCard );
-            return RedisDataControl.getRedis().update( patrul.changeTaskStatus( Status.FINISHED, selfEmploymentTask ) )
-                    .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-//                            .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) ); } ) ); }
+            .flatMap( patrul -> TaskInspector.getInstance().saveReportForTask( patrul, reportForCard ) ); }
 }

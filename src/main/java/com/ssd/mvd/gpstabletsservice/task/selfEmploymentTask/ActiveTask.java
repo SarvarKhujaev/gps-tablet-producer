@@ -1,14 +1,17 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
 import lombok.Data;
+import java.util.Map;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 
 @Data
 public class ActiveTask {
@@ -75,4 +78,61 @@ public class ActiveTask {
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );
         this.setCreatedDate( card.getIncidentDate() ); }
+
+    public ActiveTask( EventFace eventFace ) {
+        this.setTaskId( eventFace.getId() );
+        this.setStatus( eventFace.getStatus() );
+        this.setPatrulList( eventFace.getPatruls() );
+        this.setLatitude( eventFace.getLatitude() );
+        this.setLongitude( eventFace.getLongitude() );
+        this.setCreatedDate( eventFace.getCreated_date() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_FACE.name() ); }
+
+    public ActiveTask ( EventFace eventFace, Status status ) {
+        this.setPatrulStatus( status );
+        this.setTaskId( eventFace.getId() );
+        this.setStatus( eventFace.getStatus() );
+        this.setLatitude( eventFace.getLatitude() );
+        this.setPatrulList( eventFace.getPatruls() );
+        this.setLongitude( eventFace.getLongitude() );
+        this.setCreatedDate( eventFace.getCreated_date() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_FACE.name() ); }
+
+    public ActiveTask( EventBody eventBody ) {
+        this.setTaskId( eventBody.getId() );
+        this.setStatus( eventBody.getStatus() );
+        this.setPatrulList( eventBody.getPatruls() );
+        this.setLatitude( eventBody.getLatitude() );
+        this.setLongitude( eventBody.getLongitude() );
+        this.setCreatedDate( eventBody.getCreated_date() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_BODY.name() ); }
+
+    public ActiveTask ( EventBody eventBody, Status status ) {
+        this.setPatrulStatus( status );
+        this.setTaskId( eventBody.getId() );
+        this.setStatus( eventBody.getStatus() );
+        this.setLatitude( eventBody.getLatitude() );
+        this.setPatrulList( eventBody.getPatruls() );
+        this.setLongitude( eventBody.getLongitude() );
+        this.setCreatedDate( eventBody.getCreated_date() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_BODY.name() ); }
+
+    public ActiveTask ( EventCar eventCar ) {
+        this.setTaskId( eventCar.getId() );
+        this.setStatus( eventCar.getStatus() );
+        this.setPatrulList( eventCar.getPatruls() );
+        this.setLatitude( eventCar.getLatitude() );
+        this.setLongitude( eventCar.getLongitude() );
+        this.setCreatedDate( eventCar.getCreated_date() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_CAR.name() ); }
+
+    public ActiveTask ( EventCar eventCar, Status status ) {
+        this.setPatrulStatus( status );
+        this.setTaskId( eventCar.getId() );
+        this.setStatus( eventCar.getStatus() );
+        this.setLatitude( eventCar.getLatitude() );
+        this.setPatrulList( eventCar.getPatruls() );
+        this.setLongitude( eventCar.getLongitude() );
+        this.setCreatedDate( eventCar.getCreated_date() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_CAR.name() ); }
 }

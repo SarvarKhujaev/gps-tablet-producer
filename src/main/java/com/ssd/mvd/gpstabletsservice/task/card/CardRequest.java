@@ -1,6 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+
 import lombok.extern.jackson.Jacksonized;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -11,9 +13,10 @@ import lombok.Data;
 @Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
-public class CardRequest {
+public class CardRequest< T > {
+    private TaskTypes taskType;
     @JsonDeserialize
-    private Card card;
+    private T card;
     @JsonDeserialize
     private List< String > patruls;
 }

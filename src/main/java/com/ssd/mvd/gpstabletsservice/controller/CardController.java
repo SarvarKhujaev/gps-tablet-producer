@@ -4,11 +4,11 @@ import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
+import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
-import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
+import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
-import com.ssd.mvd.gpstabletsservice.entity.Data;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,26 +34,34 @@ public class CardController {
     public Mono< Card > getCurrentCard ( Long cardId ) { return RedisDataControl.getRedis().getCard( cardId ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
-    public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest request ) { return Flux.fromStream( request.getPatruls().stream() )
-            .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-            .flatMap( patrul -> patrul.flatMap( patrul1 -> Archive.getAchieve().save( patrul1, request.getCard() ) ) ); }
+    public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
+        return switch ( request.getTaskType() ) {
+            case CARD_102 -> Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, SerDes.getSerDes().deserializeCard( request.getCard() ) ) ) );
+
+            case FIND_FACE_EVENT_FACE -> Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, SerDes.getSerDes().deserializeEventFace( request.getCard() ) ) ) );
+
+            case FIND_FACE_EVENT_BODY -> Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, SerDes.getSerDes().deserializeEventBody( request.getCard() ) ) ) );
+
+            default -> Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, SerDes.getSerDes().deserializeEventCar( request.getCard() ) ) ) ); }; }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return RedisDataControl.getRedis()
             .getPatrul( RedisDataControl.getRedis().decode( token ) )
-            .flatMap( patrul -> {
-                if ( patrul.getSelfEmploymentId() != null ) return Archive.getAchieve().get( patrul.getSelfEmploymentId() )
-                        .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
-                                .data( Data.builder().data( new ActiveTask( selfEmploymentTask, patrul.getStatus() ) ).type( "selfEmployment" ).build() )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
-                                        .message( "U have SelfEmployment Task" ).build() ).success( true ).build() ) );
-                else if ( patrul.getCard() != null ) return RedisDataControl.getRedis().getCard( patrul.getCard() )
-                        .flatMap( card -> Mono.just( ApiResponseModel.builder().data( Data.builder()
-                                        .data( new ActiveTask( card, patrul.getStatus() ) )
-                                        .type( "card" ).build() )
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
-                                .message( "U have 102 Task" ).build() ).success( true ).build() ) );
-                else return Mono.just( ApiResponseModel.builder().success( false )
-                            .status( Status.builder().code( 201 )
-                                    .message( "U have no task, so u can do smth else, my darling )))" ).build() ).build() ); } ); }
+            .flatMap( patrul -> TaskInspector.getInstance().getCurrentActiveTask( patrul ) ); }
 }

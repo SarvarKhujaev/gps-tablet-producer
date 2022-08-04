@@ -3,7 +3,6 @@ package com.ssd.mvd.gpstabletsservice.database;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.task.card.Card;
 
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -49,7 +48,7 @@ public class KafkaDataControl {
         this.logger.info( "KafkaDataControl was created" );
         this.client = KafkaAdminClient.create( this.setProperties() );
         this.getNewTopic( Status.NOTIFICATION.name().toLowerCase() );
-        this.getNewTopic( Status.CARD_FINAL.name().toLowerCase() );
+        this.getNewTopic( Status.ACTIVE_TASK.name().toLowerCase() );
         this.getNewTopic( "GpsTabletsData" ); }
 
     private KafkaTemplate< String, String > kafkaTemplate () {
@@ -59,18 +58,18 @@ public class KafkaDataControl {
         map.put( ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class );
         return new KafkaTemplate<>( new DefaultKafkaProducerFactory<>( map ) ); }
 
-    public Card writeToKafka ( Card card ) {
-        this.kafkaTemplate.send( Status.CARD_FINAL.name().toLowerCase(), SerDes.getSerDes().serialize( card ) ).addCallback( new ListenableFutureCallback<>() {
+    public String writeToKafka ( String card ) {
+        this.kafkaTemplate.send( Status.ACTIVE_TASK.name().toLowerCase(), card ).addCallback(new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: "
-                    + card.getCardId() + " with offset: "
+                    + " with offset: "
                     + result.getRecordMetadata().offset() ); }
         } ); return card; }
 
-    public Notification writeToKafka ( Notification notification ) {
+    public void writeToKafka ( Notification notification ) {
         this.kafkaTemplate.send( Status.NOTIFICATION.name().toLowerCase(), SerDes.getSerDes().serialize( notification ) ).addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
@@ -79,6 +78,5 @@ public class KafkaDataControl {
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got notification: "
                     + notification.getTitle()
                     + " at: " + notification.getNotificationWasCreated()
-                    + " with offset: " + result.getRecordMetadata().offset() ); }
-        } ); return notification; }
+                    + " with offset: " + result.getRecordMetadata().offset() ); } } ); }
 }

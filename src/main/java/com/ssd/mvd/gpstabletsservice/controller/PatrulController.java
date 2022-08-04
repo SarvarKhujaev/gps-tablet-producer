@@ -5,9 +5,8 @@ import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.response.Status;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.response.PatrulInfo;
-import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
+import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
@@ -23,19 +22,8 @@ import reactor.core.publisher.Mono;
 @RestController
 public class PatrulController {
     @MessageMapping ( value = "getTaskDetails" )
-    public Mono< ApiResponseModel > getTaskDetails ( Data data ) {
-        Patrul patrul = SerDes.getSerDes().deserialize( data.getData() );
-        return patrul.getCard() != null ? RedisDataControl.getRedis().getCard( patrul.getCard() )
-                .flatMap( card -> Mono.just( ApiResponseModel.builder()
-                        .success( true )
-                        .data( Data.builder().data( new CardDetails( card, data.getType() ) ).build() )
-                        .build() ) )
-                : Archive.getAchieve().get( patrul.getSelfEmploymentId() )
-                .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
-                                .data( Data.builder().data( new CardDetails( selfEmploymentTask, data.getType(), patrul.getPassportNumber() ) ).build() )
-                        .build() ) ); }
+    public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector.getInstance()
+            .getTaskDetails( SerDes.getSerDes().deserialize( data.getData() ) ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( String token ) { return RedisDataControl.getRedis().arrived( token ); }

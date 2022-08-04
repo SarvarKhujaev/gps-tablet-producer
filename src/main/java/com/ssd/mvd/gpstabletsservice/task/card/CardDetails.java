@@ -1,12 +1,15 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
+import java.util.*;
+import lombok.Data;
+import reactor.core.publisher.Flux;
+
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.constants.Details;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-
-import reactor.core.publisher.Flux;
-import lombok.Data;
-import java.util.*;
 
 @Data
 public class CardDetails {
@@ -17,7 +20,7 @@ public class CardDetails {
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() ).subscribe( details -> {
             switch ( details ) {
                 case NUMBER -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "№", selfEmploymentTask.getUuid() ) );
-                case ADDRESS -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Адрес", selfEmploymentTask.getIncidentDate() ) );
+                case ADDRESS -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Адрес", selfEmploymentTask.getAddress() ) );
                 case DESCRIPTION -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Описание", selfEmploymentTask.getDescription() ) );
                 case ACCEPTED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
                 case REPORT_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время отрпавки рапорта", selfEmploymentTask.getIncidentDate() ) );
@@ -31,6 +34,48 @@ public class CardDetails {
                         .subscribe( reportForCard -> {
                             this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Отчет", reportForCard ) );
                             this.getDetails().get( Details.SELF_EMPLOYMENT ).add( new Item( "Время отчета", reportForCard ) ); } ); } } ); }
+
+    public CardDetails ( EventBody eventBody ) {
+        this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_BODY, new ArrayList<>() );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "F.I.O",
+                eventBody.getPsychologyCard().getModelForPassport().getPerson().getNameLatin() + " "
+               + eventBody.getPsychologyCard().getModelForPassport().getPerson().getSurnameLatin() + " "
+                        + eventBody.getPsychologyCard().getModelForPassport().getPerson().getPatronymLatin() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Pasport Seriyasi",
+                eventBody.getPsychologyCard().getModelForPassport().getDocument().getSerialNumber() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Ip", eventBody.getCameraIp() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Image", eventBody.getFullframe() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Sana", eventBody.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "O'XSHASHLIGI: ", eventBody.getConfidence() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
+
+    public CardDetails ( EventFace eventBody ) {
+        this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_BODY, new ArrayList<>() );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "F.I.O",
+                eventBody.getPsychologyCard().getModelForPassport().getPerson().getNameLatin() + " "
+               + eventBody.getPsychologyCard().getModelForPassport().getPerson().getSurnameLatin() + " "
+                        + eventBody.getPsychologyCard().getModelForPassport().getPerson().getPatronymLatin() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Pasport Seriyasi",
+                eventBody.getPsychologyCard().getModelForPassport().getDocument().getSerialNumber() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Ip", eventBody.getCameraIp() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Image", eventBody.getFullframe() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Sana", eventBody.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "O'XSHASHLIGI: ", eventBody.getConfidence() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
+
+    public CardDetails ( EventCar eventBody ) {
+        this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_BODY, new ArrayList<>() );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "F.I.O",
+                eventBody.getCarTotalData().getModelForCar().getModel() + ", "
+               + eventBody.getCarTotalData().getModelForCar().getKuzov() + ", RANG: "
+                        + eventBody.getCarTotalData().getModelForCar().getColor() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Номер машины до угона: ",
+                eventBody.getCarTotalData().getModelForCar().getPlateNumber() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Ip", eventBody.getCameraIp() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Image", eventBody.getFullframe() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Sana", eventBody.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "O'XSHASHLIGI: ", eventBody.getConfidence() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
 
     public CardDetails ( Card card, String language ) {
         this.getDetails().putIfAbsent( Details.DETAILS, new ArrayList<>() );
