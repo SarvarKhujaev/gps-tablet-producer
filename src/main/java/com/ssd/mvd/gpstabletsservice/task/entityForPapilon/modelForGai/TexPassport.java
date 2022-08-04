@@ -1,10 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai;
 
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForPassport.ModelForPassport;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.ssd.mvd.entity.modelForPassport.ModelForPassport;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Data;
 
 @Data
 @NoArgsConstructor

@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class ModelForPassport {
-    private com.ssd.mvd.entity.modelForPassport.Data Data;
+    private com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForPassport.Data Data;
 }

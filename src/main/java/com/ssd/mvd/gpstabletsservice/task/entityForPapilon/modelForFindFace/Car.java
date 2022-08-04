@@ -1,10 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForFindFace;
 
-import com.ssd.mvd.entity.modelForPassport.First;
-import com.ssd.mvd.entity.modelForPassport.Last;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForPassport.First;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForPassport.Last;
+
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Data;
 
 @Data
 @NoArgsConstructor

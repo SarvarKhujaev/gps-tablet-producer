@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class ModelForCadastor {
-    private com.ssd.mvd.entity.modelForCadastr.Data Data;
+    private com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForCadastr.Data Data;
 }
