@@ -175,35 +175,35 @@ public final class TaskInspector {
                             .success( CassandraDataControl.getInstance().login( patrul, status ) )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                     .message( "Patrul: " + this.changeTaskStatus( patrul, status, card )
-                                            .getPassportNumber() + " accepted new task" ).code( 200 ).build() ).build() ) );
+                                            .getPassportNumber() + " changed his status task to: " + status  ).code( 200 ).build() ).build() ) );
 
             case SELF_EMPLOYMENT -> Archive.getAchieve().get( UUID.fromString( patrul.getTaskId() ) )
                     .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
                             .success( CassandraDataControl.getInstance().login( patrul, status ) )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                     .message( "Patrul: " + this.changeTaskStatus( patrul, status, selfEmploymentTask )
-                                            .getPassportNumber() + " accepted new task" ).code( 200 ).build() ).build() ) );
+                                            .getPassportNumber() + " changed his status task to: " + status ).code( 200 ).build() ).build() ) );
 
             case FIND_FACE_EVENT_CAR -> Archive.getAchieve().getEventCar( patrul.getTaskId() )
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( CassandraDataControl.getInstance().login( patrul, status ) )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                     .message( "Patrul: " + this.changeTaskStatus( patrul, status, eventCar )
-                                            .getPassportNumber() + " accepted new task" ).code( 200 ).build() ).build() ) );
+                                            .getPassportNumber() + " changed his status task to: " + status  ).code( 200 ).build() ).build() ) );
 
             case FIND_FACE_EVENT_FACE -> Archive.getAchieve().getEventFace( patrul.getTaskId() )
                     .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
                             .success( CassandraDataControl.getInstance().login( patrul, status ) )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                     .message( "Patrul: " + this.changeTaskStatus( patrul, status, eventFace )
-                                            .getPassportNumber() + " accepted new task" ).code( 200 ).build() ).build() ) );
+                                            .getPassportNumber() + " changed his status task to: " + status  ).code( 200 ).build() ).build() ) );
 
             default -> Archive.getAchieve().getEventBody( patrul.getTaskId() )
                     .flatMap( eventBody -> Mono.just( ApiResponseModel.builder()
                             .success( CassandraDataControl.getInstance().login( patrul, status ) )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                     .message( "Patrul: " + this.changeTaskStatus( patrul, status, eventBody )
-                                            .getPassportNumber() + " accepted new task" ).code( 200 ).build() ).build() ) ); }; }
+                                            .getPassportNumber() + " changed his status task to: " + status  ).code( 200 ).build() ).build() ) ); }; }
 
     public Mono< ApiResponseModel > getCurrentActiveTask ( Patrul patrul ) {
         return switch ( patrul.getTaskTypes() ) {
