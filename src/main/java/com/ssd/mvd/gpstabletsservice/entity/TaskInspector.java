@@ -43,6 +43,7 @@ public final class TaskInspector {
                 card.getPatrulStatuses().get( patrul.getPassportNumber() )
                         .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) );
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), "card" );
+                patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null );
@@ -75,6 +76,7 @@ public final class TaskInspector {
             case FINISHED -> {
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), TaskTypes.FIND_FACE_EVENT_CAR.name() );
                 eventFace.getPatruls().put( patrul.getPassportNumber(), patrul );
+                patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( Status.FREE );
                 patrul.setTaskDate( null );
                 patrul.setTaskId( null ); }
@@ -102,6 +104,7 @@ public final class TaskInspector {
             case FINISHED -> {
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), TaskTypes.FIND_FACE_EVENT_FACE.name() );
                 eventFace.getPatruls().put( patrul.getPassportNumber(), patrul );
+                patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( Status.FREE );
                 patrul.setTaskDate( null );
                 patrul.setTaskId( null ); }
@@ -129,6 +132,7 @@ public final class TaskInspector {
             case FINISHED -> {
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), TaskTypes.FIND_FACE_EVENT_BODY.name() );
                 eventFace.getPatruls().put( patrul.getPassportNumber(), patrul );
+                patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( Status.FREE );
                 patrul.setTaskDate( null );
                 patrul.setTaskId( null ); }
@@ -156,6 +160,7 @@ public final class TaskInspector {
             case FINISHED -> {
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), "selfEmployment" );
                 selfEmploymentTask.getPatruls().put( patrul.getPassportNumber(), patrul );
+                patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( Status.FREE );
                 patrul.setTaskDate( null );
                 patrul.setTaskId( null ); }

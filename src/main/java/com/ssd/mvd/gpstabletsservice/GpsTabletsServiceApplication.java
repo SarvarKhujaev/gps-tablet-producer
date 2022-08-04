@@ -11,6 +11,10 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
+//        RedisDataControl.getRedis().getAllPatruls()
+//                .subscribe( patrul -> {
+//                    patrul.setTaskTypes( TaskTypes.FREE );
+//                    RedisDataControl.getRedis().update( patrul ).subscribe(); } );
         new Thread( Archive.getAchieve(), "archive" ).start(); // launching Archive to monitor all patruls, Card and SelfEmployment
     }
 }

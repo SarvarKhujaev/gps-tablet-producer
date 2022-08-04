@@ -50,6 +50,7 @@ public final class CassandraDataControl {
             .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
                 .addContactPoints( "10.254.5.1, 10.254.5.2, 10.254.5.3".split( ", " ) )
             .withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
+            .withQueryOptions( new QueryOptions().setDefaultIdempotence( true ) )
             .withSocketOptions( options )
             .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
             .withPoolingOptions( new PoolingOptions()
