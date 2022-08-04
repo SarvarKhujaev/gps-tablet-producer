@@ -418,16 +418,14 @@ public final class RedisDataControl {
     public Mono< ApiResponseModel > accepted ( String token ) { return this.patrulMap.get( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
             .flatMap( patrul -> TaskInspector.getInstance().changeTaskStatus( patrul, ACCEPTED )
-                    .flatMap( apiResponseModel -> {
-                        this.update( patrul );
-                        return Mono.just( apiResponseModel ); } ) ); }
+                    .flatMap( apiResponseModel -> this.update( patrul )
+                            .flatMap( apiResponseModel1 -> Mono.just( apiResponseModel ) ) ) ); }
 
     public Mono< ApiResponseModel > arrived ( String token ) { return this.patrulMap.get( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
             .flatMap( patrul -> TaskInspector.getInstance().changeTaskStatus( patrul, ARRIVED )
-                    .flatMap( apiResponseModel -> {
-                        this.update( patrul );
-                        return Mono.just( apiResponseModel ); } ) ); }
+                    .flatMap( apiResponseModel -> this.update( patrul )
+                            .flatMap( apiResponseModel1 -> Mono.just( apiResponseModel ) ) ) ); }
 
     public Mono< ApiResponseModel > checkToken ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) )
             .flatMap( aBoolean -> aBoolean ?
