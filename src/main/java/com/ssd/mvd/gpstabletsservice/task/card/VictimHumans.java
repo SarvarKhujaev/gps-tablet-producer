@@ -1,8 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 
 @Data
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class VictimHumans {

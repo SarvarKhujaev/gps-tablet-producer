@@ -1,10 +1,14 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.extern.jackson.Jacksonized;
 import lombok.*;
 
 @Data
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class EventHuman {
 	private Integer humanId;
 	private Integer hospital;
