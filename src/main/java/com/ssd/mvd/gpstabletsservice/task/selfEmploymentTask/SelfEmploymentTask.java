@@ -11,10 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -38,7 +35,7 @@ public class SelfEmploymentTask {
 
     private List< String > images;
     @JsonDeserialize
-    private Map< String, Patrul > patruls;
+    private Map< String, Patrul > patruls = new HashMap<>();
     @JsonDeserialize
-    private List< ReportForCard > reportForCards;
+    private List< ReportForCard > reportForCards = new ArrayList<>();
 }

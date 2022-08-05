@@ -8,9 +8,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 
 import lombok.Data;
-import java.util.Map;
-import java.util.List;
-import java.util.Date;
+
+import java.util.*;
 
 @Data
 public class EventCar {
@@ -33,6 +32,7 @@ public class EventCar {
     private byte[] fullframebytes;
     private byte[] thumbnailbytes;
 
+    @JsonDeserialize
     private CarTotalData carTotalData;
 
     @JsonDeserialize
@@ -51,9 +51,9 @@ public class EventCar {
     private Map< String, String > license_plate_country;
 
     @JsonDeserialize
-    private Map< String, Patrul> patruls; // the list of patruls who linked to this event
+    private Map< String, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize
-    private List<ReportForCard> reportForCardList; // the list of reports for the current card
+    private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize
-    private Map< String, PatrulStatus> patrulStatuses; // the final status with info the time and Statuses
+    private Map< String, PatrulStatus > patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }

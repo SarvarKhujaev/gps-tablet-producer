@@ -7,9 +7,7 @@ import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
-import java.util.List;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -54,10 +52,10 @@ public class EventBody {
     private Map< String, String > detailed_upper_clothes;
 
     @JsonDeserialize
-    private Map< String, Patrul > patruls; // the list of patruls who linked to this event
+    private Map< String, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize
-    private List< ReportForCard > reportForCardList; // the list of reports for the current card
+    private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize
-    private Map< String, PatrulStatus > patrulStatuses; // the final status with info the time and Statuses
+    private Map< String, PatrulStatus > patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 
 }
