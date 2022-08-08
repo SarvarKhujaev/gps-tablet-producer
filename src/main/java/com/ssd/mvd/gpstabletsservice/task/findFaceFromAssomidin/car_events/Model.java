@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 public class Model {
     private String name;
-    private Integer confidence;
+    private Double confidence;
 }

@@ -6,10 +6,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Features {
-    private Integer age;
     private Beard beard;
     private Gender gender;
-    private Medmask medmask;
     private Glasses glasses;
+    private Medmask medmask;
     private Emotions emotions;
+
+    private Integer age;
+    private String liveness;
 }

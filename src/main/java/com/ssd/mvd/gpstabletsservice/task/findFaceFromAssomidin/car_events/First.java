@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class First  {
-	private List<Integer> bbox;
+	private List< Integer > bbox;
 	private String timestamp;
 	private Integer quality;
 }

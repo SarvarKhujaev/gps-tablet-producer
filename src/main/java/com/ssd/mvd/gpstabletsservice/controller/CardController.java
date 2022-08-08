@@ -54,6 +54,18 @@ public class CardController {
                             .flatMap( patrul1 -> Archive.getAchieve()
                                     .save( patrul1, SerDes.getSerDes().deserializeEventBody( request.getCard() ) ) ) );
 
+            case FIND_FACE_PERSON -> Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, SerDes.getSerDes().deserializeFaceEvents( request.getCard() ) ) ) );
+
+            case FIND_FACE_CAR -> Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, SerDes.getSerDes().deserializeCarEvents ( request.getCard() ) ) ) );
+
             default -> Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
                     .flatMap( patrul -> patrul

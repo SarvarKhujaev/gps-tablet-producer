@@ -2,12 +2,14 @@ package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
 
 import lombok.*;
 
-@Data
-@NoArgsConstructor
+@Setter
+@Getter
 @AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class Bbox {
     private Integer top;
     private Integer left;
-    private Integer right;
     private Integer bottom;
+    private Integer right;
 }

@@ -5,6 +5,8 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
@@ -26,19 +28,21 @@ import java.util.Date;
 public final class CassandraDataControl {
     private final Cluster cluster;
     private final Session session;
-    public final String car = "CARS";
-    public final String tuple = "TUPLE";
-    public final String lustre = "LUSTRA";
-    public final String patrols = "PATRULS"; // for table with Patruls info
-    public final String polygon = "POLYGON";
+    private final String car = "CARS";
+    private final String tuple = "TUPLE";
+    private final String lustre = "LUSTRA";
+    private final String patrols = "PATRULS"; // for table with Patruls info
+    private final String polygon = "POLYGON";
     private final String dbName = "TABLETS";
-    public final String eventCar = "eventCar";
-    public final String eventFace = "eventFace";
-    public final String eventBody = "eventBody";
-    public final String policeTypes = "POLICETYPES";
-    public final String polygonType = "POLYGONTYPE";
-    public final String selfEmployment = "SELFEMPLOYMENT";
-    public final String polygonForPatrul = "POLYGONFORPATRUl";
+    private final String faceCar = "faceCar";
+    private final String eventCar = "eventCar";
+    private final String eventFace = "eventFace";
+    private final String eventBody = "eventBody";
+    private final String facePerson = "facePerson";
+    private final String policeTypes = "POLICETYPES";
+    private final String polygonType = "POLYGONTYPE";
+    private final String selfEmployment = "SELFEMPLOYMENT";
+    private final String polygonForPatrul = "POLYGONFORPATRUl";
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
@@ -82,11 +86,15 @@ public final class CassandraDataControl {
                 + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventCar
                 + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
-//        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.tuple
+//        this.session.execute( "CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.tuple
 //                + "(id uuid PRIMARY KEY, carList list<text>, country text, object text );" );
-//        this.session.execute("CREATE INDEX IF NOT EXISTS ON " + this.dbName + this.tuple + " (country);" );
+//        this.session.execute( "CREATE INDEX IF NOT EXISTS ON " + this.dbName + this.tuple + " (country);" );
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygon
                 + "(id uuid PRIMARY KEY, polygonName text, polygonType text);" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.facePerson
+                + "(id text PRIMARY KEY, object text);" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.faceCar
+                + "(id text PRIMARY KEY, object text);" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols
                 + "(passportNumber text PRIMARY KEY, NSF text, object text);" ); // the table for patruls
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonForPatrul
@@ -165,6 +173,18 @@ public final class CassandraDataControl {
     public ResultSetFuture addValue ( Polygon polygon, String object ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.polygonForPatrul + "(id, object) " + "VALUES (" + polygon.getUuid() + ", '" + object + "');" ); }
 
+    public ResultSetFuture addValue ( FaceEvents polygon ) { return this.session.executeAsync( "INSERT INTO "
+            + this.dbName + "." + this.polygonForPatrul
+            + "(id, object) " + "VALUES ('"
+            + polygon.getId() + "', '"
+            + SerDes.getSerDes().serialize( polygon ) + "');" ); }
+
+    public ResultSetFuture addValue ( CarEvents polygon ) { return this.session.executeAsync( "INSERT INTO "
+            + this.dbName + "." + this.polygonForPatrul
+            + "(id, object) " + "VALUES ('"
+            + polygon.getId() + "', '"
+            + SerDes.getSerDes().serialize( polygon ) + "');" ); }
+
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account
         case LOGOUT -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'log out at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
@@ -223,7 +243,22 @@ public final class CassandraDataControl {
                 .doOnError( throwable -> this.delete() )
                 .filter( eventCar -> eventCar.getPatruls().size() > 0 && eventCar.getStatus().compareTo( Status.FINISHED ) != 0 )
                 .delayElements( Duration.ofMillis( 100 ) )
-                .mapNotNull( eventCar1 -> Archive.getAchieve().getEventCarMap().putIfAbsent( eventCar1.getId(), eventCar1 ) ).subscribe(); }
+                .mapNotNull( eventCar1 -> Archive.getAchieve().getEventCarMap().putIfAbsent( eventCar1.getId(), eventCar1 ) ).subscribe();
+
+        Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.facePerson + ";" ).all().stream() )
+                .map( row -> SerDes.getSerDes().deserializeFaceEvents( row.getString( "object" ) ) )
+                .doOnError( throwable -> this.delete() )
+                .filter( eventFace -> eventFace.getPatruls().size() > 0 && eventFace.getStatus().compareTo( Status.FINISHED ) != 0 )
+                .delayElements( Duration.ofMillis( 100 ) )
+                .mapNotNull( eventFace1 -> Archive.getAchieve().getFaceEvents().putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe();
+
+        Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.faceCar + ";" ).all().stream() )
+                .map( row -> SerDes.getSerDes().deserializeCarEvents( row.getString( "object" ) ) )
+                .doOnError( throwable -> this.delete() )
+                .filter( eventFace -> eventFace.getPatruls().size() > 0 && eventFace.getStatus().compareTo( Status.FINISHED ) != 0 )
+                .delayElements( Duration.ofMillis( 100 ) )
+                .mapNotNull( eventFace1 -> Archive.getAchieve().getCarEvents().putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe();
+    }
 
     public void delete () {
         this.session.close();

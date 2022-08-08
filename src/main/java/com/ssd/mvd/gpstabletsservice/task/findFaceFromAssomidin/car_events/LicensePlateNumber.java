@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LicensePlateNumber  {
-	private Integer confidence;
+	private Double confidence;
 	private String name;
 	private Bbox bbox;
 }

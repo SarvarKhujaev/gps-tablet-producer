@@ -6,6 +6,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LicensePlateRegion {
-    private Integer confidence;
+    private Double confidence;
     private String name;
 }

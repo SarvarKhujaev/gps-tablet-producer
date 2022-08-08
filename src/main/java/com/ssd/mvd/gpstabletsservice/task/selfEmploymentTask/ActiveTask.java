@@ -12,6 +12,8 @@ import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 
 @Data
 public class ActiveTask {
@@ -135,4 +137,42 @@ public class ActiveTask {
         this.setLongitude( eventCar.getLongitude() );
         this.setCreatedDate( eventCar.getCreated_date() );
         this.setType( TaskTypes.FIND_FACE_EVENT_CAR.name() ); }
+
+    public ActiveTask ( FaceEvents faceEvents ) {
+        this.setTaskId( faceEvents.getId() );
+        this.setStatus( faceEvents.getStatus() );
+        this.setPatrulList( faceEvents.getPatruls() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_CAR.name() );
+        this.setLatitude( faceEvents.getCamera().getLatitude() );
+        this.setLongitude( faceEvents.getCamera().getLongitude() );
+        this.setCreatedDate( new Date( faceEvents.getCreated_date() ) ); }
+
+    public ActiveTask ( FaceEvents eventCar, Status status ) {
+        this.setPatrulStatus( status );
+        this.setTaskId( eventCar.getId() );
+        this.setStatus( eventCar.getStatus() );
+        this.setPatrulList( eventCar.getPatruls() );
+        this.setType( TaskTypes.FIND_FACE_CAR.name() );
+        this.setLatitude( eventCar.getCamera().getLatitude() );
+        this.setLongitude( eventCar.getCamera().getLongitude() );
+        this.setCreatedDate( new Date( eventCar.getCreated_date() ) ); }
+
+    public ActiveTask ( CarEvents faceEvents ) {
+        this.setTaskId( faceEvents.getId() );
+        this.setStatus( faceEvents.getStatus() );
+        this.setPatrulList( faceEvents.getPatruls() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_CAR.name() );
+        this.setLatitude( faceEvents.getCamera().getLatitude() );
+        this.setLongitude( faceEvents.getCamera().getLongitude() );
+        this.setCreatedDate( new Date( faceEvents.getCreated_date() ) ); }
+
+    public ActiveTask ( CarEvents eventCar, Status status ) {
+        this.setPatrulStatus( status );
+        this.setTaskId( eventCar.getId() );
+        this.setStatus( eventCar.getStatus() );
+        this.setPatrulList( eventCar.getPatruls() );
+        this.setType( TaskTypes.FIND_FACE_CAR.name() );
+        this.setLatitude( eventCar.getCamera().getLatitude() );
+        this.setLongitude( eventCar.getCamera().getLongitude() );
+        this.setCreatedDate( new Date( eventCar.getCreated_date() ) ); }
 }

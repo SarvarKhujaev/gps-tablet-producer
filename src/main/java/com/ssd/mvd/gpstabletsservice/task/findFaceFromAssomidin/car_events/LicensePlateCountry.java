@@ -6,6 +6,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LicensePlateCountry {
-    private Integer confidence;
+    private Double confidence;
     private String name;
 }

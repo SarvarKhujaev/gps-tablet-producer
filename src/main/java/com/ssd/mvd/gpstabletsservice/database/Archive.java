@@ -1,7 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import java.util.*;
 import lombok.Data;
+import java.util.*;
 import java.security.SecureRandom;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,6 +17,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 
 @Data
 public class Archive {
@@ -25,7 +27,10 @@ public class Archive {
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
 
-    private final Map< String, EventCar > eventCarMap = new HashMap<>();
+    private final Map< String, CarEvents > carEvents = new HashMap<>(); // Assomidin
+    private final Map< String, FaceEvents > faceEvents = new HashMap<>();
+
+    private final Map< String, EventCar > eventCarMap = new HashMap<>(); // Assomidin
     private final Map< String, EventBody > eventBodyMap = new HashMap<>();
     private final Map< String, EventFace > eventFaceMap = new HashMap<>();
     private final Map< UUID, SelfEmploymentTask > selfEmploymentTaskMap = new HashMap<>();
@@ -40,6 +45,10 @@ public class Archive {
     public Mono< EventBody > getEventBody ( String id ) { return this.eventBodyMap.containsKey( id ) ? Mono.just( this.eventBodyMap.get( id ) ) : Mono.empty(); }
 
     public Mono< EventFace > getEventFace ( String id ) { return this.eventFaceMap.containsKey( id ) ? Mono.just( this.eventFaceMap.get( id ) ) : Mono.empty(); }
+
+    public Mono< CarEvents > getCarEvent ( String id ) { return this.getCarEvents().containsKey( id ) ? Mono.just( this.getCarEvents().get( id ) ) : Mono.empty(); } // coming from Assamidin
+
+    public Mono< FaceEvents > getFaceEvent ( String id ) { return this.getFaceEvents().containsKey( id ) ? Mono.just( this.getFaceEvents().get( id ) ) : Mono.empty(); } // coming from Assamidin
 
     public Mono< SelfEmploymentTask > get ( UUID uuid ) { return this.selfEmploymentTaskMap.containsKey( uuid ) ? Mono.just( this.selfEmploymentTaskMap.get( uuid ) ) : Mono.empty(); }
 
@@ -170,6 +179,40 @@ public class Archive {
                 .passportSeries( patrul.getPassportNumber() )
                 .address( card.getAddress() != null ? card.getAddress() : "unknown" )
                 .title( "My dear: " + patrul.getName() + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
+        return RedisDataControl.getRedis().update( patrul )
+                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
+                        .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
+
+    public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvents card ) {
+        this.getFaceEvents().putIfAbsent( TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card ).getTaskId(), card );
+        CassandraDataControl.getInstance().addValue( card );
+        this.save( Notification.builder()
+                .id( card.getId() )
+                .type( FIND_FACE_EVENT_BODY.name() )
+                .notificationWasCreated( new Date() )
+                .passportSeries( patrul.getPassportNumber() )
+                .latitudeOfTask( card.getCamera().getLatitude() )
+                .longitudeOfTask( card.getCamera().getLongitude() )
+                .address( card.getCamera().getName() != null ? card.getCamera().getName() : "unknown" )
+                .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_PERSON
+                        + ", so be so kind to check active Task and start to work )))" ).build() );
+        return RedisDataControl.getRedis().update( patrul )
+                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
+                        .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
+
+    public Mono< ApiResponseModel > save ( Patrul patrul, CarEvents card ) {
+        this.getCarEvents().putIfAbsent( TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card ).getTaskId(), card );
+        CassandraDataControl.getInstance().addValue( card );
+        this.save( Notification.builder()
+                .id( card.getId() )
+                .type( FIND_FACE_CAR.name() )
+                .notificationWasCreated( new Date() )
+                .passportSeries( patrul.getPassportNumber() )
+                .latitudeOfTask( card.getCamera().getLatitude() )
+                .longitudeOfTask( card.getCamera().getLongitude() )
+                .address( card.getCamera().getName() != null ? card.getCamera().getName() : "unknown" )
+                .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_CAR
+                        + ", so be so kind to check active Task and start to work )))" ).build() );
         return RedisDataControl.getRedis().update( patrul )
                 .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
                         .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }

@@ -2,6 +2,8 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
@@ -38,6 +40,8 @@ public class SerDes {
 
     public String serialize ( Polygon object ) { return this.gson.toJson( object ); }
 
+    public String serialize ( CarEvents polygon ) { return this.gson.toJson( polygon ); }
+
     public String serialize ( AtlasLustra object ) { return this.gson.toJson( object ); }
 
     public String serialize ( PolygonType object ) { return this.gson.toJson( object ); }
@@ -45,6 +49,8 @@ public class SerDes {
     public String serialize ( Notification object ) { return this.gson.toJson( object ); }
 
     public String serialize( PoliceType policeType ) { return this.gson.toJson( policeType ); }
+
+    public String serialize( FaceEvents faceEvents ) { return this.gson.toJson( faceEvents ); }
 
     public String serialize ( ActiveTask activeTask ) { return this.gson.toJson( activeTask ); }
 
@@ -77,9 +83,13 @@ public class SerDes {
 
     public Card deserializeCard ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
+    public CarEvents deserializeCarEvents ( Object card ) { return this.objectMapper.convertValue( card, new TypeReference<>() {} ); }
+
     public EventCar deserializeEventCar ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
     public EventFace deserializeEventFace ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
+
+    public FaceEvents deserializeFaceEvents ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
     public EventBody deserializeEventBody ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 }

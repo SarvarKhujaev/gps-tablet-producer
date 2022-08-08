@@ -6,8 +6,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Track {
-    private Face face;
-    private String id;
-    private String lastTimestamp;
     private String firstTimestamp;
+    private String lastTimestamp;
+    private String id;
+    private Face face;
 }

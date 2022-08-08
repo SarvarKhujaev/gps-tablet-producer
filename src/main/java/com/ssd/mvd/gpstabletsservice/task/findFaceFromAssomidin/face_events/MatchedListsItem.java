@@ -7,19 +7,22 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MatchedListsItem  {
-
-    private String name;
-    private String color;
-    private String comment;
-    private String created_date;
-    private String modified_date;
-
     private Integer id;
-    private Permissions permissions;
     private List< Integer > camera_groups;
 
     private Boolean active;
     private Boolean notify;
     private Boolean acknowledge;
     private Boolean ignore_events;
+
+    private Permissions permissions;
+
+    private String name;
+    private String color;
+    private String comment;
+    private String created_date;
+    private String modified_date;
+    private String car_threshold;
+    private String face_threshold;
+    private String body_threshold;
 }

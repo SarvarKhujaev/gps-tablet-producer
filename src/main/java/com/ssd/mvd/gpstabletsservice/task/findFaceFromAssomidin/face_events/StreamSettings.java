@@ -16,8 +16,8 @@ public class StreamSettings {
     private Detectors detectors;
 
     private Integer play_speed;
-    private Integer imotion_threshold;
     private Integer router_timeout_ms;
+    private Integer imotion_threshold;
     private Integer start_stream_timestamp;
 
     private Boolean disable_drops;

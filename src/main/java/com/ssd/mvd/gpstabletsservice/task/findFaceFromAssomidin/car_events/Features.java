@@ -8,10 +8,9 @@ import lombok.*;
 public class Features {
     private Body body;
     private Make make;
-    private Color color;
     private Model model;
-
-    private LicensePlateNumber license_plate_number;
+    private Color color;
     private LicensePlateRegion license_plate_region;
+    private LicensePlateNumber license_plate_number;
     private LicensePlateCountry license_plate_country;
 }

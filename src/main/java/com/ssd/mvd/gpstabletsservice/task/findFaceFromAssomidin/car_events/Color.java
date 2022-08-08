@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 public class Color {
     private String name;
-    private Integer confidence;
+    private Double confidence;
 }

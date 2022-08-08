@@ -8,7 +8,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Last {
-    private Integer quality;
+    private List<Integer> bbox;
     private String timestamp;
-    private List< Integer > bbox;
+    private Integer quality;
 }

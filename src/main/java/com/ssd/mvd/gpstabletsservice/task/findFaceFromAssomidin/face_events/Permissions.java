@@ -9,10 +9,8 @@ import lombok.*;
 public class Permissions {
     @JsonProperty("1")
     private String jsonMember1;
-
     @JsonProperty("2")
     private String jsonMember2;
-
     @JsonProperty("3")
     private String jsonMember3;
 }
