@@ -43,7 +43,6 @@ public class Patrul {
     private String fatherName;
     private String dateOfBirth;
     private String phoneNumber;
-    private String findFaceTask;
     private String simCardNumber;
     private String passportNumber;
     private String patrulImageLink;

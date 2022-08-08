@@ -187,6 +187,7 @@ public final class TaskInspector {
             case CANCEL -> {
                 patrul.setTaskId( null );
                 patrul.setStatus( Status.FREE );
+                patrul.setTaskTypes( TaskTypes.FREE );
                 selfEmploymentTask.getPatruls().remove( patrul.getPassportNumber() ); }
             case ATTACHED -> {
                 patrul.setTaskTypes( TaskTypes.SELF_EMPLOYMENT );
@@ -196,6 +197,7 @@ public final class TaskInspector {
                 selfEmploymentTask.getPatruls().put( patrul.getPassportNumber(), patrul ); }
             case ACCEPTED, ARRIVED -> {
                 patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
+                patrul.setTaskTypes( TaskTypes.SELF_EMPLOYMENT );
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
                 selfEmploymentTask.getPatruls().put( patrul.getPassportNumber(), patrul ); }
             case FINISHED -> {
