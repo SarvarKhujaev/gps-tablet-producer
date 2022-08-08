@@ -34,6 +34,8 @@ public class CarTotalData {
     @JsonDeserialize
     private ModelForCarList modelForCarList; // the list of all cars of each citizen
 
+    @JsonDeserialize
     private List< String > patruls; // link to list of Patruls who is going deal with this Card
+    @JsonDeserialize
     private List< ReportForCard > reportForCards;
 }
