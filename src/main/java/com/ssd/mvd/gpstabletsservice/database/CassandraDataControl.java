@@ -143,14 +143,17 @@ public final class CassandraDataControl {
             + face.getConfidence() + ", '"
             + SerDes.getSerDes().serialize( face ) + "');" ).isDone(); }
 
-    public Boolean addValue ( PolygonType polygonType ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygonType + "(id, polygonType) VALUES('"
+    public Boolean addValue ( PolygonType polygonType ) { return this.session.executeAsync( "INSERT INTO "
+            + this.dbName + "." + this.polygonType + "(id, polygonType) VALUES('"
             + polygonType.getUuid() + "', '" + polygonType.getName() + "');" ).isDone(); }
 
-    public ResultSetFuture addValue ( Polygon polygon ) { return this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.polygon + "(id, polygonName, polygonType) " +
+    public ResultSetFuture addValue ( Polygon polygon ) { return this.session.executeAsync( "INSERT INTO "
+            + this.dbName + "." + this.polygon + "(id, polygonName, polygonType) " +
             "VALUES (" + polygon.getUuid() + ", '" + polygon.getName() + "', '" + polygon.getPolygonType() + "');" ); }
 
     public String addValue ( PoliceType policeType, String value ) {
-        this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.policeTypes + "(id, policeType) " + "VALUES (" + policeType.getUuid() + ", '" + value + "');" );
+        this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.policeTypes + "(id, policeType) "
+                + "VALUES (" + policeType.getUuid() + ", '" + value + "');" );
         return value; }
 
     public Boolean addValue ( ReqCar reqCar, String key ) { return this.session.executeAsync( "INSERT INTO "
@@ -187,19 +190,63 @@ public final class CassandraDataControl {
 
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account
-        case LOGOUT -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'log out at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
-        case ACCEPTED -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'accepted new task at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+        case LOGOUT -> this.session.executeAsync( "INSERT INTO "
+                + this.dbName + "." + this.patrols
+                + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('"
+                + new Date().toInstant() + "', '"
+                + status + "', 'log out at: "
+                + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+        case ACCEPTED -> this.session.executeAsync( "INSERT INTO "
+                + this.dbName + "." + this.patrols
+                + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('"
+                + new Date().toInstant() + "', '" + status + "', 'accepted new task at: "
+                + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
         // when Patrul wants to set in pause his work
-        case SET_IN_PAUSE -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'put in pause at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+        case SET_IN_PAUSE -> this.session.executeAsync( "INSERT INTO "
+                + this.dbName + "." + this.patrols + patrul.getPassportNumber()
+                + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '"
+                + status + "', 'put in pause at: " + new Date().toInstant() + "', "
+                + patrul.getTotalActivityTime() + ");" ).isDone();
         // uses when at the end of the day User finishes his job
-        case STOP_TO_WORK -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'stopped to work at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+        case STOP_TO_WORK -> this.session.executeAsync( "INSERT INTO "
+                + this.dbName + "." + this.patrols + patrul.getPassportNumber()
+                + "(date, status, message, totalActivityTime) VALUES('"
+                + new Date().toInstant() + "', '"
+                + status + "', 'stopped to work at: "
+                + new Date().toInstant() + "', "
+                + patrul.getTotalActivityTime() + ");" ).isDone();
         // uses to when User wants to back to work after pause
-        case START_TO_WORK -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'started to work at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+        case START_TO_WORK -> this.session.executeAsync( "INSERT INTO "
+                + this.dbName + "." + this.patrols + patrul.getPassportNumber()
+                + "(date, status, message, totalActivityTime) VALUES('"
+                + new Date().toInstant() + "', '" + status + "', 'started to work at: "
+                + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
         // uses to start to work every day in the morning
-        case RETURNED_TO_WORK -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'returned to work at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
-        case ARRIVED -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '" + status + "', 'arrived to given task location at: " + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+        case RETURNED_TO_WORK -> this.session.executeAsync( "INSERT INTO "
+                + this.dbName + "." + this.patrols + patrul.getPassportNumber()
+                + "(date, status, message, totalActivityTime) VALUES('"
+                + new Date().toInstant() + "', '"
+                + status + "', 'returned to work at: "
+                + new Date().toInstant() + "', "
+                + patrul.getTotalActivityTime() + ");" ).isDone();
+        case ARRIVED -> this.session.executeAsync( "INSERT INTO "
+                + this.dbName + "." + this.patrols
+                + patrul.getPassportNumber()
+                + "(date, status, message, totalActivityTime) VALUES('"
+                + new Date().toInstant() + "', '"
+                + status + "', 'arrived to given task location at: "
+                + new Date().toInstant() + "', "
+                + patrul.getTotalActivityTime() + ");" ).isDone();
         // by default, it means t o log in to account
-        default -> this.session.executeAsync( "INSERT INTO " + this.dbName + "." + this.patrols + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES ('" + new Date().toInstant() + "', '" + status + "', 'log in at: " + patrul.getStartedToWorkDate().toInstant() + " with simCard " + patrul.getSimCardNumber() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
+        default -> this.session.executeAsync( "INSERT INTO "
+                + this.dbName + "." + this.patrols
+                + patrul.getPassportNumber()
+                + "(date, status, message, totalActivityTime) VALUES ('"
+                + new Date().toInstant() + "', '"
+                + status + "', 'log in at: "
+                + patrul.getStartedToWorkDate().toInstant()
+                + " with simCard "
+                + patrul.getSimCardNumber() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return RedisDataControl.getRedis()
             .getPatrul( request.getData() )
@@ -220,44 +267,51 @@ public final class CassandraDataControl {
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
                 .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
                 .doOnError( throwable -> this.delete() )
-                .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0 && selfEmploymentTask.getTaskStatus().compareTo( Status.FINISHED ) != 0 )
+                .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() > 0
+                        && selfEmploymentTask.getTaskStatus().compareTo( Status.FINISHED ) != 0 )
                 .delayElements( Duration.ofMillis( 100 ) )
-                .mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap().putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe();
+                .mapNotNull( selfEmploymentTask -> Archive.getAchieve().getSelfEmploymentTaskMap()
+                        .putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ) ).subscribe();
 
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.eventBody + ";" ).all().stream() )
                 .map( row -> SerDes.getSerDes().deserializeEventBody( row.getString( "object" ) ) )
                 .doOnError( throwable -> this.delete() )
                 .filter( eventBody -> eventBody.getPatruls().size() > 0 && eventBody.getStatus().compareTo( Status.FINISHED ) != 0 )
                 .delayElements( Duration.ofMillis( 100 ) )
-                .mapNotNull( eventBody1 -> Archive.getAchieve().getEventBodyMap().putIfAbsent( eventBody1.getId(), eventBody1 ) ).subscribe();
+                .mapNotNull( eventBody1 -> Archive.getAchieve().getEventBodyMap()
+                        .putIfAbsent( eventBody1.getId(), eventBody1 ) ).subscribe();
 
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.eventFace + ";" ).all().stream() )
                 .map( row -> SerDes.getSerDes().deserializeEventFace( row.getString( "object" ) ) )
                 .doOnError( throwable -> this.delete() )
                 .filter( eventFace -> eventFace.getPatruls().size() > 0 && eventFace.getStatus().compareTo( Status.FINISHED ) != 0 )
                 .delayElements( Duration.ofMillis( 100 ) )
-                .mapNotNull( eventFace1 -> Archive.getAchieve().getEventFaceMap().putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe();
+                .mapNotNull( eventFace1 -> Archive.getAchieve().getEventFaceMap()
+                        .putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe();
 
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.eventCar + ";" ).all().stream() )
                 .map( row -> SerDes.getSerDes().deserializeEventCar( row.getString( "object" ) ) )
                 .doOnError( throwable -> this.delete() )
                 .filter( eventCar -> eventCar.getPatruls().size() > 0 && eventCar.getStatus().compareTo( Status.FINISHED ) != 0 )
                 .delayElements( Duration.ofMillis( 100 ) )
-                .mapNotNull( eventCar1 -> Archive.getAchieve().getEventCarMap().putIfAbsent( eventCar1.getId(), eventCar1 ) ).subscribe();
+                .mapNotNull( eventCar1 -> Archive.getAchieve().getEventCarMap()
+                        .putIfAbsent( eventCar1.getId(), eventCar1 ) ).subscribe();
 
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.facePerson + ";" ).all().stream() )
                 .map( row -> SerDes.getSerDes().deserializeFaceEvents( row.getString( "object" ) ) )
                 .doOnError( throwable -> this.delete() )
                 .filter( eventFace -> eventFace.getPatruls().size() > 0 && eventFace.getStatus().compareTo( Status.FINISHED ) != 0 )
                 .delayElements( Duration.ofMillis( 100 ) )
-                .mapNotNull( eventFace1 -> Archive.getAchieve().getFaceEvents().putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe();
+                .mapNotNull( eventFace1 -> Archive.getAchieve().getFaceEvents()
+                        .putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe();
 
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.faceCar + ";" ).all().stream() )
                 .map( row -> SerDes.getSerDes().deserializeCarEvents( row.getString( "object" ) ) )
                 .doOnError( throwable -> this.delete() )
                 .filter( eventFace -> eventFace.getPatruls().size() > 0 && eventFace.getStatus().compareTo( Status.FINISHED ) != 0 )
                 .delayElements( Duration.ofMillis( 100 ) )
-                .mapNotNull( eventFace1 -> Archive.getAchieve().getCarEvents().putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe(); }
+                .mapNotNull( eventFace1 -> Archive.getAchieve().getCarEvents()
+                        .putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe(); }
 
     public void delete () {
         this.session.close();
