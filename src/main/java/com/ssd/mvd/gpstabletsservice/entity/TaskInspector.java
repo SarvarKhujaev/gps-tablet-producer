@@ -1,7 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import lombok.Data;
 import java.util.Date;
 import java.util.UUID;
@@ -21,6 +19,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 
 @Data
 public final class TaskInspector {
@@ -377,6 +377,22 @@ public final class TaskInspector {
                                     .message( "U have " + TaskTypes.FIND_FACE_EVENT_FACE.name() + " Task" )
                                     .build() ).success( true ).build() ) );
 
+            case FIND_FACE_CAR -> Archive.getAchieve().getFaceEvent( patrul.getTaskId() )
+                    .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new ActiveTask( eventFace, patrul.getStatus() ) )
+                                    .type( TaskTypes.FIND_FACE_CAR.name() ).build() )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
+                                    .message( "U have " + TaskTypes.FIND_FACE_CAR.name() + " Task" )
+                                    .build() ).success( true ).build() ) );
+
+            case FIND_FACE_PERSON -> Archive.getAchieve().getCarEvent( patrul.getTaskId() )
+                    .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new ActiveTask( eventFace, patrul.getStatus() ) )
+                                    .type( TaskTypes.FIND_FACE_PERSON.name() ).build() )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
+                                    .message( "U have " + TaskTypes.FIND_FACE_PERSON.name() + " Task" )
+                                    .build() ).success( true ).build() ) );
+
             default -> Mono.just( ApiResponseModel.builder().success( false )
                     .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 201 )
                             .message( "U have no task, so u can do smth else, my darling )))" ).build() ) .build() ); }; }
@@ -408,6 +424,20 @@ public final class TaskInspector {
             case FIND_FACE_EVENT_FACE -> Archive.getAchieve().getEventFace( patrul.getTaskId() ).flatMap( eventFace -> {
                 eventFace.getReportForCardList().add( reportForCard );
                 return RedisDataControl.getRedis().update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, eventFace ) )
+                        .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) ); } );
+
+            case FIND_FACE_CAR -> Archive.getAchieve().getCarEvent( patrul.getTaskId() ).flatMap( carEvents -> {
+                carEvents.getReportForCardList().add( reportForCard );
+                return RedisDataControl.getRedis().update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, carEvents ) )
+                        .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) ); } );
+
+            case FIND_FACE_PERSON -> Archive.getAchieve().getFaceEvent( patrul.getTaskId() ).flatMap( faceEvents -> {
+                faceEvents.getReportForCardList().add( reportForCard );
+                return RedisDataControl.getRedis().update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, faceEvents ) )
                         .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) ); } );

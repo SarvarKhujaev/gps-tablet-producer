@@ -7,13 +7,14 @@ import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
-import java.util.*;
-
+import lombok.extern.jackson.Jacksonized;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
+import java.util.*;
 
 @Data
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventBody {
@@ -36,6 +37,7 @@ public class EventBody {
     private byte[] fullframebytes;
     private byte[] thumbnailbytes;
 
+    @JsonDeserialize
     private PsychologyCard psychologyCard;
 
     @JsonDeserialize
