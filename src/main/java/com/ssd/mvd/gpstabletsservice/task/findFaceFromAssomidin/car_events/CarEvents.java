@@ -4,6 +4,7 @@ import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.Camera;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.CameraGroup;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.MatchedListsItem;
@@ -48,6 +49,9 @@ public class CarEvents  {
 	private Integer frame_coords_left;
 	private Integer frame_coords_right;
 	private Integer frame_coords_bottom;
+
+	@JsonDeserialize
+	private CarTotalData carTotalData;
 
 	private Status status;
 	private Double quality;

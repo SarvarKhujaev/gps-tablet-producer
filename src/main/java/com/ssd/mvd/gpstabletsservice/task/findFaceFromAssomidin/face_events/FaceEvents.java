@@ -12,6 +12,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import lombok.*;
 
 @Data
@@ -53,6 +54,9 @@ public class FaceEvents {
 
     private Boolean matched;
     private Boolean acknowledged;
+
+    @JsonDeserialize
+    private PsychologyCard psychologyCard;
 
     private Integer episode;
     private Integer looks_like_confidence;
