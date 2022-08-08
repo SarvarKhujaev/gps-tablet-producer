@@ -44,6 +44,10 @@ public final class TaskInspector {
                         .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) );
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), "card" );
                 patrul.setTaskTypes( TaskTypes.FREE );
+                if ( card.getPatruls().size() == card.getReportForCardList().size() ) {
+                    card.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( card.getCardId().toString() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( card ) ); }
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null );
@@ -55,6 +59,24 @@ public final class TaskInspector {
         RedisDataControl.getRedis().addValue( card.getCardId().toString(), new ActiveTask( card ) );
         RedisDataControl.getRedis().update( card );
         return patrul; }
+
+    public Patrul changeTaskStatus ( Patrul patrul, Status status, TupleOfPatrul card ) {
+        patrul.setStatus( status );
+        switch ( ( patrul.getStatus() ) ) {
+            case CANCEL -> {
+                patrul.setTaskId( null );
+                patrul.setStatus( FREE ); }
+            case ATTACHED -> {
+                patrul.setTaskTypes( TaskTypes.ESCORT );
+                patrul.setTaskId( card.getPolygon().getUuid().toString() ); }
+            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case FINISHED -> {
+                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), "card" );
+                patrul.setTaskTypes( TaskTypes.FREE );
+                patrul.setTaskDate( null );
+                patrul.setStatus( FREE );
+                patrul.setTaskId( null );
+            } } return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventCar eventFace ) {
         patrul.setStatus( status );
@@ -76,6 +98,12 @@ public final class TaskInspector {
             case FINISHED -> {
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), TaskTypes.FIND_FACE_EVENT_CAR.name() );
                 eventFace.getPatruls().put( patrul.getPassportNumber(), patrul );
+                if ( eventFace.getPatruls().size() == eventFace.getReportForCardList().size() ) {
+                    eventFace.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( eventFace.getId() );
+                    CassandraDataControl.getInstance().addValue( eventFace );
+                    Archive.getAchieve().getSelfEmploymentTaskMap().remove( eventFace.getId() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventFace ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( Status.FREE );
                 patrul.setTaskDate( null );
@@ -104,6 +132,12 @@ public final class TaskInspector {
             case FINISHED -> {
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), TaskTypes.FIND_FACE_EVENT_FACE.name() );
                 eventFace.getPatruls().put( patrul.getPassportNumber(), patrul );
+                if ( eventFace.getPatruls().size() == eventFace.getReportForCardList().size() ) {
+                    eventFace.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( eventFace.getId() );
+                    CassandraDataControl.getInstance().addValue( eventFace );
+                    Archive.getAchieve().getSelfEmploymentTaskMap().remove( eventFace.getId() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventFace ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( Status.FREE );
                 patrul.setTaskDate( null );
@@ -117,7 +151,7 @@ public final class TaskInspector {
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL -> {
                 patrul.setTaskId( null );
-                patrul.setStatus( Status.FREE );
+                patrul.setStatus( FREE );
                 eventFace.getPatruls().remove( patrul.getPassportNumber() ); }
             case ATTACHED -> {
                 patrul.setTaskId( eventFace.getId() ); // saving card id into patrul object
@@ -133,9 +167,16 @@ public final class TaskInspector {
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), TaskTypes.FIND_FACE_EVENT_BODY.name() );
                 eventFace.getPatruls().put( patrul.getPassportNumber(), patrul );
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setStatus( Status.FREE );
+                patrul.setStatus( FREE );
                 patrul.setTaskDate( null );
-                patrul.setTaskId( null ); }
+                patrul.setTaskId( null );
+                if ( eventFace.getPatruls().size() == eventFace.getReportForCardList().size() ) {
+                    eventFace.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( eventFace.getId() );
+                    CassandraDataControl.getInstance().addValue( eventFace );
+                    Archive.getAchieve().getSelfEmploymentTaskMap().remove( eventFace.getId() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventFace ) ); }
+            }
         } RedisDataControl.getRedis().addValue( eventFace.getId(), new ActiveTask( eventFace ) );
         CassandraDataControl.getInstance().addValue( eventFace );
         return patrul; }
@@ -160,6 +201,12 @@ public final class TaskInspector {
             case FINISHED -> {
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), "selfEmployment" );
                 selfEmploymentTask.getPatruls().put( patrul.getPassportNumber(), patrul );
+                if ( selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ) {
+                    selfEmploymentTask.setTaskStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
+                    CassandraDataControl.getInstance().addValue( selfEmploymentTask,
+                            KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( selfEmploymentTask ) ) );
+                    Archive.getAchieve().getSelfEmploymentTaskMap().remove( selfEmploymentTask.getUuid() ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( Status.FREE );
                 patrul.setTaskDate( null );

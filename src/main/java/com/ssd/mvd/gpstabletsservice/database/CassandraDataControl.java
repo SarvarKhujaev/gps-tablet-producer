@@ -11,6 +11,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
+import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
@@ -26,6 +27,7 @@ public final class CassandraDataControl {
     private final Cluster cluster;
     private final Session session;
     public final String car = "CARS";
+    public final String tuple = "TUPLE";
     public final String lustre = "LUSTRA";
     public final String patrols = "PATRULS"; // for table with Patruls info
     public final String polygon = "POLYGON";
@@ -61,7 +63,8 @@ public final class CassandraDataControl {
                     .setMaxRequestsPerConnection( HostDistance.REMOTE, 256 )
                     .setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
             .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':3 };" );
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + "(passportNumber text, NSF text, object text, PRIMARY KEY( (passportNumber), NSF ) );" ); // the table for patruls
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols +
+                "(passportNumber text, NSF text, object text, PRIMARY KEY( (passportNumber), NSF ) );" ); // the table for patruls
         this.session.execute("""
                 CREATE CUSTOM INDEX IF NOT EXISTS patrul_name_idx ON TABLETS.PATRULS(NSF) USING 'org.apache.cassandra.index.sasi.SASIIndex'
                 WITH OPTIONS = {
@@ -73,18 +76,33 @@ public final class CassandraDataControl {
                     'analyzed': 'true',
                     'tokenization_normalize_lowercase': 'true' };""");
 
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventFace + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventBody + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventCar + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygon + "(id uuid PRIMARY KEY, polygonName text, polygonType text);" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols + "(passportNumber text PRIMARY KEY, NSF text, object text);" ); // the table for patruls
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonForPatrul + "(id uuid PRIMARY KEY, object text);" ); // the table for polygons for patrul
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonType + "(id uuid PRIMARY KEY, polygonType text);" ); // the table for police types
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.policeTypes + "(id uuid PRIMARY KEY, policeType text);" ); // the table for police types
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.selfEmployment + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.car + "(gosNumber text PRIMARY KEY, object text);" ); // the table for cars
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.lustre + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + ".trackers(imei text PRIMARY KEY, status text);" ); // the table for trackers
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventFace
+                + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventBody
+                + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventCar
+                + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
+//        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.tuple
+//                + "(id uuid PRIMARY KEY, carList list<text>, country text, object text );" );
+//        this.session.execute("CREATE INDEX IF NOT EXISTS ON " + this.dbName + this.tuple + " (country);" );
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygon
+                + "(id uuid PRIMARY KEY, polygonName text, polygonType text);" ); // the table for polygons
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols
+                + "(passportNumber text PRIMARY KEY, NSF text, object text);" ); // the table for patruls
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonForPatrul
+                + "(id uuid PRIMARY KEY, object text);" ); // the table for polygons for patrul
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonType
+                + "(id uuid PRIMARY KEY, polygonType text);" ); // the table for police types
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.policeTypes
+                + "(id uuid PRIMARY KEY, policeType text);" ); // the table for police types
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.selfEmployment
+                + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.car
+                + "(gosNumber text PRIMARY KEY, object text);" ); // the table for cars
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.lustre
+                + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
+        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName
+                + ".trackers(imei text PRIMARY KEY, status text);" ); // the table for trackers
         this.logger.info( "Cassandra is ready" ); }
 
     public Boolean addValue ( EventFace face ) { return this.session.executeAsync( "INSERT INTO "
@@ -212,4 +230,41 @@ public final class CassandraDataControl {
         this.cluster.close();
         cassandraDataControl = null;
         this.logger.info( "Cassandra is closed!!!" ); }
+
+    public Flux< TupleOfPatrul > getAllTupleOfPatrul () { return Flux.fromStream( this.session.execute(
+            "SELECT * FROM "
+            + this.dbName + this.tuple + ";" ).all().stream() )
+            .map( TupleOfPatrul::new ); }
+
+    public Flux< TupleOfPatrul > getAllTupleOfPatrul ( String id ) { return Flux.fromStream( this.session.execute(
+            "SELECT * FROM "
+                    + this.dbName + this.tuple
+                    + " where id = " + id + ";" ).all().stream() )
+            .map( TupleOfPatrul::new ); }
+
+    public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) {
+        this.session.execute( "DELETE FROM "
+                + this.dbName + this.tuple
+                + " where id = " + id + ";" );
+        return Mono.just( ApiResponseModel.builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .message( id + " was successfully deleted" )
+                                .code( 200 )
+                                .build() )
+                        .success( true )
+                .build() ); }
+
+    public Flux< ApiResponseModel > addValue ( TupleOfPatrul tupleOfPatrul ) {
+        this.session.execute( "INSERT INTO "
+                + this.dbName + "." + this.tuple
+                + "( id, carList, country, object ) VALUES ("
+                + tupleOfPatrul.getPolygon().getUuid() + ", "
+                + tupleOfPatrul.getReqCarsList() + ", '"
+                + tupleOfPatrul.getCountries().name() + "', '"
+                + SerDes.getSerDes().serialize( tupleOfPatrul ) + "');" );
+        return Flux.fromStream( tupleOfPatrul.getReqCarsList().stream() )
+                .flatMap( reqCar ->
+                        RedisDataControl.getRedis().getPatrul( reqCar.getPatrulPassportSeries() )
+                                .flatMap( patrul -> RedisDataControl.getRedis().update( TaskInspector.getInstance()
+                                        .changeTaskStatus( patrul, Status.ACCEPTED, tupleOfPatrul ) ) ) ); }
 }

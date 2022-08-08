@@ -19,7 +19,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 
 @Data
-public class Archive implements Runnable {
+public class Archive {
     public Boolean flag = true;
     private static Archive archive = new Archive();
     private final SecureRandom secureRandom = new SecureRandom();
@@ -179,21 +179,24 @@ public class Archive implements Runnable {
         this.secureRandom.nextBytes( bytes );
         return this.encoder.encodeToString( bytes ); }
 
-    @Override
-    public void run () {
-        while ( this.getFlag() ) {
-            try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
-            RedisDataControl.getRedis().getAllCards()
-                    .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
-                    .subscribe( card -> {
-                        card.setStatus( FINISHED );
-                        RedisDataControl.getRedis().remove( card.getCardId() );
-                        RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
-            this.getAllSelfEmploymentTask()
-                    .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
-                    .subscribe( selfEmploymentTask -> {
-                        selfEmploymentTask.setTaskStatus( FINISHED );
-                        RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
-                        CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
-                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } ); } }
+//    @Override
+//    public void run () {
+//        while ( this.getFlag() ) {
+//            try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
+//            RedisDataControl.getRedis().getAllCards()
+//                    .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
+//                    .subscribe( card -> {
+//                        card.setStatus( FINISHED );
+//                        KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( card ) );
+//                        RedisDataControl.getRedis().remove( card.getCardId() );
+//                        RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
+//            this.getAllSelfEmploymentTask()
+//                    .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
+//                    .subscribe( selfEmploymentTask -> {
+//                        selfEmploymentTask.setTaskStatus( FINISHED );
+//                        RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
+//                        CassandraDataControl.getInstance().addValue( selfEmploymentTask,
+//                                KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( selfEmploymentTask ) ) );
+//                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } );
+//        } }
 }

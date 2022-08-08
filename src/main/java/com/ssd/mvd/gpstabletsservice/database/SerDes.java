@@ -48,6 +48,7 @@ public class SerDes {
 
     public String serialize ( ActiveTask activeTask ) { return this.gson.toJson( activeTask ); }
 
+    public String serialize ( TupleOfPatrul tupleOfPatrul ) { return this.gson.toJson( tupleOfPatrul ); }
     public String serialize ( SelfEmploymentTask selfEmploymentTask ) { try { return this.objectMapper.writeValueAsString( selfEmploymentTask ); }
     catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
 
