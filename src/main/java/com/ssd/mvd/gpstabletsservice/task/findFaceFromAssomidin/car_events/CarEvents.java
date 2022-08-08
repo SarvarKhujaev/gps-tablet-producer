@@ -35,10 +35,15 @@ public class CarEvents  {
 	private String event_model_class;
 	private String acknowledged_reaction;
 
+	@JsonDeserialize
 	private Camera camera;
+	@JsonDeserialize
 	private Features features;
+	@JsonDeserialize
 	private CameraGroup camera_group;
+	@JsonDeserialize
 	private DetectorParams detector_params;
+	@JsonDeserialize
 	private List< MatchedListsItem > matched_lists;
 
 	private Boolean matched;
