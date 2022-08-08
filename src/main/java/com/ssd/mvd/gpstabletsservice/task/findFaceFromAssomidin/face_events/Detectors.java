@@ -1,14 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.Body;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.Car;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import lombok.extern.jackson.Jacksonized;
 import lombok.*;
 
 @Data
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class Detectors {
+    @JsonDeserialize
     private Face face;
-    private Body body;
-    private Car car;
 }

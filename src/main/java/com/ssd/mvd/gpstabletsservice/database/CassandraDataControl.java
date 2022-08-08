@@ -257,8 +257,7 @@ public final class CassandraDataControl {
                 .doOnError( throwable -> this.delete() )
                 .filter( eventFace -> eventFace.getPatruls().size() > 0 && eventFace.getStatus().compareTo( Status.FINISHED ) != 0 )
                 .delayElements( Duration.ofMillis( 100 ) )
-                .mapNotNull( eventFace1 -> Archive.getAchieve().getCarEvents().putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe();
-    }
+                .mapNotNull( eventFace1 -> Archive.getAchieve().getCarEvents().putIfAbsent( eventFace1.getId(), eventFace1 ) ).subscribe(); }
 
     public void delete () {
         this.session.close();

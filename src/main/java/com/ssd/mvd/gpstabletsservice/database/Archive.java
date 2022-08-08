@@ -28,11 +28,12 @@ public class Archive {
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
 
     private final Map< String, CarEvents > carEvents = new HashMap<>(); // Assomidin
-    private final Map< String, FaceEvents > faceEvents = new HashMap<>();
+    private final Map< String, FaceEvents > faceEvents = new HashMap<>(); // Assomidin
 
-    private final Map< String, EventCar > eventCarMap = new HashMap<>(); // Assomidin
+    private final Map< String, EventCar > eventCarMap = new HashMap<>();
     private final Map< String, EventBody > eventBodyMap = new HashMap<>();
     private final Map< String, EventFace > eventFaceMap = new HashMap<>();
+
     private final Map< UUID, SelfEmploymentTask > selfEmploymentTaskMap = new HashMap<>();
     private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID", "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ", "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОШИБЩИХ", "ФАБУЛА" );
 
@@ -221,25 +222,4 @@ public class Archive {
         byte[] bytes = new byte[ 24 ];
         this.secureRandom.nextBytes( bytes );
         return this.encoder.encodeToString( bytes ); }
-
-//    @Override
-//    public void run () {
-//        while ( this.getFlag() ) {
-//            try { Thread.sleep( TimeInspector.getInspector().getTimestampForArchive() * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
-//            RedisDataControl.getRedis().getAllCards()
-//                    .filter( card -> card.getPatruls().size() == card.getReportForCardList().size() )
-//                    .subscribe( card -> {
-//                        card.setStatus( FINISHED );
-//                        KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( card ) );
-//                        RedisDataControl.getRedis().remove( card.getCardId() );
-//                        RedisDataControl.getRedis().remove( card.getCardId().toString() ); } );
-//            this.getAllSelfEmploymentTask()
-//                    .filter( selfEmploymentTask -> selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() )
-//                    .subscribe( selfEmploymentTask -> {
-//                        selfEmploymentTask.setTaskStatus( FINISHED );
-//                        RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
-//                        CassandraDataControl.getInstance().addValue( selfEmploymentTask,
-//                                KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( selfEmploymentTask ) ) );
-//                        this.selfEmploymentTaskMap.remove( selfEmploymentTask.getUuid() ); } );
-//        } }
 }

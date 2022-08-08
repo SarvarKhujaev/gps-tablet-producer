@@ -1,23 +1,21 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.extern.jackson.Jacksonized;
 import lombok.*;
 
 @Data
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class Face {
     private Integer jpeg_quality;
-    private Integer filter_min_size;
     private Integer filter_max_size;
+    private Integer filter_min_size;
     private Integer track_miss_interval;
     private Integer realtime_post_interval;
     private Integer track_max_duration_frames;
-
-    private String roi;
-    private String tracker_type;
-    private String filter_min_quality;
-    private String track_overlap_threshold;
-    private String track_deep_sort_matching_threshold;
 
     private Boolean overall_only;
     private Boolean fullframe_use_png;
@@ -31,4 +29,10 @@ public class Face {
     private Boolean realtime_post_every_interval;
     private Boolean realtime_post_first_immediately;
     private Boolean track_deep_sort_filter_unconfirmed_tracks;
+
+    private String roi;
+    private String tracker_type;
+    private String filter_min_quality;
+    private String track_overlap_threshold;
+    private String track_deep_sort_matching_threshold;
 }

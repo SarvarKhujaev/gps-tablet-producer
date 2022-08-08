@@ -29,15 +29,16 @@ public class Patrul {
     private Long totalActivityTime;
 
     private Boolean inPolygon;
+    private Boolean tuplePermission; // показывает модноо ли патрульному участвовать в кортеже
 
     private String name;
     private String rank;
     private String email;
     private String token;
     private String taskId;
+    private String carType; // модель машины
     private String surname;
     private String password;
-    private String carType; // модель машины
     private String carNumber;
     private String policeType; // choosing from dictionary
     private String fatherName;

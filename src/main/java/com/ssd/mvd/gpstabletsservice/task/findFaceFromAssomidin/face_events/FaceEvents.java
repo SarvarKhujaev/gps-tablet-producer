@@ -1,53 +1,49 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
+import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
-import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
-import lombok.*;
-
 @Data
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class FaceEvents {
     private String id;
     private String name;
-    private String comment;
     private String bs_type;
+    private String comment;
     private String thumbnail;
     private String fullframe;
     private String temperature;
-    private String webhook_type;
     private String created_date;
+    private String webhook_type;
+    private String video_archive;
     private String dossier_photo;
     private String matched_object;
-    private String video_archive;
     private String acknowledged_by;
-    private String event_model_class;
     private String acknowledged_date;
+    private String event_model_class;
     private String acknowledged_reaction;
 
-    private Camera camera;
-    private Features features;
-    private CameraGroup camera_group;
-    private DetectorParams detector_params;
-    private List< MatchedListsItem > matched_lists;
-
+    private Integer episode;
     private Integer confidence;
     private Integer frame_coords_top;
     private Integer frame_coords_left;
     private Integer frame_coords_right;
     private Integer frame_coords_bottom;
+    private Integer looks_like_confidence;
 
     private Double quality;
     private Long matched_dossier;
@@ -56,17 +52,22 @@ public class FaceEvents {
     private Boolean acknowledged;
 
     @JsonDeserialize
-    private PsychologyCard psychologyCard;
-
-    private Integer episode;
-    private Integer looks_like_confidence;
+    private Camera camera;
+    @JsonDeserialize
+    private Features features;
+    @JsonDeserialize
+    private CameraGroup camera_group;
+    @JsonDeserialize
+    private DetectorParams detector_params;
+    @JsonDeserialize
+    private List< MatchedListsItem > matched_lists;
 
     private Status status;
 
-    @JsonDeserialize
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize
     private Map< String, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event
-    @JsonDeserialize
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize
     private List<ReportForCard> reportForCardList = new ArrayList<>(); // the list of reports for the current card
-    @JsonDeserialize
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize
     private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }

@@ -1,10 +1,15 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import lombok.extern.jackson.Jacksonized;
 import lombok.*;
 
 @Data
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class CameraGroup {
     private Integer id;
     private Integer deduplicate_delay;
@@ -20,6 +25,8 @@ public class CameraGroup {
     private Boolean active;
     private Boolean deduplicate;
 
+    @JsonDeserialize
     private Labels labels;
+    @JsonDeserialize
     private Permissions permissions;
 }
