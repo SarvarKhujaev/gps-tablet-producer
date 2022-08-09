@@ -1,6 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
 import lombok.Data;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -145,7 +148,8 @@ public class ActiveTask {
         this.setType( TaskTypes.FIND_FACE_EVENT_CAR.name() );
         this.setLatitude( faceEvents.getCamera().getLatitude() );
         this.setLongitude( faceEvents.getCamera().getLongitude() );
-        this.setCreatedDate( new Date( faceEvents.getCreated_date() ) ); }
+        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( faceEvents.getCreated_date() ) ); }
+        catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
 
     public ActiveTask ( FaceEvents eventCar, Status status ) {
         this.setPatrulStatus( status );
@@ -155,7 +159,8 @@ public class ActiveTask {
         this.setType( TaskTypes.FIND_FACE_CAR.name() );
         this.setLatitude( eventCar.getCamera().getLatitude() );
         this.setLongitude( eventCar.getCamera().getLongitude() );
-        this.setCreatedDate( new Date( eventCar.getCreated_date() ) ); }
+        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( eventCar.getCreated_date() ) ); }
+        catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
 
     public ActiveTask ( CarEvents faceEvents ) {
         this.setTaskId( faceEvents.getId() );
@@ -164,7 +169,8 @@ public class ActiveTask {
         this.setType( TaskTypes.FIND_FACE_EVENT_CAR.name() );
         this.setLatitude( faceEvents.getCamera().getLatitude() );
         this.setLongitude( faceEvents.getCamera().getLongitude() );
-        this.setCreatedDate( new Date( faceEvents.getCreated_date() ) ); }
+        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( faceEvents.getCreated_date() ) ); }
+        catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
 
     public ActiveTask ( CarEvents eventCar, Status status ) {
         this.setPatrulStatus( status );
@@ -174,5 +180,6 @@ public class ActiveTask {
         this.setType( TaskTypes.FIND_FACE_CAR.name() );
         this.setLatitude( eventCar.getCamera().getLatitude() );
         this.setLongitude( eventCar.getCamera().getLongitude() );
-        this.setCreatedDate( new Date( eventCar.getCreated_date() ) ); }
+        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( eventCar.getCreated_date() ) ); }
+        catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
 }
