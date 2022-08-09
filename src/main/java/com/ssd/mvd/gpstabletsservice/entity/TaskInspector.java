@@ -184,37 +184,37 @@ public final class TaskInspector {
         CassandraDataControl.getInstance().addValue( eventFace );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvents faceEvents ) {
+    public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvents carEvents ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL -> {
                 patrul.setTaskId( null );
                 patrul.setStatus( FREE );
-                faceEvents.getPatruls().remove( patrul.getPassportNumber() ); }
+                carEvents.getPatruls().remove( patrul.getPassportNumber() ); }
             case ATTACHED -> {
-                patrul.setTaskId( faceEvents.getId() ); // saving card id into patrul object
+                patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( TaskTypes.FIND_FACE_CAR );
-                patrul.setLatitudeOfTask( faceEvents.getCamera().getLatitude() );
-                patrul.setLongitudeOfTask( faceEvents.getCamera().getLongitude() ); }
+                patrul.setLatitudeOfTask( carEvents.getCamera().getLatitude() );
+                patrul.setLongitudeOfTask( carEvents.getCamera().getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case FINISHED -> {
-                faceEvents.getPatrulStatuses().get( patrul.getPassportNumber() )
+                carEvents.getPatrulStatuses().get( patrul.getPassportNumber() )
                         .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) );
                 patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), TaskTypes.FIND_FACE_CAR.name() );
                 patrul.setTaskTypes( TaskTypes.FREE );
-                if ( faceEvents.getPatruls().size() == faceEvents.getReportForCardList().size() ) {
-                    faceEvents.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( faceEvents.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( faceEvents ) ); }
+                if ( carEvents.getPatruls().size() == carEvents.getReportForCardList().size() ) {
+                    carEvents.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( carEvents.getId() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( carEvents ) ); }
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null );
-            } case ARRIVED -> faceEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
+            } case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
                     .inTime( patrul.check() )
                     .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
-        } faceEvents.getPatruls().put( patrul.getPassportNumber(), patrul );
-        RedisDataControl.getRedis().addValue( faceEvents.getId(), new ActiveTask( faceEvents ) );
+        } carEvents.getPatruls().put( patrul.getPassportNumber(), patrul );
+        RedisDataControl.getRedis().addValue( carEvents.getId(), new ActiveTask( carEvents ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvents faceEvents ) {

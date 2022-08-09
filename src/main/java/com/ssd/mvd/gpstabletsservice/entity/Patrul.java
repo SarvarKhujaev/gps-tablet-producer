@@ -3,9 +3,8 @@ package com.ssd.mvd.gpstabletsservice.entity;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
-import java.time.Duration;
-
 import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
+import java.time.Duration;
 import lombok.Data;
 import java.util.*;
 

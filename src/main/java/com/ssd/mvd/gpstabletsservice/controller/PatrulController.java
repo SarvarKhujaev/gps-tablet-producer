@@ -18,9 +18,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import static java.lang.Math.cos;
+import static java.lang.Math.*;
+import java.util.Comparator;
+import java.util.List;
 
 @RestController
 public class PatrulController {
+    private static final Double p = PI / 180;
+
+    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 - cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2
+            + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p ) * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
+
+    @MessageMapping ( value = "findTheClosestPatruls" )
+    public Mono< List< Patrul > > findTheClosestPatruls ( Point point ) { return RedisDataControl.getRedis().getAllPatruls()
+            .filter( patrul -> patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
+                    && patrul.getTaskTypes().compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
+                    && patrul.getLatitude() != null && patrul.getLongitude() != null )
+            .map( patrul -> { patrul.setDistance(  this.calculate( point, patrul ) );
+                return patrul; } )
+            .collectSortedList( Comparator.comparing( Patrul::getDistance ) ); }
+
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector.getInstance()
             .getTaskDetails( SerDes.getSerDes().deserialize( data.getData() ) ); }

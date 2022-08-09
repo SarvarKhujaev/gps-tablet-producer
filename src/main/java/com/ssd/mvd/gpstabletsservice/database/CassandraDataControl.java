@@ -34,11 +34,13 @@ public final class CassandraDataControl {
     private final String dbName = "TABLETS";
     private final String patrols = "PATRULS"; // for table with Patruls info
     private final String polygon = "POLYGON";
+
     private final String faceCar = "faceCar";
     private final String eventCar = "eventCar";
     private final String eventFace = "eventFace";
     private final String eventBody = "eventBody";
     private final String facePerson = "facePerson";
+
     private final String policeTypes = "POLICETYPES";
     private final String polygonType = "POLYGONTYPE";
     private final String selfEmployment = "SELFEMPLOYMENT";
