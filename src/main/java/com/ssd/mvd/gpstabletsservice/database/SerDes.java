@@ -2,13 +2,13 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
-import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
-import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -54,7 +54,6 @@ public class SerDes {
 
     public String serialize ( ActiveTask activeTask ) { return this.gson.toJson( activeTask ); }
 
-    public String serialize ( TupleOfPatrul tupleOfPatrul ) { return this.gson.toJson( tupleOfPatrul ); }
     public String serialize ( SelfEmploymentTask selfEmploymentTask ) { try { return this.objectMapper.writeValueAsString( selfEmploymentTask ); }
     catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
 

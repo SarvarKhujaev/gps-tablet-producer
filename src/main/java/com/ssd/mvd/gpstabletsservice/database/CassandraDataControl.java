@@ -13,27 +13,27 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
-import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import lombok.Data;
 
 import java.util.logging.Logger;
 import java.time.Duration;
 import java.util.Date;
 
+@Data
 public final class CassandraDataControl {
     private final Cluster cluster;
     private final Session session;
     private final String car = "CARS";
-    private final String tuple = "TUPLE";
     private final String lustre = "LUSTRA";
+    private final String dbName = "TABLETS";
     private final String patrols = "PATRULS"; // for table with Patruls info
     private final String polygon = "POLYGON";
-    private final String dbName = "TABLETS";
     private final String faceCar = "faceCar";
     private final String eventCar = "eventCar";
     private final String eventFace = "eventFace";
@@ -43,6 +43,7 @@ public final class CassandraDataControl {
     private final String polygonType = "POLYGONTYPE";
     private final String selfEmployment = "SELFEMPLOYMENT";
     private final String polygonForPatrul = "POLYGONFORPATRUl";
+
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
@@ -55,7 +56,8 @@ public final class CassandraDataControl {
         ( this.session = ( this.cluster = Cluster.builder()
             .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
                 .addContactPoints( "10.254.5.1, 10.254.5.2, 10.254.5.3".split( ", " ) )
-            .withProtocolVersion( ProtocolVersion.V4 ).withRetryPolicy( DefaultRetryPolicy.INSTANCE )
+            .withProtocolVersion( ProtocolVersion.V4 )
+            .withRetryPolicy( DefaultRetryPolicy.INSTANCE )
             .withQueryOptions( new QueryOptions().setDefaultIdempotence( true ) )
             .withSocketOptions( options )
             .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
@@ -86,9 +88,7 @@ public final class CassandraDataControl {
                 + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventCar
                 + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
-//        this.session.execute( "CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.tuple
-//                + "(id uuid PRIMARY KEY, carList list<text>, country text, object text );" );
-//        this.session.execute( "CREATE INDEX IF NOT EXISTS ON " + this.dbName + this.tuple + " (country);" );
+
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygon
                 + "(id uuid PRIMARY KEY, polygonName text, polygonType text);" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.facePerson
@@ -318,41 +318,4 @@ public final class CassandraDataControl {
         this.cluster.close();
         cassandraDataControl = null;
         this.logger.info( "Cassandra is closed!!!" ); }
-
-    public Flux< TupleOfPatrul > getAllTupleOfPatrul () { return Flux.fromStream( this.session.execute(
-            "SELECT * FROM "
-            + this.dbName + this.tuple + ";" ).all().stream() )
-            .map( TupleOfPatrul::new ); }
-
-    public Flux< TupleOfPatrul > getAllTupleOfPatrul ( String id ) { return Flux.fromStream( this.session.execute(
-            "SELECT * FROM "
-                    + this.dbName + this.tuple
-                    + " where id = " + id + ";" ).all().stream() )
-            .map( TupleOfPatrul::new ); }
-
-    public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) {
-        this.session.execute( "DELETE FROM "
-                + this.dbName + this.tuple
-                + " where id = " + id + ";" );
-        return Mono.just( ApiResponseModel.builder()
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                .message( id + " was successfully deleted" )
-                                .code( 200 )
-                                .build() )
-                        .success( true )
-                .build() ); }
-
-    public Flux< ApiResponseModel > addValue ( TupleOfPatrul tupleOfPatrul ) {
-        this.session.execute( "INSERT INTO "
-                + this.dbName + "." + this.tuple
-                + "( id, carList, country, object ) VALUES ("
-                + tupleOfPatrul.getPolygon().getUuid() + ", "
-                + tupleOfPatrul.getReqCarsList() + ", '"
-                + tupleOfPatrul.getCountries().name() + "', '"
-                + SerDes.getSerDes().serialize( tupleOfPatrul ) + "');" );
-        return Flux.fromStream( tupleOfPatrul.getReqCarsList().stream() )
-                .flatMap( reqCar ->
-                        RedisDataControl.getRedis().getPatrul( reqCar.getPatrulPassportSeries() )
-                                .flatMap( patrul -> RedisDataControl.getRedis().update( TaskInspector.getInstance()
-                                        .changeTaskStatus( patrul, Status.ACCEPTED, tupleOfPatrul ) ) ) ); }
 }

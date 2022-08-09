@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
+import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import lombok.Data;
 import java.util.Date;
 import java.util.UUID;
@@ -62,7 +63,7 @@ public final class TaskInspector {
         RedisDataControl.getRedis().update( card );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, TupleOfPatrul card ) {
+    public Patrul changeTaskStatus ( Patrul patrul, Status status, EscortTuple card ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL -> {

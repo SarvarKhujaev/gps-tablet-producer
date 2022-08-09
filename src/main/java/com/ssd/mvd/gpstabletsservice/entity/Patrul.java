@@ -4,6 +4,8 @@ import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 import java.time.Duration;
+
+import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import lombok.Data;
 import java.util.*;
 
@@ -51,6 +53,7 @@ public class Patrul {
 
     private Status status; // busy, free by default, available or not available
     private TaskTypes taskTypes; // task type which was attached to the current patrul
+    private EscortTuple escortTuple;
 
     private Map< String, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
 
