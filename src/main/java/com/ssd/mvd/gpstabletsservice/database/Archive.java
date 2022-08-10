@@ -57,20 +57,23 @@ public class Archive {
     public Flux< SelfEmploymentTask > getAllSelfEmploymentTask () { return Flux.fromStream( this.selfEmploymentTaskMap.values().stream() ); }
 
     // link new Patrul to existing SelfEmployment object
-    public Mono< ApiResponseModel > save ( UUID uuid, Patrul patrul ) { return this.get( uuid ).flatMap( selfEmploymentTask -> {
-        selfEmploymentTask.getPatruls().put( patrul.getPassportNumber(), TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, selfEmploymentTask ) );
-        RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
-        CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
-        this.save( Notification.builder()
-                .type( "selfEmployment" )
-                .notificationWasCreated( new Date() )
-                .passportSeries( patrul.getPassportNumber() )
-                .id( selfEmploymentTask.getUuid().toString() )
-                .latitudeOfTask( selfEmploymentTask.getLatOfAccident() )
-                .longitudeOfTask( selfEmploymentTask.getLanOfAccident() )
-                .address( selfEmploymentTask.getAddress() != null ? selfEmploymentTask.getAddress() : "unknown" )
-                .title( "My dear: " + patrul.getName() + " you got selfEmploymentTask task, so be so kind to check active Task and start to work )))" ).build() );
-        return RedisDataControl.getRedis().update( patrul ); } ); }
+    public Mono< ApiResponseModel > save ( UUID uuid, Patrul patrul ) { return this.get( uuid )
+            .flatMap( selfEmploymentTask -> {
+                selfEmploymentTask.getPatruls().put( patrul.getPassportNumber(),
+                        TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, selfEmploymentTask ) );
+                RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
+                CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
+                this.save( Notification.builder()
+                        .type( "selfEmployment" )
+                        .notificationWasCreated( new Date() )
+                        .passportSeries( patrul.getPassportNumber() )
+                        .id( selfEmploymentTask.getUuid().toString() )
+                        .latitudeOfTask( selfEmploymentTask.getLatOfAccident() )
+                        .longitudeOfTask( selfEmploymentTask.getLanOfAccident() )
+                        .address( selfEmploymentTask.getAddress() != null ? selfEmploymentTask.getAddress() : "unknown" )
+                        .title( "My dear: " + patrul.getName()
+                                + " you got selfEmploymentTask task, so be so kind to check active Task and start to work )))" ).build() );
+                return RedisDataControl.getRedis().update( patrul ); } ); }
 
     public void save ( Notification notification ) { KafkaDataControl.getInstance().writeToKafka( notification ); }
 
@@ -82,16 +85,23 @@ public class Archive {
             return RedisDataControl.getRedis().update( patrul )
                     .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
                             .status( Status.builder().message( "SelfEmployment was saved" ).code( 200 ).build() )
-                            .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).build() ) );
-        } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong Data for Task" ).code( 201 ).build() ).build() ); }
+                            .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask,
+                                    SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).build() ) );
+        } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder()
+                .message( "Wrong Data for Task" ).code( 201 ).build() ).build() ); }
 
     // taking off some Patrul from current Card
-    public Mono< ApiResponseModel > removePatrulFromSelfEmployment ( UUID uuid, Patrul patrul ) { return this.selfEmploymentTaskMap.containsKey( uuid ) ?
-            this.get( uuid ).flatMap( selfEmploymentTask -> {
-                TaskInspector.getInstance().changeTaskStatus( patrul, CANCEL, selfEmploymentTask );
-                CassandraDataControl.getInstance().addValue( selfEmploymentTask, SerDes.getSerDes().serialize( selfEmploymentTask ) );
-                return RedisDataControl.getRedis().update( patrul ); } )
-            : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "there is no such a task" ).code( 201 ).build() ).build() ); }
+    public Mono< ApiResponseModel > removePatrulFromSelfEmployment ( UUID uuid, Patrul patrul ) { return this.selfEmploymentTaskMap
+            .containsKey( uuid ) ?
+                this.get( uuid ).flatMap( selfEmploymentTask -> {
+                    TaskInspector.getInstance().changeTaskStatus( patrul, CANCEL, selfEmploymentTask );
+                    CassandraDataControl.getInstance().addValue( selfEmploymentTask,
+                            SerDes.getSerDes().serialize( selfEmploymentTask ) );
+                    return RedisDataControl.getRedis().update( patrul ); } )
+                : Mono.just( ApiResponseModel.builder()
+                    .success( false )
+                    .status( Status.builder()
+                    .message( "there is no such a task" ).code( 201 ).build() ).build() ); }
 
     public Mono< ApiResponseModel > addNewPatrulToCard ( Long cardId, Patrul patrul ) { return RedisDataControl.getRedis().getCard( cardId )
             .flatMap( card -> {
@@ -119,7 +129,6 @@ public class Archive {
     // uses to link Card to current Patrul object, either additional Patrul in case of necessary
     public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
         TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
-        RedisDataControl.getRedis().addValue( card );
         this.save( Notification.builder()
                 .type( CARD_102.name() )
                 .id( card.getCardId().toString() )
@@ -128,10 +137,12 @@ public class Archive {
                 .longitudeOfTask( card.getLongitude() )
                 .passportSeries( patrul.getPassportNumber() )
                 .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                .title( "My dear: " + patrul.getName() + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
+                .title( "My dear: " + patrul.getName()
+                        + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
         return RedisDataControl.getRedis().update( patrul )
                 .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
-                        .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
+                        .status( Status.builder()
+                                .message( card + " was linked to: " + patrul.getName() ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > save ( Patrul patrul, EventFace card ) {
         TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
@@ -145,10 +156,12 @@ public class Archive {
                 .longitudeOfTask( card.getLongitude() )
                 .passportSeries( patrul.getPassportNumber() )
                 .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                .title( "My dear: " + patrul.getName() + " you got 102 card task, so be so kind to check active Task and start to work )))" ).build() );
+                .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_EVENT_FACE
+                        + ", so be so kind to check active Task and start to work )))" ).build() );
         return RedisDataControl.getRedis().update( patrul )
                 .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
-                        .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
+                        .status( Status.builder()
+                                .message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > save ( Patrul patrul, EventBody card ) {
         TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
@@ -185,7 +198,8 @@ public class Archive {
                         .status( Status.builder().message( card + " was linked to: " + patrul.getName()  ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvents card ) {
-        this.getFaceEvents().putIfAbsent( TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card ).getTaskId(), card );
+        this.getFaceEvents().putIfAbsent( TaskInspector.getInstance()
+                .changeTaskStatus( patrul, ATTACHED, card ).getTaskId(), card );
         CassandraDataControl.getInstance().addValue( card );
         this.save( Notification.builder()
                 .id( card.getId() )

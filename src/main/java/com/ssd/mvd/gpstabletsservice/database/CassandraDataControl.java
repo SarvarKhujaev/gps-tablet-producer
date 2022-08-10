@@ -265,6 +265,11 @@ public final class CassandraDataControl {
     public Flux< Row > getPatruls ( String param ) { return Flux.fromStream( this.session
             .execute( "SELECT nsf FROM TABLETS.patruls WHERE nsf LIKE '%" + param  + "%';" ).all().stream() ); }
 
+    public Flux< Patrul > getAllPatruls () { return Flux.fromStream (
+            this.session.execute( "SELECT * FROM "
+                    + this.dbName + "." + this.patrols + ";" ).all().stream()
+        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) ); }
+
     public void resetData () {
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
                 .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )

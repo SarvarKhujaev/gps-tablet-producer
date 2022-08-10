@@ -38,8 +38,8 @@ public final class TaskInspector {
                 card.getPatruls().remove( patrul.getPassportNumber() ); }
             case ATTACHED -> {
                 patrul.setTaskTypes( TaskTypes.CARD_102 );
-                patrul.setTaskId( card.getCardId().toString() ); // saving card id into patrul object
                 patrul.setLatitudeOfTask( card.getLatitude() );
+                patrul.setTaskId( card.getCardId().toString() ); // saving card id into patrul object
                 patrul.setLongitudeOfTask( card.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case FINISHED -> {
@@ -49,6 +49,7 @@ public final class TaskInspector {
                 patrul.setTaskTypes( TaskTypes.FREE );
                 if ( card.getPatruls().size() == card.getReportForCardList().size() ) {
                     card.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( card.getCardId() );
                     RedisDataControl.getRedis().remove( card.getCardId().toString() );
                     KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( card ) ); }
                 patrul.setTaskDate( null );

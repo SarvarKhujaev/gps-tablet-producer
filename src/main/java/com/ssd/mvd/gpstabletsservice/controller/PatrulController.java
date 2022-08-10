@@ -31,7 +31,7 @@ public class PatrulController {
             + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p ) * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
 
     @MessageMapping ( value = "findTheClosestPatruls" )
-    public Mono< List< Patrul > > findTheClosestPatruls ( Point point ) { return RedisDataControl.getRedis().getAllPatruls()
+    public Mono< List< Patrul > > findTheClosestPatruls ( Point point ) { return CassandraDataControl.getInstance().getAllPatruls()
             .filter( patrul -> patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
                     && patrul.getTaskTypes().compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
                     && patrul.getLatitude() != null && patrul.getLongitude() != null )

@@ -448,17 +448,13 @@ public final class RedisDataControl {
         this.addValue( card.getCardId().toString(), new ActiveTask( card ) );
         this.cardMap.fastPutIfAbsent( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
 
-    public void update ( Card card ) {
-        this.addValue( card.getCardId().toString(), new ActiveTask( card ) );
-        this.cardMap.fastPutIfExists( card.getCardId(), SerDes.getSerDes().serialize( card ) ).subscribe(); }
+    public void update ( Card card ) { this.cardMap.fastPutIfExists( card.getCardId(),
+            SerDes.getSerDes().serialize( card ) ).subscribe(); }
 
     public Mono< Card > getCard ( Long cardId ) { return this.cardMap.get( cardId )
             .flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
 
     public void remove ( Long cardId ) { this.cardMap.remove( cardId ).subscribe(); }
-
-    public Flux< Card > getAllCards () { return this.cardMap.valueIterator()
-            .flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
 
     public void addValue ( String id, ActiveTask activeTask ) { this.activeTasks.fastPut( id, KafkaDataControl.getInstance()
             .writeToKafka( SerDes.getSerDes().serialize( activeTask ) ) ).subscribe(); }
