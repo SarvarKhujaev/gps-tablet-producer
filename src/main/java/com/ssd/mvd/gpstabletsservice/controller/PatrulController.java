@@ -35,8 +35,8 @@ public class PatrulController {
             .filter( patrul -> patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
                     && patrul.getTaskTypes().compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
                     && patrul.getLatitude() != null && patrul.getLongitude() != null )
-            .map( patrul -> { patrul.setDistance(  this.calculate( point, patrul ) );
-                return patrul; } )
+            .flatMap( patrul -> { patrul.setDistance(  this.calculate( point, patrul ) );
+                return Mono.just( patrul ); } )
             .collectSortedList( Comparator.comparing( Patrul::getDistance ) ); }
 
     @MessageMapping ( value = "getTaskDetails" )
