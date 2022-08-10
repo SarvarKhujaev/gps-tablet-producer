@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
@@ -31,13 +32,13 @@ public class PatrulController {
             + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p ) * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
 
     @MessageMapping ( value = "findTheClosestPatruls" )
-    public Mono< List< Patrul > > findTheClosestPatruls ( Point point ) { return CassandraDataControl.getInstance().getAllPatruls()
+    public Flux< Patrul > findTheClosestPatruls (Point point ) { return CassandraDataControl.getInstance().getAllPatruls()
             .filter( patrul -> patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
-                    && patrul.getTaskTypes().compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
+                    && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0
                     && patrul.getLatitude() != null && patrul.getLongitude() != null )
             .map( patrul -> { patrul.setDistance(  this.calculate( point, patrul ) );
                 return patrul; } )
-            .collectSortedList( Comparator.comparing( Patrul::getDistance ) ); }
+            .sort( Comparator.comparing( Patrul::getDistance ) ); }
 
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector.getInstance()
