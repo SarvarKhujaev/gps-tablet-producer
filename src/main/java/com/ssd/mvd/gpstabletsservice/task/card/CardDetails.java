@@ -1,6 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 import java.util.*;
+
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import lombok.Data;
 import reactor.core.publisher.Flux;
 
@@ -50,32 +53,32 @@ public class CardDetails {
         this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
 
     public CardDetails ( EventFace eventBody ) {
-        this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_BODY, new ArrayList<>() );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "F.I.O",
+        this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_FACE, new ArrayList<>() );
+        this.getDetails().get( Details.FIND_FACE_EVENT_FACE ).add( new Item( "F.I.O",
                 eventBody.getPsychologyCard().getModelForPassport().getPerson().getNameLatin() + " "
                + eventBody.getPsychologyCard().getModelForPassport().getPerson().getSurnameLatin() + " "
                         + eventBody.getPsychologyCard().getModelForPassport().getPerson().getPatronymLatin() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Pasport Seriyasi",
+        this.getDetails().get( Details.FIND_FACE_EVENT_FACE ).add( new Item( "Pasport Seriyasi",
                 eventBody.getPsychologyCard().getModelForPassport().getDocument().getSerialNumber() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Ip", eventBody.getCameraIp() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Image", eventBody.getFullframe() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Sana", eventBody.getCreated_date() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "O'XSHASHLIGI: ", eventBody.getConfidence() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
+        this.getDetails().get( Details.FIND_FACE_EVENT_FACE ).add( new Item( "Ip", eventBody.getCameraIp() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_FACE ).add( new Item( "Image", eventBody.getFullframe() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_FACE ).add( new Item( "Sana", eventBody.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_FACE ).add( new Item( "O'XSHASHLIGI: ", eventBody.getConfidence() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_FACE ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
 
     public CardDetails ( EventCar eventBody ) {
-        this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_BODY, new ArrayList<>() );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "F.I.O",
+        this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_CAR, new ArrayList<>() );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "F.I.O",
                 eventBody.getCarTotalData().getModelForCar().getModel() + ", "
                + eventBody.getCarTotalData().getModelForCar().getKuzov() + ", RANG: "
                         + eventBody.getCarTotalData().getModelForCar().getColor() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Номер машины до угона: ",
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Номер машины до угона: ",
                 eventBody.getCarTotalData().getModelForCar().getPlateNumber() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Ip", eventBody.getCameraIp() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Image", eventBody.getFullframe() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Sana", eventBody.getCreated_date() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "O'XSHASHLIGI: ", eventBody.getConfidence() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_BODY ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Ip", eventBody.getCameraIp() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Image", eventBody.getFullframe() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Sana", eventBody.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "O'XSHASHLIGI: ", eventBody.getConfidence() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
 
     public CardDetails ( Card card, String language ) {
         this.getDetails().putIfAbsent( Details.DETAILS, new ArrayList<>() );
@@ -169,5 +172,34 @@ public class CardDetails {
                     this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add( new Item( "Дом", card.getVictimHumans().get( 0 ).getVictimAddress().getFlat() ) );
                     this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add( new Item( "Адрес", card.getVictimHumans().get( 0 ).getVictimAddress().getHouse() ) );
                     this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add( new Item( "Квартира", card.getVictimHumans().get( 0 ).getVictimAddress().getStreet() ) ); } } } );
+    }
+
+    public CardDetails ( FaceEvents eventCar ) {
+        this.getDetails().putIfAbsent( Details.FIND_FACE_PERSON, new ArrayList<>() );
+        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "F.I.O",
+                eventCar.getPsychologyCard().getModelForPassport().getPerson().getNameLatin() + " "
+                        + eventCar.getPsychologyCard().getModelForPassport().getPerson().getSurnameLatin() + " "
+                        + eventCar.getPsychologyCard().getModelForPassport().getPerson().getPatronymLatin() ) );
+        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Pasport Seriyasi",
+                eventCar.getPsychologyCard().getModelForPassport().getDocument().getSerialNumber() ) );
+        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Image", eventCar.getFullframe() ) );
+        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Sana", eventCar.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Vaqt", eventCar.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Ip", eventCar.getCamera().getUrl() ) );
+        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "O'XSHASHLIGI: ", eventCar.getConfidence() ) ); }
+
+    public CardDetails ( CarEvents eventCar ) {
+        this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_CAR, new ArrayList<>() );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "F.I.O",
+                eventCar.getCarTotalData().getModelForCar().getModel() + ", "
+                        + eventCar.getCarTotalData().getModelForCar().getKuzov() + ", RANG: "
+                        + eventCar.getCarTotalData().getModelForCar().getColor() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Номер машины до угона: ",
+                eventCar.getCarTotalData().getModelForCar().getPlateNumber() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Image", eventCar.getFullframe() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Vaqt", eventCar.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Sana", eventCar.getCreated_date() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Ip", eventCar.getCamera().getUrl() ) );
+        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "O'XSHASHLIGI: ", eventCar.getConfidence() ) );
     }
 }

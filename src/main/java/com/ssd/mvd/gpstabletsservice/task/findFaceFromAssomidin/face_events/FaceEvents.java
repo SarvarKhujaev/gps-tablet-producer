@@ -5,6 +5,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import lombok.*;
 import lombok.extern.jackson.Jacksonized;
 import org.codehaus.jackson.map.annotate.JsonDeserialize;
@@ -63,6 +64,8 @@ public class FaceEvents {
     private List< MatchedListsItem > matched_lists;
 
     private Status status = Status.CREATED;
+    @JsonDeserialize
+    private PsychologyCard psychologyCard;
 
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize
     private Map< String, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event

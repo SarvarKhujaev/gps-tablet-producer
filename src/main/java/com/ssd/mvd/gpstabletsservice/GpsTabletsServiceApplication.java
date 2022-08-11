@@ -1,8 +1,5 @@
 package com.ssd.mvd.gpstabletsservice;
 
-import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import org.springframework.boot.SpringApplication;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import org.springframework.context.ApplicationContext;
@@ -14,16 +11,5 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-//        RedisDataControl.getRedis().getAllPatruls()
-//                        .subscribe( patrul -> {
-//                            patrul.setTaskId( null );
-//                            patrul.setTaskDate( null );
-//                            patrul.setStatus( Status.FREE );
-//                            patrul.setLatitudeOfTask( null );
-//                            patrul.setLongitudeOfTask( null );
-//                            patrul.setTaskTypes( TaskTypes.FREE );
-//                            RedisDataControl.getRedis().update( patrul ).subscribe();
-//                        } );
-        Archive.getAchieve();
-    }
+        Archive.getAchieve(); }
 }

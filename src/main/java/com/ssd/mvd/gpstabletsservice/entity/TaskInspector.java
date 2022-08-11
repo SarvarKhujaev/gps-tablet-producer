@@ -462,28 +462,42 @@ public final class TaskInspector {
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( card, "ru" ) ).build() )
                             .build() ) );
 
-            case FIND_FACE_EVENT_BODY -> Archive.getAchieve().getEventBody( patrul.getTaskId() )
+            case FIND_FACE_EVENT_BODY -> CassandraDataControl.getInstance().getEventBody( patrul.getTaskId() )
                     .flatMap( eventBody -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventBody ) ).build() ) // TO-DO
                             .build() ) );
 
-            case FIND_FACE_EVENT_FACE -> Archive.getAchieve().getEventFace( patrul.getTaskId() )
+            case FIND_FACE_EVENT_FACE -> CassandraDataControl.getInstance().getEventFace( patrul.getTaskId() )
                     .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventFace ) ).build() ) // TO-DO
                             .build() ) );
 
-            case FIND_FACE_EVENT_CAR -> Archive.getAchieve().getEventCar( patrul.getTaskId() )
+            case FIND_FACE_EVENT_CAR -> CassandraDataControl.getInstance().getEventCar( patrul.getTaskId() )
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventCar ) ).build() ) // TO-DO
                             .build() ) );
 
-            default -> Archive.getAchieve().get( UUID.fromString( patrul.getTaskId() ) )
+            case FIND_FACE_CAR -> CassandraDataControl.getInstance().getFaceEvents( patrul.getTaskId() )
+                    .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
+                            .success( true )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventCar ) ).build() ) // TO-DO
+                            .build() ) );
+
+            case FIND_FACE_PERSON -> CassandraDataControl.getInstance().getCarEvents( patrul.getTaskId() )
+                    .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
+                            .success( true )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventCar ) ).build() ) // TO-DO
+                            .build() ) );
+
+            default -> CassandraDataControl.getInstance().getSelfEmploymentTask( UUID.fromString( patrul.getTaskId() ) )
                     .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
