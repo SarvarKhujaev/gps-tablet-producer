@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
@@ -11,6 +10,7 @@ import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
@@ -40,57 +40,99 @@ public class CardController {
     public Mono< Card > getCurrentCard ( Long cardId ) { return RedisDataControl.getRedis().getCard( cardId ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
-    public Mono< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
-        System.out.println( request.getTaskType() );
-        switch ( request.getTaskType() ) {
-            case CARD_102 : {
-                Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
-                RedisDataControl.getRedis().addValue( card );
-                Flux.fromStream( request.getPatruls().stream() )
-                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-                        .flatMap( patrul -> patrul
-                                .flatMap( patrul1 -> Archive.getAchieve()
-                                        .save( patrul1, card ) ) ); }
+    public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
+        if ( request.getTaskType().compareTo( TaskTypes.CARD_102 ) == 0 ) {
+            Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
+            RedisDataControl.getRedis().addValue( card );
+            return Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, card ) ) ); }
 
-            case FIND_FACE_EVENT_FACE : {
-                EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
-                Flux.fromStream( request.getPatruls().stream() )
-                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-                        .flatMap( patrul -> patrul
-                                .flatMap( patrul1 -> Archive.getAchieve()
-                                        .save( patrul1, eventFace ) ) ); }
+        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
+            EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
+            return Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, eventFace ) ) ); }
 
-            case FIND_FACE_EVENT_BODY : {
-                EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
-                Flux.fromStream( request.getPatruls().stream() )
-                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-                        .flatMap( patrul -> patrul
-                                .flatMap( patrul1 -> Archive.getAchieve()
-                                        .save( patrul1, eventBody ) ) ); }
+        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
+            FaceEvents facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
+            return Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, facePerson ) ) ); }
 
-            case FIND_FACE_PERSON : {
-                FaceEvents facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
-                Flux.fromStream( request.getPatruls().stream() )
-                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-                        .flatMap( patrul -> patrul
-                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, facePerson ) ) ); }
+        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
+            CarEvents carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
+            return Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, carEvents ) ) ); }
 
-            case FIND_FACE_CAR : {
-                CarEvents carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
-                Flux.fromStream( request.getPatruls().stream() )
-                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-                        .flatMap( patrul -> patrul
-                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, carEvents ) ) ); }
+        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
+            EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
+            return Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve()
+                                    .save( patrul1, eventBody ) ) ); }
 
-            default : {
-                EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
-                Flux.fromStream( request.getPatruls().stream() )
-                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-                        .flatMap( patrul -> patrul
-                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); } }
-        return Mono.just( ApiResponseModel.builder().status( Status.builder()
-                .code( 200 )
-                .message( "Task was successfully saved" ).build() ).build() ); }
+        else { EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
+            return Flux.fromStream( request.getPatruls().stream() )
+                    .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+                    .flatMap( patrul -> patrul
+                            .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); }
+
+//        return switch ( request.getTaskType() ) {
+//            case CARD_102 -> {
+//                Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
+//                RedisDataControl.getRedis().addValue( card );
+//                return Flux.fromStream( request.getPatruls().stream() )
+//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+//                        .flatMap( patrul -> patrul
+//                                .flatMap( patrul1 -> Archive.getAchieve()
+//                                        .save( patrul1, card ) ) ); }
+
+//            case FIND_FACE_EVENT_FACE : {
+//                EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
+//                return Flux.fromStream( request.getPatruls().stream() )
+//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+//                        .flatMap( patrul -> patrul
+//                                .flatMap( patrul1 -> Archive.getAchieve()
+//                                        .save( patrul1, eventFace ) ) ); }
+
+//            case FIND_FACE_EVENT_BODY : {
+//                EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
+//                return Flux.fromStream( request.getPatruls().stream() )
+//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+//                        .flatMap( patrul -> patrul
+//                                .flatMap( patrul1 -> Archive.getAchieve()
+//                                        .save( patrul1, eventBody ) ) ); }
+
+//            case FIND_FACE_PERSON : {
+//                FaceEvents facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
+//                return Flux.fromStream( request.getPatruls().stream() )
+//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+//                        .flatMap( patrul -> patrul
+//                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, facePerson ) ) ); }
+//
+//            case FIND_FACE_CAR : {
+//                CarEvents carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
+//                return Flux.fromStream( request.getPatruls().stream() )
+//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+//                        .flatMap( patrul -> patrul
+//                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, carEvents ) ) ); }
+//
+//            default : {
+//                EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
+//                return Flux.fromStream( request.getPatruls().stream() )
+//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
+//                        .flatMap( patrul -> patrul
+//                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); } }
+    }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return RedisDataControl.getRedis()
