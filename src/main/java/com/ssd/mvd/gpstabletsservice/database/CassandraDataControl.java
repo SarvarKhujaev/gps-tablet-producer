@@ -21,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import lombok.Data;
 
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.time.Duration;
 import java.util.Date;
@@ -93,10 +94,12 @@ public final class CassandraDataControl {
 
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygon
                 + "(id uuid PRIMARY KEY, polygonName text, polygonType text);" ); // the table for polygons
+
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.facePerson
                 + "(id text PRIMARY KEY, object text);" ); // the table for polygons
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.faceCar
                 + "(id text PRIMARY KEY, object text);" ); // the table for polygons
+
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols
                 + "(passportNumber text PRIMARY KEY, NSF text, object text);" ); // the table for patruls
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonForPatrul
@@ -325,4 +328,52 @@ public final class CassandraDataControl {
         this.cluster.close();
         cassandraDataControl = null;
         this.logger.info( "Cassandra is closed!!!" ); }
+
+    public Mono< EventBody > getEventBody ( String id ) { return Mono.just(
+            SerDes.getSerDes().deserializeEventBody(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.eventBody
+                                    + " where id = '" + id + "';"
+                    ).one().getString( "object" ) ) ); }
+
+    public Mono< EventCar > getEventCar ( String id ) { return Mono.just(
+            SerDes.getSerDes().deserializeEventCar(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.eventCar
+                                    + " where id = '" + id + "';"
+                    ).one().getString( "object" ) ) ); }
+
+    public Mono< EventFace > getEventFace ( String id ) { return Mono.just(
+            SerDes.getSerDes().deserializeEventFace(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.eventFace
+                                    + " where id = '" + id + "';"
+                    ).one().getString( "object" ) ) ); }
+
+    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
+            SerDes.getSerDes().deserializeSelfEmployment(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.selfEmployment
+                                    + " where id = '" + id + "';"
+                    ).one().getString( "object" ) ) ); }
+
+    public Mono< FaceEvents > getFaceEvents ( String id ) { return Mono.just(
+            SerDes.getSerDes().deserializeFaceEvents(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.facePerson
+                                    + " where id = '" + id + "';"
+                    ).one().getString( "object" ) ) ); }
+
+    public Mono< CarEvents > getCarEvents ( String id ) { return Mono.just(
+            SerDes.getSerDes().deserializeCarEvents(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.faceCar
+                                    + " where id = '" + id + "';"
+                    ).one().getString( "object" ) ) ); }
 }

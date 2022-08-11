@@ -77,19 +77,6 @@ public class Archive {
 
     public void save ( Notification notification ) { KafkaDataControl.getInstance().writeToKafka( notification ); }
 
-    public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
-        if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
-            TaskInspector.getInstance().changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask );
-            this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
-            RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
-            return RedisDataControl.getRedis().update( patrul )
-                    .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                            .status( Status.builder().message( "SelfEmployment was saved" ).code( 200 ).build() )
-                            .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask,
-                                    SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).build() ) );
-        } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder()
-                .message( "Wrong Data for Task" ).code( 201 ).build() ).build() ); }
-
     // taking off some Patrul from current Card
     public Mono< ApiResponseModel > removePatrulFromSelfEmployment ( UUID uuid, Patrul patrul ) { return this.selfEmploymentTaskMap
             .containsKey( uuid ) ?
@@ -144,10 +131,22 @@ public class Archive {
                         .status( Status.builder()
                                 .message( card + " was linked to: " + patrul.getName() ).build() ).build() ) ); }
 
+    public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
+        if ( !this.selfEmploymentTaskMap.containsKey( selfEmploymentTask.getUuid() ) ) {
+            TaskInspector.getInstance().changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask );
+            this.selfEmploymentTaskMap.putIfAbsent( selfEmploymentTask.getUuid(), selfEmploymentTask ); // saving in Archive to manipulate in future
+            RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) );
+            return RedisDataControl.getRedis().update( patrul )
+                    .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                            .status( Status.builder().message( "SelfEmployment was saved" ).code( 200 ).build() )
+                            .success( CassandraDataControl.getInstance().addValue( selfEmploymentTask,
+                                    SerDes.getSerDes().serialize( selfEmploymentTask ) ) ).build() ) );
+        } else return Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder()
+                .message( "Wrong Data for Task" ).code( 201 ).build() ).build() ); }
+
     public Mono< ApiResponseModel > save ( Patrul patrul, EventFace card ) {
         TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
         this.getEventFaceMap().putIfAbsent( card.getId(), card );
-        CassandraDataControl.getInstance().addValue( card );
         this.save( Notification.builder()
                 .id( card.getId() )
                 .type( FIND_FACE_EVENT_FACE.name() )
@@ -166,7 +165,6 @@ public class Archive {
     public Mono< ApiResponseModel > save ( Patrul patrul, EventBody card ) {
         TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
         this.getEventBodyMap().putIfAbsent( card.getId(), card );
-        CassandraDataControl.getInstance().addValue( card );
         this.save( Notification.builder()
                 .id( card.getId() )
                 .type( FIND_FACE_EVENT_BODY.name() )
@@ -183,7 +181,6 @@ public class Archive {
     public Mono< ApiResponseModel > save ( Patrul patrul, EventCar card ) {
         TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
         this.getEventCarMap().putIfAbsent( card.getId(), card );
-        CassandraDataControl.getInstance().addValue( card );
         this.save( Notification.builder()
                 .id( card.getId() )
                 .type( FIND_FACE_EVENT_BODY.name() )
@@ -200,7 +197,6 @@ public class Archive {
     public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvents card ) {
         this.getFaceEvents().putIfAbsent( TaskInspector.getInstance()
                 .changeTaskStatus( patrul, ATTACHED, card ).getTaskId(), card );
-        CassandraDataControl.getInstance().addValue( card );
         this.save( Notification.builder()
                 .id( card.getId() )
                 .type( FIND_FACE_EVENT_BODY.name() )
@@ -217,7 +213,6 @@ public class Archive {
 
     public Mono< ApiResponseModel > save ( Patrul patrul, CarEvents card ) {
         this.getCarEvents().putIfAbsent( TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card ).getTaskId(), card );
-        CassandraDataControl.getInstance().addValue( card );
         this.save( Notification.builder()
                 .id( card.getId() )
                 .type( FIND_FACE_CAR.name() )
