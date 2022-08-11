@@ -168,9 +168,9 @@ public final class CassandraDataControl {
         this.session.executeAsync( "CREATE TABLE IF NOT EXISTS "
                 + this.dbName + "." + this.patrols + patrul.getPassportNumber()
                 + "(date timestamp PRIMARY KEY, status text, message text, totalActivityTime double );" ); // creating new journal for new patrul
-        return this.session.executeAsync( "INSERT INTO "
+        return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.patrols + "(passportNumber, NSF, object) VALUES('"
-                + patrul.getPassportNumber() + "', '" + patrul.getSurnameNameFatherName() + "', '" + key + "');" ).isDone(); }
+                + patrul.getPassportNumber() + "', '" + patrul.getSurnameNameFatherName() + "', '" + key + "');" ).wasApplied(); }
 
     public ResultSetFuture addValue ( AtlasLustra atlasLustra, String key ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.lustre + "(id, object) " + "VALUES ('" + atlasLustra.getUUID() + "', " + key + ");" ); }
