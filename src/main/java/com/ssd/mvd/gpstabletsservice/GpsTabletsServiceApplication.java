@@ -1,5 +1,8 @@
 package com.ssd.mvd.gpstabletsservice;
 
+import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import org.springframework.boot.SpringApplication;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import org.springframework.context.ApplicationContext;
@@ -11,14 +14,16 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-//        Point point = new Point( 65.6, 66.7 );
 //        RedisDataControl.getRedis().getAllPatruls()
-//                    .filter( patrul -> patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
-//                            && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0
-//                            && patrul.getLatitude() != null && patrul.getLongitude() != null )
-//                    .flatMap( patrul -> { patrul.setDistance(  calculate( point, patrul ) );
-//                        return Mono.just( patrul ); } )
-//                    .sort( Comparator.comparing( Patrul::getDistance ) )
-//                .subscribe( patrul -> System.out.println( patrul.getPassportNumber() ) );
-        Archive.getAchieve(); }
+//                        .subscribe( patrul -> {
+//                            patrul.setTaskId( null );
+//                            patrul.setTaskDate( null );
+//                            patrul.setStatus( Status.FREE );
+//                            patrul.setLatitudeOfTask( null );
+//                            patrul.setLongitudeOfTask( null );
+//                            patrul.setTaskTypes( TaskTypes.FREE );
+//                            RedisDataControl.getRedis().update( patrul ).subscribe();
+//                        } );
+        Archive.getAchieve();
+    }
 }

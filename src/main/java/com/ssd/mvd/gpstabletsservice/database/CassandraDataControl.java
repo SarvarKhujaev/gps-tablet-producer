@@ -179,13 +179,13 @@ public final class CassandraDataControl {
             + this.dbName + "." + this.polygonForPatrul + "(id, object) " + "VALUES (" + polygon.getUuid() + ", '" + object + "');" ); }
 
     public ResultSetFuture addValue ( FaceEvents polygon ) { return this.session.executeAsync( "INSERT INTO "
-            + this.dbName + "." + this.polygonForPatrul
+            + this.dbName + "." + this.facePerson
             + "(id, object) " + "VALUES ('"
             + polygon.getId() + "', '"
             + SerDes.getSerDes().serialize( polygon ) + "');" ); }
 
     public ResultSetFuture addValue ( CarEvents polygon ) { return this.session.executeAsync( "INSERT INTO "
-            + this.dbName + "." + this.polygonForPatrul
+            + this.dbName + "." + this.faceCar
             + "(id, object) " + "VALUES ('"
             + polygon.getId() + "', '"
             + SerDes.getSerDes().serialize( polygon ) + "');" ); }

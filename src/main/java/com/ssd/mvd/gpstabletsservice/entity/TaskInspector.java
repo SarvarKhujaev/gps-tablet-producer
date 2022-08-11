@@ -433,7 +433,8 @@ public final class TaskInspector {
 
             case FIND_FACE_CAR -> Archive.getAchieve().getFaceEvent( patrul.getTaskId() )
                     .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new ActiveTask( eventFace, patrul.getStatus() ) )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new ActiveTask( eventFace, patrul.getStatus() ) )
                                     .type( TaskTypes.FIND_FACE_CAR.name() ).build() )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
                                     .message( "U have " + TaskTypes.FIND_FACE_CAR.name() + " Task" )
