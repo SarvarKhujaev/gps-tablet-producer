@@ -84,11 +84,21 @@ public class SerDes {
 
     public CarEvents deserializeCarEvents ( Object card ) { return this.objectMapper.convertValue( card, new TypeReference<>() {} ); }
 
+    public CarEvents deserializeCarEvents ( String card ) { return this.gson.fromJson( card, CarEvents.class ); }
+
     public EventCar deserializeEventCar ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
+
+    public EventCar deserializeEventCar ( String object ) { return this.gson.fromJson( object, EventCar.class ); }
 
     public EventFace deserializeEventFace ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
+    public EventFace deserializeEventFace ( String object ) { return this.gson.fromJson( object, EventFace.class ); }
+
     public FaceEvents deserializeFaceEvents ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
+    public FaceEvents deserializeFaceEvents ( String object ) { return this.gson.fromJson( object, FaceEvents.class ); }
+
     public EventBody deserializeEventBody ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
+
+    public EventBody deserializeEventBody ( String object ) { return this.gson.fromJson( object, EventBody.class ); }
 }

@@ -62,7 +62,7 @@ public class FaceEvents {
     @JsonDeserialize
     private List< MatchedListsItem > matched_lists;
 
-    private Status status;
+    private Status status = Status.CREATED;
 
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize
     private Map< String, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event

@@ -58,7 +58,7 @@ public class CarEvents  {
 	private Boolean matched;
 	private Boolean acknowledged;
 
-	private Status status;
+	private Status status = Status.CREATED;
 
 	@com.fasterxml.jackson.databind.annotation.JsonDeserialize
 	private Map< String, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event

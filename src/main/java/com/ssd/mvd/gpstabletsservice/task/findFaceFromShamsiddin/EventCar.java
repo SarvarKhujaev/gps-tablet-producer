@@ -22,7 +22,7 @@ import java.util.*;
 @AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class EventCar {
-    private Status status;
+    private Status status = Status.CREATED;
     private Integer camera;
     private Boolean matched;
     private Date created_date;

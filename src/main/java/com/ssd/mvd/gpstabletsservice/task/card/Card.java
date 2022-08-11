@@ -24,7 +24,7 @@ public class Card {
     private Integer sEventFormsAddId;  //??
     private Integer initSeventFormsId;  //??
 
-    private Status status;
+    private Status status = Status.CREATED;
     private String fabula;   //????
     private String address;
     private String userFio; //Ariza berivchining F.I.SH

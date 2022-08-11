@@ -22,7 +22,7 @@ import java.util.*;
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class EventFace {
     private Long age;
-    private Status status;
+    private Status status = Status.CREATED;
     private Integer camera;
     private Boolean matched;
     private Date created_date;
