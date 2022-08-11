@@ -1,17 +1,25 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin;
 
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
+import lombok.extern.jackson.Jacksonized;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Data;
 import java.util.*;
 
-import lombok.Data;
-
 @Data
+@Jacksonized
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class EventFace {
     private Long age;
     private Status status;

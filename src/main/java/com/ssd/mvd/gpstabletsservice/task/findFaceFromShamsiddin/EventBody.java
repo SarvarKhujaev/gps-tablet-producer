@@ -1,7 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin;
 
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -17,6 +19,7 @@ import java.util.*;
 @Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties( ignoreUnknown = true )
 public class EventBody {
     private Status status;
     private Integer camera;

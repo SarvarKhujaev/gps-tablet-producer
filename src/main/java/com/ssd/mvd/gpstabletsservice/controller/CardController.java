@@ -41,6 +41,7 @@ public class CardController {
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Mono< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
+        System.out.println( request.getTaskType() );
         switch ( request.getTaskType() ) {
             case CARD_102 : {
                 Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
@@ -87,7 +88,9 @@ public class CardController {
                         .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
                         .flatMap( patrul -> patrul
                                 .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); } }
-        return Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Time for" ).build() ).build() ); }
+        return Mono.just( ApiResponseModel.builder().status( Status.builder()
+                .code( 200 )
+                .message( "Task was successfully saved" ).build() ).build() ); }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return RedisDataControl.getRedis()
