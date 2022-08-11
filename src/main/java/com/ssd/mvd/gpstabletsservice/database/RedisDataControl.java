@@ -456,8 +456,12 @@ public final class RedisDataControl {
 
     public void remove ( Long cardId ) { this.cardMap.remove( cardId ).subscribe(); }
 
-    public void addValue ( String id, ActiveTask activeTask ) { this.activeTasks.fastPut( id, KafkaDataControl.getInstance()
-            .writeToKafka( SerDes.getSerDes().serialize( activeTask ) ) ).subscribe(); }
+    public Mono< Boolean > addValue (String id, ActiveTask activeTask ) {
+        return this.activeTasks.containsKey( id )
+                .flatMap( aBoolean -> aBoolean ? this.activeTasks.fastPutIfExists( id, KafkaDataControl.getInstance()
+                        .writeToKafka( SerDes.getSerDes().serialize( activeTask ) ) )
+                        : this.activeTasks.fastPutIfAbsent( id, KafkaDataControl.getInstance()
+                        .writeToKafka( SerDes.getSerDes().serialize( activeTask ) ) ) ); }
 
     public void remove ( String id ) { this.activeTasks.remove( id ).subscribe(); }
 

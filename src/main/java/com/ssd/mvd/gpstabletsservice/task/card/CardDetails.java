@@ -144,12 +144,18 @@ public class CardDetails {
                     this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT ).add( new Item( "Квартира", card.getEventAddress().getStreet() ) ); }
 
                 case DATA_OF_VICTIM -> {
-                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Телефон", card.getVictimHumans().get( 0 ).getPhone() ) );
-                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Имя", card.getVictimHumans().get( 0 ).getFirstName() ) );
-                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Отчество", card.getVictimHumans().get( 0 ).getLastName() ) );
-                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Фамилия", card.getVictimHumans().get( 0 ).getMiddleName() ) );
-                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "ID Потерпевшего", card.getVictimHumans().get( 0 ).getVictimId() ) );
-                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Дата рождения", card.getVictimHumans().get( 0 ).getDateOfBirth() ) ); }
+                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Телефон", card.getVictimHumans() != null
+                            && card.getVictimHumans().size() > 0 ? card.getVictimHumans().get( 0 ).getPhone() : "unknown" ) );
+                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Имя", card.getVictimHumans() != null
+                            && card.getVictimHumans().size() > 0 ? card.getVictimHumans().get( 0 ).getFirstName() : "unknown"  ) );
+                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Отчество", card.getVictimHumans() != null
+                            && card.getVictimHumans().size() > 0 ? card.getVictimHumans().get( 0 ).getLastName() : "unknown"  ) );
+                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Фамилия", card.getVictimHumans() != null
+                        && card.getVictimHumans().size() > 0 ? card.getVictimHumans().get( 0 ).getMiddleName() : "unknown"  ) );
+                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "ID Потерпевшего", card.getVictimHumans() != null
+                    && card.getVictimHumans().size() > 0 ? card.getVictimHumans().get( 0 ).getVictimId() : "unknown" ) );
+                    this.getDetails().get( Details.DATA_OF_VICTIM ).add( new Item( "Дата рождения", card.getVictimHumans() != null
+                    && card.getVictimHumans().size() > 0 ? card.getVictimHumans().get( 0 ).getDateOfBirth() : "unknown" ) ); }
 
                 case ADDRESS_OF_VICTIM -> {
                     this.getDetails().get( Details.ADDRESS_OF_VICTIM ).add( new Item( "Улица", card.getEventHuman().getHumanAddress().getStreet() ) );

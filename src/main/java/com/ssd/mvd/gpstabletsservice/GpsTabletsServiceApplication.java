@@ -20,6 +20,5 @@ public class GpsTabletsServiceApplication {
 //                        return Mono.just( patrul ); } )
 //                    .sort( Comparator.comparing( Patrul::getDistance ) )
 //                .subscribe( patrul -> System.out.println( patrul.getPassportNumber() ) );
-        Archive.getAchieve();
-    }
+        Archive.getAchieve(); }
 }
