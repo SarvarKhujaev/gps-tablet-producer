@@ -483,14 +483,14 @@ public final class TaskInspector {
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventCar ) ).build() ) // TO-DO
                             .build() ) );
 
-            case FIND_FACE_CAR -> CassandraDataControl.getInstance().getFaceEvents( patrul.getTaskId() )
+            case FIND_FACE_CAR -> CassandraDataControl.getInstance().getCarEvents( patrul.getTaskId() )
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventCar ) ).build() ) // TO-DO
                             .build() ) );
 
-            case FIND_FACE_PERSON -> CassandraDataControl.getInstance().getCarEvents( patrul.getTaskId() )
+            case FIND_FACE_PERSON -> CassandraDataControl.getInstance().getFaceEvents( patrul.getTaskId() )
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
