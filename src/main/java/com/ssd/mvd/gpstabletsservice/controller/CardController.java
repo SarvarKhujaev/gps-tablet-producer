@@ -1,10 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -85,53 +85,6 @@ public class CardController {
                     .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
                     .flatMap( patrul -> patrul
                             .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); }
-
-//        return switch ( request.getTaskType() ) {
-//            case CARD_102 -> {
-//                Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
-//                RedisDataControl.getRedis().addValue( card );
-//                return Flux.fromStream( request.getPatruls().stream() )
-//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-//                        .flatMap( patrul -> patrul
-//                                .flatMap( patrul1 -> Archive.getAchieve()
-//                                        .save( patrul1, card ) ) ); }
-
-//            case FIND_FACE_EVENT_FACE : {
-//                EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
-//                return Flux.fromStream( request.getPatruls().stream() )
-//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-//                        .flatMap( patrul -> patrul
-//                                .flatMap( patrul1 -> Archive.getAchieve()
-//                                        .save( patrul1, eventFace ) ) ); }
-
-//            case FIND_FACE_EVENT_BODY : {
-//                EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
-//                return Flux.fromStream( request.getPatruls().stream() )
-//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-//                        .flatMap( patrul -> patrul
-//                                .flatMap( patrul1 -> Archive.getAchieve()
-//                                        .save( patrul1, eventBody ) ) ); }
-
-//            case FIND_FACE_PERSON : {
-//                FaceEvents facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
-//                return Flux.fromStream( request.getPatruls().stream() )
-//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-//                        .flatMap( patrul -> patrul
-//                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, facePerson ) ) ); }
-//
-//            case FIND_FACE_CAR : {
-//                CarEvents carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
-//                return Flux.fromStream( request.getPatruls().stream() )
-//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-//                        .flatMap( patrul -> patrul
-//                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, carEvents ) ) ); }
-//
-//            default : {
-//                EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
-//                return Flux.fromStream( request.getPatruls().stream() )
-//                        .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
-//                        .flatMap( patrul -> patrul
-//                                .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); } }
     }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android

@@ -21,9 +21,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import lombok.Data;
 
-import java.util.UUID;
 import java.util.logging.Logger;
 import java.time.Duration;
+import java.util.UUID;
 import java.util.Date;
 
 @Data
@@ -111,7 +111,7 @@ public final class CassandraDataControl {
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.selfEmployment
                 + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.car
-                + "(gosNumber text PRIMARY KEY, object text);" ); // the table for cars
+                + "(uuid uuid, trackersId text, gosNumber text PRIMARY KEY, object text);" ); // the table for cars
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.lustre
                 + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName
@@ -162,7 +162,12 @@ public final class CassandraDataControl {
         return value; }
 
     public Boolean addValue ( ReqCar reqCar, String key ) { return this.session.executeAsync( "INSERT INTO "
-            + this.dbName + "." + this.car + "(gosNumber, object) VALUES ('" + reqCar.getGosNumber() + "', '" + key + "');" ).isDone(); }
+            + this.dbName + "." + this.car
+            + "(uuid, trackersId, gosNumber, object) VALUES ("
+            + reqCar.getUuid() + ", '"
+            + reqCar.getTrackerId() + "', '"
+            + reqCar.getGosNumber() + "', '"
+            + key + "');" ).isDone(); }
 
     public Boolean addValue ( SelfEmploymentTask selfEmploymentTask, String key ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.selfEmployment + "(id, object) VALUES(" + selfEmploymentTask.getUuid() + ", '" + key + "');" ).isDone(); }
@@ -268,11 +273,6 @@ public final class CassandraDataControl {
     public Flux< Row > getPatruls ( String param ) { return Flux.fromStream( this.session
             .execute( "SELECT nsf FROM TABLETS.patruls WHERE nsf LIKE '%" + param  + "%';" ).all().stream() ); }
 
-    public Flux< Patrul > getAllPatruls () { return Flux.fromStream (
-            this.session.execute( "SELECT * FROM "
-                    + this.dbName + "." + this.patrols + ";" ).all().stream()
-        ).flatMap( row -> Mono.just( SerDes.getSerDes().deserialize( row.getString( "object" ) ) ) ); }
-
     public void resetData () {
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
                 .map( row -> SerDes.getSerDes().deserializeSelfEmployment( row.getString( "object" ) ) )
@@ -376,4 +376,16 @@ public final class CassandraDataControl {
                                     + this.dbName + "." + this.faceCar
                                     + " where id = '" + id + "';"
                     ).one().getString( "object" ) ) ); }
+
+    public Boolean deleteCar ( String gosNumber ) {
+        return this.session.execute( "delete from "
+                + this.dbName + this.car
+                + " where gosnumber = '" + gosNumber + "';" )
+                .wasApplied(); }
+
+    public Boolean deletePatrul ( String passportNumber ) {
+        return this.session.execute( "delete from "
+                        + this.dbName + this.patrols
+                        + " where gosnumber = '" + passportNumber + "';" )
+                .wasApplied(); }
 }
