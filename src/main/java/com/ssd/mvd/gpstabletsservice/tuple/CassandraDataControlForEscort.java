@@ -92,20 +92,52 @@ public class CassandraDataControlForEscort {
                 .build() ); }
 
     public Flux< ApiResponseModel > addValue ( EscortTuple escortTuple ) {
-        this.session.execute( "INSERT INTO "
+        return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.tupleOfEscort
                 + "( id, carList, country, object ) VALUES ("
                 + escortTuple.getPolygon().getUuid() + ", "
                 + escortTuple.getTupleOfCars() + ", '"
                 + escortTuple.getCountries().name() + "', "
-                + escortTuple.getPolygon() + ");" );
-        return Flux.fromStream( escortTuple.getTupleOfCars().stream() )
+                + escortTuple.getPolygon() + ") IF NOT EXISTS;" )
+                .wasApplied() ?
+        Flux.fromStream( escortTuple.getTupleOfCars().stream() )
                 .flatMap( tupleOfCar ->
                         RedisDataControl.getRedis().getPatrul( tupleOfCar.getPassportSeries() )
-                                .flatMap( patrul -> {
-                                    patrul.setEscortTuple( escortTuple );
-                                    return RedisDataControl.getRedis().update( TaskInspector.getInstance()
-                                            .changeTaskStatus( patrul, Status.ACCEPTED, escortTuple) ); } ) ); }
+                                .flatMap( patrul -> RedisDataControl.getRedis().update( TaskInspector.getInstance()
+                                        .changeTaskStatus( patrul, Status.ACCEPTED, escortTuple ) ) ) )
+                : Flux.just(
+                        ApiResponseModel.builder()
+                                .success( false )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "Such a tuple does not exists" )
+                                        .code( 201 )
+                                        .build() )
+                                .build() ); }
+
+    public Mono< ApiResponseModel > update ( EscortTuple escortTuple ) {
+        return this.session.execute( "INSERT INTO "
+                + this.dbName + "." + this.tupleOfEscort
+                + "( id, carList, country, object ) VALUES ("
+                + escortTuple.getPolygon().getUuid() + ", "
+                + escortTuple.getTupleOfCars() + ", '"
+                + escortTuple.getCountries().name() + "', "
+                + escortTuple.getPolygon() + ") IF EXISTS;" )
+                .wasApplied() ? Mono.just(
+                        ApiResponseModel.builder()
+                                .success( true )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( escortTuple.getPolygon().getName() + " was updated successfully" )
+                                        .code( 200 )
+                                        .build() )
+                                .build() )
+                : Mono.just(
+                ApiResponseModel.builder()
+                        .success( false )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .message( escortTuple.getPolygon().getName() + " does not exists" )
+                                .code( 201 )
+                                .build() )
+                        .build() ); }
 
     public Mono< ApiResponseModel > addValue ( TupleOfCar tupleOfCar ) { return this.session.execute(
                 "INSERT INTO " + this.dbName + "." + this.tupleOfCar
@@ -180,13 +212,13 @@ public class CassandraDataControlForEscort {
             ).all().stream()
         ).map( PolygonForEscort::new ); }
 
-    public Mono< ApiResponseModel > addValue ( PolygonForEscort polygon ) { return this.session.execute(
+    public Mono< ApiResponseModel > updatePolygonForEscort ( PolygonForEscort polygon ) { return this.session.execute(
             "INSERT INTO "
                     + this.dbName + '.' + this.polygonForEscort
                     + "(id, name, latlngs) VALUES ("
                     + polygon.getUuid() + ", '"
                     + polygon.getName() + "', "
-                    + polygon.getLatlngs() + ");"
+                    + polygon.getLatlngs() + ") IF EXISTS;"
     ).wasApplied() ? Mono.just( ApiResponseModel.builder()
             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                     .code( 200 )
@@ -202,10 +234,32 @@ public class CassandraDataControlForEscort {
                     .build() )
             .build() ); }
 
-    public Flux< PolygonForEscort > getAllPolygonForEscort ( String id ) { return Flux.fromStream(
+    public Mono< ApiResponseModel > addValue ( PolygonForEscort polygon ) { return this.session.execute(
+            "INSERT INTO "
+                    + this.dbName + '.' + this.polygonForEscort
+                    + "(id, name, latlngs) VALUES ("
+                    + polygon.getUuid() + ", '"
+                    + polygon.getName() + "', "
+                    + polygon.getLatlngs() + ") IF NOT EXISTS;"
+    ).wasApplied() ? Mono.just( ApiResponseModel.builder()
+            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                    .code( 200 )
+                    .message( "Polygon was saved" )
+                    .build() )
+            .success( true )
+            .build() )
+            : Mono.just( ApiResponseModel.builder()
+            .success( false )
+            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                    .code( 201 )
+                    .message( "This polygon has already been saved" )
+                    .build() )
+            .build() ); }
+
+    public Mono< PolygonForEscort > getAllPolygonForEscort ( String id ) { return Mono.just(
             this.session.execute(
                     "SELECT * FROM " + this.dbName + "." + this.polygonForEscort
                        + " where id = " + UUID.fromString( id ) + ";"
-            ).all().stream()
+            ).one()
     ).map( PolygonForEscort::new ); }
 }

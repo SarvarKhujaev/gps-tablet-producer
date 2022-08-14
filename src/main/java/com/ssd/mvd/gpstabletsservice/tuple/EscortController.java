@@ -9,17 +9,28 @@ import reactor.core.publisher.Mono;
 
 @RestController
 public class EscortController {
-    @MessageMapping ( value = "addNewTupleOfPatrul" )
-    public Flux< ApiResponseModel > addNewTupleOfPatrul( EscortTuple escortTuple) { return CassandraDataControlForEscort
-            .getInstance().addValue( escortTuple ); }
+    @MessageMapping ( value = "addNewEscort" )
+    public Flux< ApiResponseModel > addNewTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
+            .getInstance()
+            .addValue( escortTuple ); }
 
-    @MessageMapping ( value = "getAllTupleOfPatrul" )
-    public Flux< EscortTuple > getAllTupleOfPatrul () { return CassandraDataControlForEscort.getInstance().getAllTupleOfPatrul(); }
+    @MessageMapping ( value = "getAllEscort" )
+    public Flux< EscortTuple > getAllTupleOfPatrul () { return CassandraDataControlForEscort
+            .getInstance()
+            .getAllTupleOfPatrul(); }
 
-    @MessageMapping ( value = "getCurrentTupleOfPatrul" )
-    public Flux< EscortTuple > getCurrentTupleOfPatrul (String id ) { return CassandraDataControlForEscort.getInstance()
+    @MessageMapping ( value = "getCurrentEscort" )
+    public Flux< EscortTuple > getCurrentTupleOfPatrul ( String id ) { return CassandraDataControlForEscort
+            .getInstance()
             .getAllTupleOfPatrul( id ); }
 
-    @MessageMapping ( value = "deleteTupleOfPatrul" )
-    public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) { return CassandraDataControlForEscort.getInstance().deleteTupleOfPatrul( id ); }
+    @MessageMapping ( value = "deleteEscort" )
+    public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) { return CassandraDataControlForEscort
+            .getInstance()
+            .deleteTupleOfPatrul( id ); }
+
+    @MessageMapping ( value = "updateEscort" )
+    public Mono< ApiResponseModel > updateTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
+            .getInstance()
+            .update( escortTuple ); }
 }
