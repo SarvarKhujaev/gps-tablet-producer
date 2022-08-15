@@ -467,8 +467,8 @@ public final class RedisDataControl {
                             .filter( patrul -> !patrul.getInPolygon() )
                             .flatMap( patrul -> {
                                 patrul.setInPolygon( true );
-                                this.update( patrul ).subscribe();
-                                return Mono.just( patrul ); } )
+                                return this.update( patrul )
+                                        .flatMap( apiResponseModel -> Mono.just( patrul ) ); } )
                             .collectList()
                             .flatMap( patruls -> {
                                     polygon.getPatrulList().addAll( patruls );

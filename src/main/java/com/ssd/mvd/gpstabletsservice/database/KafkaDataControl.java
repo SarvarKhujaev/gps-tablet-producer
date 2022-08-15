@@ -4,6 +4,7 @@ import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.config.TopicBuilder;
@@ -59,7 +60,19 @@ public class KafkaDataControl {
         return new KafkaTemplate<>( new DefaultKafkaProducerFactory<>( map ) ); }
 
     public String writeToKafka ( String card ) {
-        this.kafkaTemplate.send( Status.ACTIVE_TASK.name().toLowerCase(), card ).addCallback(new ListenableFutureCallback<>() {
+        this.kafkaTemplate.send( Status.ACTIVE_TASK.name().toLowerCase(), card ).addCallback( new ListenableFutureCallback<>() {
+            @Override
+            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
+
+            @Override
+            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: "
+                    + " with offset: "
+                    + result.getRecordMetadata().offset() ); }
+        } ); return card; }
+
+    public CarTotalData writeToKafka ( CarTotalData card ) {
+        this.kafkaTemplate.send( Status.ACTIVE_TASK.name().toLowerCase(), SerDes.getSerDes().serialize( card ) )
+                .addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 

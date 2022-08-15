@@ -1,20 +1,22 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
-import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
-import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.Comparator;
+import java.util.List;
 
 @RestController
 public class CardController {
@@ -91,4 +94,31 @@ public class CardController {
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return RedisDataControl.getRedis()
             .getPatrul( RedisDataControl.getRedis().decode( token ) )
             .flatMap( patrul -> TaskInspector.getInstance().getCurrentActiveTask( patrul ) ); }
+
+    @MessageMapping ( value = "addNewWarningCar" )
+    public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) { CassandraDataControl
+            .getInstance()
+            .addValue(
+                    KafkaDataControl
+                            .getInstance()
+                            .writeToKafka( carTotalData ) );
+        return Mono.just(
+                ApiResponseModel.builder()
+                        .success( true )
+                        .status( Status.builder()
+                                .message( "Car was saved successfully" )
+                                .code( 200 )
+                                .build() )
+                        .build() ); }
+
+    @MessageMapping ( value = "getViolationsInformationsList" )
+    public Mono< List< ViolationsInformation > > getViolationsInformationsList ( String gosnumber ) { return Mono.just(
+            CassandraDataControl
+                    .getInstance()
+                    .getViolationsInformationsList( gosnumber ) ); }
+
+    @MessageMapping ( value = "getWarningCarDetails" )
+    public Mono< CardDetails > getWarningCarDetails ( String gosnumber ) { return CassandraDataControl
+            .getInstance()
+            .getWarningCarDetails( gosnumber ); }
 }

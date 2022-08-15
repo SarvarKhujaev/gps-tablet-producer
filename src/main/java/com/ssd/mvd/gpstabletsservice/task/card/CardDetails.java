@@ -1,18 +1,18 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import java.util.*;
-
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import lombok.Data;
+import java.util.*;
 import reactor.core.publisher.Flux;
 
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.constants.Details;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 
 @Data
 public class CardDetails {
@@ -171,8 +171,7 @@ public class CardDetails {
                 case ADDITIONAL_ADDRESS_OF_Victim -> {
                     this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add( new Item( "Дом", card.getVictimHumans().get( 0 ).getVictimAddress().getFlat() ) );
                     this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add( new Item( "Адрес", card.getVictimHumans().get( 0 ).getVictimAddress().getHouse() ) );
-                    this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add( new Item( "Квартира", card.getVictimHumans().get( 0 ).getVictimAddress().getStreet() ) ); } } } );
-    }
+                    this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add( new Item( "Квартира", card.getVictimHumans().get( 0 ).getVictimAddress().getStreet() ) ); } } } ); }
 
     public CardDetails ( FaceEvents eventCar ) {
         this.getDetails().putIfAbsent( Details.FIND_FACE_PERSON, new ArrayList<>() );
@@ -201,5 +200,137 @@ public class CardDetails {
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Sana", eventCar.getCreated_date() ) );
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Ip", eventCar.getCamera().getUrl() ) );
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "O'XSHASHLIGI: ", eventCar.getConfidence() ) );
+    }
+
+    public CardDetails ( CarTotalData carTotalData ) {
+        this.getDetails().putIfAbsent( Details.TONIROVKA, new ArrayList<>() );
+        this.getDetails().putIfAbsent( Details.ISHONCHNOMA, new ArrayList<>() );
+        this.getDetails().putIfAbsent( Details.AVTO_SUGURTA, new ArrayList<>() );
+        this.getDetails().putIfAbsent( Details.TEX_PASSPORT, new ArrayList<>() );
+        this.getDetails().putIfAbsent( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR, new ArrayList<>() );
+
+        carTotalData.getDoverennostList().getDoverennostsList().forEach( doverennost -> {
+            this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "TOMONIDAN BERILGAN", doverennost.getIssuedBy() ) );
+            this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "BERILGAN SANASI", doverennost.getDateBegin() ) );
+            this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "TUGASH SANASI", doverennost.getDateValid() ) ); } );
+
+        carTotalData.getModelForCarList().getModelForCarList().forEach( modelForCar -> {
+            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "DAVLAT RAQAM BELGISI", modelForCar.getPlateNumber() ) );
+            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "BERILGAN SANASI", modelForCar.getRegistrationDate() ) );
+            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "ISHLAB CHIQARILGAN SANASI", modelForCar.getYear() ) );
+            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "AVTOMOBIL RUSUMI/MODELI", modelForCar.getModel() ) );
+            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "AVTOMOBIL RANGI", modelForCar.getColor() ) );
+            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "KUZOV RAQAMI", modelForCar.getKuzov() ) );
+            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "TURI", modelForCar.getVehicleType() ) ); } );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Seriya va raqam", carTotalData
+                .getPsychologyCard()
+                .getModelForPassport()
+                .getDocument()
+                .getSerialNumber() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil egasi", carTotalData
+                .getModelForCar()
+                .getPerson() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil modeli", carTotalData
+                .getModelForCar()
+                .getModel() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil rangi", carTotalData
+                .getModelForCar()
+                .getColor() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Berilgan sanasi", carTotalData
+                .getModelForCar()
+                .getRegistrationDate() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil egasi", carTotalData
+                .getModelForCar()
+                .getPerson() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "STIR", carTotalData
+                .getModelForCar()
+                .getStir() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Organizatiya", carTotalData
+                .getModelForCar()
+                .getOrganization() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Turi", carTotalData
+                .getModelForCar()
+                .getVehicleType() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Manzil", carTotalData
+                .getModelForCar()
+                .getAddress() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Kuzov ragami", carTotalData
+                .getModelForCar()
+                .getKuzov() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Tola vazni", carTotalData
+                .getModelForCar()
+                .getFullWeight() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Yuksiz vazni", carTotalData
+                .getModelForCar()
+                .getEmptyWeight() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Dvigatel raqami", carTotalData
+                .getModelForCar()
+                .getEngine() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Dvigatel quvvati", carTotalData
+                .getModelForCar()
+                .getPower() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Yonilg'i turi", carTotalData
+                .getModelForCar()
+                .getFullWeight() ) );this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Tola vazni", carTotalData
+                .getModelForCar()
+                .getFuelType() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "O'TIRADIGAN JOYLAR SONI", carTotalData
+                .getModelForCar()
+                .getSeats() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "TIK TURADIGAN JOYLAR SONI", carTotalData
+                .getModelForCar()
+                .getStands() ) );
+
+        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "ALOHIDA BELGILARI", carTotalData
+                .getModelForCar()
+                .getTexPassportSerialNumber() ) );
+
+        this.getDetails().get( Details.TONIROVKA ).add( new Item( "TURI", carTotalData
+                .getModelForCar()
+                .getTonirovka()
+                .getTintinType() ) );
+
+        this.getDetails().get( Details.TONIROVKA ).add( new Item( "RUXSATNOMA BERILGAN SANASI", carTotalData
+                .getModelForCar()
+                .getTonirovka()
+                .getDateOfPermission() ) );
+
+        this.getDetails().get( Details.TONIROVKA ).add( new Item( "RUXSATNOMA AMAL QILISH MUDDATI", carTotalData
+                .getModelForCar()
+                .getTonirovka()
+                .getDateOfValidotion() ) );
+
+        this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "BERILGAN VAQTI", carTotalData
+                .getModelForCar()
+                .getInsurance()
+                .getDateBegin() ) );
+
+        this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "MUDDAT TUGASH SANASI", carTotalData
+                .getModelForCar()
+                .getInsurance()
+                .getDateValid() ) );
+
+        this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "SUG'URTA RAQAMI", carTotalData
+                .getModelForCar()
+                .getInsurance()
+                .getInsuranceSerialNumber() ) );
     }
 }

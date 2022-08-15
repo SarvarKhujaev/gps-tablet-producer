@@ -48,7 +48,8 @@ public class CassandraDataControlForEscort {
                 + "simCardNumber text, "
                 + "passportSeries text, "
                 + "averageFuelConsumption double);" );
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.tupleOfCar
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.tupleOfCar
                 + "(gosNumber text, trackerId text, patrul text, simCardNumber text, carModel text," +
                 "passportNumber text, averageFuelConsumption double, PRIMARY KEY( (gosNumber), trackerId ) );" ); // the table for cars from Tuple
         this.session.execute( "CREATE INDEX IF NOT EXISTS ON " + this.dbName + "." + this.tupleOfCar + " (trackerId);" );
@@ -61,8 +62,9 @@ public class CassandraDataControlForEscort {
                 + this.dbName + "." + this.polygonForEscort
                 + "( id uuid PRIMARY KEY, name text, latlngs list< frozen<" + this.polygonType + "> > )" );
 
-        this.session.execute( "CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.tupleOfEscort
-                + "(id uuid PRIMARY KEY, carList list< frozen<" + this.carForEscortType + ">>, country text," +
+        this.session.execute( "CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.tupleOfEscort
+                + "(id uuid PRIMARY KEY, carList list< frozen<" + this.carForEscortType + "> >, country text," +
                 "polygonForEscort frozen<" + this.polygonType + "> );" );
         this.session.execute( "CREATE INDEX IF NOT EXISTS ON " + this.dbName + "." + this.tupleOfEscort + " (country);" );
 

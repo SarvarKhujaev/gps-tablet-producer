@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
@@ -25,6 +26,8 @@ public class SerDes {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public static SerDes getSerDes () { return serDes != null ? serDes : ( serDes = new SerDes() ); }
+
+    public String serialize ( CarTotalData card ) { return this.gson.toJson( card); }
 
     public String serialize ( Card object ) { return this.gson.toJson( object ); }
 
@@ -96,9 +99,11 @@ public class SerDes {
 
     public FaceEvents deserializeFaceEvents ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
+    public EventBody deserializeEventBody ( String object ) { return this.gson.fromJson( object, EventBody.class ); }
+
     public FaceEvents deserializeFaceEvents ( String object ) { return this.gson.fromJson( object, FaceEvents.class ); }
 
-    public EventBody deserializeEventBody ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
+    public CarTotalData deserializeCarTotalData ( String object ) { return this.gson.fromJson( object, CarTotalData.class ); }
 
-    public EventBody deserializeEventBody ( String object ) { return this.gson.fromJson( object, EventBody.class ); }
+    public EventBody deserializeEventBody ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 }

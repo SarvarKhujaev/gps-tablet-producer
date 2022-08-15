@@ -5,6 +5,10 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
+import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsList;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
@@ -21,6 +25,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import lombok.Data;
 
+import java.util.List;
 import java.util.logging.Logger;
 import java.time.Duration;
 import java.util.UUID;
@@ -35,6 +40,9 @@ public final class CassandraDataControl {
     private final String dbName = "TABLETS";
     private final String patrols = "PATRULS"; // for table with Patruls info
     private final String polygon = "POLYGON";
+
+    private final String carTotalData = "carTotalData";
+    private final String violationListType = "violationListType";
 
     private final String faceCar = "faceCar";
     private final String eventCar = "eventCar";
@@ -110,13 +118,60 @@ public final class CassandraDataControl {
                 + "(id uuid PRIMARY KEY, policeType text);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.selfEmployment
                 + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.car
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.car
                 + "(uuid uuid, trackersId text, gosNumber text PRIMARY KEY, object text);" ); // the table for cars
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.lustre
                 + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName
-                + ".trackers(imei text PRIMARY KEY, status text);" ); // the table for trackers
+
+        this.session.execute(
+                "CREATE TYPE IF NOT EXISTS "
+                        + this.dbName + "." + this.violationListType
+                        + "( DecreeStatus int "
+                        + "Amount int "
+                        + "DecreeSerialNumber text "
+                        + "Violation text "
+                        + "Division text "
+                        + "PayDate text "
+                        + "Address text "
+                        + "Article text "
+                        + "Owner text "
+                        + "Model text "
+                        + "Bill text );" );
+
+        this.session.execute(
+                "CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.carTotalData
+                + "( gosnumber text," +
+                        "cameraImage text," +
+                        "violationList< frozen<" + this.violationListType + "> >," +
+                        "object text );" );
         this.logger.info( "Cassandra is ready" ); }
+
+    public Boolean addValue ( CarTotalData carTotalData ) { return this.session.executeAsync( "INSERT INTO "
+            + this.dbName + "." + this.carTotalData
+            + "( gosnumber, cameraImage, violationList, object ) VALUES('"
+            + carTotalData.getGosNumber() + "', '"
+            + carTotalData.getCameraImage() + "', "
+            + carTotalData.getViolationsList().getViolationsInformationsList() + ", '"
+            + SerDes.getSerDes().serialize( carTotalData ) + "');" ).isDone(); }
+
+    public List< ViolationsInformation > getViolationsInformationsList ( String gosnumer ) { return this.session
+            .execute(
+                    "select * FROM "
+                    + this.dbName + "." + this.carTotalData
+                     + " WHERE gosnumer = '" + gosnumer + "';"
+            ).one().getList( "violationList", ViolationsInformation.class ); }
+
+    public Mono< CardDetails > getWarningCarDetails ( String gosnumber ) { return Mono.just(
+            new CardDetails(
+                    SerDes.getSerDes().deserializeCarTotalData(
+                            this.session
+                                    .execute(
+                                            "select * FROM "
+                                                    + this.dbName + "." + this.carTotalData
+                                                    + " WHERE gosnumer = '" + gosnumber + "';"
+                                    ).one().getString( "object" ) ) ) ); }
 
     public Boolean addValue ( EventFace face ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.eventFace
