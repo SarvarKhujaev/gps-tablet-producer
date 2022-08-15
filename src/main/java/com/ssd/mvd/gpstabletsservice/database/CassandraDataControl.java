@@ -5,18 +5,17 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
-import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsList;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
+import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
@@ -63,8 +62,11 @@ public final class CassandraDataControl {
         SocketOptions options = new SocketOptions();
         options.setConnectTimeoutMillis( 30000 );
         options.setReadTimeoutMillis( 300000 );
+//        options.setReuseAddress( true );
         options.setTcpNoDelay( true );
+        options.setKeepAlive( true );
         ( this.session = ( this.cluster = Cluster.builder()
+            .withClusterName( "GpsTablet" )
             .withPort( Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_PORT" ) ) )
                 .addContactPoints( "10.254.5.1, 10.254.5.2, 10.254.5.3".split( ", " ) )
             .withProtocolVersion( ProtocolVersion.V4 )
@@ -79,7 +81,9 @@ public final class CassandraDataControl {
                     .setMaxConnectionsPerHost( HostDistance.LOCAL, Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_LOCAL" ) ) )
                     .setMaxRequestsPerConnection( HostDistance.REMOTE, 256 )
                     .setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
-            .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor':3 };" );
+                .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy'," +
+                        "'datacenter1':3 } AND DURABLE_WRITES = false;" );
+
         this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols +
                 "(passportNumber text, NSF text, object text, PRIMARY KEY( (passportNumber), NSF ) );" ); // the table for patruls
         this.session.execute("""
@@ -127,24 +131,24 @@ public final class CassandraDataControl {
         this.session.execute(
                 "CREATE TYPE IF NOT EXISTS "
                         + this.dbName + "." + this.violationListType
-                        + "( DecreeStatus int "
-                        + "Amount int "
-                        + "DecreeSerialNumber text "
-                        + "Violation text "
-                        + "Division text "
-                        + "PayDate text "
-                        + "Address text "
-                        + "Article text "
-                        + "Owner text "
-                        + "Model text "
+                        + "( DecreeStatus int, "
+                        + "Amount int, "
+                        + "DecreeSerialNumber text, "
+                        + "Violation text, "
+                        + "Division text, "
+                        + "PayDate text, "
+                        + "Address text, "
+                        + "Article text, "
+                        + "Owner text, "
+                        + "Model text, "
                         + "Bill text );" );
 
         this.session.execute(
                 "CREATE TABLE IF NOT EXISTS "
                 + this.dbName + "." + this.carTotalData
-                + "( gosnumber text," +
+                + "( gosnumber text PRIMARY KEY," +
                         "cameraImage text," +
-                        "violationList< frozen<" + this.violationListType + "> >," +
+                        "violationList list< frozen<" + this.violationListType + "> >," +
                         "object text );" );
         this.logger.info( "Cassandra is ready" ); }
 

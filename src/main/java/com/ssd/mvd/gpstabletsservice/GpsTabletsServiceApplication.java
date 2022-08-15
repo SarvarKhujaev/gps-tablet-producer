@@ -20,6 +20,7 @@ public class GpsTabletsServiceApplication {
 //                    patrul.setLatitudeOfTask( null );
 //                    patrul.setLongitudeOfTask( null );
 //                    patrul.setTaskTypes( TaskTypes.FREE );
-//                    RedisDataControl.getRedis().update( patrul ).subscribe(); } );
+//                    RedisDataControl.getRedis().update( patrul )
+//                            .subscribe( apiResponseModel -> System.out.println( apiResponseModel.getStatus() ) ); } );
         Archive.getAchieve(); }
 }
