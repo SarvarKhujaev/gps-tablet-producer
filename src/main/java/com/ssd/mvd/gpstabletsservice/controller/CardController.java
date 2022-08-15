@@ -87,8 +87,7 @@ public class CardController {
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> RedisDataControl.getRedis().getPatrul( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); }
-    }
+                            .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); } }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return RedisDataControl.getRedis()

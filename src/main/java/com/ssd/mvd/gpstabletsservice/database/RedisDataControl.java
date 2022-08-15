@@ -195,6 +195,7 @@ public final class RedisDataControl {
                     .message( gosno + " does not exists" ).build() ).build() ) ); } // deleting current carMap
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
+        patrul.setInPolygon( false );
         patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
         return this.patrulMap.fastPutIfAbsent( patrul.getPassportNumber(), ( key = SerDes.getSerDes().serialize( patrul ) ) )
                 .log()

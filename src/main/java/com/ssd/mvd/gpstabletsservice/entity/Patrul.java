@@ -41,6 +41,8 @@ public class Patrul {
     private String surname;
     private String password;
     private String carNumber;
+    private String organName;
+    private String regionName;
     private String policeType; // choosing from dictionary
     private String fatherName;
     private String dateOfBirth;
@@ -52,8 +54,6 @@ public class Patrul {
 
     private Status status; // busy, free by default, available or not available
     private TaskTypes taskTypes; // task type which was attached to the current patrul
-    private EscortTuple escortTuple;
-
     private Map< String, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
 
     public String getSurnameNameFatherName () { return this.surnameNameFatherName != null ? this.surnameNameFatherName
