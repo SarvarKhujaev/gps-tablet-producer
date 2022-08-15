@@ -1,8 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.constants.Countries;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,4 +35,7 @@ public class EscortController {
     public Mono< ApiResponseModel > updateTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
             .getInstance()
             .update( escortTuple ); }
+
+    @MessageMapping ( value = "getListOfCountries" )
+    public Flux< Countries > getListOfCountries () { return Flux.fromArray( Countries.values() ); }
 }
