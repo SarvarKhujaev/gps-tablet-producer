@@ -34,11 +34,14 @@ public class UnirestController {
     public Patrul addUser ( Patrul patrul ) {
         this.getFields().put( "role", "Patrul" );
         this.getFields().put( "id", patrul.getUuid() );
+        this.getHeaders().put( "Authorization", patrul.getToken() );
         this.getFields().put( "username", patrul.getSurnameNameFatherName() );
-        try { Unirest.post( "http://ms-backend.ssd.uz:3040/add-user" )
+        System.out.println( patrul.getToken() );
+        try { Unirest.post( "https://ms.ssd.uz/chat/add-user" )
                 .headers( this.getHeaders() )
                 .fields( this.getFields() )
                 .asString();
+            patrul.setToken( null );
             return patrul;
         } catch ( UnirestException e ) { return patrul; } }
 

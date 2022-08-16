@@ -200,7 +200,7 @@ public final class RedisDataControl {
                 .onErrorStop()
                 .flatMap( aBoolean -> aBoolean ?
                     Mono.just( ApiResponseModel.builder()
-                            .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
+                            .success( CassandraDataControl.getInstance().addValue( UnirestController.getInstance().addUser( patrul ), this.key ) )
                             .status( Status.builder().message( "new patrul was added" ).code( 200 ).build() ).build() )
                     : Mono.just( ApiResponseModel.builder().status( Status.builder()
                             .message( "this patrul already exists" ).code( 201 ).build() ).build() ) ); }
