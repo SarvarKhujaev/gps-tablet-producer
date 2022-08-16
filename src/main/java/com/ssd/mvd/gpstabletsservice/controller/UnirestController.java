@@ -1,6 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mashape.unirest.http.HttpResponse;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -34,13 +35,13 @@ public class UnirestController {
     public Patrul addUser ( Patrul patrul ) {
         this.getFields().put( "role", "Patrul" );
         this.getFields().put( "id", patrul.getUuid() );
-        this.getHeaders().put( "Authorization", patrul.getToken().split( " " )[1] );
+        this.getHeaders().put( "token", patrul.getToken().split( " " )[1] );
         this.getFields().put( "username", patrul.getSurnameNameFatherName() );
-        System.out.println( this.getHeaders().get( "Authorization" ) );
-        try { Unirest.post( "https://ms.ssd.uz/chat/add-user" )
+        try { HttpResponse<String> response = Unirest.post( "https://ms.ssd.uz/chat/add-user" )
                 .headers( this.getHeaders() )
                 .fields( this.getFields() )
                 .asString();
+            System.out.println( response.getBody() );
             patrul.setToken( null );
             return patrul;
         } catch ( UnirestException e ) { return patrul; } }
