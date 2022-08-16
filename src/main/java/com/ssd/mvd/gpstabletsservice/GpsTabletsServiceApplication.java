@@ -11,6 +11,5 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-        Archive.getAchieve();
-    }
+        Archive.getAchieve(); }
 }
