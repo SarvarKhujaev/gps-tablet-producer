@@ -11,16 +11,6 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-//        RedisDataControl.getRedis().getAllPatruls()
-//                .subscribe( patrul -> {
-//                    patrul.setToken( null );
-//                    patrul.setTaskId( null );
-//                    patrul.setTaskDate( null );
-//                    patrul.setStatus( Status.FREE );
-//                    patrul.setLatitudeOfTask( null );
-//                    patrul.setLongitudeOfTask( null );
-//                    patrul.setTaskTypes( TaskTypes.FREE );
-//                    RedisDataControl.getRedis().update( patrul )
-//                            .subscribe( apiResponseModel -> System.out.println( apiResponseModel.getStatus() ) ); } );
-        Archive.getAchieve(); }
+        Archive.getAchieve();
+    }
 }

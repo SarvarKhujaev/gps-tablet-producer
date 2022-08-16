@@ -79,7 +79,8 @@ public final class CassandraDataControl {
                     .setCoreConnectionsPerHost( HostDistance.LOCAL, Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_LOCAL" ) ) )
                     .setMaxConnectionsPerHost( HostDistance.REMOTE, Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_REMOTE" ) ) )
                     .setMaxConnectionsPerHost( HostDistance.LOCAL, Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_LOCAL" ) ) )
-                    .setMaxRequestsPerConnection( HostDistance.REMOTE, 256 )
+                    .setMaxRequestsPerConnection( HostDistance.REMOTE, 1024 )
+                    .setMaxRequestsPerConnection( HostDistance.LOCAL, 1024 )
                     .setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
                 .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy'," +
                         "'datacenter1':3 } AND DURABLE_WRITES = false;" );
@@ -438,7 +439,7 @@ public final class CassandraDataControl {
 
     public Boolean deleteCar ( String gosNumber ) {
         return this.session.execute( "delete from "
-                + this.dbName + this.car
+                + this.dbName + "." + this.car
                 + " where gosnumber = '" + gosNumber + "';" )
                 .wasApplied(); }
 
@@ -447,4 +448,23 @@ public final class CassandraDataControl {
                         + this.dbName + this.patrols
                         + " where gosnumber = '" + passportNumber + "';" )
                 .wasApplied(); }
+
+    public Flux< Patrul > getAllPatruls () {
+        return Flux.fromStream(
+                this.session.execute(
+                        "select * from tablets.patruls;"
+                ).all().stream()
+        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) );
+    }
+
+    public Mono< Patrul > getPatrul ( String id ) {
+        return Mono.just(
+                this.session.execute(
+                        "SELECT * FROM tablets.patruls where passportNumber = '" + id + "';"
+                ).one()
+        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) ); }
+
+    public Mono< ReqCar > getCar ( String carNumber ) {
+        Row row = this.session.execute( "select * from tablets.cars where gosnumber = '" + carNumber +"';" ).one();
+        return Mono.justOrEmpty( row != null ? SerDes.getSerDes().deserializeCar( row.getString( "object" ) ) : null ); }
 }

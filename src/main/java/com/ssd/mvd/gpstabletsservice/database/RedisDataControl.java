@@ -172,7 +172,6 @@ public final class RedisDataControl {
                                     .build() ).build() ) ); } // deleting current police type
 
     public Mono< ApiResponseModel > deleteCar ( String gosno ) { return this.carMap.containsKey( gosno )
-            .log()
             .onErrorStop()
             .flatMap( aBoolean -> aBoolean ?
                     this.carMap.remove( gosno )
@@ -183,10 +182,9 @@ public final class RedisDataControl {
                                                 patrul1.setCarNumber( null );
                                                 return patrulMap.fastPutIfExists( patrul1.getPassportNumber(),
                                                                 SerDes.getSerDes().serialize( patrul1 ) )
-                                                        .log()
                                                         .onErrorStop()
                                                         .flatMap( aLong -> Mono.just( ApiResponseModel.builder()
-                                                                .success( CassandraDataControl.getInstance().deleteCar( gosno ) )
+                                                                .success( CassandraDataControl.getInstance().deleteCar( reqCar1.getGosNumber() ) )
                                                                 .status( Status.builder()
                                                                         .code( 200 )
                                                                         .message( gosno + " was deleted" )
@@ -322,35 +320,47 @@ public final class RedisDataControl {
                 : Mono.just( ApiResponseModel.builder()
                         .status( Status.builder().message( "Wrong Lustra data" ).code( 201 ).build() ).success( false ).build() ) ); }
 
-    public Mono< ApiResponseModel > update ( ReqCar reqCar ) { return this.carMap.containsKey( reqCar.getUuid().toString() )
-            .flatMap( aBoolean -> aBoolean ?
-            this.carMap.get( reqCar.getGosNumber() )
-                    .map( s -> SerDes.getSerDes().deserializeCar( s ) )
-                    .flatMap( reqCar1 -> {
-                if ( !reqCar1.getPatrulPassportSeries().equals( reqCar.getPatrulPassportSeries() ) ) return this.patrulMap
-                        .get( reqCar1.getPatrulPassportSeries() )
-                        .map( s -> SerDes.getSerDes().deserialize( s ) )
-                        .flatMap( patrul -> { patrul.setCarNumber( null );
-                            return this.update( patrul )
-                                    .flatMap( aBoolean1 -> this.patrulMap.get( reqCar.getPatrulPassportSeries() )
-                                    .map( s -> SerDes.getSerDes().deserialize( s ) )
-                                            .flatMap( patrul1 -> { patrul1.setCarNumber( reqCar.getGosNumber() );
-                                        return this.update( patrul1 )
-                                                .flatMap( aBoolean2 -> this.carMap.fastPutIfExists( reqCar.getGosNumber(),
-                                                                ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
-                                                        .flatMap( aBoolean3 -> Mono.just( ApiResponseModel.builder()
-                                                                .status( Status.builder().message( "Car was updated" ).code( 200 ).build() )
-                                                                .success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) ) ); } ) );
-                        } );
-                else return this.carMap.fastPutIfExists( reqCar.getGosNumber(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
-                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
-                                            .status( Status.builder()
-                                                    .message( "Car data was successfully updated" )
-                                                    .code( 200 )
-                                                    .build() )
-                                    .success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) );
-            } ) : Mono.just( ApiResponseModel.builder().success( false )
-            .status( Status.builder().code( 201 ).message( "Wrong Car data" ).build() ).build() ) ); }
+    public Mono< ApiResponseModel > update ( ReqCar reqCar ) {
+        System.out.println( reqCar.getPatrulPassportSeries() );
+        return this.carMap.fastPutIfExists( reqCar.getUuid().toString(), SerDes.getSerDes().serialize( reqCar ) )
+                .flatMap( aBoolean -> Mono.just( ApiResponseModel.builder()
+                                .status( Status.builder()
+                                        .message( "Updated" )
+                                        .code( 200 )
+                                        .build() )
+                        .build() ) );
+//        return this.carMap.containsKey( reqCar.getUuid().toString() )
+//            .flatMap( aBoolean -> aBoolean ?
+//            this.carMap.get( reqCar.getUuid().toString() )
+//                    .map( s -> SerDes.getSerDes().deserializeCar( s ) )
+//                    .flatMap( reqCar1 -> {
+//                        System.out.println( reqCar1.getGosNumber() + " : " + reqCar1.getPatrulPassportSeries() );
+//                if ( !reqCar1.getPatrulPassportSeries().equals( reqCar.getPatrulPassportSeries() ) ) return this.patrulMap
+//                        .get( reqCar1.getPatrulPassportSeries() )
+//                        .map( s -> SerDes.getSerDes().deserialize( s ) )
+//                        .flatMap( patrul -> { patrul.setCarNumber( null );
+//                            return this.update( patrul )
+//                                    .flatMap( aBoolean1 -> this.patrulMap.get( reqCar.getPatrulPassportSeries() )
+//                                    .map( s -> SerDes.getSerDes().deserialize( s ) )
+//                                            .flatMap( patrul1 -> { patrul1.setCarNumber( reqCar.getGosNumber() );
+//                                                System.out.println( patrul1.getCarNumber() + " : " + patrul1.getPassportNumber() );
+//                                                return this.update( patrul1 )
+//                                                .flatMap( aBoolean2 -> this.carMap.fastPutIfExists( reqCar.getUuid().toString(),
+//                                                                ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
+//                                                        .flatMap( aBoolean3 -> Mono.just( ApiResponseModel.builder()
+//                                                                .status( Status.builder().message( "Car was updated" ).code( 200 ).build() )
+//                                                                .success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) ) ); } ) );
+//                        } );
+//                else return this.carMap.fastPutIfExists( reqCar.getUuid().toString(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
+//                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+//                                            .status( Status.builder()
+//                                                    .message( "Car data was successfully updated" )
+//                                                    .code( 200 )
+//                                                    .build() )
+//                                    .success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) );
+//            } ) : Mono.just( ApiResponseModel.builder().success( false )
+//            .status( Status.builder().code( 201 ).message( "Wrong Car data" ).build() ).build() ) );
+    }
 
     public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) { return this.polygonForPatrulMap
             .containsKey( polygon.getUuid().toString() ).flatMap( a -> a ?
