@@ -34,9 +34,9 @@ public class UnirestController {
     public Patrul addUser ( Patrul patrul ) {
         this.getFields().put( "role", "Patrul" );
         this.getFields().put( "id", patrul.getUuid() );
-        this.getHeaders().put( "Authorization", patrul.getToken() );
+        this.getHeaders().put( "Authorization", patrul.getToken().split( " " )[1] );
         this.getFields().put( "username", patrul.getSurnameNameFatherName() );
-        System.out.println( patrul.getToken() );
+        System.out.println( this.getHeaders().get( "Authorization" ) );
         try { Unirest.post( "https://ms.ssd.uz/chat/add-user" )
                 .headers( this.getHeaders() )
                 .fields( this.getFields() )
