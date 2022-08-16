@@ -11,5 +11,8 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-        Archive.getAchieve(); }
+//        RedisDataControl.getRedis().getAllPatruls()
+//                .subscribe( patrul -> CassandraDataControl.getInstance().addValue( patrul, SerDes.getSerDes().serialize( patrul ) ) );
+        Archive.getAchieve();
+    }
 }

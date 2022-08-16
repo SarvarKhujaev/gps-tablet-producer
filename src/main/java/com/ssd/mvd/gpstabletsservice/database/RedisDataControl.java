@@ -193,13 +193,14 @@ public final class RedisDataControl {
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
         patrul.setInPolygon( false );
+        patrul.setUuid( UUID.randomUUID() );
         patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
         return this.patrulMap.fastPutIfAbsent( patrul.getPassportNumber(), ( key = SerDes.getSerDes().serialize( patrul ) ) )
                 .log()
                 .onErrorStop()
                 .flatMap( aBoolean -> aBoolean ?
                     Mono.just( ApiResponseModel.builder()
-                            .success( CassandraDataControl.getInstance().addValue( UnirestController.getInstance().addUser( patrul ), this.key ) )
+                            .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
                             .status( Status.builder().message( "new patrul was added" ).code( 200 ).build() ).build() )
                     : Mono.just( ApiResponseModel.builder().status( Status.builder()
                             .message( "this patrul already exists" ).code( 201 ).build() ).build() ) ); }
@@ -287,26 +288,23 @@ public final class RedisDataControl {
                         .build() ).success( false ).build() ) ); }
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
-        return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
-                .flatMap( aBoolean -> Mono.just( ApiResponseModel.builder().build() ) );
-//        return this.patrulMap.containsKey( patrul.getPassportNumber() )
-//            .flatMap( aBoolean -> {
-//                if ( aBoolean ) { return this.patrulMap.get( patrul.getPassportNumber() )
-//                .map( s -> SerDes.getSerDes().deserialize( s ) )
-//                .flatMap( patrul1 -> {
-//                    if ( patrul1.getCarNumber() != null && patrul1.getCarNumber().length() > 0 ) return this.getCar( patrul1.getCarNumber() )
-//                            .flatMap( reqCar -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
-//                                    .flatMap( value -> Mono.just( ApiResponseModel.builder()
-//                                            .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
-//                                    .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() )
-//                                            .success( true ).build() ) ) );
-//                    else return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
-//                        .flatMap( value -> Mono.just( ApiResponseModel.builder()
-//                                .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
-//                        .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() ).success( true ).build() ) ); } );
-//        } else return Mono.just( ApiResponseModel.builder().success( false )
-//                        .status( Status.builder().message( "Wrong Patrul data" ).code( 200 ).build() ).build() ); } );
-    }
+        return this.patrulMap.containsKey( patrul.getPassportNumber() )
+            .flatMap( aBoolean -> {
+                if ( aBoolean ) { return this.patrulMap.get( patrul.getPassportNumber() )
+                .map( s -> SerDes.getSerDes().deserialize( s ) )
+                .flatMap( patrul1 -> {
+                    if ( patrul1.getCarNumber() != null && patrul1.getCarNumber().length() > 0 ) return this.getCar( patrul1.getCarNumber() )
+                            .flatMap( reqCar -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
+                                    .flatMap( value -> Mono.just( ApiResponseModel.builder()
+                                            .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
+                                    .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() )
+                                            .success( true ).build() ) ) );
+                    else return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
+                        .flatMap( value -> Mono.just( ApiResponseModel.builder()
+                                .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
+                        .status( Status.builder().message( "Patrul was updated" ).code( 200 ).build() ).success( true ).build() ) ); } );
+        } else return Mono.just( ApiResponseModel.builder().success( false )
+                        .status( Status.builder().message( "Wrong Patrul data" ).code( 200 ).build() ).build() ); } ); }
 
     public Mono< ApiResponseModel > update ( Polygon polygon ) { return this.polygonMap.containsKey( polygon.getUuid().toString() ).flatMap( a -> a ?
             this.polygonMap.fastPutIfExists( polygon.getUuid().toString(), SerDes.getSerDes().serialize( polygon ) ).flatMap( aBoolean -> aBoolean ?

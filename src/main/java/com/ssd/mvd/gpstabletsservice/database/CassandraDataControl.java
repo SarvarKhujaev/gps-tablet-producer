@@ -451,22 +451,22 @@ public final class CassandraDataControl {
                         + " where gosnumber = '" + passportNumber + "';" )
                 .wasApplied(); }
 
-    public Flux< Patrul > getAllPatruls () {
-        return Flux.fromStream(
-                this.session.execute(
-                        "select * from tablets.patruls;"
-                ).all().stream()
-        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) );
-    }
-
-    public Mono< Patrul > getPatrul ( String id ) {
-        return Mono.just(
-                this.session.execute(
-                        "SELECT * FROM tablets.patruls where passportNumber = '" + id + "';"
-                ).one()
-        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) ); }
-
-    public Mono< ReqCar > getCar ( String carNumber ) {
-        Row row = this.session.execute( "select * from tablets.cars where gosnumber = '" + carNumber +"';" ).one();
-        return Mono.justOrEmpty( row != null ? SerDes.getSerDes().deserializeCar( row.getString( "object" ) ) : null ); }
+//    public Flux< Patrul > getAllPatruls () {
+//        return Flux.fromStream(
+//                this.session.execute(
+//                        "select * from tablets.patruls;"
+//                ).all().stream()
+//        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) );
+//    }
+//
+//    public Mono< Patrul > getPatrul ( String id ) {
+//        return Mono.just(
+//                this.session.execute(
+//                        "SELECT * FROM tablets.patruls where passportNumber = '" + id + "';"
+//                ).one()
+//        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) ); }
+//
+//    public Mono< ReqCar > getCar ( String carNumber ) {
+//        Row row = this.session.execute( "select * from tablets.cars where gosnumber = '" + carNumber +"';" ).one();
+//        return Mono.justOrEmpty( row != null ? SerDes.getSerDes().deserializeCar( row.getString( "object" ) ) : null ); }
 }
