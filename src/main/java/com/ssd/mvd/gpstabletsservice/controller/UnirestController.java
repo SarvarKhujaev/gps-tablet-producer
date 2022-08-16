@@ -33,7 +33,7 @@ public class UnirestController {
         this.getHeaders().put( "token", "JhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBQzEyMzQ1NjciLCJpZCI6IjBlMGMwMjAzLTBiNjYtNDI5NC05OWEwLWZkY2JmMzIyN2RjZiIsInBhc3Nwb3J0TnVtYmVyIjoiQUMxMjM0NT" ); }
 
     public Patrul addUser ( Patrul patrul ) {
-        this.getFields().put( "role", "Patrul" );
+        this.getFields().put( "role", "USER" );
         this.getFields().put( "id", patrul.getUuid() );
         this.getHeaders().put( "token", patrul.getToken().split( " " )[1] );
         this.getFields().put( "username", patrul.getSurnameNameFatherName() );
