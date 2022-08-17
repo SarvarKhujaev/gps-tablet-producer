@@ -121,24 +121,30 @@ public final class RedisDataControl {
                 : Mono.just( ApiResponseModel.builder().status( Status.builder()
             .message( "this polygon does not exists" ).code( 201 ).build() ).build() ) ); } // deleting current polygon
 
-    public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return this.patrulMap.containsKey( passportNumber )
+    public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) {
+        String passport = passportNumber.split( "_" )[0];
+        String token = passportNumber.split( "_" )[1];
+        return this.patrulMap
+            .containsKey( passport )
             .flatMap( aBoolean -> aBoolean ?
-                this.patrulMap.remove( passportNumber )
+                this.patrulMap.remove( passport )
                         .log()
                         .onErrorStop()
-                        .flatMap( aLong -> this.getPatrul( passportNumber )
-                                .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
-                                        .success( CassandraDataControl.getInstance().deletePatrul( passportNumber )
-                                        && UnirestController.getInstance().deleteUser( patrul ) )
-                                        .status( Status.builder()
-                                                .code( 200 )
-                                                .message( passportNumber + " was deleted" )
-                                                .build() ).build() )) )
+                        .flatMap( aLong -> this.getPatrul( passport )
+                                .flatMap( patrul -> {
+                                    patrul.setToken( token );
+                                    return Mono.just( ApiResponseModel.builder()
+                                            .success( CassandraDataControl.getInstance().deletePatrul( passport )
+                                                    && UnirestController.getInstance().deleteUser( patrul ) )
+                                            .status( Status.builder()
+                                                    .code( 200 )
+                                                    .message( passport + " was deleted" )
+                                                    .build() ).build() ); } ) )
                 : Mono.just( ApiResponseModel.builder()
                     .success( false )
                     .status( Status.builder()
                             .code( 201 )
-                            .message( passportNumber + " does not exists" ).build() ).build() ) ); } // deleting current car
+                            .message( passport + " does not exists" ).build() ).build() ) ); } // deleting current car
 
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return this.polygonForPatrulMap.containsKey( uuid )
             .flatMap( aBoolean -> aBoolean ?

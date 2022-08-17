@@ -22,6 +22,7 @@ public class UnirestController {
         HttpEntity<?> entity = new HttpEntity<>( reqId, null );
         var res = restTemplate( patrul.getToken() )
                 .exchange( "https://ms.ssd.uz/chat/delete-user", HttpMethod.POST, entity, String.class );
+        System.out.println( res.getBody() );
         return res.getStatusCodeValue() == 200; }
 
     public RestTemplate restTemplate( String token ) { return new RestTemplateBuilder()
