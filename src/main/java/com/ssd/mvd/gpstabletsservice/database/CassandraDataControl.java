@@ -56,7 +56,8 @@ public final class CassandraDataControl {
 
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
-    public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl : ( cassandraDataControl = new CassandraDataControl() ); }
+    public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl
+            : ( cassandraDataControl = new CassandraDataControl() ); }
 
     private CassandraDataControl () {
         SocketOptions options = new SocketOptions();
@@ -81,14 +82,16 @@ public final class CassandraDataControl {
                     .setCoreConnectionsPerHost( HostDistance.LOCAL, Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_CORE_CONN_LOCAL" ) ) )
                     .setMaxConnectionsPerHost( HostDistance.REMOTE, Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_REMOTE" ) ) )
                     .setMaxConnectionsPerHost( HostDistance.LOCAL, Integer.parseInt( GpsTabletsServiceApplication.context.getEnvironment().getProperty( "variables.CASSANDRA_MAX_CONN_LOCAL" ) ) )
-                    .setMaxRequestsPerConnection( HostDistance.REMOTE, 1024 )
-                    .setMaxRequestsPerConnection( HostDistance.LOCAL, 1024 )
+                    .setMaxRequestsPerConnection( HostDistance.REMOTE, 256 )
+                    .setMaxRequestsPerConnection( HostDistance.LOCAL, 256 )
                     .setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
                 .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy'," +
                         "'datacenter1':3 } AND DURABLE_WRITES = false;" );
 
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols +
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.patrols +
                 "(passportNumber text, NSF text, object text, PRIMARY KEY( (passportNumber), NSF ) );" ); // the table for patruls
+
         this.session.execute("""
                 CREATE CUSTOM INDEX IF NOT EXISTS patrul_name_idx ON TABLETS.PATRULS(NSF) USING 'org.apache.cassandra.index.sasi.SASIIndex'
                 WITH OPTIONS = {
@@ -153,6 +156,7 @@ public final class CassandraDataControl {
                         "cameraImage text," +
                         "violationList list< frozen<" + this.violationListType + "> >," +
                         "object text );" );
+
         this.logger.info( "Cassandra is ready" ); }
 
     public Boolean addValue ( CarTotalData carTotalData ) { return this.session.executeAsync( "INSERT INTO "
