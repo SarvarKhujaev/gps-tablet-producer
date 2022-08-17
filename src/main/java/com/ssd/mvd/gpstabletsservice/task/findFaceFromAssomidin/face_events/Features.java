@@ -1,9 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
 import lombok.extern.jackson.Jacksonized;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import lombok.*;
 
 @Data
 @Jacksonized

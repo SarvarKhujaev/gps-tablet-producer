@@ -9,8 +9,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.Came
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.CameraGroup;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.MatchedListsItem;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 import java.util.ArrayList;
 import java.util.HashMap;

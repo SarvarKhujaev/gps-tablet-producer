@@ -1,7 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForAddress.ModelForAddress;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import java.util.List;

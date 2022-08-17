@@ -1,14 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
+import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
-import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
-import lombok.*;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.extern.jackson.Jacksonized;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

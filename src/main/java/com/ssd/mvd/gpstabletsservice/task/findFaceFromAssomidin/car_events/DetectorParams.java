@@ -1,6 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
 
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
 
 @Data
