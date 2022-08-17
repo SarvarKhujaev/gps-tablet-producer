@@ -127,14 +127,13 @@ public final class RedisDataControl {
                         .log()
                         .onErrorStop()
                         .flatMap( aLong -> this.getPatrul( passportNumber )
-                                .flatMap( patrul -> {
-                            UnirestController.getInstance().deleteUser( patrul );
-                            return Mono.just( ApiResponseModel.builder()
-                                    .success( CassandraDataControl.getInstance().deletePatrul( passportNumber ) )
-                                    .status( Status.builder()
-                                            .code( 200 )
-                                            .message( passportNumber + " was deleted" )
-                                            .build() ).build() ); } ) )
+                                .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
+                                        .success( CassandraDataControl.getInstance().deletePatrul( passportNumber )
+                                        && UnirestController.getInstance().deleteUser( patrul ) )
+                                        .status( Status.builder()
+                                                .code( 200 )
+                                                .message( passportNumber + " was deleted" )
+                                                .build() ).build() )) )
                 : Mono.just( ApiResponseModel.builder()
                     .success( false )
                     .status( Status.builder()
@@ -200,7 +199,8 @@ public final class RedisDataControl {
                 .onErrorStop()
                 .flatMap( aBoolean -> aBoolean ?
                     Mono.just( ApiResponseModel.builder()
-                            .success( CassandraDataControl.getInstance().addValue( UnirestController.getInstance().addUser( patrul ), this.key ) )
+                            .success( CassandraDataControl.getInstance()
+                                    .addValue( UnirestController.getInstance().addUser( patrul ), this.key ) )
                             .status( Status.builder().message( "new patrul was added" ).code( 200 ).build() ).build() )
                     : Mono.just( ApiResponseModel.builder().status( Status.builder()
                             .message( "this patrul already exists" ).code( 201 ).build() ).build() ) ); }
