@@ -298,7 +298,9 @@ public final class RedisDataControl {
             .fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
             .flatMap( aBoolean -> aBoolean ?
                     Mono.just( ApiResponseModel.builder()
-                                    .success( CassandraDataControl.getInstance().addValue( patrul, this.key ) )
+                                    .success( CassandraDataControl.getInstance()
+                                            .addValue( UnirestController.getInstance()
+                                                    .updateUser( patrul ), this.key ) )
                                     .status( Status.builder()
                                             .message( "patrul was updated successfully" )
                                             .code( 200 )

@@ -44,6 +44,19 @@ public class UnirestController {
         System.out.println( res.getBody() );
         return patrul; }
 
+    public Patrul updateUser ( Patrul patrul ) {
+        Req req = new Req();
+        req.setId( patrul.getUuid() );
+        req.setRole( Role.USER );
+        req.setUsername( patrul.getSurnameNameFatherName() );
+        HttpEntity<?> entity = new HttpEntity<>( req, null );
+        var res = restTemplate( patrul
+                .getToken()
+                .split( " " )[1] )
+                .exchange("https://ms.ssd.uz/chat/edit-user", HttpMethod.POST, entity, String.class );
+        System.out.println( res.getBody() );
+        return patrul; }
+
     @Data
     public static class Req {
         private UUID id;
