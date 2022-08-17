@@ -194,6 +194,7 @@ public final class RedisDataControl {
         patrul.setInPolygon( false );
         patrul.setUuid( UUID.randomUUID() );
         patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
+        patrul.setSurnameNameFatherName( patrul.getName() + " " + patrul.getSurname() + " " + patrul.getFatherName() );
         return this.patrulMap.fastPutIfAbsent( patrul.getPassportNumber(), ( key = SerDes.getSerDes().serialize( patrul ) ) )
                 .log()
                 .onErrorStop()
