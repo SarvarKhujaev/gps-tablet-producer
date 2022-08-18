@@ -299,8 +299,7 @@ public final class RedisDataControl {
             .flatMap( aBoolean -> aBoolean ?
                     Mono.just( ApiResponseModel.builder()
                                     .success( CassandraDataControl.getInstance()
-                                            .addValue( UnirestController.getInstance()
-                                                    .updateUser( patrul ), this.key ) )
+                                            .addValue( patrul, this.key ) )
                                     .status( Status.builder()
                                             .message( "patrul was updated successfully" )
                                             .code( 200 )
@@ -417,15 +416,25 @@ public final class RedisDataControl {
             .success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
 
     // sets every day when Patrul start to work in morning
-    public Mono< ApiResponseModel > startToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
-            this.patrulMap.get( this.key ).map( s -> SerDes.getSerDes().deserialize( s ) ).flatMap( patrul -> {
-                patrul.setTotalActivityTime( 0L ); // set to 0 every day
-                patrul.setStartedToWorkDate( new Date() ); // registration of time every day
-                return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
-                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
-                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.START_TO_WORK ) )
-                                .status( Status.builder().message( "Patrul started to work" ).code( 200 ).build() ).build() ) );
-            } ) : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
+    public Mono< ApiResponseModel > startToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) )
+            .flatMap( aBoolean -> aBoolean ?
+            this.getPatrul( this.key )
+                    .flatMap( patrul -> {
+                        patrul.setTotalActivityTime( 0L ); // set to 0 every day
+                        patrul.setStartedToWorkDate( new Date() ); // registration of time every day
+                        return this.update( patrul )
+                                .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                        .success( CassandraDataControl.getInstance()
+                                                .login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.START_TO_WORK ) )
+                                        .status( Status.builder()
+                                                .message( "Patrul started to work" )
+                                                .code( 200 )
+                                                .build() ).build() ) );
+                    } ) : Mono.just( ApiResponseModel.builder().success( false )
+                    .status( Status.builder()
+                    .message( "Wrong login or password" )
+                    .code( 201 )
+                    .build() ).build() ) ); }
 
     // uses when patrul finishes his work in the evening
     public Mono< ApiResponseModel > stopToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
