@@ -417,7 +417,9 @@ public final class RedisDataControl {
         Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 )
                 .message( "This policeType does not exists. so if u wish u can check the list and choose another one ((" ).build() ).build() ) ); }
 
-    public String decode ( String token ) { return new String( Base64.getDecoder().decode( token ) ).split( "_" )[ 0 ]; }
+    public String decode ( String token ) { return new String( Base64.getDecoder()
+            .decode( token ) )
+            .split( "@" )[ 0 ]; }
 
     // uses when Patrul wants to change his status from active to pause
     public Mono< ApiResponseModel > setInPause ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) )
@@ -504,9 +506,11 @@ public final class RedisDataControl {
                             if ( patrul.getPassword()
                                     .equals( patrulLoginRequest.getPassword() ) ) {
                                 patrul.setStartedToWorkDate( new Date() );
+                                patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
                                 patrul.setToken( Base64.getEncoder().encodeToString( ( patrul.getPassportNumber()
-                                        + "_" + patrul.getPassword()
-                                        + "_" + Archive.getAchieve().generateToken() ).getBytes( StandardCharsets.UTF_8 ) ) );
+                                        + "@" + patrul.getPassword()
+                                        + "@" + Archive.getAchieve().generateToken() )
+                                        .getBytes( StandardCharsets.UTF_8 ) ) );
                                 return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
                                         .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
                                                 .data( Data.builder().data( patrul ).build() )
