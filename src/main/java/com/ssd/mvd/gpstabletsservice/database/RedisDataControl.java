@@ -502,9 +502,7 @@ public final class RedisDataControl {
                         .map( s -> SerDes.getSerDes().deserialize( s ) )
                         .flatMap( patrul -> {
                             if ( patrul.getPassword()
-                                    .equals( patrulLoginRequest.getPassword() )
-                                    && patrul.getLogin()
-                                    .equals( patrulLoginRequest.getLogin() ) ) {
+                                    .equals( patrulLoginRequest.getPassword() ) ) {
                                 patrul.setStartedToWorkDate( new Date() );
                                 patrul.setToken( Base64.getEncoder().encodeToString( ( patrul.getPassportNumber()
                                         + "_" + patrul.getPassword()
