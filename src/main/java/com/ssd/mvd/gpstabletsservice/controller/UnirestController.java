@@ -44,7 +44,8 @@ public class UnirestController {
         System.out.println( res.getBody() );
         return patrul; }
 
-    public Patrul updateUser ( Patrul patrul ) {
+    public Boolean updateUser ( Patrul patrul ) {
+        if ( !patrul.getToken().contains( "Bearer" ) ) return false;
         Req req = new Req();
         req.setId( patrul.getUuid() );
         req.setRole( Role.USER );
@@ -55,7 +56,8 @@ public class UnirestController {
                 .split( " " )[1] )
                 .exchange("https://ms.ssd.uz/chat/edit-user", HttpMethod.POST, entity, String.class );
         System.out.println( res.getBody() );
-        return patrul; }
+        patrul.setToken( null );
+        return res.getStatusCode().is2xxSuccessful(); }
 
     @Data
     public static class Req {

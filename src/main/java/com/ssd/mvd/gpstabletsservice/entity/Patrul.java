@@ -36,6 +36,7 @@ public class Patrul {
     private String rank;
     private String email;
     private String token;
+    private String login;
     private String taskId;
     private String carType; // модель машины
     private String surname;

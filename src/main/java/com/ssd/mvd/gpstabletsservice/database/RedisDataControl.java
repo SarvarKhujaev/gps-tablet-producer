@@ -188,7 +188,9 @@ public final class RedisDataControl {
                                                 return this.update( patrul1 )
                                                         .onErrorStop()
                                                         .flatMap( aLong -> Mono.just( ApiResponseModel.builder()
-                                                                .success( CassandraDataControl.getInstance().deleteCar( reqCar.getGosNumber() ) )
+                                                                .success( CassandraDataControl
+                                                                        .getInstance()
+                                                                        .deleteCar( gosno ) )
                                                                 .status( Status.builder()
                                                                         .code( 200 )
                                                                         .message( gosno + " was deleted" )
@@ -198,6 +200,7 @@ public final class RedisDataControl {
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
         patrul.setInPolygon( false );
+        patrul.setTuplePermission( false );
         patrul.setUuid( UUID.randomUUID() );
         patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
         patrul.setSurnameNameFatherName( patrul.getName() + " " + patrul.getSurname() + " " + patrul.getFatherName() );
@@ -298,7 +301,8 @@ public final class RedisDataControl {
             .fastPutIfExists( patrul.getPassportNumber(), ( this.key = SerDes.getSerDes().serialize( patrul ) ) )
             .flatMap( aBoolean -> aBoolean ?
                     Mono.just( ApiResponseModel.builder()
-                                    .success( CassandraDataControl.getInstance()
+                                    .success( CassandraDataControl
+                                            .getInstance()
                                             .addValue( patrul, this.key ) )
                                     .status( Status.builder()
                                             .message( "patrul was updated successfully" )
@@ -313,11 +317,30 @@ public final class RedisDataControl {
                                     .build() )
                             .build() ) ); }
 
-    public Mono< ApiResponseModel > update ( Polygon polygon ) { return this.polygonMap.containsKey( polygon.getUuid().toString() ).flatMap( a -> a ?
-            this.polygonMap.fastPutIfExists( polygon.getUuid().toString(), SerDes.getSerDes().serialize( polygon ) ).flatMap( aBoolean -> aBoolean ?
-                    Mono.just( ApiResponseModel.builder().success( true ).status( Status.builder().message( polygon.getName() + " was updated" ).code( 200 ).build() ).build() )
-                    : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "There is no such a polygon" ).code( 201 ).build() ).build() ) ) :
-            Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "There is no such a polygon" ).code( 201 ).build() ).build() ) ); }
+    public Mono< ApiResponseModel > update ( Polygon polygon ) { return this.polygonMap.containsKey( polygon.getUuid().toString() )
+            .flatMap( a -> a ?
+            this.polygonMap.fastPutIfExists( polygon.getUuid().toString(),
+                    SerDes.getSerDes().serialize( polygon ) )
+                    .flatMap( aBoolean -> aBoolean ?
+                    Mono.just( ApiResponseModel.builder()
+                            .success( true )
+                            .status( Status.builder()
+                                    .message( polygon.getName() + " was updated" )
+                                    .code( 200 ).build() )
+                            .build() )
+                    : Mono.just( ApiResponseModel.builder()
+                            .success( false )
+                            .status( Status.builder()
+                                    .message( "There is no such a polygon" )
+                                    .code( 201 )
+                                    .build() )
+                            .build() ) ) :
+            Mono.just( ApiResponseModel.builder()
+                    .success( false )
+                    .status( Status.builder()
+                            .message( "There is no such a polygon" )
+                            .code( 201 )
+                            .build() ).build() ) ); }
 
     public Mono< ApiResponseModel > update ( AtlasLustra atlasLustra ) { return this.lustraMap.containsKey( atlasLustra.getUUID() )
             .flatMap( aBoolean -> aBoolean ?
@@ -349,7 +372,8 @@ public final class RedisDataControl {
                                                                 .status( Status.builder().message( "Car was updated" ).code( 200 ).build() )
                                                                 .success( CassandraDataControl.getInstance().addValue( reqCar, this.key ) ).build() ) ) ); } ) );
                         } );
-                else return this.carMap.fastPutIfExists( reqCar.getUuid().toString(), ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
+                else return this.carMap.fastPutIfExists( reqCar.getUuid().toString(),
+                                ( this.key = SerDes.getSerDes().serialize( reqCar ) ) )
                         .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
                                             .status( Status.builder()
                                                     .message( "Car data was successfully updated" )
@@ -396,24 +420,37 @@ public final class RedisDataControl {
     public String decode ( String token ) { return new String( Base64.getDecoder().decode( token ) ).split( "_" )[ 0 ]; }
 
     // uses when Patrul wants to change his status from active to pause
-    public Mono< ApiResponseModel > setInPause ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
+    public Mono< ApiResponseModel > setInPause ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) )
+            .flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key )
                     .map( s -> SerDes.getSerDes().deserialize( s ) )
                     .flatMap( patrul -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
                     .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
                             .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
                             .status( Status.builder().message( "Patrul set in pause" ).code( 200 ).build() ).build() ) ) )
-            : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
+            : Mono.just( ApiResponseModel.builder()
+                    .success( false )
+                    .status( Status.builder()
+                            .message( "Wrong login or password" )
+                            .code( 201 )
+                            .build() )
+                    .build() ) ); }
 
     // uses when Patrul wants to change his status from pause to active
-    public Mono< ApiResponseModel > backToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
+    public Mono< ApiResponseModel > backToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) )
+            .flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key )
                     .map( s -> SerDes.getSerDes().deserialize( s ) )
                     .flatMap( patrul -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
                     .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
                             .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.RETURNED_TO_WORK ) )
-                            .status( Status.builder().message( "Patrul returned to work" ).code( 200 ).build() ).build() ) )) : Mono.just( ApiResponseModel.builder()
-            .success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
+                            .status( Status.builder().message( "Patrul returned to work" ).code( 200 ).build() ).build() ) ) )
+                    : Mono.just( ApiResponseModel.builder()
+                        .success( false )
+                                .status( Status.builder()
+                                        .message( "Wrong login or password" )
+                                        .code( 201 )
+                                        .build() ).build() ) ); }
 
     // sets every day when Patrul start to work in morning
     public Mono< ApiResponseModel > startToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) )
@@ -437,14 +474,25 @@ public final class RedisDataControl {
                     .build() ).build() ) ); }
 
     // uses when patrul finishes his work in the evening
-    public Mono< ApiResponseModel > stopToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) ).flatMap( aBoolean -> aBoolean ?
+    public Mono< ApiResponseModel > stopToWork ( String token ) { return this.patrulMap.containsKey( ( this.key = this.decode( token ) ) )
+            .flatMap( aBoolean -> aBoolean ?
             this.patrulMap.get( this.key )
                     .map( s -> SerDes.getSerDes().deserialize( s ) )
                     .flatMap( patrul -> this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
                     .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
-                            .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.STOP_TO_WORK ) )
-                            .status( Status.builder().message( "Patrul stopped his job" ).code( 200 ).build() ).build() ) ) )
-            : Mono.just( ApiResponseModel.builder().success( false ).status( Status.builder().message( "Wrong login or password" ).code( 201 ).build() ).build() ) ); }
+                            .success( CassandraDataControl.getInstance()
+                                    .login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.STOP_TO_WORK ) )
+                            .status( Status.builder()
+                                    .message( "Patrul stopped his job" )
+                                    .code( 200 )
+                                    .build() )
+                            .build() ) ) )
+            : Mono.just( ApiResponseModel.builder()
+                    .success( false )
+                    .status( Status.builder()
+                            .message( "Wrong login or password" )
+                            .code( 201 )
+                            .build() ).build() ) ); }
 
     // uses when Patrul login to account after some time
     public Mono< ApiResponseModel > login ( PatrulLoginRequest patrulLoginRequest ) { return this.patrulMap
@@ -453,19 +501,34 @@ public final class RedisDataControl {
                 this.patrulMap.get( patrulLoginRequest.getPassportSeries() )
                         .map( s -> SerDes.getSerDes().deserialize( s ) )
                         .flatMap( patrul -> {
-//                            if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {
+                            if ( patrul.getPassword()
+                                    .equals( patrulLoginRequest.getPassword() )
+                                    && patrul.getLogin()
+                                    .equals( patrulLoginRequest.getLogin() ) ) {
                                 patrul.setStartedToWorkDate( new Date() );
-                                patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
                                 patrul.setToken( Base64.getEncoder().encodeToString( ( patrul.getPassportNumber()
                                         + "_" + patrul.getPassword()
                                         + "_" + Archive.getAchieve().generateToken() ).getBytes( StandardCharsets.UTF_8 ) ) );
                                 return this.patrulMap.fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
-                                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() )
-                                                .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
-                                                .status( Status.builder().message( "Welcome to Family: " + patrul.getName() ).code( 200 ).build() ).build() ) );
-//                            } else return Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 )
-//                                    .message( "Wrong Login or password" ).build() ).success( false ).build() );
-                } ) : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Login or Password" ).code( 201 ).build() ).build() ) ); }
+                                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
+                                                .data( Data.builder().data( patrul ).build() )
+                                                .success( CassandraDataControl.getInstance()
+                                                        .login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
+                                                .status( Status.builder()
+                                                        .message( "Welcome to Family: " + patrul.getName() )
+                                                        .code( 200 ).build() )
+                                                .build() ) );
+                            } else return Mono.just( ApiResponseModel.builder()
+                                    .status( Status.builder()
+                                            .code( 201 )
+                                            .message( "Wrong Login or password" )
+                                            .build() )
+                                    .success( false )
+                                    .build() );
+                } ) : Mono.just( ApiResponseModel.builder()
+                    .status( Status.builder()
+                            .message( "Wrong Login or Password" )
+                            .code( 201 ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > logout ( String token ) { return this.patrulMap.get( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
