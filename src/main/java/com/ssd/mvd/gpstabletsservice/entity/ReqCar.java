@@ -17,6 +17,8 @@ public class ReqCar {
     private Integer sideNumber; // бортовой номер
     private Integer simCardNumber;
 
+    private Double latitude;
+    private Double longitude;
     private Double averageFuelSize; // средний расход топлива по документам
     private Double averageFuelConsumption = 0.0; // средний расход топлива исходя из стиля вождения водителя
 }
