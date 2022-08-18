@@ -443,8 +443,8 @@ public final class RedisDataControl {
             .flatMap( aBoolean -> aBoolean ?
                 this.patrulMap.get( patrulLoginRequest.getPassportSeries() )
                         .map( s -> SerDes.getSerDes().deserialize( s ) )
-                        .flatMap(patrul -> {
-                            if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {
+                        .flatMap( patrul -> {
+//                            if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {
                                 patrul.setStartedToWorkDate( new Date() );
                                 patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
                                 patrul.setToken( Base64.getEncoder().encodeToString( ( patrul.getPassportNumber()
@@ -454,8 +454,8 @@ public final class RedisDataControl {
                                         .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder().data( Data.builder().data( patrul ).build() )
                                                 .success( CassandraDataControl.getInstance().login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
                                                 .status( Status.builder().message( "Welcome to Family: " + patrul.getName() ).code( 200 ).build() ).build() ) );
-                            } else return Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 )
-                                    .message( "Wrong Login or password" ).build() ).success( false ).build() );
+//                            } else return Mono.just( ApiResponseModel.builder().status( Status.builder().code( 201 )
+//                                    .message( "Wrong Login or password" ).build() ).success( false ).build() );
                 } ) : Mono.just( ApiResponseModel.builder().status( Status.builder().message( "Wrong Login or Password" ).code( 201 ).build() ).build() ) ); }
 
     public Mono< ApiResponseModel > logout ( String token ) { return this.patrulMap.get( this.decode( token ) )
@@ -523,7 +523,11 @@ public final class RedisDataControl {
                                         .build() )
                                 .success( true ).build() ) )
                 : Mono.just( ApiResponseModel.builder().status( Status.builder()
-                    .message( "Wrong token" ).code( 201 ).build() ).success( false ).build() ) ); }
+                    .message( "Wrong token" )
+                    .code( 201 )
+                    .build() )
+                    .success( false )
+                    .build() ) ); }
 
     public void addValue ( Card card ) {
         this.addValue( card.getCardId().toString(), new ActiveTask( card ) );
