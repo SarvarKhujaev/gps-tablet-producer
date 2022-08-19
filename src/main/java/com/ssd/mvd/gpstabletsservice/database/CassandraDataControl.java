@@ -175,9 +175,9 @@ public final class CassandraDataControl {
                 + this.dbName + "." + this.notification
                 + "( id uuid, taskId text, type text," +
                         " latitudeOfTask double, wasRead boolean, longitudeOfTask double," +
-                        " notificationWasCreated timestamp, status text, taskTypes text" +
-                " title text, address text, carNumber text, nsfOfPatrul text, passportSeries text" +
-                        " PRIMARY KEY( (id), notificationWasCreated );" );
+                        " notificationWasCreated timestamp, status text, taskTypes text," +
+                " title text, address text, carNumber text, nsfOfPatrul text, passportSeries text," +
+                        " PRIMARY KEY( (id), notificationWasCreated ) );" );
 
         this.logger.info( "Cassandra is ready" ); }
 
@@ -499,4 +499,19 @@ public final class CassandraDataControl {
                 + notification.getNsfOfPatrul() + "', '"
                 + notification.getPassportSeries() + "');" );
         return notification; }
+
+    public Flux< Notification > getAllNotification () {
+        return Flux.fromStream(
+                this.session.execute(
+                        "SELECT * FROM "
+                        + this.dbName + "." + this.notification + ";"
+                ).all().stream()
+        ).map( row -> Notification.builder()
+                .id( row.getString( "taskId" ) )
+                .type( row.getString( "type" ) )
+                .title( row.getString( "title" ) )
+                .address( row.getString( "address" ) )
+                .carNumber( row.getString( "carNumber" ) )
+                .build() );
+    }
 }

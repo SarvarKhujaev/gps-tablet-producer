@@ -1,7 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -16,6 +17,7 @@ public class Notification {
     private String title; // description of Patrul action
     private String address;
     private String carNumber;
+    private String policeType;
     private String nsfOfPatrul;
     private String passportSeries;
 

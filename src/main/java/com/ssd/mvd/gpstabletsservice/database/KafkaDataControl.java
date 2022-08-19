@@ -1,9 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.config.TopicBuilder;
