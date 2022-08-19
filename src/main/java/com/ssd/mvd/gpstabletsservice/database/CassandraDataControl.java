@@ -5,6 +5,8 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
@@ -176,7 +178,7 @@ public final class CassandraDataControl {
                 + "( id uuid, taskId text, type text," +
                         " latitudeOfTask double, wasRead boolean, longitudeOfTask double," +
                         " notificationWasCreated timestamp, status text, taskTypes text," +
-                " title text, address text, carNumber text, nsfOfPatrul text, passportSeries text," +
+                " title text, address text, carNumber text, nsfOfPatrul text, passportSeries text, policeType text," +
                         " PRIMARY KEY( (id), notificationWasCreated ) );" );
 
         this.logger.info( "Cassandra is ready" ); }
@@ -483,7 +485,7 @@ public final class CassandraDataControl {
                         + this.dbName + "." + this.notification
                 + "( id, taskId, type, latitudeOfTask, wasRead, longitudeOfTask," +
                         " notificationWasCreated, status, taskTypes" +
-                        " title, address, carNumber, nsfOfPatrul, passportSeries ) VALUES ("
+                        " title, address, carNumber, nsfOfPatrul, passportSeries, policeType ) VALUES ("
                 + notification.getUuid() + ", '"
                 + notification.getId() + "', '"
                 + notification.getType() + "', "
@@ -497,7 +499,9 @@ public final class CassandraDataControl {
                 + notification.getAddress() + "', '"
                 + notification.getCarNumber() + "', '"
                 + notification.getNsfOfPatrul() + "', '"
-                + notification.getPassportSeries() + "');" );
+                + notification.getPassportSeries() + "', '"
+                + notification.getPoliceType() + "');"
+        );
         return notification; }
 
     public Flux< Notification > getAllNotification () {
@@ -507,11 +511,45 @@ public final class CassandraDataControl {
                         + this.dbName + "." + this.notification + ";"
                 ).all().stream()
         ).map( row -> Notification.builder()
+                .uuid( row.getUUID( "id" ) )
                 .id( row.getString( "taskId" ) )
                 .type( row.getString( "type" ) )
                 .title( row.getString( "title" ) )
+                .wasRead( row.getBool( "wasRead" ) )
                 .address( row.getString( "address" ) )
                 .carNumber( row.getString( "carNumber" ) )
+                .policeType( row.getString( "policeType" ) )
+                .nsfOfPatrul( row.getString( "nsfOfPatrul" ) )
+                .passportSeries( row.getString( "passportSeries" ) )
+                .latitudeOfTask( row.getDouble( "latitudeOfTask" ) )
+                .longitudeOfTask( row.getDouble( "longitudeOfTask" ) )
+                .status( Status.valueOf( row.getString( "status" ) ) )
+                .taskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) )
+                .notificationWasCreated( row.getTimestamp( "notificationWasCreated" ) )
                 .build() );
     }
+
+    public Mono< ApiResponseModel > setNotificationAsRead ( UUID uuid ) {
+        return this.session.execute(
+                "UPDATE"
+                        + this.dbName + "." + this.notification
+                        + " SET wasRead = " + true
+                        + " WHERE id = '" + uuid + "' IF EXISTS;"
+        ).wasApplied() ? Mono.just(
+                ApiResponseModel.builder()
+                        .status(
+                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "Notification " + uuid + " was updated successfully" )
+                                        .code( 200 )
+                                        .build()
+                        ).success( true )
+                        .build() )
+                : Mono.just( ApiResponseModel.builder()
+                        .status(
+                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "Notification " + uuid + " was not updated" )
+                                        .code( 200 )
+                                        .build()
+                        ).success( false )
+                        .build() ); }
 }
