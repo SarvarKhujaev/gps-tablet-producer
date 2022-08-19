@@ -146,7 +146,9 @@ public final class RedisDataControl {
                     .success( false )
                     .status( Status.builder()
                             .code( 201 )
-                            .message( passport + " does not exists" ).build() ).build() ) ); } // deleting current car
+                            .message( passport + " does not exists" )
+                            .build() )
+                    .build() ) ); } // deleting current car
 
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return this.polygonForPatrulMap.containsKey( uuid )
             .flatMap( aBoolean -> aBoolean ?
@@ -729,9 +731,6 @@ public final class RedisDataControl {
 
     public void remove ( String id ) { this.activeTasks.remove( id ).subscribe(); }
 
-    public Flux< ActiveTask > getActiveTasks() { return this.activeTasks.valueIterator()
-            .flatMap( s -> Mono.just( SerDes.getSerDes().deserializeActiveTask( s ) ) ); }
-
     public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return this.getAllPatruls()
             .flatMap( patrul -> {
                 patrul.setSpecialToken( token );
@@ -743,4 +742,7 @@ public final class RedisDataControl {
                                         .code( 200 )
                                         .build()
                                 ).build() ); } ); }
+
+    public Flux< ActiveTask > getActiveTasks() { return this.activeTasks.valueIterator()
+            .flatMap( s -> Mono.just( SerDes.getSerDes().deserializeActiveTask( s ) ) ); }
 }

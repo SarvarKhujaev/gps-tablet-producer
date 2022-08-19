@@ -95,15 +95,15 @@ public class CardController {
             .flatMap( patrul -> TaskInspector.getInstance().getCurrentActiveTask( patrul ) ); }
 
     @MessageMapping ( value = "addNewWarningCar" )
-    public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) { CassandraDataControl
-            .getInstance()
-            .addValue(
-                    KafkaDataControl
-                            .getInstance()
-                            .writeToKafka( carTotalData ) );
+    public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) {
         return Mono.just(
                 ApiResponseModel.builder()
-                        .success( true )
+                        .success( CassandraDataControl
+                                .getInstance()
+                                .addValue(
+                                        KafkaDataControl
+                                                .getInstance()
+                                                .writeToKafka( carTotalData ) ) )
                         .status( Status.builder()
                                 .message( "Car was saved successfully" )
                                 .code( 200 )

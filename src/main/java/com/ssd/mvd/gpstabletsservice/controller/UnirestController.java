@@ -61,16 +61,15 @@ public class UnirestController {
                 .getStatusCode().is2xxSuccessful(); }
 
     @Data
-    public static class Req {
-        private UUID id;
-        private Role role;
-        private String username;
-    }
-
-    @Data
     public static class ReqId {
         private UUID id;
     }
+
+    @Data
+    public static class Req {
+        private UUID id;
+        private Role role;
+        private String username; }
 
     public enum Role {
         OPERATOR,

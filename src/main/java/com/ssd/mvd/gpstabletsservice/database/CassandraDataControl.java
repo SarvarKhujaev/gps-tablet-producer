@@ -41,6 +41,7 @@ public final class CassandraDataControl {
     private final String polygon = "POLYGON";
 
     private final String carTotalData = "carTotalData";
+    private final String notification = "notification";
     private final String violationListType = "violationListType";
 
     private final String faceCar = "faceCar";
@@ -103,35 +104,47 @@ public final class CassandraDataControl {
                     'analyzed': 'true',
                     'tokenization_normalize_lowercase': 'true' };""");
 
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventFace
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.eventFace
                 + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventBody
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.eventBody
                 + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.eventCar
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.eventCar
                 + "(id text, camera int, matched boolean, date timestamp, confidence double, object text, PRIMARY KEY( (id), date ) );" ); // the table for polygons
 
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygon
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.polygon
                 + "(id uuid PRIMARY KEY, polygonName text, polygonType text);" ); // the table for polygons
 
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.facePerson
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.facePerson
                 + "(id text PRIMARY KEY, object text);" ); // the table for polygons
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.faceCar
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.faceCar
                 + "(id text PRIMARY KEY, object text);" ); // the table for polygons
 
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.patrols
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.patrols
                 + "(passportNumber text PRIMARY KEY, NSF text, object text);" ); // the table for patruls
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonForPatrul
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.polygonForPatrul
                 + "(id uuid PRIMARY KEY, object text);" ); // the table for polygons for patrul
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.polygonType
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.polygonType
                 + "(id uuid PRIMARY KEY, polygonType text);" ); // the table for police types
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.policeTypes
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.policeTypes
                 + "(id uuid PRIMARY KEY, policeType text);" ); // the table for police types
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.selfEmployment
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.selfEmployment
                 + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
         this.session.execute("CREATE TABLE IF NOT EXISTS "
                 + this.dbName + "." + this.car
                 + "(uuid uuid, trackersId text, gosNumber text PRIMARY KEY, object text);" ); // the table for cars
-        this.session.execute("CREATE TABLE IF NOT EXISTS " + this.dbName + "." + this.lustre
+        this.session.execute("CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.lustre
                 + "(id uuid PRIMARY KEY, object text);" ); // the table for police types
 
         this.session.execute(
@@ -157,6 +170,15 @@ public final class CassandraDataControl {
                         "violationList list< frozen<" + this.violationListType + "> >," +
                         "object text );" );
 
+        this.session.execute(
+                "CREATE TABLE IF NOT EXISTS "
+                + this.dbName + "." + this.notification
+                + "( id uuid, taskId text, type text," +
+                        " latitudeOfTask double, wasRead boolean, longitudeOfTask double," +
+                        " notificationWasCreated timestamp, status text, taskTypes text" +
+                " title text, address text, carNumber text, nsfOfPatrul text, passportSeries text" +
+                        " PRIMARY KEY( (id), notificationWasCreated );" );
+
         this.logger.info( "Cassandra is ready" ); }
 
     public Boolean addValue ( CarTotalData carTotalData ) { return this.session.executeAsync( "INSERT INTO "
@@ -167,13 +189,6 @@ public final class CassandraDataControl {
             + carTotalData.getViolationsList().getViolationsInformationsList() + ", '"
             + SerDes.getSerDes().serialize( carTotalData ) + "');" ).isDone(); }
 
-    public List< ViolationsInformation > getViolationsInformationsList ( String gosnumer ) { return this.session
-            .execute(
-                    "select * FROM "
-                    + this.dbName + "." + this.carTotalData
-                     + " WHERE gosnumer = '" + gosnumer + "';"
-            ).one().getList( "violationList", ViolationsInformation.class ); }
-
     public Mono< CardDetails > getWarningCarDetails ( String gosnumber ) { return Mono.just(
             new CardDetails(
                     SerDes.getSerDes().deserializeCarTotalData(
@@ -183,6 +198,13 @@ public final class CassandraDataControl {
                                                     + this.dbName + "." + this.carTotalData
                                                     + " WHERE gosnumer = '" + gosnumber + "';"
                                     ).one().getString( "object" ) ) ) ); }
+
+    public List< ViolationsInformation > getViolationsInformationsList ( String gosnumer ) { return this.session
+            .execute(
+                    "select * FROM "
+                    + this.dbName + "." + this.carTotalData
+                     + " WHERE gosnumer = '" + gosnumer + "';"
+            ).one().getList( "violationList", ViolationsInformation.class ); }
 
     public Boolean addValue ( EventFace face ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.eventFace
@@ -452,25 +474,29 @@ public final class CassandraDataControl {
     public Boolean deletePatrul ( String passportNumber ) {
         return this.session.execute( "delete from "
                         + this.dbName + this.patrols
-                        + " where gosnumber = '" + passportNumber + "';" )
+                        + " where passportNumber = '" + passportNumber + "';" )
                 .wasApplied(); }
 
-//    public Flux< Patrul > getAllPatruls () {
-//        return Flux.fromStream(
-//                this.session.execute(
-//                        "select * from tablets.patruls;"
-//                ).all().stream()
-//        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) );
-//    }
-//
-//    public Mono< Patrul > getPatrul ( String id ) {
-//        return Mono.just(
-//                this.session.execute(
-//                        "SELECT * FROM tablets.patruls where passportNumber = '" + id + "';"
-//                ).one()
-//        ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) ); }
-//
-//    public Mono< ReqCar > getCar ( String carNumber ) {
-//        Row row = this.session.execute( "select * from tablets.cars where gosnumber = '" + carNumber +"';" ).one();
-//        return Mono.justOrEmpty( row != null ? SerDes.getSerDes().deserializeCar( row.getString( "object" ) ) : null ); }
+    public Notification addValue ( Notification notification ) {
+        this.session.execute(
+                "INSERT INTO "
+                        + this.dbName + "." + this.notification
+                + "( id, taskId, type, latitudeOfTask, wasRead, longitudeOfTask," +
+                        " notificationWasCreated, status, taskTypes" +
+                        " title, address, carNumber, nsfOfPatrul, passportSeries ) VALUES ("
+                + notification.getUuid() + ", '"
+                + notification.getId() + "', '"
+                + notification.getType() + "', "
+                + notification.getLatitudeOfTask() + ", "
+                + notification.getWasRead() + ", "
+                + notification.getLongitudeOfTask() + ", '"
+                + notification.getNotificationWasCreated().toInstant() + "', '"
+                + notification.getStatus() + "', '"
+                + notification.getTaskTypes() + "', '"
+                + notification.getTitle() + "', '"
+                + notification.getAddress() + "', '"
+                + notification.getCarNumber() + "', '"
+                + notification.getNsfOfPatrul() + "', '"
+                + notification.getPassportSeries() + "');" );
+        return notification; }
 }

@@ -57,8 +57,10 @@ public class Patrul {
     private TaskTypes taskTypes; // task type which was attached to the current patrul
     private Map< String, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
 
-    public String getSurnameNameFatherName () { return this.surnameNameFatherName != null ? this.surnameNameFatherName
-            : ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
+    public String getSurnameNameFatherName () { return ( this.surnameNameFatherName =
+            this.getName() + " "
+                    + this.getSurname() + " "
+                    + this.getFatherName() ); }
 
     public Boolean check () { return switch ( this.getPoliceType() ) {
             case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;
