@@ -32,6 +32,8 @@ public class PatrulController {
 
     @MessageMapping ( value = "findTheClosestPatruls" )
     public Flux< Patrul > findTheClosestPatruls ( Point point ) { return RedisDataControl.getRedis().getAllPatruls()
+            .flatMap( patrul -> CassandraDataControl.getInstance()
+                        .getPatrul( patrul.getPassportNumber() ) )
             .filter( patrul -> patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
                     && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0
                     && patrul.getLatitude() != null && patrul.getLongitude() != null )

@@ -505,8 +505,7 @@ public final class CassandraDataControl {
                 + notification.getNsfOfPatrul() + "', '"
                 + notification.getPassportSeries() + "', '"
                 + notification.getPoliceType() + "');"
-        );
-        return notification; }
+        ); return notification; }
 
     public Flux< Notification > getAllNotification () {
         return Flux.fromStream(
@@ -556,4 +555,10 @@ public final class CassandraDataControl {
                                         .build()
                         ).success( false )
                         .build() ); }
+
+    public Mono< Patrul > getPatrul ( String id ) { return Mono.just(
+            this.session.execute(
+                    "SELECT * FROM tablets.patruls where passportNumber = '" + id + "';"
+            ).one()
+    ).map( row -> SerDes.getSerDes().deserialize( row.getString( "object" ) ) ); }
 }
