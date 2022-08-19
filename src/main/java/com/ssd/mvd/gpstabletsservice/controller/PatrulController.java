@@ -96,4 +96,9 @@ public class PatrulController {
     public Flux< PatrulInfo > getPatrulByPortion ( String name ) { return CassandraDataControl.getInstance()
             .getPatruls( name )
             .map( row -> new PatrulInfo( row.getString( "NSF" ) ) ); }
+
+    @MessageMapping ( value = "addAllPatrulsToChatService" )
+    public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return RedisDataControl
+            .getRedis()
+            .addAllPatrulsToChatService( token ); }
 }

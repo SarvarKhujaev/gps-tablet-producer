@@ -19,11 +19,12 @@ public class UnirestController {
     public boolean deleteUser ( Patrul patrul ) {
         ReqId reqId = new ReqId();
         reqId.setId( patrul.getUuid() );
-        HttpEntity<?> entity = new HttpEntity<>( reqId, null );
-        var res = restTemplate( patrul.getToken() )
-                .exchange( "https://ms.ssd.uz/chat/delete-user", HttpMethod.POST, entity, String.class );
-        System.out.println( res.getBody() );
-        return res.getStatusCodeValue() == 200; }
+        return restTemplate( patrul.getToken() )
+                .exchange( "https://ms.ssd.uz/chat/delete-user",
+                        HttpMethod.POST,
+                        new HttpEntity<>( reqId, null ),
+                        String.class )
+                .getStatusCodeValue() == 200; }
 
     public RestTemplate restTemplate( String token ) { return new RestTemplateBuilder()
                 .setConnectTimeout( Duration.ofSeconds( 10 ) )
@@ -31,33 +32,33 @@ public class UnirestController {
                 .defaultHeader("token", token )
                 .build(); }
 
-    public Patrul addUser ( Patrul patrul ) {
-        Req req = new Req();
-        req.setId( patrul.getUuid() );
-        req.setRole( Role.USER );
-        req.setUsername( patrul.getSurnameNameFatherName() );
-        HttpEntity<?> entity = new HttpEntity<>( req, null );
-        var res = restTemplate( patrul
-                .getToken()
-                .split( " " )[1] )
-                .exchange("https://ms.ssd.uz/chat/add-user", HttpMethod.POST, entity, String.class );
-        System.out.println( res.getBody() );
-        return patrul; }
-
     public Boolean updateUser ( Patrul patrul ) {
-        if ( !patrul.getToken().contains( "Bearer" ) ) return false;
+        if ( patrul.getSpecialToken() == null ) return false;
         Req req = new Req();
         req.setId( patrul.getUuid() );
         req.setRole( Role.USER );
         req.setUsername( patrul.getSurnameNameFatherName() );
-        HttpEntity<?> entity = new HttpEntity<>( req, null );
-        var res = restTemplate( patrul
-                .getToken()
-                .split( " " )[1] )
-                .exchange("https://ms.ssd.uz/chat/edit-user", HttpMethod.POST, entity, String.class );
-        System.out.println( res.getBody() );
-        patrul.setToken( null );
-        return res.getStatusCode().is2xxSuccessful(); }
+        return restTemplate( patrul
+                .getSpecialToken() )
+                .exchange("https://ms.ssd.uz/chat/edit-user",
+                        HttpMethod.POST,
+                        new HttpEntity<>( req, null ),
+                        String.class )
+                .getStatusCode()
+                .is2xxSuccessful(); }
+
+    public Boolean addUser ( Patrul patrul ) {
+        Req req = new Req();
+        req.setId( patrul.getUuid() );
+        req.setRole( Role.USER );
+        req.setUsername( patrul.getSurnameNameFatherName() );
+        return restTemplate( patrul
+                .getSpecialToken() )
+                .exchange("https://ms.ssd.uz/chat/add-user",
+                        HttpMethod.POST,
+                        new HttpEntity<>( req, null ),
+                        String.class )
+                .getStatusCode().is2xxSuccessful(); }
 
     @Data
     public static class Req {

@@ -3,7 +3,6 @@ package com.ssd.mvd.gpstabletsservice.entity;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
-import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import java.time.Duration;
 import lombok.Data;
 import java.util.*;
@@ -48,6 +47,7 @@ public class Patrul {
     private String fatherName;
     private String dateOfBirth;
     private String phoneNumber;
+    private String specialToken;
     private String simCardNumber;
     private String passportNumber;
     private String patrulImageLink;
