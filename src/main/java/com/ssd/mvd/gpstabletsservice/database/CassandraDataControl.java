@@ -259,8 +259,12 @@ public final class CassandraDataControl {
             + reqCar.getGosNumber() + "', '"
             + key + "');" ).isDone(); }
 
-    public Boolean addValue ( SelfEmploymentTask selfEmploymentTask, String key ) { return this.session.executeAsync( "INSERT INTO "
-            + this.dbName + "." + this.selfEmployment + "(id, object) VALUES(" + selfEmploymentTask.getUuid() + ", '" + key + "');" ).isDone(); }
+    public Boolean addValue ( SelfEmploymentTask selfEmploymentTask, String key ) { return this.session
+            .executeAsync( "INSERT INTO "
+            + this.dbName + "." + this.selfEmployment
+            + "(id, object) VALUES("
+            + selfEmploymentTask.getUuid()
+            + ", '" + key + "');" ).isDone(); }
 
     public Boolean addValue ( Patrul patrul, String key ) {
         this.session.executeAsync( "CREATE TABLE IF NOT EXISTS "
@@ -448,7 +452,7 @@ public final class CassandraDataControl {
                     this.session.execute(
                             "select * from "
                                     + this.dbName + "." + this.selfEmployment
-                                    + " where id = '" + id + "';"
+                                    + " where id = " + id + ";"
                     ).one().getString( "object" ) ) ); }
 
     public Mono< FaceEvents > getFaceEvents ( String id ) { return Mono.just(

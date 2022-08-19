@@ -674,7 +674,12 @@ public final class TaskInspector {
             default -> CassandraDataControl.getInstance().getSelfEmploymentTask( UUID.fromString( patrul.getTaskId() ) )
                     .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( selfEmploymentTask, "ru", patrul.getPassportNumber() ) ).build() )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .code( 200 )
+                                    .message( "Your task details" )
+                                    .build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new CardDetails( selfEmploymentTask, "ru", patrul.getPassportNumber() ) )
+                                    .build() )
                             .build() ) ); }; }
 }
