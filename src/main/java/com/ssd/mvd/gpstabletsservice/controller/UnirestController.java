@@ -16,21 +16,21 @@ public class UnirestController {
 
     public static UnirestController getInstance () { return serDes != null ? serDes : ( serDes = new UnirestController() ); }
 
-    public boolean deleteUser ( Patrul patrul ) {
-        ReqId reqId = new ReqId();
-        reqId.setId( patrul.getUuid() );
-        return restTemplate( patrul.getToken() )
-                .exchange( "https://ms.ssd.uz/chat/delete-user",
-                        HttpMethod.POST,
-                        new HttpEntity<>( reqId, null ),
-                        String.class )
-                .getStatusCodeValue() == 200; }
-
     public RestTemplate restTemplate( String token ) { return new RestTemplateBuilder()
                 .setConnectTimeout( Duration.ofSeconds( 10 ) )
                 .setReadTimeout( Duration.ofSeconds( 60 ) )
                 .defaultHeader("token", token )
                 .build(); }
+
+    public boolean deleteUser ( Patrul patrul ) {
+        ReqId reqId = new ReqId();
+        reqId.setId( patrul.getUuid() );
+        return restTemplate( patrul.getSpecialToken() )
+                .exchange( "https://ms.ssd.uz/chat/delete-user",
+                        HttpMethod.POST,
+                        new HttpEntity<>( reqId, null ),
+                        String.class )
+                .getStatusCodeValue() == 200; }
 
     public Boolean updateUser ( Patrul patrul ) {
         if ( patrul.getSpecialToken() == null ) return false;

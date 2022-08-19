@@ -132,10 +132,12 @@ public final class RedisDataControl {
                         .onErrorStop()
                         .flatMap( aLong -> this.getPatrul( passport )
                                 .flatMap( patrul -> {
-                                    patrul.setToken( token );
+                                    patrul.setSpecialToken( token );
                                     return Mono.just( ApiResponseModel.builder()
-                                            .success( CassandraDataControl.getInstance().deletePatrul( passport )
-                                                    && UnirestController.getInstance().deleteUser( patrul ) )
+                                            .success( CassandraDataControl.getInstance()
+                                                    .deletePatrul( passport )
+                                                    && UnirestController.getInstance()
+                                                    .deleteUser( patrul ) )
                                             .status( Status.builder()
                                                     .code( 200 )
                                                     .message( passport + " was deleted" )
