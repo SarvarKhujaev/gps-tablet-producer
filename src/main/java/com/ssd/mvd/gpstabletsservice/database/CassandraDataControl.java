@@ -5,8 +5,6 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
-import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
@@ -17,7 +15,9 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
+import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
@@ -174,12 +174,12 @@ public final class CassandraDataControl {
 
         this.session.execute(
                 "CREATE TABLE IF NOT EXISTS "
-                + this.dbName + "." + this.notification
-                + "( id uuid, taskId text, type text," +
-                        " latitudeOfTask double, wasRead boolean, longitudeOfTask double," +
-                        " notificationWasCreated timestamp, status text, taskTypes text," +
-                " title text, address text, carNumber text, nsfOfPatrul text, passportSeries text, policeType text," +
-                        " PRIMARY KEY( (id), notificationWasCreated ) );" );
+                + this.dbName + "." + this.notification +
+                "( id uuid, taskId text, type text," +
+                " latitudeOfTask double, wasRead boolean, longitudeOfTask double," +
+                " notificationWasCreated timestamp, status text, taskTypes text," +
+                " title text, address text, carNumber text, nsfOfPatrul text, passportSeries text," +
+                        "policeType text, PRIMARY KEY( (id), notificationWasCreated ) );" );
 
         this.logger.info( "Cassandra is ready" ); }
 
@@ -484,7 +484,7 @@ public final class CassandraDataControl {
                 "INSERT INTO "
                         + this.dbName + "." + this.notification
                 + "( id, taskId, type, latitudeOfTask, wasRead, longitudeOfTask," +
-                        " notificationWasCreated, status, taskTypes" +
+                        " notificationWasCreated, status, taskTypes," +
                         " title, address, carNumber, nsfOfPatrul, passportSeries, policeType ) VALUES ("
                 + notification.getUuid() + ", '"
                 + notification.getId() + "', '"
