@@ -110,11 +110,11 @@ public class CardController {
                                 .build() )
                         .build() ); }
 
-    @MessageMapping ( value = "getViolationsInformationsList" )
-    public Mono< List< ViolationsInformation > > getViolationsInformationsList ( String gosnumber ) { return Mono.just(
+    @MessageMapping ( value = "getViolationsInformationList" )
+    public Mono< List< ViolationsInformation > > getViolationsInformationList ( String gosnumber ) { return Mono.just(
             CassandraDataControl
                     .getInstance()
-                    .getViolationsInformationsList( gosnumber ) ); }
+                    .getViolationsInformationList( gosnumber ) ); }
 
     @MessageMapping ( value = "getWarningCarDetails" )
     public Mono< CardDetails > getWarningCarDetails ( String gosnumber ) { return CassandraDataControl

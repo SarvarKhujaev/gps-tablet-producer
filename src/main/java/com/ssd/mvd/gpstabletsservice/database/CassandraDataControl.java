@@ -198,45 +198,45 @@ public final class CassandraDataControl {
                                     .execute(
                                             "select * FROM "
                                                     + this.dbName + "." + this.carTotalData
-                                                    + " WHERE gosnumer = '" + gosnumber + "';"
+                                                    + " WHERE gosnumber = '" + gosnumber + "';"
                                     ).one().getString( "object" ) ) ) ); }
 
-    public List< ViolationsInformation > getViolationsInformationsList ( String gosnumer ) { return this.session
+    public List< ViolationsInformation > getViolationsInformationList ( String gosnumber ) { return this.session
             .execute(
-                    "select * FROM "
+                    "SELECT * FROM "
                     + this.dbName + "." + this.carTotalData
-                     + " WHERE gosnumer = '" + gosnumer + "';"
+                     + " WHERE gosnumber = '" + gosnumber + "';"
             ).one().getList( "violationList", ViolationsInformation.class ); }
 
-    public Boolean addValue ( EventFace face ) { return this.session.executeAsync( "INSERT INTO "
-            + this.dbName + "." + this.eventFace
-            + "( id, camera, matched, date, confidence, object ) VALUES('"
-            + face.getId() + "', "
-            + face.getCamera() + ", "
-            + face.getMatched() + ", '"
-            + face.getCreated_date().toInstant() + "', "
-            + face.getConfidence() + ", '"
-            + SerDes.getSerDes().serialize( face ) + "');" ).isDone(); }
-
-    public Boolean addValue ( EventCar face ) { return this.session.executeAsync( "INSERT INTO "
+    public Boolean addValue ( EventCar eventCar ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.eventCar
             + "( id, camera, matched, date, confidence, object ) VALUES('"
-            + face.getId() + "', "
-            + face.getCamera() + ", "
-            + face.getMatched() + ", '"
-            + face.getCreated_date().toInstant() + "', "
-            + face.getConfidence() + ", '"
-            + SerDes.getSerDes().serialize( face ) + "');" ).isDone(); }
+            + eventCar.getId() + "', "
+            + eventCar.getCamera() + ", "
+            + eventCar.getMatched() + ", '"
+            + eventCar.getCreated_date().toInstant() + "', "
+            + eventCar.getConfidence() + ", '"
+            + SerDes.getSerDes().serialize( eventCar ) + "');" ).isDone(); }
 
-    public Boolean addValue ( EventBody face ) { return this.session.executeAsync( "INSERT INTO "
+    public Boolean addValue ( EventFace eventFace ) { return this.session.executeAsync( "INSERT INTO "
+            + this.dbName + "." + this.eventFace
+            + "( id, camera, matched, date, confidence, object ) VALUES('"
+            + eventFace.getId() + "', "
+            + eventFace.getCamera() + ", "
+            + eventFace.getMatched() + ", '"
+            + eventFace.getCreated_date().toInstant() + "', "
+            + eventFace.getConfidence() + ", '"
+            + SerDes.getSerDes().serialize( eventFace ) + "');" ).isDone(); }
+
+    public Boolean addValue ( EventBody eventBody ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.eventBody
             + "( id, camera, matched, date, confidence, object ) VALUES('"
-            + face.getId() + "', "
-            + face.getCamera() + ", "
-            + face.getMatched() + ", '"
-            + face.getCreated_date().toInstant() + "', "
-            + face.getConfidence() + ", '"
-            + SerDes.getSerDes().serialize( face ) + "');" ).isDone(); }
+            + eventBody.getId() + "', "
+            + eventBody.getCamera() + ", "
+            + eventBody.getMatched() + ", '"
+            + eventBody.getCreated_date().toInstant() + "', "
+            + eventBody.getConfidence() + ", '"
+            + SerDes.getSerDes().serialize( eventBody ) + "');" ).isDone(); }
 
     public Boolean addValue ( PolygonType polygonType ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.polygonType + "(id, polygonType) VALUES('"
@@ -274,11 +274,15 @@ public final class CassandraDataControl {
                 + this.dbName + "." + this.patrols + "(passportNumber, NSF, object) VALUES('"
                 + patrul.getPassportNumber() + "', '" + patrul.getSurnameNameFatherName() + "', '" + key + "');" ).wasApplied(); }
 
-    public ResultSetFuture addValue ( AtlasLustra atlasLustra, String key ) { return this.session.executeAsync( "INSERT INTO "
-            + this.dbName + "." + this.lustre + "(id, object) " + "VALUES ('" + atlasLustra.getUUID() + "', " + key + ");" ); }
-
     public ResultSetFuture addValue ( Polygon polygon, String object ) { return this.session.executeAsync( "INSERT INTO "
-            + this.dbName + "." + this.polygonForPatrul + "(id, object) " + "VALUES (" + polygon.getUuid() + ", '" + object + "');" ); }
+            + this.dbName + "." + this.polygonForPatrul
+            + "(id, object) VALUES ("
+            + polygon.getUuid() + ", '" + object + "');" ); }
+
+    public ResultSetFuture addValue ( AtlasLustra atlasLustra, String key ) { return this.session.executeAsync( "INSERT INTO "
+            + this.dbName + "." + this.lustre
+            + "(id, object) " + "VALUES ('"
+            + atlasLustra.getUUID() + "', " + key + ");" ); }
 
     public ResultSetFuture addValue ( FaceEvents polygon ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.facePerson
@@ -365,7 +369,8 @@ public final class CassandraDataControl {
                     .all().stream() ) ) ) ); }
 
     public Flux< Row > getPatruls ( String param ) { return Flux.fromStream( this.session
-            .execute( "SELECT nsf FROM TABLETS.patruls WHERE nsf LIKE '%" + param  + "%';" ).all().stream() ); }
+            .execute( "SELECT nsf FROM TABLETS.patruls WHERE nsf LIKE '%" + param  + "%';" )
+            .all().stream() ); }
 
     public void resetData () {
         Flux.fromStream( this.session.execute( "SELECT * FROM " + this.dbName + "." + this.selfEmployment + ";" ).all().stream() )
@@ -494,7 +499,7 @@ public final class CassandraDataControl {
                 + notification.getId() + "', '"
                 + notification.getType() + "', "
                 + notification.getLatitudeOfTask() + ", "
-                + notification.getWasRead() + ", "
+                + false + ", "
                 + notification.getLongitudeOfTask() + ", '"
                 + notification.getNotificationWasCreated().toInstant() + "', '"
                 + notification.getStatus() + "', '"
@@ -529,8 +534,7 @@ public final class CassandraDataControl {
                 .status( Status.valueOf( row.getString( "status" ) ) )
                 .taskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) )
                 .notificationWasCreated( row.getTimestamp( "notificationWasCreated" ) )
-                .build() );
-    }
+                .build() ); }
 
     public Mono< ApiResponseModel > setNotificationAsRead ( UUID uuid ) {
         return this.session.execute(
