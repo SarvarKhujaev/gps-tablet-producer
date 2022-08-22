@@ -223,85 +223,88 @@ public class CardDetails {
                 this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "KUZOV RAQAMI", modelForCar.getKuzov() ) );
                 this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "TURI", modelForCar.getVehicleType() ) ); } );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Seriya va raqam", carTotalData
-                .getPsychologyCard()
-                .getModelForPassport()
-                .getDocument()
-                .getSerialNumber() ) );
+        if ( carTotalData.getPsychologyCard().getModelForPassport() != null ) {
+            this.getDetails()
+                    .get( Details.TEX_PASSPORT )
+                    .add( new Item( "Seriya va raqam", carTotalData
+                            .getPsychologyCard()
+                            .getModelForPassport()
+                            .getDocument()
+                            .getSerialNumber() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil egasi", carTotalData
-                .getModelForCar()
-                .getPerson() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil egasi", carTotalData
+                    .getModelForCar()
+                    .getPerson() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil modeli", carTotalData
-                .getModelForCar()
-                .getModel() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil modeli", carTotalData
+                    .getModelForCar()
+                    .getModel() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil rangi", carTotalData
-                .getModelForCar()
-                .getColor() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil rangi", carTotalData
+                    .getModelForCar()
+                    .getColor() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Berilgan sanasi", carTotalData
-                .getModelForCar()
-                .getRegistrationDate() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Berilgan sanasi", carTotalData
+                    .getModelForCar()
+                    .getRegistrationDate() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil egasi", carTotalData
-                .getModelForCar()
-                .getPerson() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Avtomobil egasi", carTotalData
+                    .getModelForCar()
+                    .getPerson() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "STIR", carTotalData
-                .getModelForCar()
-                .getStir() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "STIR", carTotalData
+                    .getModelForCar()
+                    .getStir() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Organizatiya", carTotalData
-                .getModelForCar()
-                .getOrganization() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Organizatiya", carTotalData
+                    .getModelForCar()
+                    .getOrganization() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Turi", carTotalData
-                .getModelForCar()
-                .getVehicleType() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Turi", carTotalData
+                    .getModelForCar()
+                    .getVehicleType() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Manzil", carTotalData
-                .getModelForCar()
-                .getAddress() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Manzil", carTotalData
+                    .getModelForCar()
+                    .getAddress() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Kuzov ragami", carTotalData
-                .getModelForCar()
-                .getKuzov() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Kuzov ragami", carTotalData
+                    .getModelForCar()
+                    .getKuzov() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Tola vazni", carTotalData
-                .getModelForCar()
-                .getFullWeight() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Tola vazni", carTotalData
+                    .getModelForCar()
+                    .getFullWeight() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Yuksiz vazni", carTotalData
-                .getModelForCar()
-                .getEmptyWeight() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Yuksiz vazni", carTotalData
+                    .getModelForCar()
+                    .getEmptyWeight() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Dvigatel raqami", carTotalData
-                .getModelForCar()
-                .getEngine() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Dvigatel raqami", carTotalData
+                    .getModelForCar()
+                    .getEngine() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Dvigatel quvvati", carTotalData
-                .getModelForCar()
-                .getPower() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Dvigatel quvvati", carTotalData
+                    .getModelForCar()
+                    .getPower() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Yonilg'i turi", carTotalData
-                .getModelForCar()
-                .getFullWeight() ) );this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Tola vazni", carTotalData
-                .getModelForCar()
-                .getFuelType() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Yonilg'i turi", carTotalData
+                    .getModelForCar()
+                    .getFullWeight() ) );this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Tola vazni", carTotalData
+                    .getModelForCar()
+                    .getFuelType() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "O'TIRADIGAN JOYLAR SONI", carTotalData
-                .getModelForCar()
-                .getSeats() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "O'TIRADIGAN JOYLAR SONI", carTotalData
+                    .getModelForCar()
+                    .getSeats() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "TIK TURADIGAN JOYLAR SONI", carTotalData
-                .getModelForCar()
-                .getStands() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "TIK TURADIGAN JOYLAR SONI", carTotalData
+                    .getModelForCar()
+                    .getStands() ) );
 
-        this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "ALOHIDA BELGILARI", carTotalData
-                .getModelForCar()
-                .getTexPassportSerialNumber() ) );
+            this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "ALOHIDA BELGILARI", carTotalData
+                    .getModelForCar()
+                    .getTexPassportSerialNumber() ) ); }
 
         if ( carTotalData.getModelForCar().getTonirovka() != null ) {
             this.getDetails().get( Details.TONIROVKA ).add( new Item( "TURI", carTotalData
