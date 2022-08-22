@@ -2,6 +2,8 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
+import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
 
 import java.util.Date;
 import lombok.Data;
@@ -57,7 +60,8 @@ public class SerDes {
 
     public String serialize ( ActiveTask activeTask ) { return this.gson.toJson( activeTask ); }
 
-    public String serialize ( SelfEmploymentTask selfEmploymentTask ) { try { return this.objectMapper.writeValueAsString( selfEmploymentTask ); }
+    public String serialize ( SelfEmploymentTask selfEmploymentTask ) { try { return this.objectMapper
+            .writeValueAsString( selfEmploymentTask ); }
     catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
 
     public Card deserializeCard ( String object ) { return this.gson.fromJson( object, Card.class ); }
@@ -106,4 +110,12 @@ public class SerDes {
     public CarTotalData deserializeCarTotalData ( String object ) { return this.gson.fromJson( object, CarTotalData.class ); }
 
     public EventBody deserializeEventBody ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
+
+    public PolygonForEscort deserializePolygonForEscort ( String object ) { return this.gson.fromJson( object, PolygonForEscort.class ); }
+
+    public String serialize( PolygonForEscort polygon ) { return this.gson.toJson( polygon ); }
+
+    public String serialize( EscortTuple escortTuple ) { return this.gson.toJson( escortTuple ); }
+
+    public EscortTuple deleteTupleOfPatrul( String object ) { return this.gson.fromJson( object, EscortTuple.class ); }
 }

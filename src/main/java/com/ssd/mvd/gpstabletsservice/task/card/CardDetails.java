@@ -209,12 +209,19 @@ public class CardDetails {
         this.getDetails().putIfAbsent( Details.TEX_PASSPORT, new ArrayList<>() );
         this.getDetails().putIfAbsent( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR, new ArrayList<>() );
 
-        if ( carTotalData.getDoverennostList() != null ) carTotalData.getDoverennostList().getDoverennostsList().forEach( doverennost -> {
+        if ( carTotalData.getDoverennostList() != null ) carTotalData
+                .getDoverennostList()
+                .getDoverennostsList()
+                .forEach( doverennost -> {
             this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "TOMONIDAN BERILGAN", doverennost.getIssuedBy() ) );
             this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "BERILGAN SANASI", doverennost.getDateBegin() ) );
             this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "TUGASH SANASI", doverennost.getDateValid() ) ); } );
 
-        if ( carTotalData.getPsychologyCard().getModelForCarList() != null ) carTotalData.getPsychologyCard().getModelForCarList().getModelForCarList().forEach( modelForCar -> {
+        if ( carTotalData.getPsychologyCard().getModelForCarList() != null ) carTotalData
+                .getPsychologyCard()
+                .getModelForCarList()
+                .getModelForCarList()
+                .forEach( modelForCar -> {
                 this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "DAVLAT RAQAM BELGISI", modelForCar.getPlateNumber() ) );
                 this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "BERILGAN SANASI", modelForCar.getRegistrationDate() ) );
                 this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "ISHLAB CHIQARILGAN SANASI", modelForCar.getYear() ) );

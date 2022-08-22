@@ -19,12 +19,12 @@ public class EscortController {
     @MessageMapping ( value = "getAllEscort" )
     public Flux< EscortTuple > getAllTupleOfPatrul () { return CassandraDataControlForEscort
             .getInstance()
-            .getAllTupleOfPatrul(); }
+            .getAllTupleOfEscort(); }
 
     @MessageMapping ( value = "getCurrentEscort" )
     public Flux< EscortTuple > getCurrentTupleOfPatrul ( String id ) { return CassandraDataControlForEscort
             .getInstance()
-            .getAllTupleOfPatrul( id ); }
+            .getAllTupleOfEscort( id ); }
 
     @MessageMapping ( value = "deleteEscort" )
     public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) { return CassandraDataControlForEscort
