@@ -70,20 +70,22 @@ public class CassandraDataControlForEscort {
 
         this.logger.info( "CassandraDataControlForEscort is ready" ); }
 
-    public Flux< EscortTuple > getAllTupleOfPatrul () { return Flux.fromStream( this.session.execute(
+    public Flux< EscortTuple > getAllTupleOfPatrul () { return Flux.fromStream( this.session
+                    .execute(
                     "SELECT * FROM "
-                            + this.dbName + this.tupleOfEscort + ";" ).all().stream() )
+                            + this.dbName + "." + this.tupleOfEscort + ";" )
+                    .all().stream() )
             .map( EscortTuple::new ); }
 
     public Flux< EscortTuple > getAllTupleOfPatrul ( String id ) { return Flux.fromStream( this.session.execute(
                     "SELECT * FROM "
-                            + this.dbName + this.tupleOfEscort
+                            + this.dbName + "." + this.tupleOfEscort
                             + " where id = " + id + ";" ).all().stream() )
             .map( EscortTuple::new ); }
 
     public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) {
         this.session.execute( "DELETE FROM "
-                + this.dbName + this.tupleOfEscort
+                + this.dbName + "." + this.tupleOfEscort
                 + " where id = " + id + ";" );
         return Mono.just( ApiResponseModel.builder()
                 .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()

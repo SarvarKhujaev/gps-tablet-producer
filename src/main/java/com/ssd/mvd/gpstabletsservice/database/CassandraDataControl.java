@@ -183,13 +183,21 @@ public final class CassandraDataControl {
 
         this.logger.info( "Cassandra is ready" ); }
 
-    public Boolean addValue ( CarTotalData carTotalData ) { return this.session.executeAsync( "INSERT INTO "
+    public Boolean addValue ( CarTotalData carTotalData ) { return this.session
+            .execute( "INSERT INTO "
             + this.dbName + "." + this.carTotalData
             + "( gosnumber, cameraImage, violationList, object ) VALUES('"
             + carTotalData.getGosNumber() + "', '"
             + carTotalData.getCameraImage() + "', "
             + carTotalData.getViolationsList().getViolationsInformationsList() + ", '"
-            + SerDes.getSerDes().serialize( carTotalData ) + "');" ).isDone(); }
+            + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
+
+    public Flux< CarTotalData > getAllCarTotalData() { return Flux.fromStream(
+            this.session.execute(
+                    "SELECT * FROM "
+                            + this.dbName + "." + this.carTotalData )
+    .all().stream() )
+            .map( row -> SerDes.getSerDes().deserializeCarTotalData( row.getString( "object" ) ) ); }
 
     public Mono< CardDetails > getWarningCarDetails ( String gosnumber ) { return Mono.just(
             new CardDetails(

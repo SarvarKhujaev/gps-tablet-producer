@@ -120,4 +120,9 @@ public class CardController {
     public Mono< CardDetails > getWarningCarDetails ( String gosnumber ) { return CassandraDataControl
             .getInstance()
             .getWarningCarDetails( gosnumber ); }
+
+    @MessageMapping ( value = "getAllCarTotalData" )
+    public Flux< CarTotalData > getAllCarTotalData () { return CassandraDataControl
+            .getInstance()
+            .getAllCarTotalData(); }
 }
