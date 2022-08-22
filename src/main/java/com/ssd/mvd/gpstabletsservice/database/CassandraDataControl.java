@@ -152,17 +152,17 @@ public final class CassandraDataControl {
         this.session.execute(
                 "CREATE TYPE IF NOT EXISTS "
                         + this.dbName + "." + this.violationListType
-                        + "( DecreeStatus int, "
-                        + "Amount int, "
-                        + "DecreeSerialNumber text, "
-                        + "Violation text, "
-                        + "Division text, "
-                        + "PayDate text, "
-                        + "Address text, "
-                        + "Article text, "
-                        + "Owner text, "
-                        + "Model text, "
-                        + "Bill text );" );
+                        + "( decreeStatus int, "
+                        + "amount int, "
+                        + "decreeSerialNumber text, "
+                        + "violation text, "
+                        + "division text, "
+                        + "payDate text, "
+                        + "address text, "
+                        + "article text, "
+                        + "owner text, "
+                        + "model text, "
+                        + "bill text );" );
 
         this.session.execute(
                 "CREATE TABLE IF NOT EXISTS "

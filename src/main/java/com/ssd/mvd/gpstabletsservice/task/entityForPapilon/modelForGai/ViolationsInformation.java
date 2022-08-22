@@ -8,16 +8,16 @@ import lombok.Data;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ViolationsInformation {
-    private Integer DecreeStatus;
-    private Integer Amount;
+    private Integer decreeStatus;
+    private Integer amount;
 
-    private String DecreeSerialNumber;
-    private String Violation;
-    private String Division;
-    private String PayDate;
-    private String Address;
-    private String Article;
-    private String Owner;
-    private String Model;
-    private String Bill;
+    private String decreeSerialNumber;
+    private String violation;
+    private String division;
+    private String payDate;
+    private String address;
+    private String article;
+    private String owner;
+    private String model;
+    private String bill;
 }

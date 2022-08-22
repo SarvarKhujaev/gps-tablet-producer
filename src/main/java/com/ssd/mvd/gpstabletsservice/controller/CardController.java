@@ -33,11 +33,17 @@ public class CardController {
             .flatMap( patrul -> Archive.getAchieve().removePatrulFromCard( Long.parseLong( request.getAdditional() ), patrul ) ); }
 
     @MessageMapping ( value = "addNewPatrulToCard" )
-    public Mono< ApiResponseModel > addNewPatrulToCard ( Request request ) { return RedisDataControl.getRedis().getPatrul( request.getData() )
-            .flatMap( patrul -> Archive.getAchieve().addNewPatrulToCard( Long.parseLong( request.getAdditional() ), patrul ) ); }
+    public Mono< ApiResponseModel > addNewPatrulToCard ( Request request ) { return RedisDataControl
+            .getRedis()
+            .getPatrul( request.getData() )
+            .flatMap( patrul -> Archive.getAchieve()
+                    .addNewPatrulToCard( Long.parseLong( request.getAdditional() ), patrul ) ); }
 
     @MessageMapping ( value = "getListOfCards" )
-    public Flux< ActiveTask > getListOfCards () { return RedisDataControl.getRedis().getActiveTasks().sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
+    public Flux< ActiveTask > getListOfCards () { return RedisDataControl
+            .getRedis()
+            .getActiveTasks()
+            .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
 
     @MessageMapping ( value = "getCurrentCard" )
     public Mono< Card > getCurrentCard ( Long cardId ) { return RedisDataControl.getRedis().getCard( cardId ); }
@@ -92,7 +98,9 @@ public class CardController {
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return RedisDataControl.getRedis()
             .getPatrul( RedisDataControl.getRedis().decode( token ) )
-            .flatMap( patrul -> TaskInspector.getInstance().getCurrentActiveTask( patrul ) ); }
+            .flatMap( patrul -> TaskInspector
+                    .getInstance()
+                    .getCurrentActiveTask( patrul ) ); }
 
     @MessageMapping ( value = "addNewWarningCar" )
     public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) {
