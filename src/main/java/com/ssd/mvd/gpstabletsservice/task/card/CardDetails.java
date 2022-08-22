@@ -209,19 +209,19 @@ public class CardDetails {
         this.getDetails().putIfAbsent( Details.TEX_PASSPORT, new ArrayList<>() );
         this.getDetails().putIfAbsent( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR, new ArrayList<>() );
 
-        carTotalData.getDoverennostList().getDoverennostsList().forEach( doverennost -> {
+        if ( carTotalData.getDoverennostList() != null ) carTotalData.getDoverennostList().getDoverennostsList().forEach( doverennost -> {
             this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "TOMONIDAN BERILGAN", doverennost.getIssuedBy() ) );
             this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "BERILGAN SANASI", doverennost.getDateBegin() ) );
             this.getDetails().get( Details.ISHONCHNOMA ).add( new Item( "TUGASH SANASI", doverennost.getDateValid() ) ); } );
 
-        carTotalData.getModelForCarList().getModelForCarList().forEach( modelForCar -> {
-            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "DAVLAT RAQAM BELGISI", modelForCar.getPlateNumber() ) );
-            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "BERILGAN SANASI", modelForCar.getRegistrationDate() ) );
-            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "ISHLAB CHIQARILGAN SANASI", modelForCar.getYear() ) );
-            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "AVTOMOBIL RUSUMI/MODELI", modelForCar.getModel() ) );
-            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "AVTOMOBIL RANGI", modelForCar.getColor() ) );
-            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "KUZOV RAQAMI", modelForCar.getKuzov() ) );
-            this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "TURI", modelForCar.getVehicleType() ) ); } );
+        if ( carTotalData.getPsychologyCard().getModelForCarList() != null ) carTotalData.getPsychologyCard().getModelForCarList().getModelForCarList().forEach( modelForCar -> {
+                this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "DAVLAT RAQAM BELGISI", modelForCar.getPlateNumber() ) );
+                this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "BERILGAN SANASI", modelForCar.getRegistrationDate() ) );
+                this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "ISHLAB CHIQARILGAN SANASI", modelForCar.getYear() ) );
+                this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "AVTOMOBIL RUSUMI/MODELI", modelForCar.getModel() ) );
+                this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "AVTOMOBIL RANGI", modelForCar.getColor() ) );
+                this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "KUZOV RAQAMI", modelForCar.getKuzov() ) );
+                this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR ).add( new Item( "TURI", modelForCar.getVehicleType() ) ); } );
 
         this.getDetails().get( Details.TEX_PASSPORT ).add( new Item( "Seriya va raqam", carTotalData
                 .getPsychologyCard()
@@ -303,34 +303,35 @@ public class CardDetails {
                 .getModelForCar()
                 .getTexPassportSerialNumber() ) );
 
-        this.getDetails().get( Details.TONIROVKA ).add( new Item( "TURI", carTotalData
-                .getModelForCar()
-                .getTonirovka()
-                .getTintinType() ) );
+        if ( carTotalData.getModelForCar().getTonirovka() != null ) {
+            this.getDetails().get( Details.TONIROVKA ).add( new Item( "TURI", carTotalData
+                    .getModelForCar()
+                    .getTonirovka()
+                    .getTintinType() ) );
 
-        this.getDetails().get( Details.TONIROVKA ).add( new Item( "RUXSATNOMA BERILGAN SANASI", carTotalData
-                .getModelForCar()
-                .getTonirovka()
-                .getDateOfPermission() ) );
+            this.getDetails().get( Details.TONIROVKA ).add( new Item( "RUXSATNOMA BERILGAN SANASI", carTotalData
+                    .getModelForCar()
+                    .getTonirovka()
+                    .getDateOfPermission() ) );
 
-        this.getDetails().get( Details.TONIROVKA ).add( new Item( "RUXSATNOMA AMAL QILISH MUDDATI", carTotalData
-                .getModelForCar()
-                .getTonirovka()
-                .getDateOfValidotion() ) );
+            this.getDetails().get( Details.TONIROVKA ).add( new Item( "RUXSATNOMA AMAL QILISH MUDDATI", carTotalData
+                    .getModelForCar()
+                    .getTonirovka()
+                    .getDateOfValidotion() ) ); }
 
-        this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "BERILGAN VAQTI", carTotalData
-                .getModelForCar()
-                .getInsurance()
-                .getDateBegin() ) );
+        if ( carTotalData.getModelForCar().getInsurance() != null ) {
+            this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "BERILGAN VAQTI", carTotalData
+                    .getModelForCar()
+                    .getInsurance()
+                    .getDateBegin() ) );
 
-        this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "MUDDAT TUGASH SANASI", carTotalData
-                .getModelForCar()
-                .getInsurance()
-                .getDateValid() ) );
+            this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "MUDDAT TUGASH SANASI", carTotalData
+                    .getModelForCar()
+                    .getInsurance()
+                    .getDateValid() ) );
 
-        this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "SUG'URTA RAQAMI", carTotalData
-                .getModelForCar()
-                .getInsurance()
-                .getInsuranceSerialNumber() ) );
-    }
+            this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "SUG'URTA RAQAMI", carTotalData
+                    .getModelForCar()
+                    .getInsurance()
+                    .getInsuranceSerialNumber() ) ); } }
 }
