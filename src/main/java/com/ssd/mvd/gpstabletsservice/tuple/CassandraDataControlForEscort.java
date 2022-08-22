@@ -52,7 +52,8 @@ public class CassandraDataControlForEscort {
                 + this.dbName + "." + this.tupleOfCar
                 + "(gosNumber text, trackerId text, patrul text, simCardNumber text, carModel text," +
                 "passportNumber text, averageFuelConsumption double, PRIMARY KEY( (gosNumber), trackerId ) );" ); // the table for cars from Tuple
-        this.session.execute( "CREATE INDEX IF NOT EXISTS ON " + this.dbName + "." + this.tupleOfCar + " (trackerId);" );
+        this.session.execute( "CREATE INDEX IF NOT EXISTS ON "
+                + this.dbName + "." + this.tupleOfCar + " (trackerId);" );
 
         this.session.execute("CREATE TYPE IF NOT EXISTS "
                 + this.dbName + "." + this.polygonType
@@ -98,7 +99,7 @@ public class CassandraDataControlForEscort {
     public Flux< ApiResponseModel > addValue ( EscortTuple escortTuple ) {
         return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.tupleOfEscort
-                + "( id, carList, country, object ) VALUES ("
+                + "( id, carList, country, polygonForEscort ) VALUES ("
                 + escortTuple.getPolygon().getUuid() + ", "
                 + escortTuple.getTupleOfCars() + ", '"
                 + escortTuple.getCountries().name() + "', "

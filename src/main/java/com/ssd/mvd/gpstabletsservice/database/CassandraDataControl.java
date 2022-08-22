@@ -169,7 +169,7 @@ public final class CassandraDataControl {
                 + this.dbName + "." + this.carTotalData
                 + "( gosnumber text PRIMARY KEY," +
                         "cameraImage text," +
-                        "violationList list< frozen<" + this.violationListType + "> >," +
+                        "violationList frozen< list< frozen<" + this.violationListType + "> > >," +
                         "object text );" );
 
         this.session.execute(
