@@ -169,7 +169,6 @@ public final class CassandraDataControl {
                 + this.dbName + "." + this.carTotalData
                 + "( gosnumber text PRIMARY KEY," +
                         "cameraImage text," +
-                        "violationList frozen< list< frozen<" + this.violationListType + "> > >," +
                         "object text );" );
 
         this.session.execute(
@@ -186,10 +185,9 @@ public final class CassandraDataControl {
     public Boolean addValue ( CarTotalData carTotalData ) { return this.session
             .execute( "INSERT INTO "
             + this.dbName + "." + this.carTotalData
-            + "( gosnumber, cameraImage, violationList, object ) VALUES('"
+            + "( gosnumber, cameraImage, object ) VALUES('"
             + carTotalData.getGosNumber() + "', '"
-            + carTotalData.getCameraImage() + "', "
-            + carTotalData.getViolationsList().getViolationsInformationsList() + ", '"
+            + carTotalData.getCameraImage() + "', '"
             + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
 
     public Flux< CarTotalData > getAllCarTotalData() { return Flux.fromStream(
@@ -209,12 +207,16 @@ public final class CassandraDataControl {
                                                     + " WHERE gosnumber = '" + gosnumber + "';"
                                     ).one().getString( "object" ) ) ) ); }
 
-    public List< ViolationsInformation > getViolationsInformationList ( String gosnumber ) { return this.session
-            .execute(
-                    "SELECT * FROM "
-                    + this.dbName + "." + this.carTotalData
-                     + " WHERE gosnumber = '" + gosnumber + "';"
-            ).one().getList( "violationList", ViolationsInformation.class ); }
+    public List< ViolationsInformation > getViolationsInformationList ( String gosnumber ) { return SerDes
+            .getSerDes()
+            .deserializeCarTotalData( this.session
+                    .execute(
+                            "SELECT * FROM "
+                                    + this.dbName + "." + this.carTotalData
+                                    + " WHERE gosnumber = '" + gosnumber + "';"
+                    ).one().getString( "object" ) )
+            .getViolationsList()
+            .getViolationsInformationsList(); }
 
     public Boolean addValue ( EventCar eventCar ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.eventCar
