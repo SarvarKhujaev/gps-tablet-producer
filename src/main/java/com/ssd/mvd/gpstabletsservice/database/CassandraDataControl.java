@@ -539,35 +539,6 @@ public final class CassandraDataControl {
         return Mono.just( row != null ? new Polygon( row ) : null ); }
 
     public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) {
-        System.out.println(
-                "INSERT INTO "
-                        + this.dbName + "." + this.polygonForPatrul +
-                        CassandraConverter
-                                .getInstance()
-                                .getALlNames( Polygon.class ) +
-                        " VALUES ("
-                        + polygon.getUuid() + ", "
-                        + polygon.getOrgan() + ", "
-
-                        + polygon.getRegionId() + ", "
-                        + polygon.getMahallaId() + ", "
-                        + polygon.getDistrictId() + ", '"
-
-                        + polygon.getName() + "', '"
-                        + ( polygon.getColor() == null ? "Qizil" : polygon.getColor() ) + "', " +
-
-                        CassandraConverter
-                                .getInstance()
-                                .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
-
-                        CassandraConverter
-                                .getInstance()
-                                .convertListToCassandra( polygon.getPatrulList() ) + ", " +
-
-                        CassandraConverter
-                                .getInstance()
-                                .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() )
-        );
         return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.polygonForPatrul +
                 CassandraConverter
