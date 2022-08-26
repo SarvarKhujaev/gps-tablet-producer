@@ -31,5 +31,5 @@ public class PolygonForEscortController {
     @MessageMapping ( value = "updatePolygonForEscort" )
     public Mono< ApiResponseModel > updatePolygonForEscort ( PolygonForEscort polygon ) { return CassandraDataControlForEscort
             .getInstance()
-            .updatePolygonForEscort( polygon ); }
+            .update( polygon ); }
 }

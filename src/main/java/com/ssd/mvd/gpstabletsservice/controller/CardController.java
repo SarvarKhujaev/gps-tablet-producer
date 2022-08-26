@@ -9,7 +9,6 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
@@ -106,7 +105,7 @@ public class CardController {
     public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) {
         return Mono.just(
                 ApiResponseModel.builder()
-                        .success( CassandraDataControl
+                        .success( CassandraDataControlForTasks
                                 .getInstance()
                                 .addValue(
                                         KafkaDataControl
@@ -120,17 +119,17 @@ public class CardController {
 
     @MessageMapping ( value = "getViolationsInformationList" )
     public Mono< List< ViolationsInformation > > getViolationsInformationList ( String gosnumber ) { return Mono.just(
-            CassandraDataControl
+            CassandraDataControlForTasks
                     .getInstance()
                     .getViolationsInformationList( gosnumber ) ); }
 
     @MessageMapping ( value = "getWarningCarDetails" )
-    public Mono< CardDetails > getWarningCarDetails ( String gosnumber ) { return CassandraDataControl
+    public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return CassandraDataControlForTasks
             .getInstance()
             .getWarningCarDetails( gosnumber ); }
 
     @MessageMapping ( value = "getAllCarTotalData" )
-    public Flux< CarTotalData > getAllCarTotalData () { return CassandraDataControl
+    public Flux< ApiResponseModel > getAllCarTotalData () { return CassandraDataControlForTasks
             .getInstance()
             .getAllCarTotalData(); }
 }

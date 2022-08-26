@@ -60,7 +60,7 @@ public class EventCar {
     private Map< String, String > license_plate_country;
 
     @JsonDeserialize
-    private Map< String, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
+    private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize
     private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize

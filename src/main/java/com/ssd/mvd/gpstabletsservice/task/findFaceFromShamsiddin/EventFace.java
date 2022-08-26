@@ -54,9 +54,9 @@ public class EventFace {
     private Map< String, String > medmask;
 
     @JsonDeserialize
-    private Map< String, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event
+    private Map< UUID, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize
-    private List<ReportForCard> reportForCardList = new ArrayList<>(); // the list of reports for the current card
+    private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize
-    private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
+    private Map< String, PatrulStatus > patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }

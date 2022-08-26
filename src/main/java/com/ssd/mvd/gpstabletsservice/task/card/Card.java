@@ -44,7 +44,7 @@ public class Card {
     private EventHuman eventHuman;   // Aybdor inson
 
     @JsonDeserialize
-    private Map< String, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
+    private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize
     private List< VictimHumans > victimHumans = new ArrayList<>();  // Jabirlanuchi inson
     @JsonDeserialize

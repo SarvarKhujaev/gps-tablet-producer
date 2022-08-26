@@ -1,20 +1,25 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
 import com.ssd.mvd.gpstabletsservice.constants.Countries;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.datastax.driver.core.Row;
+
 import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
 public class EscortTuple {
+    private UUID uuid; // own of id of each escortTuple
+    private UUID uuidOfPolygon; // id of polygon
     private Countries countries;
-    private PolygonForEscort polygon;
-    private List< Patrul > patrulList;
-    private List< TupleOfCar > tupleOfCars;
+
+    private List< UUID > patrulList;
+    private List< UUID > tupleOfCarsList;
 
     public EscortTuple ( Row row ) {
-        this.setTupleOfCars( row.getList( "carList", TupleOfCar.class ) );
-        this.setCountries( Countries.valueOf( row.getString( "country" ) ) );
-        this.setPolygon( row.get( "polygonForEscort", PolygonForEscort.class ) ); }
+        this.setUuid( row.getUUID( "id" ) );
+        this.setUuidOfPolygon( row.getUUID( "polygonForEscort" ) );
+        this.setTupleOfCarsList( row.getList( "carList", UUID.class ) );
+        this.setTupleOfCarsList( row.getList( "patrulList", UUID.class ) );
+        this.setCountries( Countries.valueOf( row.getString( "country" ) ) ); }
 }

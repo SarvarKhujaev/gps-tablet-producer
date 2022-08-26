@@ -12,10 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.extern.jackson.Jacksonized;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @Jacksonized
@@ -70,7 +67,7 @@ public class FaceEvents {
     private PsychologyCard psychologyCard;
 
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize
-    private Map< String, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event
+    private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize
     private List<ReportForCard> reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize

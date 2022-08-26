@@ -5,27 +5,23 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TupleOfCar {
+    private UUID uuid;
+    private UUID uuidOfEscort; // UUID of the Escort which this car is linked to
+    private UUID uuidOfPatrul; // UUID of the Escort which this car is linked to
+
     private String carModel;
     private String gosNumber;
     private String trackerId;
     private String nsfOfPatrul;
     private String simCardNumber;
-    private String passportSeries; // adding after admin chose all cars and wishes to link them to patruls
 
     private Double latitude;
     private Double longitude;
     private Double averageFuelConsumption;
-
-    public TupleOfCar ( Row row ) {
-        this.setCarModel( row.getString( "carModel" ) );
-        this.setNsfOfPatrul( row.getString( "patrul" ) );
-        this.setGosNumber( row.getString( "gosNumber" ) );
-        this.setTrackerId( row.getString( "trackerId" ) );
-        this.setSimCardNumber( row.getString( "simCardNumber" ) );
-        this.setPassportSeries( row.getString( "passportNumber" ) );
-        this.setAverageFuelConsumption( row.getDouble( "averageFuelConsumption" ) ); }
 }

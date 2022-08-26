@@ -18,24 +18,38 @@ import java.util.UUID;
 public class SelfEmploymentController {
 
     @MessageMapping ( value = "getSelfEmployment" ) // returns the current Card
-    public Mono< SelfEmploymentTask > getSelfEmployment ( UUID uuid ) { return Archive.getAchieve().get( uuid ); }
+    public Mono< SelfEmploymentTask > getSelfEmployment ( UUID uuid ) { return CassandraDataControlForTasks
+            .getInstance()
+            .getSelfEmploymentTask( uuid ); }
 
     @MessageMapping ( value = "getAllSelfEmploymentTask" )
-    public Flux< SelfEmploymentTask > getAllSelfEmploymentTask () { return Archive.getAchieve().getAllSelfEmploymentTask(); }
+    public Flux< SelfEmploymentTask > getAllSelfEmploymentTask () { return CassandraDataControlForTasks
+            .getInstance()
+            .getSelfEmploymentTasks(); }
 
     @MessageMapping ( value = "addSelfEmployment" ) // saves new Task and link the Patrul who created it
-    public Mono< ApiResponseModel > addSelfEmployment ( SelfEmploymentTask selfEmploymentTask ) { return RedisDataControl.getRedis()
+    public Mono< ApiResponseModel > addSelfEmployment ( SelfEmploymentTask selfEmploymentTask ) { return CassandraDataControl
+            .getInstance()
             .getPatrul( selfEmploymentTask.getPatruls().keySet().iterator().next() )
-            .flatMap( patrul -> Archive.getAchieve().save( selfEmploymentTask, patrul ) ); }
+            .flatMap( patrul -> Archive
+                    .getAchieve()
+                    .save( selfEmploymentTask, patrul ) ); }
 
     @MessageMapping ( value = "removePatrulFromSelfEmployment" )
-    public Mono< ApiResponseModel > removePatrulFromSelfEmployment ( SelfEmploymentRequest request ) { return Archive.getAchieve().removePatrulFromSelfEmployment( request.getUuid(), request.getPatrul() ); }
+    public Mono< ApiResponseModel > removePatrulFromSelfEmployment ( SelfEmploymentRequest request ) { return Archive
+            .getAchieve()
+            .removePatrulFromSelfEmployment( request.getUuid(), request.getPatrul() ); }
 
     @MessageMapping ( value = "addNewPatrulToSelfEmployment" ) // join new Patrul to existing selfEmployment
-    public Mono< ApiResponseModel > addNewPatrulToSelfEmployment ( SelfEmploymentRequest selfEmploymentRequest ) { return Archive.getAchieve().save( selfEmploymentRequest.getUuid(), selfEmploymentRequest.getPatrul() ); }
+    public Mono< ApiResponseModel > addNewPatrulToSelfEmployment ( SelfEmploymentRequest selfEmploymentRequest ) { return Archive
+            .getAchieve()
+            .save( selfEmploymentRequest.getUuid(), selfEmploymentRequest.getPatrul() ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )
-    public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return RedisDataControl.getRedis()
-            .getPatrul( reportForCard.getPassportSeries() )
-            .flatMap( patrul -> TaskInspector.getInstance().saveReportForTask( patrul, reportForCard ) ); }
+    public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( reportForCard.getUuidOfPatrul() )
+            .flatMap( patrul -> TaskInspector
+                    .getInstance()
+                    .saveReportForTask( patrul, reportForCard ) ); }
 }

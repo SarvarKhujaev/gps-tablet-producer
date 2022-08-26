@@ -5,8 +5,6 @@ import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.response.Status;
-import com.ssd.mvd.gpstabletsservice.response.PatrulInfo;
-import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
@@ -19,26 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import static java.lang.Math.cos;
-import static java.lang.Math.*;
 import java.util.Comparator;
+import java.util.UUID;
 
 @RestController
 public class PatrulController {
-    private static final Double p = PI / 180;
-
-    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 - cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2
-            + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p ) * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
-
     @MessageMapping ( value = "findTheClosestPatruls" )
-    public Flux< Patrul > findTheClosestPatruls ( Point point ) { return RedisDataControl.getRedis().getAllPatruls()
-            .flatMap( patrul -> CassandraDataControl.getInstance()
-                        .getPatrul( patrul.getPassportNumber() ) )
-            .filter( patrul -> patrul.getStatus().compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
-                    && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0
-                    && patrul.getLatitude() != null && patrul.getLongitude() != null )
-            .map( patrul -> { patrul.setDistance(  calculate( point, patrul ) );
-                return patrul; } )
+    public Flux< Patrul > findTheClosestPatruls ( Point point ) { return CassandraDataControl
+            .getInstance()
+            .findTheClosestPatruls( point )
             .sort( Comparator.comparing( Patrul::getDistance ) ); }
 
     @MessageMapping ( value = "getTaskDetails" )
@@ -70,34 +57,47 @@ public class PatrulController {
     public Mono< ApiResponseModel > patrulLogin ( PatrulLoginRequest patrulLoginRequest ) { return RedisDataControl.getRedis().login( patrulLoginRequest ); }
 
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
-    public Flux< Patrul > getAllUsersList () { return RedisDataControl.getRedis().getAllPatruls(); }
+    public Flux< Patrul > getAllUsersList () { return CassandraDataControl
+            .getInstance()
+            .getPatrul(); }
 
     @MessageMapping( value = "addUser" ) // adding new user
     public Mono< ApiResponseModel > addUser ( Patrul patrul ) { return RedisDataControl.getRedis().addValue( patrul ); }
 
     @MessageMapping ( value = "updatePatrul" )
-    public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) { return RedisDataControl.getRedis().update( patrul ); }
+    public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) { return RedisDataControl
+            .getRedis()
+            .update( patrul ); }
 
     @MessageMapping ( value = "checkToken" )
     public Mono< ApiResponseModel > checkToken ( String token ) { return RedisDataControl.getRedis().checkToken( token ); }
 
     @MessageMapping ( value = "getCurrentUser" )
-    public Mono< Patrul > getCurrentUser ( String passportSeries ) { return RedisDataControl.getRedis().getPatrul( passportSeries ); }
+    public Mono< Patrul > getCurrentUser ( String passportSeries ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( UUID.fromString( passportSeries ) ); }
 
     @MessageMapping ( value = "getPatrulDataByToken" )
-    public Mono< Status > getPatrulDataByToken ( String token ) { return RedisDataControl.getRedis().checkToken( token )
+    public Mono< Status > getPatrulDataByToken ( String token ) { return RedisDataControl
+            .getRedis()
+            .checkToken( token )
             .flatMap( apiResponseModel -> Mono.just( apiResponseModel.getStatus() ) ); }
 
     @MessageMapping( value = "deletePatrul" )
-    public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return RedisDataControl.getRedis().deletePatrul( passportNumber ); }
+    public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return RedisDataControl
+            .getRedis()
+            .deletePatrul( passportNumber ); }
 
     @MessageMapping ( value = "getPatrulStatistics" )
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return RedisDataControl.getRedis().getPatrulStatistics( passportNumber ); }
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return RedisDataControl
+            .getRedis()
+            .getPatrulStatistics( passportNumber ); }
 
     @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
-    public Flux< PatrulInfo > getPatrulByPortion ( String name ) { return CassandraDataControl.getInstance()
-            .getPatruls( name )
-            .map( row -> new PatrulInfo( row.getString( "NSF" ) ) ); }
+    public Flux< Patrul > getPatrulByPortion ( String name ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul()
+            .filter( patrul -> patrul.getSurnameNameFatherName().contains( name ) ); }
 
     @MessageMapping ( value = "addAllPatrulsToChatService" )
     public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return RedisDataControl

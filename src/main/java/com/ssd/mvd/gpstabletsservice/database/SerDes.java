@@ -2,8 +2,6 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
-import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
-import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
@@ -18,12 +16,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
-
 import java.util.Date;
 import lombok.Data;
 
 @Data
 public class SerDes {
+    private static String result;
     private final Gson gson = new Gson();
     private static SerDes serDes = new SerDes();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -70,20 +68,9 @@ public class SerDes {
 
     public ReqCar deserializeCar ( String object ) { return this.gson.fromJson( object, ReqCar.class ); }
 
-    public Polygon deserializePolygon ( String object ) { return this.gson.fromJson( object, Polygon.class ); }
-
-    public AtlasLustra deserializeLustra ( String object ) { return this.gson.fromJson( object, AtlasLustra.class ); }
-
-    public PoliceType deserializePoliceType ( String object ) { return this.gson.fromJson( object, PoliceType.class ); }
-
-    public PolygonType deserializePolygonType( String value ) { return this.getGson().fromJson( value, PolygonType.class ); }
-
     public Patrul deserialize ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 
     public Date convertDate ( String value ) { return this.objectMapper.convertValue( value, new TypeReference<>() {} ); }
-
-    public SelfEmploymentTask deserializeSelfEmployment ( String position ) { try { return this.objectMapper.reader()
-            .forType( SelfEmploymentTask.class ).readValue( position ); } catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
 
     public ActiveTask deserializeActiveTask ( String value ) { return this.gson.fromJson( value, ActiveTask.class ); }
 
@@ -110,12 +97,4 @@ public class SerDes {
     public CarTotalData deserializeCarTotalData ( String object ) { return this.gson.fromJson( object, CarTotalData.class ); }
 
     public EventBody deserializeEventBody ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
-
-    public PolygonForEscort deserializePolygonForEscort ( String object ) { return this.gson.fromJson( object, PolygonForEscort.class ); }
-
-    public String serialize( PolygonForEscort polygon ) { return this.gson.toJson( polygon ); }
-
-    public String serialize( EscortTuple escortTuple ) { return this.gson.toJson( escortTuple ); }
-
-    public EscortTuple deleteTupleOfPatrul( String object ) { return this.gson.fromJson( object, EscortTuple.class ); }
 }

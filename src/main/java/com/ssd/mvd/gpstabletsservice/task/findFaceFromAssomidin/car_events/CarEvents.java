@@ -12,10 +12,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.Matc
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import lombok.*;
 
 @Data
@@ -64,7 +62,7 @@ public class CarEvents  {
 	private CarTotalData carTotalData;
 
 	@com.fasterxml.jackson.databind.annotation.JsonDeserialize
-	private Map< String, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event
+	private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
 	@com.fasterxml.jackson.databind.annotation.JsonDeserialize
 	private List<ReportForCard> reportForCardList = new ArrayList<>(); // the list of reports for the current card
 	@com.fasterxml.jackson.databind.annotation.JsonDeserialize

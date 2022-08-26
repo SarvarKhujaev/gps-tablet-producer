@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
@@ -35,7 +36,7 @@ public class ActiveTask {
     private Status patrulStatus;
 
     private List< String > images;
-    private Map< String, Patrul > patrulList;
+    private Map< UUID, Patrul > patrulList;
 
     public ActiveTask ( Card card ) {
         this.setType( "card" );
