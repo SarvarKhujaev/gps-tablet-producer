@@ -155,7 +155,7 @@ public class CassandraDataControlForEscort {
 
     public Mono< ApiResponseModel > update ( EscortTuple escortTuple ) {
         return this.session.execute( "INSERT INTO "
-                + this.dbName + "." + this.tupleOfEscort
+                        + this.dbName + "." + this.tupleOfEscort
                         + "( id," +
                         " countries," +
                         " uuidOfPolygon," +
@@ -170,7 +170,7 @@ public class CassandraDataControlForEscort {
                         + CassandraConverter
                             .getInstance()
                             .convertListToCassandra( escortTuple.getPatrulList() )
-                        + " ) IF EXISTS;" )
+                        + " );" )
                 .wasApplied() ? Mono.just(
                         ApiResponseModel.builder()
                                 .success( true )
