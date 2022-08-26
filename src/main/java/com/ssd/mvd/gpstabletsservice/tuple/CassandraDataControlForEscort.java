@@ -100,13 +100,14 @@ public class CassandraDataControlForEscort {
     private static Integer i;
 
     public Flux< ApiResponseModel > addValue ( EscortTuple escortTuple ) {
-        i = 0;
+        i = -1;
         escortTuple.getPatrulList().forEach( uuid -> {
+            i++;
             this.session.executeAsync(
                     "UPDATE "
                     + this.dbName + "." + this.getPatrols()
                     + " SET uuidOfEscort = " + escortTuple.getUuid() +", " +
-                            " uuidForEscortCar = " + escortTuple.getTupleOfCarsList().get( i++ )
+                            " uuidForEscortCar = " + escortTuple.getTupleOfCarsList().get( i )
                     + " where uuid = " + uuid + ";" );
 
             this.session.executeAsync(
@@ -114,7 +115,7 @@ public class CassandraDataControlForEscort {
                     + this.dbName + "." + this.getTupleOfCar() +
                     " SET uuidOfEscort = " + escortTuple.getUuid() +", " +
                     "uuidOfPatrul = " + uuid
-                    + " where uuid = " + uuid + ";" ); } );
+                    + " where uuid = " + escortTuple.getTupleOfCarsList().get( i ) + ";" ); } );
 
         return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.tupleOfEscort
