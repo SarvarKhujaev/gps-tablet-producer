@@ -870,7 +870,8 @@ public final class CassandraDataControl {
     public Flux< Patrul > findTheClosestPatruls ( Point point ) {
         return Flux.fromStream(
                 this.session.execute(
-                        "SELECT * FROM" + ";"
+                        "SELECT * FROM" +
+                                this.dbName + "." + this.getPatrols() + ";"
                 ).all().stream()
         ).filter( row ->
                 Status.valueOf( row.getString( "status" ) ).compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
