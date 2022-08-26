@@ -103,14 +103,15 @@ public class CassandraDataControlForEscort {
         i = -1;
         escortTuple.getPatrulList().forEach( uuid -> {
             i++;
-            this.session.executeAsync(
+            System.out.println( uuid + " : " + escortTuple.getTupleOfCarsList().get( i ) );
+            this.session.execute(
                     "UPDATE "
                     + this.dbName + "." + this.getPatrols()
                     + " SET uuidOfEscort = " + escortTuple.getUuid() +", " +
-                            " uuidForEscortCar = " + escortTuple.getTupleOfCarsList().get( i )
+                            "uuidForEscortCar = " + escortTuple.getTupleOfCarsList().get( i )
                     + " where uuid = " + uuid + ";" );
 
-            this.session.executeAsync(
+            this.session.execute(
                     "UPDATE "
                     + this.dbName + "." + this.getTupleOfCar() +
                     " SET uuidOfEscort = " + escortTuple.getUuid() +", " +
