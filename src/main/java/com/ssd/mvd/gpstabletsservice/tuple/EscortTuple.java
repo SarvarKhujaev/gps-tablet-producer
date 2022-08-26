@@ -5,9 +5,14 @@ import com.datastax.driver.core.Row;
 
 import java.util.List;
 import java.util.UUID;
+
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Data;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EscortTuple {
     private UUID uuid; // own of id of each escortTuple
     private UUID uuidOfPolygon; // id of polygon
