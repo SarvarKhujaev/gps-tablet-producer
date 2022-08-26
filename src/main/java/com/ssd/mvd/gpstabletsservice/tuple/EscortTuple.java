@@ -21,6 +21,8 @@ public class EscortTuple {
     private List< UUID > patrulList;
     private List< UUID > tupleOfCarsList;
 
+    public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
+
     public EscortTuple ( Row row ) {
         this.setUuid( row.getUUID( "id" ) );
         this.setUuidOfPolygon( row.getUUID( "polygonForEscort" ) );
