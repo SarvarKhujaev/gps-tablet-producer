@@ -12,6 +12,5 @@ public class GpsTabletsServiceApplication {
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
         CassandraDataControl.getInstance().register();
-//        Archive.getAchieve();
-    }
+        Archive.getAchieve(); }
 }

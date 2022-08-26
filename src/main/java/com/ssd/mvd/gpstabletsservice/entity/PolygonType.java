@@ -1,6 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
 import com.datastax.driver.core.Row;
+import com.datastax.driver.core.UDTValue;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import java.util.UUID;
@@ -16,6 +17,10 @@ public class PolygonType {
     public UUID getUuid () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
 
     public PolygonType ( Row row ) {
+        this.setUuid( row.getUUID( "uuid" ) );
+        this.setName( row.getString( "name" ) ); }
+
+    public PolygonType( UDTValue row ) {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setName( row.getString( "name" ) ); }
 }

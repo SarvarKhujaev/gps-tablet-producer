@@ -68,11 +68,15 @@ public final class CassandraDataControl {
     public void register () {
         CassandraConverter
                 .getInstance()
+                .registerCodecForPolygonType( this.dbName, this.getPolygonType() );
+
+        CassandraConverter
+                .getInstance()
                 .registerCodecForPatrul( this.dbName, this.getPatrulType() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForPolygonEntity( this.dbName, this.getPolygonType() );
+                .registerCodecForPolygonEntity( this.dbName, this.getPolygonEntity() );
 
         CassandraConverter
                 .getInstance()
@@ -172,7 +176,7 @@ public final class CassandraDataControl {
 
         this.createTable( this.getPolygonForPatrul(), Polygon.class,
                 ", polygonType frozen< " + this.getPolygonType() + " >, " +
-                        "patrulList list< frozen< " + this.getPatrulType() + " > >, " +
+                        "patrulList list< uuid >, " +
                         "latlngs list < frozen< " + this.getPolygonEntity()+ " > >, " +
                         "PRIMARY KEY ( uuid ) );" );
 
@@ -440,7 +444,8 @@ public final class CassandraDataControl {
 
     public Flux< Patrul > getPatrul () { return Flux.fromStream(
             this.session.execute(
-                    "SELECT * FROM" + ";"
+                    "SELECT * FROM"
+                            + this.dbName + "." + this.getPatrols() + ";"
             ).all().stream()
     ).map( Patrul::new ); }
 
@@ -533,6 +538,35 @@ public final class CassandraDataControl {
         return Mono.just( row != null ? new Polygon( row ) : null ); }
 
     public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) {
+        System.out.println(
+                "INSERT INTO "
+                        + this.dbName + "." + this.polygonForPatrul +
+                        CassandraConverter
+                                .getInstance()
+                                .getALlNames( Polygon.class ) +
+                        " VALUES ("
+                        + polygon.getUuid() + ", "
+                        + polygon.getOrgan() + ", "
+
+                        + polygon.getRegionId() + ", "
+                        + polygon.getMahallaId() + ", "
+                        + polygon.getDistrictId() + ", '"
+
+                        + polygon.getName() + "', '"
+                        + ( polygon.getColor() == null ? "Qizil" : polygon.getColor() ) + "', " +
+
+                        CassandraConverter
+                                .getInstance()
+                                .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
+
+                        CassandraConverter
+                                .getInstance()
+                                .convertListToCassandra( polygon.getPatrulList() ) + ", " +
+
+                        CassandraConverter
+                                .getInstance()
+                                .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() )
+        );
         return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.polygonForPatrul +
                 CassandraConverter

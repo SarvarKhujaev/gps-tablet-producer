@@ -57,8 +57,7 @@ public class CassandraConverter {
         latlngs.forEach( polygonEntity -> result += "{ "
                 + "lat : " + polygonEntity.getLat() + ", "
                 + "lng : " + polygonEntity.getLng() + " }, " );
-        result = result.substring( 0, result.length() - 2 );
-        return result + "]"; }
+        return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
 
     public String convertListOfViolationsToCassandra ( List< ViolationsInformation > images ) {
         result = "[";
@@ -107,10 +106,10 @@ public class CassandraConverter {
                                 .append( " : " );
                         org.springframework.util.ReflectionUtils.makeAccessible( field );
                         result.append( field.get( object ) instanceof String ?
-                                        ( (String) field.get( object ) ).replaceAll( "'", "" )
+                                        "'" + ( (String) field.get( object ) ).replaceAll( "'", "" ) + "'"
                                 : field.get( object ) ).append( ", " );
                     } catch ( IllegalAccessException e ) { e.printStackTrace(); }
-                } ); return result.substring( 0, result.length() - 2 ); }
+                } ); return result.substring( 0, result.length() - 2 ) + "}"; }
 
     public void registerCodecForPatrul ( String dbName, String userType ) {
         CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
@@ -178,6 +177,7 @@ public class CassandraConverter {
                                         ), CameraList.class ) ); }
 
     public void registerCodecForPolygonEntity ( String dbName, String userType ) {
+        System.out.println( "Codec is ready" );
         CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
                 .register (
@@ -209,4 +209,20 @@ public class CassandraConverter {
                                                         .getKeyspace( dbName )
                                                         .getUserType( userType )
                                         ), ViolationsInformation.class ) ); }
+
+    public void registerCodecForPolygonType ( String dbName, String userType ) {
+        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry().register(
+                        new CodecRegistrationForPolygonType (
+                                CassandraDataControl
+                                        .getInstance()
+                                        .getCodecRegistry()
+                                        .codecFor(
+                                                CassandraDataControl
+                                                        .getInstance()
+                                                        .getCluster()
+                                                        .getMetadata()
+                                                        .getKeyspace( dbName )
+                                                        .getUserType( userType )
+                                        ), PolygonType.class ) ); }
 }

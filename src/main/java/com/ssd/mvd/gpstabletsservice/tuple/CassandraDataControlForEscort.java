@@ -106,13 +106,15 @@ public class CassandraDataControlForEscort {
                     "UPDATE "
                     + this.dbName + "." + this.getPatrols()
                     + " SET uuidOfEscort = " + escortTuple.getUuid() +", " +
-                            " uuidForEscortCar = " + escortTuple.getTupleOfCarsList().get( i++ ) );
+                            " uuidForEscortCar = " + escortTuple.getTupleOfCarsList().get( i++ )
+                    + " where uuid = " + uuid + ";" );
 
             this.session.executeAsync(
                     "UPDATE "
                     + this.dbName + "." + this.getTupleOfCar() +
                     " SET uuidOfEscort = " + escortTuple.getUuid() +", " +
-                    "uuidOfPatrul = " + uuid ); } );
+                    "uuidOfPatrul = " + uuid
+                    + " where uuid = " + uuid + ";" ); } );
 
         return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.tupleOfEscort
