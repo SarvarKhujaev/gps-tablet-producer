@@ -24,9 +24,9 @@ public class EscortTuple {
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 
     public EscortTuple ( Row row ) {
-        this.setUuid( row.getUUID( "id" ) );
-        this.setUuidOfPolygon( row.getUUID( "polygonForEscort" ) );
-        this.setTupleOfCarsList( row.getList( "carList", UUID.class ) );
+        this.setUuid( row.getUUID( "uuid" ) );
+        this.setUuidOfPolygon( row.getUUID( "uuidOfPolygon" ) );
         this.setTupleOfCarsList( row.getList( "patrulList", UUID.class ) );
-        this.setCountries( Countries.valueOf( row.getString( "country" ) ) ); }
+        this.setCountries( Countries.valueOf( row.getString( "countries" ) ) );
+        this.setTupleOfCarsList( row.getList( "tupleOfCarsList", UUID.class ) ); }
 }
