@@ -27,7 +27,7 @@ public class CassandraDataControlForEscort {
     private final String tupleOfEscort = "TUPLE_OF_ESCORT";
     private final String polygonForEscort = "POLYGON_FOR_ESCORT_TEST";
 
-    private final String polygonType = "POLYGON_ENTITY";
+    private final String polygonEntity = "POLYGON_ENTITY";
     private final String carForEscortType = "CAR_FOR_ESCORT_TYPE";
 
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
@@ -45,7 +45,7 @@ public class CassandraDataControlForEscort {
                 "AND DURABLE_WRITES = false;" );
 
         this.session.execute("CREATE TYPE IF NOT EXISTS "
-                + this.dbName + "." + this.polygonType
+                + this.dbName + "." + this.polygonEntity
                 + "( lat double,"
                 + "lng double );" );
 
@@ -54,7 +54,7 @@ public class CassandraDataControlForEscort {
                 + "( id uuid PRIMARY KEY, " +
                 "name text, " +
                 "latlngs list< frozen < "
-                + this.polygonType + " > > );" );
+                + this.polygonEntity + " > > );" );
 
         this.session.execute( "CREATE TABLE IF NOT EXISTS "
                 + this.dbName + "." + this.tupleOfEscort +
@@ -66,7 +66,7 @@ public class CassandraDataControlForEscort {
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForPolygonEntity( this.dbName, this.getPolygonType() );
+                .registerCodecForPolygonEntity( this.dbName, this.getPolygonEntity() );
 
         this.logger.info( "CassandraDataControlForEscort is ready" ); }
 

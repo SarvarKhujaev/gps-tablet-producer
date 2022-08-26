@@ -160,6 +160,7 @@ public final class CassandraDataControl {
         this.createType( this.getLustreType(), CameraList.class );
         this.createType( this.getPolygonType(), PolygonType.class );
         this.createType( this.getReportForCard(), ReportForCard.class );
+        this.createType( this.getPolygonEntity(), PolygonEntity.class );
         this.createType( this.getViolationListType(), ViolationsInformation.class );
 
         this.createTable( this.getCar(), ReqCar.class, ", PRIMARY KEY ( uuid ) );" );
