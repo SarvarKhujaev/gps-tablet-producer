@@ -39,22 +39,4 @@ public class SelfEmploymentTask {
     private Map< UUID, Patrul > patruls = new HashMap<>();
     @JsonDeserialize
     private List< ReportForCard > reportForCards = new ArrayList<>();
-
-    public SelfEmploymentTask( Row row ) {
-        this.setLanOfPatrul( row.getDouble( "lanOfPatrul" ) );
-        this.setLatOfPatrul( row.getDouble( "latOfPatrul" ) );
-        this.setLanOfAccident( row.getDouble( "lanOfAccident" ) );
-        this.setLatOfAccident( row.getDouble( "latOfAccident" ) );
-
-        this.setTitle( row.getString( "title" ) );
-        this.setAddress( row.getString( "address" ) );
-        this.setDescription( row.getString( "description" ) );
-
-        this.setUuid( row.getUUID( "uuid" ) );
-        this.setIncidentDate( row.getTimestamp( "incidentDate" ) );
-        this.setTaskStatus( Status.valueOf( row.getString( "taskStatus" ) ) );
-
-        this.setImages( row.getList( "images", String.class ) );
-        this.setPatruls( row.getMap( "patruls", UUID.class, Patrul.class ) );
-        this.setReportForCards( row.getList( "reportForCards", ReportForCard.class ) ); }
 }

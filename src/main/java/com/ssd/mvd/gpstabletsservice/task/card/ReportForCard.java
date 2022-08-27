@@ -3,13 +3,18 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.datastax.driver.core.UDTValue;
+
 import java.util.List;
 import java.util.Date;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Data;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonIgnoreProperties ( ignoreUnknown = true )
 public class ReportForCard { // creates when some of Patrul from current Card has finished the work and has written the report about everything he has done
     private Double lan;

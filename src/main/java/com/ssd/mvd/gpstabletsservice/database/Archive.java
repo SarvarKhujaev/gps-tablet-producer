@@ -27,60 +27,9 @@ public class Archive {
 
     private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID",
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
-            "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОШИБЩИХ", "ФАБУЛА" );
+            "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
 
     public static Archive getAchieve () { return archive != null ? archive : ( archive = new Archive() ); }
-
-    // link new Patrul to existing SelfEmployment object
-    public Mono< ApiResponseModel > save ( UUID uuid, Patrul patrul ) { return CassandraDataControlForTasks
-            .getInstance()
-            .getSelfEmploymentTask( uuid )
-            .flatMap( selfEmploymentTask -> {
-                selfEmploymentTask.getPatruls().put( patrul.getUuid(),
-                        TaskInspector.getInstance().changeTaskStatus(
-                                patrul,
-                                ATTACHED,
-                                selfEmploymentTask ) );
-                RedisDataControl.getRedis()
-                        .addValue( selfEmploymentTask.getUuid().toString(),
-                                new ActiveTask( selfEmploymentTask ) )
-                        .subscribe();
-                CassandraDataControlForTasks
-                        .getInstance()
-                        .addValue( selfEmploymentTask );
-                return RedisDataControl.getRedis().update( patrul ); } ); }
-
-    // taking off some Patrul from current Card
-    public Mono< ApiResponseModel > removePatrulFromSelfEmployment ( UUID uuid, Patrul patrul ) { return CassandraDataControlForTasks
-            .getInstance()
-            .getSelfEmploymentTask( uuid )
-                .flatMap( selfEmploymentTask -> {
-                    TaskInspector.getInstance().changeTaskStatus( patrul, CANCEL, selfEmploymentTask );
-                    CassandraDataControlForTasks
-                            .getInstance()
-                            .addValue( selfEmploymentTask );
-                    return RedisDataControl.getRedis().update( patrul ); } ); }
-
-    public Mono< ApiResponseModel > addNewPatrulToCard ( Long cardId, Patrul patrul ) { return RedisDataControl.getRedis().getCard( cardId )
-            .flatMap( card -> {
-                TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
-                return Mono.just( ApiResponseModel.builder().success( true )
-                                .status( Status.builder()
-                                        .message( patrul.getName() + " linked to " + card.getCardId() )
-                                        .code( 200 )
-                                        .build() )
-                        .build() ); } ); }
-
-    public Mono< ApiResponseModel > removePatrulFromCard ( Long cardId, Patrul patrul ) { return RedisDataControl.getRedis()
-            .getCard( cardId )
-            .flatMap( card -> {
-                TaskInspector.getInstance().changeTaskStatus( patrul, CANCEL, card );
-                return Mono.just( ApiResponseModel.builder()
-                        .success( true )
-                        .status( Status.builder()
-                                .message( patrul.getName() + " removed from: " + card.getCardId() )
-                                .code( 200 ).build() )
-                        .build() ); } ); }
 
     // uses to link Card to current Patrul object, either additional Patrul in case of necessary
     public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
@@ -92,9 +41,6 @@ public class Archive {
 
     public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
             TaskInspector.getInstance().changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask );
-            RedisDataControl.getRedis()
-                    .addValue( selfEmploymentTask.getUuid().toString(),
-                            new ActiveTask( selfEmploymentTask ) );
             return RedisDataControl.getRedis()
                     .update( patrul )
                     .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
@@ -102,9 +48,7 @@ public class Archive {
                                     .message( "SelfEmployment was saved" )
                                     .code( 200 )
                                     .build() )
-                            .success( CassandraDataControlForTasks
-                                    .getInstance()
-                                    .addValue( selfEmploymentTask ) )
+                            .success( true )
                             .build() ) ); }
 
     public Mono< ApiResponseModel > save ( Patrul patrul, EventFace card ) {

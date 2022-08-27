@@ -80,6 +80,11 @@ public class CassandraDataControlForTasks {
 
         this.session.execute(
                 "CREATE TABLE IF NOT EXISTS "
+                        + this.dbName + "." + this.getSelfEmployment()
+                        + "( id uuid PRIMARY KEY, object text );" );
+
+        this.session.execute(
+                "CREATE TABLE IF NOT EXISTS "
                         + this.dbName + "." + this.getFacePerson()
                         + "( id text PRIMARY KEY, object text );" );
 
@@ -96,23 +101,14 @@ public class CassandraDataControlForTasks {
                     .convertListOfViolationsToCassandra( carTotalData.getViolationsList().getViolationsInformationsList() )
                     + ", '" + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
 
-    public Flux< ApiResponseModel > getAllCarTotalData () { return Flux.fromStream(
+    public Flux< CarTotalData > getAllCarTotalData () { return Flux.fromStream(
                     this.session.execute(
                                     "SELECT * FROM "
                                             + this.dbName + "." + this.carTotalData )
                             .all().stream() )
-            .map( row -> ApiResponseModel.builder()
-                    .success( true )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                            .message( "Warning car details" )
-                            .code( 200 )
-                            .build() )
-                    .data( com.ssd.mvd.gpstabletsservice.entity.Data
-                            .builder()
-                            .data( SerDes
-                                    .getSerDes()
-                                    .deserializeCarTotalData( row.getString( "object" ) ) )
-                            .build() ).build() ); }
+            .map( row -> SerDes
+                    .getSerDes()
+                    .deserializeCarTotalData( row.getString( "object" ) ) ); }
 
     public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return Mono.just(
             ApiResponseModel.builder()
@@ -213,58 +209,34 @@ public class CassandraDataControlForTasks {
             + eventBody.getConfidence() + ", '"
             + SerDes.getSerDes().serialize( eventBody ) + "');" ).isDone(); }
 
-    public ResultSetFuture addValue ( CarEvents polygon ) { return this.session
+    public ResultSetFuture addValue ( CarEvents carEvents ) { return this.session
             .executeAsync( "INSERT INTO "
                     + this.dbName + "." + this.faceCar
                     + "(id, object) VALUES ('"
-                    + polygon.getId() + "', '"
-                    + SerDes.getSerDes().serialize( polygon ) + "');" ); }
+                    + carEvents.getId() + "', '"
+                    + SerDes.getSerDes().serialize( carEvents ) + "');" ); }
 
-    public ResultSetFuture addValue ( FaceEvents polygon ) { return this.session.executeAsync( "INSERT INTO "
+    public ResultSetFuture addValue ( FaceEvents faceEvents ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.facePerson
             + "(id, object) VALUES ('"
-            + polygon.getId() + "', '"
-            + SerDes.getSerDes().serialize( polygon ) + "');" ); }
+            + faceEvents.getId() + "', '"
+            + SerDes.getSerDes().serialize( faceEvents ) + "');" ); }
 
     public Flux< SelfEmploymentTask > getSelfEmploymentTasks () { return Flux.fromStream(
                     this.session.execute(
                             "select * from "
                                     + this.dbName + "." + this.selfEmployment + ";"
                     ).all().stream() )
-            .map( SelfEmploymentTask::new ); }
+            .map( row -> SerDes.getSerDes()
+                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
 
     public Boolean addValue ( SelfEmploymentTask selfEmploymentTask ) { return this.session
             .executeAsync( "INSERT INTO "
                     + this.dbName + "." + this.selfEmployment +
-                    CassandraConverter
-                            .getInstance()
-                            .getALlNames( SelfEmploymentTask.class )
-                    + " VALUES("
-                    + selfEmploymentTask.getLanOfPatrul() + ", "
-                    + selfEmploymentTask.getLatOfPatrul() + ", "
-                    + selfEmploymentTask.getLanOfAccident() + ", "
-                    + selfEmploymentTask.getLanOfAccident() + ", "
-
-                    + selfEmploymentTask.getTitle() + "', '"
-                    + selfEmploymentTask.getAddress() + "', '"
-                    + selfEmploymentTask.getDescription() + "', "
-
+                    " ( id, object ) VALUES("
                     + selfEmploymentTask.getUuid() + ", '"
-                    + selfEmploymentTask.getTaskStatus() + "', '"
-                    + selfEmploymentTask.getIncidentDate().toInstant() + "', "
-
-                    + CassandraConverter
-                        .getInstance()
-                        .convertListOfStringToCassandra( selfEmploymentTask.getImages() ) + ", "
-
-                    + CassandraConverter
-                        .getInstance()
-                        .convertMapOfPatrulToCassandra( selfEmploymentTask.getPatruls() )  + ", "
-
-                    + CassandraConverter
-                        .getInstance()
-                        .convertListOfReportToCassandra( selfEmploymentTask.getReportForCards() )
-                        + " );" ).isDone(); }
+                    + SerDes.getSerDes().serialize( selfEmploymentTask )
+                        + "');" ).isDone(); }
 
     public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
                     this.session.execute(
@@ -272,5 +244,7 @@ public class CassandraDataControlForTasks {
                                     + this.dbName + "." + this.selfEmployment
                                     + " where id = " + id + ";"
                     ).one() )
-            .map( SelfEmploymentTask::new ); }
+            .map( row -> SerDes.getSerDes()
+                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) );
+    }
 }

@@ -7,10 +7,15 @@ import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 import java.time.Duration;
-import lombok.Data;
 import java.util.*;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Data;
+
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Patrul {
     private Date taskDate; // for registration of exact time when patrul started to deal with task
     private Date lastActiveDate; // shows when user was online lastly
@@ -116,7 +121,11 @@ public class Patrul {
         this.setSimCardNumber( row.getString( "simCardNumber" ) );
         this.setPassportNumber( row.getString( "passportNumber" ) );
         this.setPatrulImageLink( row.getString( "patrulImageLink" ) );
-        this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) ); }
+        this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) );
+
+        this.setStatus( Status.valueOf( row.getString( "status" ) ) );
+        this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
+        this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); }
 
     public Patrul ( UDTValue row ) {
         this.setTaskDate( row.getTimestamp( "taskDate" ) );
@@ -162,5 +171,9 @@ public class Patrul {
         this.setSimCardNumber( row.getString( "simCardNumber" ) );
         this.setPassportNumber( row.getString( "passportNumber" ) );
         this.setPatrulImageLink( row.getString( "patrulImageLink" ) );
-        this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) ); }
+        this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) );
+
+        this.setStatus( Status.valueOf( row.getString( "status" ) ) );
+        this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
+        this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) );;}
 }

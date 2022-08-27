@@ -35,40 +35,46 @@ public final class TaskInspector {
     public Patrul changeTaskStatus ( Patrul patrul, Status status, Card card ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
-            case CANCEL -> {
-                patrul.setTaskId( null );
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), CARD_102.name() );
+                else card.getPatruls().remove( patrul.getUuid() );
+                if ( card.getPatruls().size() == card.getReportForCardList().size() ) {
+                    card.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( card.getCardId() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( card ) ); }
+                patrul.setTaskTypes( TaskTypes.FREE );
+                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
-                card.getPatruls().remove( patrul.getPassportNumber() ); }
+                patrul.setTaskId( null ); }
             case ATTACHED -> {
-                patrul.setTaskTypes( TaskTypes.CARD_102 );
+                patrul.setTaskTypes( CARD_102 );
                 patrul.setLatitudeOfTask( card.getLatitude() );
                 patrul.setTaskId( card.getCardId().toString() ); // saving card id into patrul object
                 patrul.setLongitudeOfTask( card.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-            case FINISHED -> {
-                card.getPatrulStatuses().get( patrul.getPassportNumber() )
-                        .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) );
-                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), "card" );
-                patrul.setTaskTypes( TaskTypes.FREE );
-                if ( card.getPatruls().size() == card.getReportForCardList().size() ) {
-                    card.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( card.getCardId() );
-                    RedisDataControl.getRedis().remove( card.getCardId().toString() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( card ) ); }
-                patrul.setTaskDate( null );
-                patrul.setStatus( FREE );
-                patrul.setTaskId( null );
-            } case ARRIVED -> card.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
+            case ARRIVED -> card.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
                     .inTime( patrul.check() )
-                    .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
-        } card.getPatruls().put( patrul.getUuid(), patrul );
-        RedisDataControl.getRedis().addValue( card.getCardId().toString(), new ActiveTask( card ) ).subscribe();
+                    .totalTimeConsumption( TimeInspector
+                            .getInspector()
+                            .getTimeDifference( patrul.getTaskDate().toInstant() ) )
+                    .build() );
+        } if ( status.compareTo( CANCEL ) != 0 ) card.getPatruls().put( patrul.getUuid(), patrul );
+        CassandraDataControl
+                .getInstance()
+                .update( patrul )
+                .subscribe();
+        if ( card.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
+                .getRedis()
+                .addValue( card.getCardId().toString(),
+                new ActiveTask( card ) ).subscribe();
         RedisDataControl.getRedis().update( card );
         KafkaDataControl.getInstance()
                 .writeToKafka(
                         CassandraDataControl
-                                .getInstance().addValue(
+                                .getInstance()
+                                .addValue(
                                         Notification.builder()
                                                 .type( CARD_102.name() )
                                                 .uuid( UUID.randomUUID() )
@@ -111,35 +117,35 @@ public final class TaskInspector {
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventCar eventCar ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
-            case CANCEL -> {
-                patrul.setTaskId( null );
-                patrul.setStatus( FREE );
-                eventCar.getPatruls().remove( patrul.getPassportNumber() ); }
-            case ATTACHED -> {
-                patrul.setTaskId( eventCar.getId() ); // saving card id into patrul object
-                patrul.setLatitudeOfTask( eventCar.getLatitude() );
-                patrul.setTaskTypes( FIND_FACE_EVENT_CAR );
-                patrul.setLongitudeOfTask( eventCar.getLongitude() );
-                eventCar.getPatruls().put( patrul.getUuid(), patrul ); }
-            case ACCEPTED, ARRIVED -> {
-                patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-                patrul.setTaskId( eventCar.getId() );
-                eventCar.getPatruls().put( patrul.getUuid(), patrul ); }
-            case FINISHED -> {
-                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_CAR.name() );
-                eventCar.getPatruls().put( patrul.getUuid(), patrul );
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_CAR.name() );
+                else eventCar.getPatruls().remove( patrul.getUuid() );
                 if ( eventCar.getPatruls().size() == eventCar.getReportForCardList().size() ) {
                     eventCar.setStatus( FINISHED );
                     RedisDataControl.getRedis().remove( eventCar.getId() );
-                    CassandraDataControlForTasks
-                            .getInstance()
-                            .addValue( eventCar );
                     KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventCar ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setStatus( FREE );
                 patrul.setTaskDate( null );
+                patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
-        } RedisDataControl.getRedis().addValue( eventCar.getId(), new ActiveTask( eventCar ) ).subscribe();
+            case ATTACHED -> {
+                patrul.setTaskId( eventCar.getId() ); // saving card id into patrul object
+                patrul.setTaskTypes( FIND_FACE_EVENT_CAR );
+                patrul.setLatitudeOfTask( eventCar.getLatitude() );
+                patrul.setLongitudeOfTask( eventCar.getLongitude() ); }
+            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case ARRIVED -> eventCar.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
+                    PatrulStatus.builder()
+                            .patrul( patrul )
+                            .inTime( patrul.check() )
+                            .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
+        } if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis().addValue( eventCar.getId(), new ActiveTask( eventCar ) ).subscribe();
+        if ( status.compareTo( CANCEL ) != 0 ) eventCar.getPatruls().put( patrul.getUuid(), patrul );
+        CassandraDataControl
+                .getInstance()
+                .update( patrul )
+                .subscribe();
         CassandraDataControlForTasks
                 .getInstance()
                 .addValue( eventCar );
@@ -169,38 +175,38 @@ public final class TaskInspector {
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventFace eventFace ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
-            case CANCEL -> {
-                patrul.setTaskId( null );
-                patrul.setStatus( FREE );
-                eventFace.getPatruls().remove( patrul.getPassportNumber() ); }
-            case ATTACHED -> {
-                patrul.setTaskId( eventFace.getId() ); // saving card id into patrul object
-                patrul.setLatitudeOfTask( eventFace.getLatitude() );
-                patrul.setLongitudeOfTask( eventFace.getLongitude() );
-                patrul.setTaskTypes( FIND_FACE_EVENT_FACE );
-                eventFace.getPatruls().put( patrul.getUuid(), patrul ); }
-            case ACCEPTED, ARRIVED -> {
-                patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-                patrul.setTaskId( eventFace.getId() );
-                eventFace.getPatruls().put( patrul.getUuid(), patrul ); }
-            case FINISHED -> {
-                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_FACE.name() );
-                eventFace.getPatruls().put( patrul.getUuid(), patrul );
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_FACE.name() );
+                else eventFace.getPatruls().remove( patrul.getUuid() );
                 if ( eventFace.getPatruls().size() == eventFace.getReportForCardList().size() ) {
                     eventFace.setStatus( FINISHED );
                     RedisDataControl.getRedis().remove( eventFace.getId() );
-                    CassandraDataControlForTasks
-                            .getInstance()
-                            .addValue( eventFace );
                     KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventFace ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setStatus( FREE );
                 patrul.setTaskDate( null );
+                patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
-        } RedisDataControl.getRedis().addValue( eventFace.getId(), new ActiveTask( eventFace ) ).subscribe();
+            case ATTACHED -> {
+                patrul.setTaskId( eventFace.getId() ); // saving card id into patrul object
+                patrul.setTaskTypes( FIND_FACE_EVENT_FACE );
+                patrul.setLatitudeOfTask( eventFace.getLatitude() );
+                patrul.setLongitudeOfTask( eventFace.getLongitude() ); }
+            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case ARRIVED -> eventFace.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
+                    PatrulStatus.builder()
+                            .patrul( patrul )
+                            .inTime( patrul.check() )
+                            .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
+        } if ( eventFace.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis().addValue( eventFace.getId(), new ActiveTask( eventFace ) ).subscribe();
+        if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
                 .addValue( eventFace );
+        CassandraDataControl
+                .getInstance()
+                .update( patrul )
+                .subscribe();
         KafkaDataControl.getInstance()
                 .writeToKafka(
                         CassandraDataControl
@@ -226,40 +232,39 @@ public final class TaskInspector {
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventBody eventBody ) {
         patrul.setStatus( status );
-        switch ( ( patrul.getStatus() ) ) {
-            case CANCEL -> {
-                patrul.setTaskId( null );
-                patrul.setStatus( FREE );
-                eventBody.getPatruls().remove( patrul.getPassportNumber() ); }
-            case ATTACHED -> {
-                patrul.setTaskId( eventBody.getId() ); // saving card id into patrul object
-                patrul.setLatitudeOfTask( eventBody.getLatitude() );
-                patrul.setLongitudeOfTask( eventBody.getLongitude() );
-                patrul.setTaskTypes( FIND_FACE_EVENT_BODY );
-                eventBody.getPatruls().put( patrul.getUuid(), patrul ); }
-            case ACCEPTED, ARRIVED -> {
-                patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-                patrul.setTaskId( eventBody.getId() );
-                eventBody.getPatruls().put( patrul.getUuid(), patrul ); }
-            case FINISHED -> {
-                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_BODY.name() );
-                eventBody.getPatruls().put( patrul.getUuid(), patrul );
-                patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setStatus( FREE );
-                patrul.setTaskDate( null );
-                patrul.setTaskId( null );
+        switch ( patrul.getStatus() ) {
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_BODY.name() );
+                else eventBody.getPatruls().remove( patrul.getUuid() );
                 if ( eventBody.getPatruls().size() == eventBody.getReportForCardList().size() ) {
                     eventBody.setStatus( FINISHED );
                     RedisDataControl.getRedis().remove( eventBody.getId() );
-                    CassandraDataControlForTasks
-                            .getInstance()
-                            .addValue( eventBody );
                     KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventBody ) ); }
-            }
-        } RedisDataControl.getRedis().addValue( eventBody.getId(), new ActiveTask( eventBody ) ).subscribe();
+                patrul.setTaskTypes( TaskTypes.FREE );
+                patrul.setTaskDate( null );
+                patrul.setStatus( FREE );
+                patrul.setTaskId( null ); }
+            case ATTACHED -> {
+                patrul.setTaskId( eventBody.getId() ); // saving card id into patrul object
+                patrul.setTaskTypes( FIND_FACE_EVENT_BODY );
+                patrul.setLatitudeOfTask( eventBody.getLatitude() );
+                patrul.setLongitudeOfTask( eventBody.getLongitude() ); }
+            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case ARRIVED -> eventBody.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
+                    PatrulStatus.builder()
+                    .patrul( patrul )
+                    .inTime( patrul.check() )
+                    .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
+        } if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis().addValue( eventBody.getId(), new ActiveTask( eventBody ) ).subscribe();
+        if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
                 .addValue( eventBody );
+        CassandraDataControl
+                .getInstance()
+                .update( patrul )
+                .subscribe();
         KafkaDataControl.getInstance()
                 .writeToKafka(
                         CassandraDataControl
@@ -286,37 +291,39 @@ public final class TaskInspector {
     public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvents carEvents ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
-            case CANCEL -> {
-                patrul.setTaskId( null );
-                patrul.setStatus( FREE );
-                carEvents.getPatruls().remove( patrul.getPassportNumber() ); }
-            case ATTACHED -> {
-                patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
-                patrul.setTaskTypes( FIND_FACE_CAR );
-                patrul.setLatitudeOfTask( carEvents.getCamera().getLatitude() );
-                patrul.setLongitudeOfTask( carEvents.getCamera().getLongitude() ); }
-            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-            case FINISHED -> {
-                carEvents.getPatrulStatuses().get( patrul.getPassportNumber() )
-                        .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) );
-                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_CAR.name() );
-                patrul.setTaskTypes( TaskTypes.FREE );
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_CAR.name() );
+                else carEvents.getPatruls().remove( patrul.getUuid() );
                 if ( carEvents.getPatruls().size() == carEvents.getReportForCardList().size() ) {
                     carEvents.setStatus( FINISHED );
                     RedisDataControl.getRedis().remove( carEvents.getId() );
                     KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( carEvents ) ); }
-                patrul.setStatus( FREE );
+                patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
-                patrul.setTaskId( null );
-            } case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
+                patrul.setStatus( FREE );
+                patrul.setTaskId( null ); }
+            case ATTACHED -> {
+                patrul.setTaskTypes( FIND_FACE_CAR );
+                patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
+                patrul.setLatitudeOfTask( carEvents.getCamera().getLatitude() );
+                patrul.setLongitudeOfTask( carEvents.getCamera().getLongitude() ); }
+            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
                     .inTime( patrul.check() )
                     .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
-        } carEvents.getPatruls().put( patrul.getUuid(), patrul );
-        RedisDataControl.getRedis().addValue( carEvents.getId(), new ActiveTask( carEvents ) ).subscribe();
+        } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis().addValue( carEvents.getId(), new ActiveTask( carEvents ) ).subscribe();
+        if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
                 .addValue( carEvents );
+
+        CassandraDataControl
+                .getInstance()
+                .update( patrul )
+                .subscribe();
+
         KafkaDataControl.getInstance()
                 .writeToKafka(
                         CassandraDataControl
@@ -342,37 +349,41 @@ public final class TaskInspector {
     public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvents faceEvents ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
-            case CANCEL -> {
-                patrul.setTaskId( null );
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_CAR.name() );
+                else faceEvents.getPatruls().remove( patrul.getUuid() );
+                if ( faceEvents.getPatruls().size() == faceEvents.getReportForCardList().size() ) {
+                    faceEvents.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( faceEvents.getId() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( faceEvents ) ); }
+                patrul.setTaskTypes( TaskTypes.FREE );
+                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
-                faceEvents.getPatruls().remove( patrul.getPassportNumber() ); }
+                patrul.setTaskId( null ); }
             case ATTACHED -> {
                 patrul.setTaskId( faceEvents.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( FIND_FACE_PERSON );
                 patrul.setLatitudeOfTask( faceEvents.getCamera().getLatitude() );
                 patrul.setLongitudeOfTask( faceEvents.getCamera().getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-            case FINISHED -> {
-                faceEvents.getPatrulStatuses().get( patrul.getPassportNumber() )
-                        .setTotalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) );
-                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_PERSON.name() );
-                patrul.setTaskTypes( TaskTypes.FREE );
-                if ( faceEvents.getPatruls().size() == faceEvents.getReportForCardList().size() ) {
-                    faceEvents.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( faceEvents.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( faceEvents ) ); }
-                patrul.setTaskDate( null );
-                patrul.setStatus( FREE );
-                patrul.setTaskId( null );
-            } case ARRIVED -> faceEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
+            case ARRIVED -> faceEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
+                    PatrulStatus.builder()
                     .patrul( patrul )
                     .inTime( patrul.check() )
                     .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
-        } faceEvents.getPatruls().put( patrul.getUuid(), patrul );
-        RedisDataControl.getRedis().addValue( faceEvents.getId(), new ActiveTask( faceEvents ) ).subscribe();
+        } if ( status.compareTo( CANCEL ) != 0 ) faceEvents.getPatruls().put( patrul.getUuid(), patrul );
+        if ( faceEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis()
+                .addValue( faceEvents.getId(), new ActiveTask( faceEvents ) ).subscribe();
         CassandraDataControlForTasks
                 .getInstance()
                 .addValue( faceEvents );
+
+        CassandraDataControl
+                .getInstance()
+                        .update( patrul )
+                                .subscribe();
+
         KafkaDataControl.getInstance()
                 .writeToKafka(
                         CassandraDataControl
@@ -400,40 +411,36 @@ public final class TaskInspector {
     public Patrul changeTaskStatus ( Patrul patrul, Status status, SelfEmploymentTask selfEmploymentTask ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
-            case CANCEL -> {
-                patrul.setTaskId( null );
-                patrul.setStatus( FREE );
-                patrul.setTaskTypes( TaskTypes.FREE );
-                selfEmploymentTask.getPatruls().remove( patrul.getPassportNumber() ); }
-            case ATTACHED -> {
-                patrul.setTaskTypes( TaskTypes.SELF_EMPLOYMENT );
-                patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object
-                patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
-                patrul.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() );
-                selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul ); }
-            case ACCEPTED, ARRIVED -> {
-                patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-                patrul.setTaskTypes( TaskTypes.SELF_EMPLOYMENT );
-                patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
-                selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul ); }
-            case FINISHED -> {
-                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), "selfEmployment" );
-                selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul );
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), TaskTypes.SELF_EMPLOYMENT.name() );
+                else selfEmploymentTask.getPatruls().remove( patrul.getUuid() );
                 if ( selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ) {
                     selfEmploymentTask.setTaskStatus( FINISHED );
                     RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( selfEmploymentTask ) );
-                    CassandraDataControlForTasks
-                            .getInstance()
-                            .addValue( selfEmploymentTask ); }
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( selfEmploymentTask ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
-                patrul.setTaskDate( null );
                 patrul.setTaskId( null ); }
-        } RedisDataControl.getRedis().addValue( selfEmploymentTask.getUuid().toString(), new ActiveTask( selfEmploymentTask ) ).subscribe();
+            case ATTACHED, ACCEPTED, ARRIVED -> {
+                patrul.setTaskTypes( TaskTypes.SELF_EMPLOYMENT );
+                patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object
+                patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
+                patrul.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() ); } }
+        if ( selfEmploymentTask.getTaskStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
+                .getRedis()
+                .addValue( selfEmploymentTask.getUuid().toString(),
+                    new ActiveTask( selfEmploymentTask ) ).subscribe();
+        if ( status.compareTo( CANCEL ) != 0 ) selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
                 .addValue( selfEmploymentTask );
+
+        CassandraDataControl
+                .getInstance()
+                        .update( patrul )
+                                .subscribe();
+
         KafkaDataControl.getInstance()
                 .writeToKafka(
                         CassandraDataControl
@@ -460,42 +467,59 @@ public final class TaskInspector {
 
     public Mono< ApiResponseModel > saveReportForTask ( Patrul patrul, ReportForCard reportForCard ) {
         return switch ( patrul.getTaskTypes() ) {
-            case CARD_102 -> RedisDataControl.getRedis().getCard( Long.parseLong( patrul.getTaskId() ) ).flatMap( card -> {
-                card.getReportForCardList().add( reportForCard );
-                return RedisDataControl.getRedis().update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, card ) )
-                        .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) ); } );
-
-            case SELF_EMPLOYMENT -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getSelfEmploymentTask( UUID.fromString( patrul.getTaskId() ) )
-                    .flatMap( selfEmploymentTask -> RedisDataControl.getRedis()
-                            .update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, selfEmploymentTask ) )
-                                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                                .message( "Report from: " + patrul.getName() + " was saved" ).code( 200 ).build() ).build() ) ) );
-
-            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getEventBody( patrul.getTaskId() )
-                    .flatMap( eventBody -> RedisDataControl.getRedis()
-                            .update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, eventBody ) )
+            case CARD_102 -> RedisDataControl.getRedis()
+                    .getCard( Long.parseLong( patrul.getTaskId() ) )
+                    .flatMap( card -> {
+                    card.getReportForCardList().add( reportForCard );
+                    return CassandraDataControl
+                            .getInstance()
+                            .update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, card ) )
                             .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                                    .success( true )
                                     .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                             .message( "Report from: " + patrul.getName() + " was saved" )
                                             .code( 200 )
                                             .build() )
-                                    .build() ) ) );
+                                    .build() ) ); } );
+
+            case SELF_EMPLOYMENT -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getSelfEmploymentTask( UUID.fromString( patrul.getTaskId() ) )
+                    .flatMap( selfEmploymentTask -> {
+                        selfEmploymentTask.getReportForCards().add( reportForCard );
+                        return CassandraDataControl
+                                .getInstance()
+                                .update( TaskInspector.getInstance()
+                                        .changeTaskStatus( patrul, Status.FINISHED, selfEmploymentTask ) )
+                                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                .message( "Report from: " + patrul.getName() + " was saved" )
+                                                .code( 200 )
+                                                .build() )
+                                        .build() ) ); } );
+
+            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getEventBody( patrul.getTaskId() )
+                    .flatMap( eventBody -> {
+                        eventBody.getReportForCardList().add( reportForCard );
+                        return CassandraDataControl
+                                .getInstance()
+                                .update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, eventBody ) )
+                                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                .message( "Report from: " + patrul.getName() + " was saved" )
+                                                .code( 200 )
+                                                .build() )
+                                        .build() ) ); } );
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
                     .getEventFace( patrul.getTaskId() )
                     .flatMap( eventFace -> {
                         eventFace.getReportForCardList().add( reportForCard );
-                        return RedisDataControl
-                                .getRedis()
+                        return CassandraDataControl
+                                .getInstance()
                                 .update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, eventFace ) )
                                 .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
                                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
@@ -506,43 +530,49 @@ public final class TaskInspector {
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
                     .getCarEvents( patrul.getTaskId() )
-                    .flatMap( carEvents -> RedisDataControl
-                            .getRedis()
-                            .update( TaskInspector.getInstance()
-                                .changeTaskStatus( patrul, Status.FINISHED, carEvents ) )
-                        .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Report from: " + patrul.getName() + " was saved" )
-                                        .code( 200 )
-                                        .build() )
-                                .build() ) ) );
+                    .flatMap( carEvents -> {
+                        carEvents.getReportForCardList().add( reportForCard );
+                        return CassandraDataControl
+                                .getInstance()
+                                .update( TaskInspector.getInstance()
+                                        .changeTaskStatus( patrul, Status.FINISHED, carEvents ) )
+                                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                .message( "Report from: " + patrul.getName() + " was saved" )
+                                                .code( 200 )
+                                                .build() )
+                                        .build() ) ); } );
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
                     .getFaceEvents( patrul.getTaskId() )
-                    .flatMap( faceEvents -> RedisDataControl
-                            .getRedis()
-                            .update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, faceEvents ) )
-                            .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "Report from: " + patrul.getName() + " was saved" )
-                                            .code( 200 )
-                                            .build() )
-                                    .build() ) ) );
+                    .flatMap( faceEvents -> {
+                        faceEvents.getReportForCardList().add( reportForCard );
+                        return CassandraDataControl
+                                .getInstance()
+                                .update( TaskInspector.getInstance().changeTaskStatus( patrul, Status.FINISHED, faceEvents ) )
+                                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                .message( "Report from: " + patrul.getName() + " was saved" )
+                                                .code( 200 )
+                                                .build() )
+                                        .build() ) ); } );
 
             default -> CassandraDataControlForTasks
                     .getInstance()
-                    .getEventFace( patrul.getTaskId() )
-                    .flatMap( eventFace -> RedisDataControl
-                            .getRedis()
-                            .update( TaskInspector.getInstance()
-                                    .changeTaskStatus( patrul, Status.FINISHED, eventFace ) )
-                    .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .message( "Report from: " + patrul.getName() + " was saved" )
-                                    .code( 200 )
-                                    .build() )
-                            .build() ) ) ); }; }
+                    .getEventCar( patrul.getTaskId() )
+                    .flatMap( eventCar -> {
+                        eventCar.getReportForCardList().add( reportForCard );
+                        return CassandraDataControl
+                                .getInstance()
+                                .update( TaskInspector.getInstance()
+                                        .changeTaskStatus( patrul, Status.FINISHED, eventCar ) )
+                                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
+                                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                .message( "Report from: " + patrul.getName() + " was saved" )
+                                                .code( 200 )
+                                                .build() )
+                                        .build() ) ); } ); }; }
 
     public Mono< ApiResponseModel > changeTaskStatus ( Patrul patrul, Status status ) {
         return switch ( patrul.getTaskTypes() ) {
@@ -703,50 +733,189 @@ public final class TaskInspector {
                     .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 201 )
                             .message( "U have no task, so u can do smth else, my darling )))" ).build() ) .build() ); }; }
 
+    public Mono< ApiResponseModel > removePatrulFromTask ( Patrul patrul ) {
+        return switch ( patrul.getTaskTypes() ) {
+            case CARD_102 -> RedisDataControl
+                    .getRedis()
+                    .getCard( Long.parseLong( patrul.getTaskId() ) )
+                    .flatMap( card -> Mono.just(
+                            ApiResponseModel.builder()
+                                    .success( true )
+                                    .status(
+                                            com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                    .message( this.changeTaskStatus( patrul, CANCEL, card )
+                                                            .getName() + " was removed from " + card.getCardId() )
+                                                    .code( 200 )
+                                                    .build()
+                                    ).build() ) );
+
+            case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getEventCar( patrul.getTaskId() )
+                    .flatMap( card -> Mono.just(
+                            ApiResponseModel.builder()
+                                    .success( true )
+                                    .status(
+                                            com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                    .message( this.changeTaskStatus( patrul, CANCEL, card )
+                                                            .getName() + " was removed from " + card.getId() )
+                                                    .code( 200 )
+                                                    .build()
+                                    ).build() ) );
+
+            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getEventBody( patrul.getTaskId() )
+                    .flatMap( card -> Mono.just(
+                            ApiResponseModel.builder()
+                                    .success( true )
+                                    .status(
+                                            com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                    .message( this.changeTaskStatus( patrul, CANCEL, card )
+                                                            .getName() + " was removed from " + card.getId() )
+                                                    .code( 200 )
+                                                    .build()
+                                    ).build() ) );
+
+            case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getEventFace ( patrul.getTaskId() )
+                    .flatMap( card -> Mono.just(
+                            ApiResponseModel.builder()
+                                    .success( true )
+                                    .status(
+                                            com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                    .message( this.changeTaskStatus( patrul, CANCEL, card )
+                                                            .getName() + " was removed from " + card.getId() )
+                                                    .code( 200 )
+                                                    .build()
+                                    ).build() ) );
+
+            case FIND_FACE_CAR -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getCarEvents( patrul.getTaskId() )
+                    .flatMap( card -> Mono.just(
+                            ApiResponseModel.builder()
+                                    .success( true )
+                                    .status(
+                                            com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                    .message( this.changeTaskStatus( patrul, CANCEL, card )
+                                                            .getName() + " was removed from " + card.getId() )
+                                                    .code( 200 )
+                                                    .build()
+                                    ).build() ) );
+
+            case FIND_FACE_PERSON -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getFaceEvents( patrul.getTaskId() )
+                    .flatMap( card -> Mono.just(
+                            ApiResponseModel.builder()
+                                    .success( true )
+                                    .status(
+                                            com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                    .message( this.changeTaskStatus( patrul, CANCEL, card )
+                                                            .getName() + " was removed from " + card.getId() )
+                                                    .code( 200 )
+                                                    .build()
+                                    ).build() ) );
+
+            default -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getSelfEmploymentTask( UUID.fromString( patrul.getTaskId() ) )
+                    .flatMap( card -> Mono.just(
+                            ApiResponseModel.builder()
+                                    .success( true )
+                                    .status(
+                                            com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                    .message( this.changeTaskStatus( patrul, CANCEL, card )
+                                                            .getName() + " was removed from " + card.getUuid() )
+                                                    .code( 200 )
+                                                    .build()
+                                    ).build() ) ); }; }
+
     public Mono< ApiResponseModel > getTaskDetails ( Patrul patrul ) {
         return switch ( patrul.getTaskTypes() ) {
-            case CARD_102 -> RedisDataControl.getRedis().getCard( Long.parseLong( patrul.getTaskId() ) )
+            case CARD_102 -> RedisDataControl.getRedis()
+                    .getCard( Long.parseLong( patrul.getTaskId() ) )
                     .flatMap( card -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( card, "ru" ) ).build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new CardDetails( card, "ru" ) )
+                                    .build() )
                             .build() ) );
 
-            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks.getInstance().getEventBody( patrul.getTaskId() )
+            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getEventBody( patrul.getTaskId() )
                     .flatMap( eventBody -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventBody ) ).build() ) // TO-DO
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .code( 200 )
+                                    .message( "Your task details" )
+                                    .build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new CardDetails( eventBody ) )
+                                    .build() ) // TO-DO
                             .build() ) );
 
-            case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks.getInstance().getEventFace( patrul.getTaskId() )
+            case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getEventFace( patrul.getTaskId() )
                     .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventFace ) ).build() ) // TO-DO
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .code( 200 )
+                                    .message( "Your task details" )
+                                    .build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new CardDetails( eventFace ) ).build() ) // TO-DO
                             .build() ) );
 
-            case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks.getInstance().getEventCar( patrul.getTaskId() )
+            case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getEventCar( patrul.getTaskId() )
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventCar ) ).build() ) // TO-DO
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .code( 200 )
+                                    .message( "Your task details" )
+                                    .build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new CardDetails( eventCar ) )
+                                    .build() ) // TO-DO
                             .build() ) );
 
-            case FIND_FACE_CAR -> CassandraDataControlForTasks.getInstance().getCarEvents( patrul.getTaskId() )
+            case FIND_FACE_CAR -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getCarEvents( patrul.getTaskId() )
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventCar ) ).build() ) // TO-DO
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .code( 200 )
+                                    .message( "Your task details" )
+                                    .build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new CardDetails( eventCar ) )
+                                    .build() ) // TO-DO
                             .build() ) );
 
-            case FIND_FACE_PERSON -> CassandraDataControlForTasks.getInstance().getFaceEvents( patrul.getTaskId() )
+            case FIND_FACE_PERSON -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getFaceEvents( patrul.getTaskId() )
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 ).message( "Your task details" ).build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new CardDetails( eventCar ) ).build() ) // TO-DO
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .code( 200 )
+                                    .message( "Your task details" )
+                                    .build() )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new CardDetails( eventCar ) )
+                                    .build() ) // TO-DO
                             .build() ) );
 
-            default -> CassandraDataControlForTasks.getInstance().getSelfEmploymentTask( UUID.fromString( patrul.getTaskId() ) )
+            default -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getSelfEmploymentTask( UUID.fromString( patrul.getTaskId() ) )
                     .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()

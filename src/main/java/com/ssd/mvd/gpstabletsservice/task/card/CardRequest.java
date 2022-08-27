@@ -6,8 +6,10 @@ import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import lombok.extern.jackson.Jacksonized;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @Jacksonized
@@ -18,5 +20,5 @@ public class CardRequest< T > {
     @JsonDeserialize
     private T card;
     @JsonDeserialize
-    private List< String > patruls;
+    private List< UUID > patruls;
 }

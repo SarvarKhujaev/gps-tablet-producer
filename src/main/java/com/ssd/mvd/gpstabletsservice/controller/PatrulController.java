@@ -33,28 +33,44 @@ public class PatrulController {
             .getTaskDetails( SerDes.getSerDes().deserialize( data.getData() ) ); }
 
     @MessageMapping ( value = "ARRIVED" )
-    public Mono< ApiResponseModel > arrived ( String token ) { return RedisDataControl.getRedis().arrived( token ); }
+    public Mono< ApiResponseModel > arrived ( String token ) { return CassandraDataControl
+            .getInstance()
+            .arrived( token ); }
 
     @MessageMapping ( value = "ACCEPTED" )
-    public Mono< ApiResponseModel > accepted ( String token ) { return RedisDataControl.getRedis().accepted( token ); }
+    public Mono< ApiResponseModel > accepted ( String token ) { return CassandraDataControl
+            .getInstance()
+            .accepted( token ); }
 
     @MessageMapping ( value = "SET_IN_PAUSE" )
-    public Mono< ApiResponseModel > setInPause ( String token ) { return RedisDataControl.getRedis().setInPause( token ); }
+    public Mono< ApiResponseModel > setInPause ( String token ) { return CassandraDataControl
+            .getInstance()
+            .setInPause( token ); }
 
     @MessageMapping ( value = "LOGOUT" ) // used to Log out from current Account
-    public Mono< ApiResponseModel > patrulLogout ( String token ) { return RedisDataControl.getRedis().logout( token ); }
+    public Mono< ApiResponseModel > patrulLogout ( String token ) { return CassandraDataControl
+            .getInstance()
+            .logout( token ); }
 
     @MessageMapping ( value = "RETURNED_TO_WORK" )
-    public Mono< ApiResponseModel > setInActive ( String token ) { return RedisDataControl.getRedis().backToWork( token ); }
+    public Mono< ApiResponseModel > setInActive ( String token ) { return CassandraDataControl
+            .getInstance()
+            .backToWork( token ); }
 
     @MessageMapping ( value = "START_TO_WORK" )
-    public Mono< ApiResponseModel > starToWork ( String token ) { return RedisDataControl.getRedis().startToWork( token ); }
+    public Mono< ApiResponseModel > starToWork ( String token ) { return CassandraDataControl
+            .getInstance()
+            .startToWork( token ); }
 
     @MessageMapping ( value = "STOP_TO_WORK" )
-    public Mono< ApiResponseModel > finishWorkOfPatrul ( String token ) { return RedisDataControl.getRedis().stopToWork( token ); }
+    public Mono< ApiResponseModel > finishWorkOfPatrul ( String token ) { return CassandraDataControl
+            .getInstance()
+            .stopToWork( token ); }
 
     @MessageMapping ( value = "LOGIN" ) // for checking login data of Patrul with his Login and password
-    public Mono< ApiResponseModel > patrulLogin ( PatrulLoginRequest patrulLoginRequest ) { return RedisDataControl.getRedis().login( patrulLoginRequest ); }
+    public Mono< ApiResponseModel > patrulLogin ( PatrulLoginRequest patrulLoginRequest ) { return CassandraDataControl
+            .getInstance()
+            .login( patrulLoginRequest ); }
 
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
     public Flux< Patrul > getAllUsersList () { return CassandraDataControl
@@ -62,15 +78,19 @@ public class PatrulController {
             .getPatrul(); }
 
     @MessageMapping( value = "addUser" ) // adding new user
-    public Mono< ApiResponseModel > addUser ( Patrul patrul ) { return RedisDataControl.getRedis().addValue( patrul ); }
+    public Mono< ApiResponseModel > addUser ( Patrul patrul ) { return CassandraDataControl
+            .getInstance()
+            .addValue( patrul ); }
 
     @MessageMapping ( value = "updatePatrul" )
-    public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) { return RedisDataControl
-            .getRedis()
+    public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) { return CassandraDataControl
+            .getInstance()
             .update( patrul ); }
 
     @MessageMapping ( value = "checkToken" )
-    public Mono< ApiResponseModel > checkToken ( String token ) { return RedisDataControl.getRedis().checkToken( token ); }
+    public Mono< ApiResponseModel > checkToken ( String token ) { return CassandraDataControl
+            .getInstance()
+            .checkToken( token ); }
 
     @MessageMapping ( value = "getCurrentUser" )
     public Mono< Patrul > getCurrentUser ( String passportSeries ) { return CassandraDataControl
@@ -78,20 +98,28 @@ public class PatrulController {
             .getPatrul( UUID.fromString( passportSeries ) ); }
 
     @MessageMapping ( value = "getPatrulDataByToken" )
-    public Mono< Status > getPatrulDataByToken ( String token ) { return RedisDataControl
-            .getRedis()
+    public Mono< Status > getPatrulDataByToken ( String token ) { return CassandraDataControl
+            .getInstance()
             .checkToken( token )
             .flatMap( apiResponseModel -> Mono.just( apiResponseModel.getStatus() ) ); }
 
     @MessageMapping( value = "deletePatrul" )
-    public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return RedisDataControl
-            .getRedis()
-            .deletePatrul( passportNumber ); }
+    public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return CassandraDataControl
+            .getInstance()
+            .delete(
+                    CassandraDataControl
+                            .getInstance()
+                            .getPatrols(),
+                    "uuid",
+                    passportNumber ); }
 
     @MessageMapping ( value = "getPatrulStatistics" )
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return RedisDataControl
-            .getRedis()
-            .getPatrulStatistics( passportNumber ); }
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( UUID.fromString( passportNumber.getData() ) )
+            .flatMap( patrul -> CassandraDataControl
+                    .getInstance()
+                    .getPatrulStatistics( passportNumber ) ); }
 
     @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
     public Flux< Patrul > getPatrulByPortion ( String name ) { return CassandraDataControl

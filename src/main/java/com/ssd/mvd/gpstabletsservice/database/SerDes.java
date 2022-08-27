@@ -11,7 +11,6 @@ import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -58,9 +57,7 @@ public class SerDes {
 
     public String serialize ( ActiveTask activeTask ) { return this.gson.toJson( activeTask ); }
 
-    public String serialize ( SelfEmploymentTask selfEmploymentTask ) { try { return this.objectMapper
-            .writeValueAsString( selfEmploymentTask ); }
-    catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
+    public String serialize ( SelfEmploymentTask selfEmploymentTask ) { return this.gson.toJson( selfEmploymentTask ); }
 
     public Card deserializeCard ( String object ) { return this.gson.fromJson( object, Card.class ); }
 
@@ -75,6 +72,8 @@ public class SerDes {
     public ActiveTask deserializeActiveTask ( String value ) { return this.gson.fromJson( value, ActiveTask.class ); }
 
     public Card deserializeCard ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
+
+    public SelfEmploymentTask deserializeSelfEmploymentTask ( String object ) { return this.gson.fromJson( object, SelfEmploymentTask.class ); }
 
     public CarEvents deserializeCarEvents ( Object card ) { return this.objectMapper.convertValue( card, new TypeReference<>() {} ); }
 
