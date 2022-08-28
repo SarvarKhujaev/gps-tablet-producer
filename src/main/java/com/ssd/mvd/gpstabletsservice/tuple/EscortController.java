@@ -38,4 +38,9 @@ public class EscortController {
 
     @MessageMapping ( value = "getListOfCountries" )
     public Flux< Countries > getListOfCountries () { return Flux.fromArray( Countries.values() ); }
+
+    @MessageMapping ( value = "getTupleTotalData" )
+    public Mono< TupleTotalData > getTupleTotalData ( String uuid ) { return CassandraDataControlForEscort
+            .getInstance()
+            .getTupleTotalData( uuid ); }
 }

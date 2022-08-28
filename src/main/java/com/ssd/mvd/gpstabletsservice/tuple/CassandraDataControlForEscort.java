@@ -125,7 +125,7 @@ public class CassandraDataControlForEscort {
                                     escortTuple ); } );
 
         return this.session.execute( "INSERT INTO "
-                + this.dbName + "." + this.tupleOfEscort
+                + this.dbName + "." + this.getTupleOfEscort()
                 + "( id," +
                         " countries," +
                         " uuidOfPolygon," +
@@ -312,4 +312,20 @@ public class CassandraDataControlForEscort {
                         + this.dbName + "." + this.getTupleOfCar()
                         + " where uuid = " + uuid + ";"
         ).one() ).map( TupleOfCar::new ); }
+
+    public Mono< TupleTotalData > getTupleTotalData ( String uuid ) {
+        TupleTotalData tupleTotalData = new TupleTotalData();
+        return this.getAllTupleOfEscort( uuid )
+                .flatMap( escortTuple -> this.getAllPolygonForEscort( escortTuple.getUuidOfPolygon().toString() )
+                                .flatMap( polygon -> {
+                                    escortTuple.getPatrulList().forEach( uuid1 -> CassandraDataControl
+                                            .getInstance()
+                                            .getPatrul( uuid1 )
+                                            .subscribe( patrul -> tupleTotalData.getPatrulList().add( patrul ) ) );
+                                    escortTuple.getTupleOfCarsList().forEach( uuid1 -> CassandraDataControlForEscort
+                                            .getInstance()
+                                            .getAllTupleOfCar( uuid1 )
+                                            .subscribe( escortTuple1 -> tupleTotalData.getTupleOfCarList().add( escortTuple1 ) ) );
+                                    tupleTotalData.setPolygonForEscort( polygon );
+                                    return Mono.just( tupleTotalData ); } ) ); }
 }

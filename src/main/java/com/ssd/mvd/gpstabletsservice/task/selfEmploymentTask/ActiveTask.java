@@ -1,17 +1,18 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
 import lombok.Data;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
@@ -183,4 +184,10 @@ public class ActiveTask {
         this.setLongitude( eventCar.getCamera().getLongitude() );
         try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( eventCar.getCreated_date() ) ); }
         catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
+
+    public ActiveTask( EscortTuple escortTuple, Status status ) {
+        this.setPatrulStatus( status );
+        this.setStatus( Status.CREATED );
+        this.setType( TaskTypes.ESCORT.name() );
+        this.setTaskId( escortTuple.getUuid().toString() ); }
 }

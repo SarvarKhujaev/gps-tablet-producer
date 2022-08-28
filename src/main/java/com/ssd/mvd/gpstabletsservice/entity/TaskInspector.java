@@ -755,15 +755,40 @@ public final class TaskInspector {
                     .getInstance()
                     .getFaceEvents( patrul.getTaskId() )
                     .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder().data( new ActiveTask( eventFace, patrul.getStatus() ) )
-                                    .type( TaskTypes.FIND_FACE_PERSON.name() ).build() )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 200 )
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .data( new ActiveTask( eventFace, patrul.getStatus() ) )
+                                    .type( TaskTypes.FIND_FACE_PERSON.name() )
+                                    .build() )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .code( 200 )
                                     .message( "U have " + TaskTypes.FIND_FACE_PERSON.name() + " Task" )
-                                    .build() ).success( true ).build() ) );
+                                    .build() )
+                            .success( true )
+                            .build() ) );
 
-            default -> Mono.just( ApiResponseModel.builder().success( false )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder().code( 201 )
-                            .message( "U have no task, so u can do smth else, my darling )))" ).build() ) .build() ); }; }
+            case ESCORT -> CassandraDataControlForEscort
+                    .getInstance()
+                    .getAllTupleOfEscort( patrul.getTaskId() )
+                    .flatMap( escortTuple -> Mono.just( ApiResponseModel.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
+                                    .data( new ActiveTask( escortTuple, patrul.getStatus() ) )
+                                    .type( ESCORT.name() )
+                                    .build() )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .code( 200 )
+                                    .message( "U have " + ESCORT.name() + " Task" )
+                                    .build() )
+                            .success( true )
+                            .build() ) );
+
+            default -> Mono.just( ApiResponseModel.builder()
+                    .success( false )
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .code( 201 )
+                            .message( "U have no task, so u can do smth else, my darling )))" )
+                            .build() )
+                    .build() ); }; }
 
     public Mono< ApiResponseModel > removePatrulFromTask ( Patrul patrul ) {
         return switch ( patrul.getTaskTypes() ) {
@@ -944,6 +969,29 @@ public final class TaskInspector {
                                     .data( new CardDetails( eventCar ) )
                                     .build() ) // TO-DO
                             .build() ) );
+
+            case ESCORT -> CassandraDataControlForEscort
+                    .getInstance()
+                    .getAllTupleOfEscort( patrul.getTaskId() )
+                    .flatMap( escortTuple -> CassandraDataControlForEscort
+                            .getInstance()
+                            .getAllTupleOfCar(
+                                    escortTuple.getTupleOfCarsList()
+                                            .get(
+                                                    escortTuple
+                                                            .getPatrulList()
+                                                            .indexOf( patrul.getUuid() )
+                                            )
+                            ).flatMap( tupleOfCar -> Mono.just( ApiResponseModel.builder()
+                                    .success( true )
+                                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .code( 200 )
+                                            .message( "Your task details" )
+                                            .build() )
+                                    .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                            .data( new CardDetails( escortTuple, "ru", tupleOfCar ) )
+                                            .build() )
+                                    .build() ) ) );
 
             default -> CassandraDataControlForTasks
                     .getInstance()

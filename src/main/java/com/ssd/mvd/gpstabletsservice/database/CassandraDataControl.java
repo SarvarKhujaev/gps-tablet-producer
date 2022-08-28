@@ -43,7 +43,7 @@ public final class CassandraDataControl {
     private final String lustre = "LUSTRA";
     private final String patrols = "PATRULS"; // for table with Patruls info
     private final String polygon = "POLYGON";
-    private final String patrolsLogin = "PATRULS_LOGIN"; // using in login situation
+    private final String patrolsLogin = "PATRULS_LOGIN_TABLE"; // using in login situation
 
     private final String faceCar = "faceCar";
     private final String eventCar = "eventCar";
@@ -199,7 +199,7 @@ public final class CassandraDataControl {
         this.session.execute(
                 "CREATE TABLE IF NOT EXISTS "
                 + this.dbName + "." + this.getPatrolsLogin()
-                + " ( login text PRIMARY KEY, password text, uuid uuid );" );
+                + " ( login text, password text, uuid uuid, PRIMARY KEY ( (login), uuid ) );" );
 
         this.logger.info( "Cassandra is ready" ); }
 
@@ -611,7 +611,14 @@ public final class CassandraDataControl {
         patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
         patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
         patrul.setSurnameNameFatherName( patrul.getName() + " " + patrul.getSurname() + " " + patrul.getFatherName() );
-        return this.session.execute( "INSERT INTO "
+        return this.session.execute(
+                "INSERT INTO "
+                + this.dbName + "." + this.getPatrolsLogin()
+            + " ( login, password, uuid ) VALUES( '"
+            + patrul.getLogin() + "', '"
+            + patrul.getPassword() + "', "
+            + patrul.getUuid() + " ) IF NOT EXISTS; " ).wasApplied() ?
+        this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.patrols +
                 CassandraConverter
                         .getInstance()
@@ -684,7 +691,14 @@ public final class CassandraDataControl {
                                         .message( "Patrul has already been saved. choose another one" )
                                         .code( 201 )
                                         .build() )
-                        .build() ); }
+                        .build() ) : Mono.just(
+                                ApiResponseModel.builder()
+                                        .status(
+                                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                        .message( "Wrong login. it has to be unique" )
+                                                        .code( 200 )
+                                                        .build()
+                                        ).build() ); }
 
     public Flux< Polygon > getAllPoygonForPatrul () {
         return Flux.fromStream(
@@ -1018,7 +1032,12 @@ public final class CassandraDataControl {
                     .decode( token ) )
                     .split( "@" )[ 0 ] ); }
 
-    public Mono< ApiResponseModel > login ( PatrulLoginRequest patrulLoginRequest ) { return this.getPatrul( patrulLoginRequest.getPassportSeries() )
+    public Mono< ApiResponseModel > login ( PatrulLoginRequest patrulLoginRequest ) {
+        Row row = this.session.execute(
+                "SELECT * FROM " +
+                        this.dbName + "." + this.getPatrolsLogin()
+                        + " where login = '" + patrulLoginRequest.getLogin() + "';" ).one();
+        return row != null ? this.getPatrul( row.getUUID( "uuid" ) )
             .flatMap( patrul -> {
                 if ( patrul.getPassword()
                         .equals( patrulLoginRequest.getPassword() ) ) {
@@ -1041,13 +1060,19 @@ public final class CassandraDataControl {
                                     .code( 200 )
                                     .build() )
                             .build() );
-                } else return Mono.just( ApiResponseModel.builder()
+                } else return Mono.just( ApiResponseModel.builder() // in case of wrong password
                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                 .code( 201 )
                                 .message( "Wrong Login or password" )
                                 .build() )
                         .success( false )
-                        .build() ); } ); }
+                        .build() ); } ) : Mono.just( ApiResponseModel.builder() // in case of wrong login
+                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        .code( 201 )
+                        .message( "Wrong Login or password" )
+                        .build() )
+                .success( false )
+                .build() ); }
 
     public Mono< ApiResponseModel > checkToken ( String token ) { return this.getPatrul( this.decode( token ) )
             .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
