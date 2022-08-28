@@ -3,6 +3,8 @@ package com.ssd.mvd.gpstabletsservice.tuple;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.database.CassandraConverter;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
+import com.ssd.mvd.gpstabletsservice.response.Status;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
@@ -78,12 +80,12 @@ public class CassandraDataControlForEscort {
                     .all().stream() )
             .map( EscortTuple::new ); }
 
-    public Flux< EscortTuple > getAllTupleOfEscort ( String id ) { return Flux.fromStream(
-            this.session.execute(
-                    "SELECT * FROM "
-                            + this.dbName + "." + this.tupleOfEscort
-                            + " where id = " + UUID.fromString( id ) + ";" ).all().stream() )
-            .map( EscortTuple::new ); }
+    public Mono< EscortTuple > getAllTupleOfEscort ( String id ) {
+        Row row = this.session.execute(
+                "SELECT * FROM "
+                        + this.dbName + "." + this.tupleOfEscort
+                        + " where id = " + UUID.fromString( id ) + ";" ).one();
+        return Mono.justOrEmpty( row != null ? new EscortTuple( row ) : null ); }
 
     public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) {
         this.session.execute( "DELETE FROM "
@@ -100,23 +102,27 @@ public class CassandraDataControlForEscort {
     private static Integer i;
 
     public Flux< ApiResponseModel > addValue ( EscortTuple escortTuple ) {
-        i = -1;
-        escortTuple.getPatrulList().forEach( uuid -> {
-            i++;
-            System.out.println( uuid + " : " + escortTuple.getTupleOfCarsList().get( i ) );
-            this.session.execute(
-                    "UPDATE "
-                    + this.dbName + "." + this.getPatrols()
-                    + " SET uuidOfEscort = " + escortTuple.getUuid() +", " +
-                            "uuidForEscortCar = " + escortTuple.getTupleOfCarsList().get( i )
-                    + " where uuid = " + uuid + ";" );
-
-            this.session.execute(
-                    "UPDATE "
-                    + this.dbName + "." + this.getTupleOfCar() +
-                    " SET uuidOfEscort = " + escortTuple.getUuid() +", " +
-                    "uuidOfPatrul = " + uuid
-                    + " where uuid = " + escortTuple.getTupleOfCarsList().get( i ) + ";" ); } );
+        for ( i = 0; i < escortTuple.getPatrulList().size(); i++ ) CassandraDataControl
+                .getInstance()
+                .getPatrul( escortTuple.getPatrulList().get( i ) )
+                .subscribe( patrul -> {
+                    patrul.setUuidOfEscort( escortTuple.getUuid() );
+                    patrul.setUuidForEscortCar( escortTuple.getTupleOfCarsList().get( i ) );
+                    CassandraDataControlForEscort
+                            .getInstance()
+                            .getAllTupleOfCar( patrul.getUuidForEscortCar() )
+                            .subscribe( tupleOfCar -> {
+                                tupleOfCar.setUuidOfPatrul( patrul.getUuid() );
+                                tupleOfCar.setUuidOfEscort( escortTuple.getUuid() );
+                                CassandraDataControlForEscort
+                                        .getInstance()
+                                        .update( tupleOfCar )
+                                        .subscribe(); } );
+                    TaskInspector
+                            .getInstance()
+                            .changeTaskStatus( patrul,
+                                    com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                    escortTuple ); } );
 
         return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.tupleOfEscort
@@ -266,4 +272,44 @@ public class CassandraDataControlForEscort {
                     .message( "This polygon has already been saved" )
                     .build() )
             .build() ); }
+
+    public Mono< ApiResponseModel > update ( TupleOfCar tupleOfCar ) { return this.session.execute(
+            "INSERT INTO "
+                    + this.dbName + "." + this.getTupleOfCar()
+                    + CassandraConverter
+                    .getInstance()
+                    .getALlNames( TupleOfCar.class )
+                    + " VALUES("
+                    + tupleOfCar.getUuid() + ", "
+                    + tupleOfCar.getUuidOfEscort() + ", "
+                    + tupleOfCar.getUuidOfPatrul() + ", '"
+                    + tupleOfCar.getCarModel() + "', '"
+                    + tupleOfCar.getGosNumber() + "', '"
+                    + tupleOfCar.getTrackerId() + "', '"
+                    + tupleOfCar.getNsfOfPatrul() + "', '"
+                    + tupleOfCar.getSimCardNumber() + "', "
+
+                    + tupleOfCar.getLatitude() + ", "
+                    + tupleOfCar.getLongitude() + ", " +
+                    tupleOfCar.getAverageFuelConsumption() + ") "
+            ).wasApplied() ? Mono.just (
+                    ApiResponseModel.builder()
+                            .success( true )
+                            .status( Status.builder()
+                                    .message( "Car" + tupleOfCar.getGosNumber() + " was updated successfully" )
+                                    .code( 200 )
+                                    .build() ).build() )
+                    : Mono.just( ApiResponseModel.builder()
+                    .success( false )
+                    .status( Status.builder()
+                            .code( 201 )
+                            .message( "This car does not exists" )
+                            .build() ).build() ); }
+
+    public Mono< TupleOfCar > getAllTupleOfCar ( UUID uuid ) {
+        return Mono.just( this.session.execute(
+                "SELECT * FROM "
+                        + this.dbName + "." + this.getTupleOfCar()
+                        + " where uuid = " + uuid + ";"
+        ).one() ).map( TupleOfCar::new ); }
 }

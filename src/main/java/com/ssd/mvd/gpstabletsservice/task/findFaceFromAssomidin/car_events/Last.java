@@ -7,13 +7,13 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class First {
-	@SerializedName("timestamp")
-	private String timestamp;
+public class Last {
+    @SerializedName("timestamp")
+    private String timestamp;
 
-	@SerializedName("bbox")
-	private List<Integer> bbox;
+    @SerializedName("bbox")
+    private List<Integer> bbox;
 
-	@SerializedName("quality")
-	private Double quality;
+    @SerializedName("quality")
+    private Double quality;
 }

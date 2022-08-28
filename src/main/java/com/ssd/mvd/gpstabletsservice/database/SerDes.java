@@ -39,19 +39,9 @@ public class SerDes {
 
     public String serialize ( Patrul object ) { return this.gson.toJson( object ); }
 
-    public String serialize ( ReqCar object ) { return this.gson.toJson( object ); }
-
-    public String serialize ( Polygon object ) { return this.gson.toJson( object ); }
-
     public String serialize ( CarEvents polygon ) { return this.gson.toJson( polygon ); }
 
-    public String serialize ( AtlasLustra object ) { return this.gson.toJson( object ); }
-
-    public String serialize ( PolygonType object ) { return this.gson.toJson( object ); }
-
     public String serialize ( Notification object ) { return this.gson.toJson( object ); }
-
-    public String serialize( PoliceType policeType ) { return this.gson.toJson( policeType ); }
 
     public String serialize( FaceEvents faceEvents ) { return this.gson.toJson( faceEvents ); }
 
@@ -62,8 +52,6 @@ public class SerDes {
     public Card deserializeCard ( String object ) { return this.gson.fromJson( object, Card.class ); }
 
     public Patrul deserialize ( String object ) { return this.gson.fromJson( object, Patrul.class ); }
-
-    public ReqCar deserializeCar ( String object ) { return this.gson.fromJson( object, ReqCar.class ); }
 
     public Patrul deserialize ( Object object ) { return this.objectMapper.convertValue( object, new TypeReference<>() {} ); }
 

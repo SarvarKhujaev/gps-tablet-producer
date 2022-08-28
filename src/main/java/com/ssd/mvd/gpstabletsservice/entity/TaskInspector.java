@@ -18,6 +18,7 @@ import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.*;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
+import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
@@ -93,25 +94,6 @@ public final class TaskInspector {
                                                         + " you got 102 card task," +
                                                         "so be so kind to check active Task and start to work )))" )
                                                 .build() ) );
-        return patrul; }
-
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, EscortTuple card ) {
-        patrul.setStatus( status );
-        switch ( ( patrul.getStatus() ) ) {
-            case CANCEL -> {
-                patrul.setTaskId( null );
-                patrul.setStatus( FREE ); }
-            case ATTACHED -> {
-                patrul.setTaskTypes( TaskTypes.ESCORT );
-                patrul.setTaskId( card.getUuid().toString() ); }
-            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-            case FINISHED -> {
-                patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), TaskTypes.CARD_102.name() );
-                patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setTaskDate( null );
-                patrul.setStatus( FREE );
-                patrul.setTaskId( null );
-            } }
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventCar eventCar ) {
@@ -345,6 +327,56 @@ public final class TaskInspector {
                                                 .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_CAR
                                                         + ", so be so kind to check active Task and start to work )))" ).build() ) );
         return patrul; }
+
+    public void changeTaskStatus ( Patrul patrul, Status status, EscortTuple escortTuple ) {
+        patrul.setStatus( status );
+        switch ( ( patrul.getStatus() ) ) {
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_CAR.name() );
+                else escortTuple.getPatrulList().remove( patrul.getUuid() );
+                CassandraDataControlForEscort
+                        .getInstance()
+                        .getAllTupleOfCar( patrul.getUuidForEscortCar() )
+                        .subscribe( tupleOfCar -> {
+                            tupleOfCar.setUuidOfPatrul( null );
+                            CassandraDataControlForEscort
+                                    .getInstance()
+                                    .update( tupleOfCar )
+                                    .subscribe(); } );
+                patrul.setTaskTypes( TaskTypes.FREE );
+                patrul.setUuidForEscortCar( null );
+                patrul.setUuidOfEscort( null );
+                patrul.setTaskDate( null );
+                patrul.setStatus( FREE );
+                patrul.setTaskId( null ); }
+            case ATTACHED -> {
+                patrul.setTaskTypes( TaskTypes.ESCORT );
+                patrul.setTaskId( escortTuple.getUuid().toString() ); }
+            case ACCEPTED -> patrul.setTaskDate( new Date() ); }
+        CassandraDataControl
+                .getInstance()
+                .update( patrul )
+                .subscribe();
+
+        KafkaDataControl.getInstance()
+                .writeToKafka(
+                        CassandraDataControl
+                                .getInstance().addValue(
+                                        Notification.builder()
+                                                .type( ESCORT.name() )
+                                                .uuid( UUID.randomUUID() )
+                                                .status( patrul.getStatus() )
+                                                .carNumber( patrul.getCarNumber() )
+                                                .taskTypes( patrul.getTaskTypes() )
+                                                .notificationWasCreated( new Date() )
+                                                .policeType( patrul.getPoliceType() )
+                                                .id( escortTuple.getUuid().toString() )
+                                                .passportSeries( patrul.getPassportNumber() )
+                                                .nsfOfPatrul( patrul.getSurnameNameFatherName() )
+                                                .title( "My dear: " + patrul.getName() + " you got " + ESCORT
+                                                        + ", so be so kind to check active Task and start to work )))" )
+                                                .build() ) ); }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvents faceEvents ) {
         patrul.setStatus( status );

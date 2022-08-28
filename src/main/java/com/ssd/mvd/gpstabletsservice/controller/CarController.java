@@ -3,30 +3,49 @@ package com.ssd.mvd.gpstabletsservice.controller;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.entity.ReqCar;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 @RestController
 public class CarController {
     @MessageMapping( value = "carList" ) // the list of all cars
-    public Flux< ReqCar > getAllCars () { return RedisDataControl.getRedis().getAllCars(); }
+    public Flux< ReqCar > getAllCars () { return CassandraDataControl
+            .getInstance()
+            .getCar(); }
 
     @MessageMapping ( value = "getCurrentCar" )
-    public Mono< ReqCar > getCurrentCar ( String gosno ) { return RedisDataControl.getRedis().getCar( gosno ); }
+    public Mono< ReqCar > getCurrentCar ( String gosno ) { return CassandraDataControl
+            .getInstance()
+            .getCar( UUID.fromString( gosno ) ); }
 
     @MessageMapping( value = "searchByGosnoCar" )
-    public Mono< ReqCar > searchByGosno ( String gosno ) { return RedisDataControl.getRedis().getCar( gosno ); }
+    public Flux< ReqCar > searchByGosno ( String gosno ) { return CassandraDataControl
+            .getInstance()
+            .getCar()
+            .filter( reqCar -> reqCar.getGosNumber().equals( gosno ) ); }
 
     @MessageMapping( value = "addCar" )
-    public Mono< ApiResponseModel > addCar ( ReqCar reqCar ) { return RedisDataControl.getRedis().addValue( reqCar ); }
+    public Mono< ApiResponseModel > addCar ( ReqCar reqCar ) { return CassandraDataControl
+            .getInstance()
+            .addValue( reqCar ); }
 
     @MessageMapping ( value = "updateCar" )
-    public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return RedisDataControl.getRedis().update( reqCar ); }
+    public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return CassandraDataControl
+            .getInstance()
+            .update( reqCar ); }
 
     @MessageMapping( value = "deleteCar" )
-    public Mono< ApiResponseModel > deleteCar ( String gosno ) { return RedisDataControl.getRedis().deleteCar( gosno ); }
+    public Mono< ApiResponseModel > deleteCar ( String gosno ) { return CassandraDataControl
+            .getInstance()
+            .delete(
+                    CassandraDataControl
+                            .getInstance()
+                            .getCars(),
+                    "uuid",
+                    gosno ); }
 }

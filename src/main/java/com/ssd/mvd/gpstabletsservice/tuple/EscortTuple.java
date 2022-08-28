@@ -26,7 +26,7 @@ public class EscortTuple {
     public EscortTuple ( Row row ) {
         this.setUuid( row.getUUID( "id" ) );
         this.setUuidOfPolygon( row.getUUID( "uuidOfPolygon" ) );
-        this.setTupleOfCarsList( row.getList( "patrulList", UUID.class ) );
-        this.setCountries( Countries.valueOf( row.getString( "countries" ) ) );
-        this.setTupleOfCarsList( row.getList( "tupleOfCarsList", UUID.class ) ); }
+        this.setPatrulList( row.getList( "patrulList", UUID.class ) );
+        this.setTupleOfCarsList( row.getList( "tupleOfCarsList", UUID.class ) );
+        this.setCountries( Countries.valueOf( row.getString( "countries" ) ) ); }
 }

@@ -22,7 +22,7 @@ public class EscortController {
             .getAllTupleOfEscort(); }
 
     @MessageMapping ( value = "getCurrentEscort" )
-    public Flux< EscortTuple > getCurrentTupleOfPatrul ( String id ) { return CassandraDataControlForEscort
+    public Mono< EscortTuple > getCurrentTupleOfPatrul ( String id ) { return CassandraDataControlForEscort
             .getInstance()
             .getAllTupleOfEscort( id ); }
 

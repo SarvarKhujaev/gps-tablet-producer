@@ -245,6 +245,5 @@ public class CassandraDataControlForTasks {
                                     + " where id = " + id + ";"
                     ).one() )
             .map( row -> SerDes.getSerDes()
-                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) );
-    }
+                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
 }

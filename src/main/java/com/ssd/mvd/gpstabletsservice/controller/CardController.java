@@ -169,7 +169,7 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL, card ) ) );
                         return Mono.just( ApiResponseModel.builder().build() ); } );
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
@@ -183,7 +183,7 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL, card ) ) );
                         return Mono.just( ApiResponseModel.builder().build() ); } );
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
@@ -197,7 +197,9 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                                                .changeTaskStatus( patrul,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        card ) ) );
                         return Mono.just( ApiResponseModel.builder().build() ); } );
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
@@ -211,7 +213,9 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                                                .changeTaskStatus( patrul,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        card ) ) );
                         return Mono.just( ApiResponseModel.builder().build() ); } );
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
@@ -225,7 +229,9 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                                                .changeTaskStatus( patrul,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        card ) ) );
                         return Mono.just( ApiResponseModel.builder().build() ); } );
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
@@ -239,7 +245,9 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                                                .changeTaskStatus( patrul,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        card ) ) );
                         return Mono.just( ApiResponseModel.builder().build() ); } );
 
             default -> CassandraDataControlForTasks
@@ -253,6 +261,8 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                                                .changeTaskStatus( patrul,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        card ) ) );
                         return Mono.just( ApiResponseModel.builder().build() ); } ); }; }
 }
