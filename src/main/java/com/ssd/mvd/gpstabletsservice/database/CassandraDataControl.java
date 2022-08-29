@@ -493,7 +493,7 @@ public final class CassandraDataControl {
                             .success( false )
                             .status(
                                     com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "This car was already saved, choose another one" )
+                                            .message( "This car does not exist, choose another one" )
                                             .code( 201 )
                                             .build()
                             ).build() ); }
@@ -561,8 +561,8 @@ public final class CassandraDataControl {
 
                 patrul.getName().replaceAll( "'", "" ) + "', '" +
                 patrul.getRank().replaceAll( "'", "" ) + "', '" +
-                patrul.getEmail().replaceAll( "'", "" ) + "', '" +
-                patrul.getLogin().replaceAll( "'", "" ) + "', '" +
+                patrul.getEmail() + "', '" +
+                patrul.getLogin() != null ? patrul.getLogin().replaceAll( "'", "" ) : null + "', '" +
                 patrul.getTaskId() + "', '" +
                 patrul.getCarType() + "', '" +
                 patrul.getSurname().replaceAll( "'", "" ) + "', '" +
@@ -573,7 +573,7 @@ public final class CassandraDataControl {
                 patrul.getPoliceType().replaceAll( "'", "" ) + "', '" +
                 patrul.getFatherName().replaceAll( "'", "" ) + "', '" +
                 patrul.getDateOfBirth().replaceAll( "'", "" ) + "', '" +
-                patrul.getPhoneNumber().replaceAll( "'", "" ) + "', '" +
+                patrul.getPhoneNumber() + "', '" +
                 patrul.getSpecialToken() + "', '" +
                 patrul.getTokenForLogin() + "', '" +
                 patrul.getSimCardNumber() + "', '" +
@@ -606,6 +606,7 @@ public final class CassandraDataControl {
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
         patrul.setInPolygon( false );
+        if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
         patrul.setTuplePermission( false );
         patrul.setUuid( UUID.randomUUID() );
         patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
@@ -650,7 +651,7 @@ public final class CassandraDataControl {
 
                 patrul.getName().replaceAll( "'", "" ) + "', '" +
                 patrul.getRank().replaceAll( "'", "" ) + "', '" +
-                patrul.getEmail().replaceAll( "'", "" ) + "', '" +
+                patrul.getEmail() +
                 patrul.getLogin().replaceAll( "'", "" ) + "', '" +
                 patrul.getTaskId() + "', '" +
                 patrul.getCarType() + "', '" +
