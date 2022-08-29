@@ -34,16 +34,6 @@ public class CassandraConverter {
         list.forEach( s -> result += s + ", " );
         return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
 
-    public String convertListOfStringToCassandra ( List< String > images ) {
-        result = "[";
-        images.forEach( s -> result += s + "', '" );
-        return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 3 ) + "]"; }
-
-    public String convertListOfReportToCassandra ( List< ReportForCard > images ) {
-        result = "[";
-        images.forEach( s -> result += this.convertClassToCassandraTable( s ) + ", " );
-        return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 3 ) + "]"; }
-
     public String convertListOfCameraListToCassandra ( List< CameraList > cameraLists ) {
         result = "[";
         cameraLists.forEach ( cameraList -> result += "{ "
@@ -67,12 +57,6 @@ public class CassandraConverter {
     public String convertMapToCassandra ( Map< String, String > listOfTasks ) {
         result = "{";
         listOfTasks.keySet().forEach( s -> result += "'" + s + "' : '" + listOfTasks.get( s ) + "', " );
-        return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
-
-    public String convertMapOfPatrulToCassandra ( Map< UUID, Patrul > listOfTasks ) {
-        result = "{";
-        listOfTasks.keySet().forEach( s -> result += "'" + s + "' : " +
-                this.convertClassToCassandraTable( listOfTasks.get( s ) ) + ", " );
         return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
 
     public String convertClassToCassandra ( Class object ) {

@@ -513,88 +513,115 @@ public final class CassandraDataControl {
             ).all().stream()
     ).map( ReqCar::new ); }
 
-    public Flux< Patrul > getPatrul () { return Flux.fromStream(
+    public Flux< Patrul > getPatrul() { return Flux.fromStream(
             this.session.execute(
                     "SELECT * FROM "
                             + this.dbName + "." + this.getPatrols() + ";"
             ).all().stream()
     ).map( Patrul::new ); }
 
-    public Mono< Patrul > getPatrul ( UUID uuid ) { return Mono.just(
+    public Mono< Patrul > getPatrul ( UUID uuid ) {
+        Row row = this.session.execute(
+                "SELECT * FROM "
+                        + this.dbName + "." + this.getPatrols()
+                        + " WHERE uuid = " + uuid + ";"
+        ).one();
+        return Mono.justOrEmpty( row != null ? new Patrul( row ) : null ); }
+
+    public Row getPatrul( String pasportNumber ) { return
             this.session.execute(
                     "SELECT * FROM "
                             + this.dbName + "." + this.getPatrols()
-                            + " WHERE uuid = " + uuid + ";"
-            ).one()
-    ).map( Patrul::new ); }
+                            + " WHERE passportNumber = '" + pasportNumber + "';"
+            ).one(); }
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
-        return this.session.execute( "INSERT INTO "
-                + this.dbName + "." + this.patrols +
-                CassandraConverter
-                        .getInstance()
-                        .getALlNames( patrul.getClass() ) + " VALUES ('" +
-                ( patrul.getTaskDate() != null ? patrul.getTaskDate().toInstant() : null ) + "', '" +
-                ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : new Date() ) + "', '" +
-                ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : new Date() ) + "', '" +
-                ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : new Date() ) + "', " +
-
-                patrul.getDistance() + ", " +
-                patrul.getLatitude() + ", " +
-                patrul.getLongitude() + ", " +
-                patrul.getLatitudeOfTask() + ", " +
-                patrul.getLongitudeOfTask() + ", " +
-
-                patrul.getUuid() + ", " +
-                patrul.getOrgan() + ", " +
-                patrul.getUuidOfEscort() + ", " +
-                patrul.getUuidForPatrulCar() + ", " +
-                patrul.getUuidForEscortCar() + ", " +
-
-                patrul.getRegionId() + ", " +
-                patrul.getMahallaId() + ", " +
-                patrul.getDistrictId() + ", " +
-                patrul.getTotalActivityTime() + ", " +
-
-                patrul.getInPolygon() + ", " +
-                patrul.getTuplePermission() + ", '" +
-
-                patrul.getName().replaceAll( "'", "" ) + "', '" +
-                patrul.getRank().replaceAll( "'", "" ) + "', '" +
-                patrul.getEmail() + "', '" +
-                patrul.getLogin() != null ? patrul.getLogin().replaceAll( "'", "" ) : null + "', '" +
-                patrul.getTaskId() + "', '" +
-                patrul.getCarType() + "', '" +
-                patrul.getSurname().replaceAll( "'", "" ) + "', '" +
-                patrul.getPassword().replaceAll( "'", "" ) + "', '" +
-                patrul.getCarNumber() + "', '" +
-                patrul.getOrganName().replaceAll( "'", "" ) + "', '" +
-                patrul.getRegionName().replaceAll( "'", "" ) + "', '" +
-                patrul.getPoliceType().replaceAll( "'", "" ) + "', '" +
-                patrul.getFatherName().replaceAll( "'", "" ) + "', '" +
-                patrul.getDateOfBirth().replaceAll( "'", "" ) + "', '" +
-                patrul.getPhoneNumber() + "', '" +
-                patrul.getSpecialToken() + "', '" +
-                patrul.getTokenForLogin() + "', '" +
-                patrul.getSimCardNumber() + "', '" +
-                patrul.getPassportNumber() + "', '" +
-                patrul.getPatrulImageLink() + "', '" +
-                patrul.getSurnameNameFatherName().replaceAll( "'", "" ) + "', '" +
-                patrul.getStatus() + "', '" +
-                patrul.getTaskTypes() + "', " +
-                CassandraConverter
-                        .getInstance()
-                        .convertMapToCassandra( patrul.getListOfTasks() ) + " );"
-        ).wasApplied() ? Mono.just(
+        Row row = this.getPatrul( patrul.getPassportNumber() );
+        if ( row == null ) return Mono.just(
                 ApiResponseModel.builder()
-                        .success( true )
+                        .success( false )
                         .status(
                                 com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Patrul was successfully updated" )
-                                        .code( 200 )
+                                        .message( "Wrong patrul data" )
+                                        .code( 201 )
                                         .build() )
-                        .build()
-        ) : Mono.just(
+                        .build() );
+        if ( row.getUUID( "uuid" ).compareTo( patrul.getUuid() ) == 0 ) {
+            return this.session.execute( "INSERT INTO "
+                    + this.dbName + "." + this.patrols +
+                    CassandraConverter
+                            .getInstance()
+                            .getALlNames( Patrul.class ) + " VALUES ('" +
+                    ( patrul.getTaskDate() != null ? patrul.getTaskDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : new Date().toInstant() ) + "', " +
+
+                    patrul.getDistance() + ", " +
+                    patrul.getLatitude() + ", " +
+                    patrul.getLongitude() + ", " +
+                    patrul.getLatitudeOfTask() + ", " +
+                    patrul.getLongitudeOfTask() + ", " +
+
+                    patrul.getUuid() + ", " +
+                    patrul.getOrgan() + ", " +
+                    patrul.getUuidOfEscort() + ", " +
+                    patrul.getUuidForPatrulCar() + ", " +
+                    patrul.getUuidForEscortCar() + ", " +
+
+                    patrul.getRegionId() + ", " +
+                    patrul.getMahallaId() + ", " +
+                    patrul.getDistrictId() + ", " +
+                    patrul.getTotalActivityTime() + ", " +
+
+                    patrul.getInPolygon() + ", " +
+                    patrul.getTuplePermission() + ", '" +
+
+                    patrul.getName() + "', '" +
+                    patrul.getRank() + "', '" +
+                    patrul.getEmail() + "', '" +
+                    patrul.getLogin() + "', '" +
+                    patrul.getTaskId() + "', '" +
+                    patrul.getCarType() + "', '" +
+                    patrul.getSurname() + "', '" +
+                    patrul.getPassword() + "', '" +
+                    patrul.getCarNumber() + "', '" +
+                    patrul.getOrganName() + "', '" +
+                    patrul.getRegionName() + "', '" +
+                    patrul.getPoliceType() + "', '" +
+                    patrul.getFatherName() + "', '" +
+                    patrul.getDateOfBirth() + "', '" +
+                    patrul.getPhoneNumber() + "', '" +
+                    patrul.getSpecialToken() + "', '" +
+                    patrul.getTokenForLogin() + "', '" +
+                    patrul.getSimCardNumber() + "', '" +
+                    patrul.getPassportNumber() + "', '" +
+                    patrul.getPatrulImageLink() + "', '" +
+                    patrul.getSurnameNameFatherName() + "', '" +
+                    patrul.getStatus() + "', '" +
+                    patrul.getTaskTypes() + "', " +
+                    CassandraConverter
+                            .getInstance()
+                            .convertMapToCassandra( patrul.getListOfTasks() ) + " );"
+            ).wasApplied() ? Mono.just(
+                    ApiResponseModel.builder()
+                            .success( true )
+                            .status(
+                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .message( "Patrul was successfully updated" )
+                                            .code( 200 )
+                                            .build() )
+                            .build()
+            ) : Mono.just(
+                    ApiResponseModel.builder()
+                            .success( false )
+                            .status(
+                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .message( "There is no such a patrul" )
+                                            .code( 201 )
+                                            .build() )
+                            .build() ); }
+        else return Mono.just(
                 ApiResponseModel.builder()
                         .success( false )
                         .status(
@@ -605,101 +632,105 @@ public final class CassandraDataControl {
                         .build() ); }
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
-        patrul.setInPolygon( false );
-        if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
-        patrul.setTuplePermission( false );
-        patrul.setUuid( UUID.randomUUID() );
-        patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
-        patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
-        patrul.setSurnameNameFatherName( patrul.getName() + " " + patrul.getSurname() + " " + patrul.getFatherName() );
-        return this.session.execute(
-                "INSERT INTO "
-                + this.dbName + "." + this.getPatrolsLogin()
-            + " ( login, password, uuid ) VALUES( '"
-            + patrul.getLogin() + "', '"
-            + patrul.getPassword() + "', "
-            + patrul.getUuid() + " ) IF NOT EXISTS; " ).wasApplied() ?
-        this.session.execute( "INSERT INTO "
-                + this.dbName + "." + this.patrols +
-                CassandraConverter
-                        .getInstance()
-                        .getALlNames( patrul.getClass() ) + " VALUES ('" +
-                ( patrul.getTaskDate() != null ? patrul.getTaskDate().toInstant() : null ) + "', '" +
-                ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : null ) + "', '" +
-                ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : null ) + "', '" +
-                ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : null ) + "', " +
-
-                patrul.getDistance() + ", " +
-                patrul.getLatitude() + ", " +
-                patrul.getLongitude() + ", " +
-                patrul.getLatitudeOfTask() + ", " +
-                patrul.getLongitudeOfTask() + ", " +
-
-                patrul.getUuid() + ", " +
-                patrul.getOrgan() + ", " +
-                patrul.getUuidOfEscort() + ", " +
-                patrul.getUuidForPatrulCar() + ", " +
-                patrul.getUuidForEscortCar() + ", " +
-
-                patrul.getRegionId() + ", " +
-                patrul.getMahallaId() + ", " +
-                patrul.getDistrictId() + ", " +
-                patrul.getTotalActivityTime() + ", " +
-
-                patrul.getInPolygon() + ", " +
-                patrul.getTuplePermission() + ", '" +
-
-                patrul.getName().replaceAll( "'", "" ) + "', '" +
-                patrul.getRank().replaceAll( "'", "" ) + "', '" +
-                patrul.getEmail() +
-                patrul.getLogin().replaceAll( "'", "" ) + "', '" +
-                patrul.getTaskId() + "', '" +
-                patrul.getCarType() + "', '" +
-                patrul.getSurname().replaceAll( "'", "" ) + "', '" +
-                patrul.getPassword().replaceAll( "'", "" ) + "', '" +
-                patrul.getCarNumber() + "', '" +
-                patrul.getOrganName().replaceAll( "'", "" ) + "', '" +
-                patrul.getRegionName().replaceAll( "'", "" ) + "', '" +
-                patrul.getPoliceType().replaceAll( "'", "" ) + "', '" +
-                patrul.getFatherName().replaceAll( "'", "" ) + "', '" +
-                patrul.getDateOfBirth().replaceAll( "'", "" ) + "', '" +
-                patrul.getPhoneNumber().replaceAll( "'", "" ) + "', '" +
-                patrul.getSpecialToken() + "', '" +
-                patrul.getTokenForLogin() + "', '" +
-                patrul.getSimCardNumber() + "', '" +
-                patrul.getPassportNumber() + "', '" +
-                patrul.getPatrulImageLink() + "', '" +
-                patrul.getSurnameNameFatherName().replaceAll( "'", "" ) + "', '" +
-                patrul.getStatus() + "', '" +
-                patrul.getTaskTypes() + "', " +
-                CassandraConverter
-                        .getInstance()
-                        .convertMapToCassandra( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;"
-        ).wasApplied() ? Mono.just(
-                ApiResponseModel.builder()
-                        .success( true )
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Patrul was successfully saved" )
-                                        .code( 200 )
-                                        .build() )
-                        .build()
+        if ( this.getPatrul( patrul.getPassportNumber() ) == null ) {
+            patrul.setInPolygon( false );
+            patrul.setTuplePermission( false );
+            patrul.setUuid( UUID.randomUUID() );
+            patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
+            patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
+            if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
+            patrul.setSurnameNameFatherName( patrul.getName() + " " + patrul.getSurname() + " " + patrul.getFatherName() );
+            return this.session.execute(
+                    "INSERT INTO "
+                            + this.dbName + "." + this.getPatrolsLogin()
+                            + " ( login, password, uuid ) VALUES( '"
+                            + patrul.getLogin() + "', '"
+                            + patrul.getPassword() + "', "
+                            + patrul.getUuid() + " ) IF NOT EXISTS; " ).wasApplied() ?
+            this.session.execute( "INSERT INTO "
+                    + this.dbName + "." + this.getPatrols() +
+                    CassandraConverter
+                            .getInstance()
+                            .getALlNames( Patrul.class ) + " VALUES ('" +
+                    ( patrul.getTaskDate() != null ? patrul.getTaskDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : new Date().toInstant() ) + "', " +
+                    patrul.getDistance() + ", " +
+                    patrul.getLatitude() + ", " +
+                    patrul.getLongitude() + ", " +
+                    patrul.getLatitudeOfTask() + ", " +
+                    patrul.getLongitudeOfTask() + ", " +
+                    patrul.getUuid() + ", " +
+                    patrul.getOrgan() + ", " +
+                    patrul.getUuidOfEscort() + ", " +
+                    patrul.getUuidForPatrulCar() + ", " +
+                    patrul.getUuidForEscortCar() + ", " +
+                    patrul.getRegionId() + ", " +
+                    patrul.getMahallaId() + ", " +
+                    patrul.getDistrictId() + ", " +
+                    patrul.getTotalActivityTime() + ", " +
+                    patrul.getInPolygon() + ", " +
+                    patrul.getTuplePermission() + ", '" +
+                    patrul.getName() + "', '" +
+                    patrul.getRank() + "', '" +
+                    patrul.getEmail() + "', '" +
+                    patrul.getLogin() + "', '" +
+                    patrul.getTaskId() + "', '" +
+                    patrul.getCarType() + "', '" +
+                    patrul.getSurname() + "', '" +
+                    patrul.getPassword() + "', '" +
+                    patrul.getCarNumber() + "', '" +
+                    patrul.getOrganName() + "', '" +
+                    patrul.getRegionName() + "', '" +
+                    patrul.getPoliceType() + "', '" +
+                    patrul.getFatherName() + "', '" +
+                    patrul.getDateOfBirth() + "', '" +
+                    patrul.getPhoneNumber() + "', '" +
+                    patrul.getSpecialToken() + "', '" +
+                    patrul.getTokenForLogin() + "', '" +
+                    patrul.getSimCardNumber() + "', '" +
+                    patrul.getPassportNumber() + "', '" +
+                    patrul.getPatrulImageLink() + "', '" +
+                    patrul.getSurnameNameFatherName() + "', '" +
+                    patrul.getStatus() + "', '" +
+                    patrul.getTaskTypes() + "', " +
+                    CassandraConverter
+                            .getInstance()
+                            .convertMapToCassandra( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;" )
+                    .wasApplied() ? Mono.just(
+                    ApiResponseModel.builder()
+                            .success( true )
+                            .status(
+                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .message( "Patrul was successfully saved" )
+                                            .code( 200 )
+                                            .build() )
+                            .build()
             ) : Mono.just(
+                    ApiResponseModel.builder()
+                            .success( false )
+                            .status(
+                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .message( "Patrul has already been saved. choose another one" )
+                                            .code( 201 )
+                                            .build() )
+                            .build() ) : Mono.just(
+                    ApiResponseModel.builder()
+                            .status(
+                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .message( "Wrong login. it has to be unique" )
+                                            .code( 200 )
+                                            .build()
+                            ).build() );
+        } else return Mono.just(
                 ApiResponseModel.builder()
-                        .success( false )
                         .status(
                                 com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Patrul has already been saved. choose another one" )
-                                        .code( 201 )
-                                        .build() )
-                        .build() ) : Mono.just(
-                                ApiResponseModel.builder()
-                                        .status(
-                                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                                        .message( "Wrong login. it has to be unique" )
-                                                        .code( 200 )
-                                                        .build()
-                                        ).build() ); }
+                                        .message( "This patrul is already exists" )
+                                        .code( 200 )
+                                        .build()
+                        ).build() ); }
 
     public Flux< Polygon > getAllPoygonForPatrul () {
         return Flux.fromStream(
@@ -790,7 +821,7 @@ public final class CassandraDataControl {
 
                         CassandraConverter
                                 .getInstance()
-                                .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() ) + ") IF EXISTS;" )
+                                .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() ) + ");" )
                 .wasApplied() ? Mono.just(
                 ApiResponseModel.builder()
                         .status(
@@ -813,7 +844,7 @@ public final class CassandraDataControl {
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return this.getPolygonForPatrul( scheduleForPolygonPatrul.getUuid() )
                 .flatMap( polygon -> Flux.fromStream( scheduleForPolygonPatrul.getPatrulUUIDs().stream() )
-                        .flatMap( this::getPatrul )
+                        .flatMap( this::getPatrul)
                         .flatMap( patrul -> {
                             this.session.executeAsync(
                                     "UPDATE " +
@@ -1050,8 +1081,10 @@ public final class CassandraDataControl {
                                     + "@" + patrul.getPassword()
                                     + "@" + Archive.getAchieve().generateToken() )
                             .getBytes( StandardCharsets.UTF_8 ) ) );
+                    this.update( patrul ).subscribe(); // savs all new changes in patrul object
                     return Mono.just( ApiResponseModel.builder()
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                    .type( patrul.getUuid().toString() )
                                     .data( patrul )
                                     .build() )
                             .success( CassandraDataControl.getInstance()

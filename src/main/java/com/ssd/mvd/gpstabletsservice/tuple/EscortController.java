@@ -3,6 +3,7 @@ package com.ssd.mvd.gpstabletsservice.tuple;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.Countries;
 
@@ -50,6 +51,16 @@ public class EscortController {
             .getInstance()
             .getAllTupleOfCar( uuid )
             .flatMap( tupleOfCar -> {
+                CassandraDataControl
+                        .getInstance()
+                                .getPatrul( tupleOfCar.getUuidOfPatrul() )
+                                        .subscribe( patrul -> {
+                                            patrul.setUuidOfEscort( null );
+                                            patrul.setUuidForEscortCar( null );
+                                            CassandraDataControl
+                                                    .getInstance()
+                                                    .update( patrul )
+                                                    .subscribe(); } );
                 tupleOfCar.setUuidOfEscort( null );
                 tupleOfCar.setUuidOfPatrul( null );
                 return CassandraDataControlForEscort
