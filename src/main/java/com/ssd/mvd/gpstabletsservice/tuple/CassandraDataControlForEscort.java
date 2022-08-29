@@ -101,7 +101,7 @@ public class CassandraDataControlForEscort {
 
     private static Integer i;
 
-    public Flux< ApiResponseModel > addValue ( EscortTuple escortTuple ) {
+    private void linkPatrulWithEscortCar ( EscortTuple escortTuple ) {
         for ( i = 0; i < escortTuple.getPatrulList().size(); i++ ) CassandraDataControl
                 .getInstance()
                 .getPatrul( escortTuple.getPatrulList().get( i ) )
@@ -122,8 +122,10 @@ public class CassandraDataControlForEscort {
                             .getInstance()
                             .changeTaskStatus( patrul,
                                     com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                    escortTuple ); } );
+                                    escortTuple ); } ); }
 
+    public Flux< ApiResponseModel > addValue ( EscortTuple escortTuple ) {
+        this.linkPatrulWithEscortCar( escortTuple );
         return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.getTupleOfEscort()
                 + "( id," +
@@ -160,6 +162,7 @@ public class CassandraDataControlForEscort {
                                         .build() ); }
 
     public Mono< ApiResponseModel > update ( EscortTuple escortTuple ) {
+        this.linkPatrulWithEscortCar( escortTuple );
         return this.session.execute( "INSERT INTO "
                         + this.dbName + "." + this.tupleOfEscort
                         + "( id," +

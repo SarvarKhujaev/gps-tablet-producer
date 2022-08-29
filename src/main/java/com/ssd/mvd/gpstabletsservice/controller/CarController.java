@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import com.ssd.mvd.gpstabletsservice.response.Status;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,12 +41,24 @@ public class CarController {
             .update( reqCar ); }
 
     @MessageMapping( value = "deleteCar" )
-    public Mono< ApiResponseModel > deleteCar ( String gosno ) { return CassandraDataControl
-            .getInstance()
-            .delete(
-                    CassandraDataControl
-                            .getInstance()
-                            .getCars(),
-                    "uuid",
-                    gosno ); }
+    public Mono< ApiResponseModel > deleteCar ( String gosno ) {
+        return CassandraDataControl
+                .getInstance()
+                .getCar( UUID.fromString( gosno ) )
+                .flatMap( reqCar -> reqCar.getPatrulPassportSeries() == null ? CassandraDataControl
+                                .getInstance()
+                                .delete( CassandraDataControl
+                                                .getInstance()
+                                                .getCars(),
+                                        "uuid",
+                                        gosno ) : Mono.just( ApiResponseModel.builder()
+                        .success( false )
+                        .status( Status.builder()
+                                .message( "OOOps this car is linked to patrul: "
+                                        + reqCar.getPatrulPassportSeries()
+                                        + " so firstly eliminate this link" )
+                                .code( 201 )
+                                .build() )
+                        .build() ) );
+    }
 }

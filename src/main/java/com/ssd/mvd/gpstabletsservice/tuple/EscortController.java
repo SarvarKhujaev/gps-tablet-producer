@@ -8,6 +8,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Countries;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 @RestController
 public class EscortController {
@@ -43,4 +44,15 @@ public class EscortController {
     public Mono< TupleTotalData > getTupleTotalData ( String uuid ) { return CassandraDataControlForEscort
             .getInstance()
             .getTupleTotalData( uuid ); }
+
+    @MessageMapping ( value = "removeEscortCarFromEscort" )
+    public Mono< ApiResponseModel > removeEscortCarFromEscort ( UUID uuid ) { return CassandraDataControlForEscort
+            .getInstance()
+            .getAllTupleOfCar( uuid )
+            .flatMap( tupleOfCar -> {
+                tupleOfCar.setUuidOfEscort( null );
+                tupleOfCar.setUuidOfPatrul( null );
+                return CassandraDataControlForEscort
+                        .getInstance()
+                        .update( tupleOfCar ); } ); }
 }
