@@ -12,7 +12,7 @@ public class First {
 	private String timestamp;
 
 	@SerializedName("bbox")
-	private List<Integer> bbox;
+	private List< Integer > bbox;
 
 	@SerializedName("quality")
 	private Double quality;

@@ -24,8 +24,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FIND_FACE_CAR;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
 @Data
 public final class TaskInspector {
@@ -270,7 +270,7 @@ public final class TaskInspector {
                                                 .build() ) );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvents carEvents ) {
+    public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvent carEvents ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
@@ -288,8 +288,9 @@ public final class TaskInspector {
             case ATTACHED -> {
                 patrul.setTaskTypes( FIND_FACE_CAR );
                 patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
-                patrul.setLatitudeOfTask( carEvents.getCamera().getLatitude() );
-                patrul.setLongitudeOfTask( carEvents.getCamera().getLongitude() ); }
+//                patrul.setLatitudeOfTask( carEvents.getCamera().getLatitude() );
+//                patrul.setLongitudeOfTask( carEvents.getCamera().getLongitude() );
+            }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
@@ -320,10 +321,10 @@ public final class TaskInspector {
                                                 .notificationWasCreated( new Date() )
                                                 .policeType( patrul.getPoliceType() )
                                                 .passportSeries( patrul.getPassportNumber() )
-                                                .latitudeOfTask( carEvents.getCamera().getLatitude() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
-                                                .longitudeOfTask( carEvents.getCamera().getLongitude() )
-                                                .address( carEvents.getCamera().getName() != null ? carEvents.getCamera().getName() : "unknown" )
+//                                                .latitudeOfTask( carEvents.getCamera().getLatitude() )
+//                                                .longitudeOfTask( carEvents.getCamera().getLongitude() )
+//                                                .address( carEvents.getCamera().getName() != null ? carEvents.getCamera().getName() : "unknown" )
                                                 .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_CAR
                                                         + ", so be so kind to check active Task and start to work )))" ).build() ) );
         return patrul; }
@@ -378,7 +379,7 @@ public final class TaskInspector {
                                                         + ", so be so kind to check active Task and start to work )))" )
                                                 .build() ) ); }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvents faceEvents ) {
+    public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvent faceEvents ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
@@ -396,8 +397,9 @@ public final class TaskInspector {
             case ATTACHED -> {
                 patrul.setTaskId( faceEvents.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( FIND_FACE_PERSON );
-                patrul.setLatitudeOfTask( faceEvents.getCamera().getLatitude() );
-                patrul.setLongitudeOfTask( faceEvents.getCamera().getLongitude() ); }
+//                patrul.setLatitudeOfTask( faceEvents.getCamera().getLatitude() );
+//                patrul.setLongitudeOfTask( faceEvents.getCamera().getLongitude() );
+            }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> faceEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
                     PatrulStatus.builder()
@@ -431,10 +433,10 @@ public final class TaskInspector {
                                                 .notificationWasCreated( new Date() )
                                                 .policeType( patrul.getPoliceType() )
                                                 .passportSeries( patrul.getPassportNumber() )
-                                                .latitudeOfTask( faceEvents.getCamera().getLatitude() )
+//                                                .latitudeOfTask( faceEvents.getCamera().getLatitude() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
-                                                .longitudeOfTask( faceEvents.getCamera().getLongitude() )
-                                                .address( faceEvents.getCamera().getName() != null ? faceEvents.getCamera().getName() : "unknown" )
+//                                                .longitudeOfTask( faceEvents.getCamera().getLongitude() )
+//                                                .address( faceEvents.getCamera().getName() != null ? faceEvents.getCamera().getName() : "unknown" )
                                                 .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_PERSON
                                                         + ", so be so kind to check active Task and start to work )))" )
                                                 .build() ) );

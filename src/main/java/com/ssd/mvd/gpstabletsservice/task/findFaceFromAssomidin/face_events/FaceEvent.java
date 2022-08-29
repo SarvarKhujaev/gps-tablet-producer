@@ -1,34 +1,44 @@
-package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
+package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.*;
-import java.util.*;
-
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
+
+import lombok.extern.jackson.Jacksonized;
+import java.util.*;
+import lombok.*;
 
 @Data
+@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties( ignoreUnknown = true )
-public class CarEvent {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class FaceEvent {
+
     @JsonProperty("episode")
-    private String episode;
+    private Integer episode;
 
     @JsonProperty("matched_object")
     private String matched_object;
 
+    @JsonProperty("matched_cluster")
+    private String matched_cluster;
+
     @JsonProperty("matched_card")
     private Long matched_dossier;
 
-    @JsonProperty("matched_cluster")
-    private String matched_cluster;
+    private String name;
+    private String comment;
+    private String dossier_photo;
+
+    @JsonProperty("temperature")
+    private String temperature;
 
     @JsonProperty("created_date")
     private String created_date;
@@ -63,6 +73,7 @@ public class CarEvent {
     @JsonProperty("matched")
     private Boolean matched;
 
+    @JsonDeserialize
     @JsonProperty("matched_lists")
     private List<Integer> matched_lists;
 
@@ -73,14 +84,13 @@ public class CarEvent {
     private Integer cluster_confidence;
 
     @JsonProperty("quality")
-    private Double quality;
+    private String quality;
 
-    private TintedGlass tintedGlass;
-
-    @JsonProperty( "detector_params" )
+    @JsonDeserialize
+    @JsonProperty("detector_params")
     private DetectorParams detector_params;
 
-    @JsonProperty( "acknowledged_date" )
+    @JsonProperty("acknowledged_date")
     private String acknowledged_date;
 
     @JsonProperty("acknowledged_by")
@@ -89,20 +99,21 @@ public class CarEvent {
     @JsonProperty("acknowledged_reaction")
     private String acknowledged_reaction;
 
-    @JsonProperty( "acknowledged" )
+    @JsonProperty("acknowledged")
     private Boolean acknowledged;
 
-    @JsonProperty( "video_archive" )
+    @JsonProperty("video_archive")
     private String video_archive;
 
-    @JsonProperty( "id" )
+    @JsonProperty("id")
     private String id;
 
+    @JsonDeserialize
     @JsonProperty("features")
     private Features features;
 
     @JsonProperty("looks_like_confidence")
-    private String looks_like_confidence;
+    private String looksLikeConfidence;
 
     @JsonProperty("object_type")
     private String object_type;
@@ -115,12 +126,12 @@ public class CarEvent {
 
     private Status status = Status.CREATED;
     @JsonDeserialize
-    private CarTotalData carTotalData;
+    private PsychologyCard psychologyCard;
 
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize
     private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize
-    private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
+    private List<ReportForCard> reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize
-    private Map< String, PatrulStatus > patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
+    private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }

@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.gson.annotations.SerializedName;
 import lombok.extern.jackson.Jacksonized;
 import lombok.*;
 
@@ -12,16 +13,26 @@ import lombok.*;
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class Features {
     @JsonDeserialize
-    private Beard beard;
-    @JsonDeserialize
+    @SerializedName("gender")
     private Gender gender;
+
     @JsonDeserialize
-    private Medmask medmask;
+    @SerializedName("age")
+    private Age age;
+
     @JsonDeserialize
-    private Glasses glasses;
-    @JsonDeserialize
+    @SerializedName("emotions")
     private Emotions emotions;
 
-    private Integer age;
-    private String liveness;
+    @JsonDeserialize
+    @SerializedName("beard")
+    private Beard beard;
+
+    @JsonDeserialize
+    @SerializedName("glasses")
+    private Glasses glasses;
+
+    @JsonDeserialize
+    @SerializedName("medmask")
+    private Medmask medmask;
 }

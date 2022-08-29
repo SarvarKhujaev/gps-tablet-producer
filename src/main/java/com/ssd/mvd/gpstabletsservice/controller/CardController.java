@@ -1,8 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
@@ -61,7 +61,7 @@ public class CardController {
                                     .save( patrul1, eventFace ) ) ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
-            FaceEvents facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
+            FaceEvent facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
@@ -70,7 +70,7 @@ public class CardController {
                             .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, facePerson ) ) ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
-            CarEvents carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
+            CarEvent carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()

@@ -13,8 +13,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
 @Data
 public class CardDetails {
@@ -62,7 +62,7 @@ public class CardDetails {
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "O'XSHASHLIGI: ", eventBody.getConfidence() ) );
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Vaqt", eventBody.getCreated_date().getTime() ) ); }
 
-    public CardDetails ( FaceEvents eventCar ) {
+    public CardDetails ( FaceEvent eventCar ) {
         this.getDetails().putIfAbsent( Details.FIND_FACE_PERSON, new ArrayList<>() );
         this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "F.I.O",
                 eventCar.getPsychologyCard().getModelForPassport().getPerson().getNameLatin() + " "
@@ -73,10 +73,10 @@ public class CardDetails {
         this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Image", eventCar.getFullframe() ) );
         this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Sana", eventCar.getCreated_date() ) );
         this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Vaqt", eventCar.getCreated_date() ) );
-        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Ip", eventCar.getCamera().getUrl() ) );
+//        this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "Ip", eventCar.getCamera().getUrl() ) );
         this.getDetails().get( Details.FIND_FACE_PERSON ).add( new Item( "O'XSHASHLIGI: ", eventCar.getConfidence() ) ); }
 
-    public CardDetails ( CarEvents eventCar ) {
+    public CardDetails ( CarEvent eventCar ) {
         this.getDetails().putIfAbsent( Details.FIND_FACE_EVENT_CAR, new ArrayList<>() );
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "F.I.O",
                 eventCar.getCarTotalData().getModelForCar().getModel() + ", "
@@ -87,7 +87,7 @@ public class CardDetails {
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Image", eventCar.getFullframe() ) );
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Vaqt", eventCar.getCreated_date() ) );
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Sana", eventCar.getCreated_date() ) );
-        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Ip", eventCar.getCamera().getUrl() ) );
+//        this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "Ip", eventCar.getCamera().getUrl() ) );
         this.getDetails().get( Details.FIND_FACE_EVENT_CAR ).add( new Item( "O'XSHASHLIGI: ", eventCar.getConfidence() ) ); }
 
     public CardDetails ( CarTotalData carTotalData ) {

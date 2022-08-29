@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import com.ssd.mvd.gpstabletsservice.response.Status;
 import lombok.Data;
 
 import java.util.List;
@@ -14,6 +13,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSetFuture;
 
+import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
@@ -21,8 +21,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
 @Data
@@ -176,7 +176,7 @@ public class CassandraDataControlForTasks {
                                     + " where id = '" + id + "';"
                     ).one().getString( "object" ) ) ); }
 
-    public Mono< FaceEvents > getFaceEvents ( String id ) { return Mono.just(
+    public Mono< FaceEvent > getFaceEvents ( String id ) { return Mono.just(
             SerDes.getSerDes().deserializeFaceEvents(
                     this.session.execute(
                             "select * from "
@@ -184,7 +184,7 @@ public class CassandraDataControlForTasks {
                                     + " where id = '" + id + "';"
                     ).one().getString( "object" ) ) ); }
 
-    public Mono< CarEvents > getCarEvents ( String id ) { return Mono.just(
+    public Mono< CarEvent > getCarEvents ( String id ) { return Mono.just(
             SerDes.getSerDes().deserializeCarEvents(
                     this.session.execute(
                             "select * from "
@@ -225,14 +225,14 @@ public class CassandraDataControlForTasks {
             + eventBody.getConfidence() + ", '"
             + SerDes.getSerDes().serialize( eventBody ) + "');" ).isDone(); }
 
-    public ResultSetFuture addValue ( CarEvents carEvents ) { return this.session
+    public ResultSetFuture addValue ( CarEvent carEvents ) { return this.session
             .executeAsync( "INSERT INTO "
                     + this.dbName + "." + this.faceCar
                     + "(id, object) VALUES ('"
                     + carEvents.getId() + "', '"
                     + SerDes.getSerDes().serialize( carEvents ) + "');" ); }
 
-    public ResultSetFuture addValue ( FaceEvents faceEvents ) { return this.session.executeAsync( "INSERT INTO "
+    public ResultSetFuture addValue ( FaceEvent faceEvents ) { return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.facePerson
             + "(id, object) VALUES ('"
             + faceEvents.getId() + "', '"

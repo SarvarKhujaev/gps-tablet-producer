@@ -10,13 +10,12 @@ import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvents;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvents;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
 @Data
 public class Archive {
@@ -81,7 +80,7 @@ public class Archive {
                                 .build() )
                         .build() ) ); }
 
-    public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvents card ) {
+    public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvent card ) {
         TaskInspector.getInstance()
                 .changeTaskStatus( patrul, ATTACHED, card );
         return RedisDataControl.getRedis().update( patrul )
@@ -92,7 +91,7 @@ public class Archive {
                                 .build() )
                         .build() ) ); }
 
-    public Mono< ApiResponseModel > save ( Patrul patrul, CarEvents card ) {
+    public Mono< ApiResponseModel > save ( Patrul patrul, CarEvent card ) {
         TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
         return RedisDataControl.getRedis().update( patrul )
                 .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
