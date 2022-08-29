@@ -132,7 +132,7 @@ public class CardController {
             .getWarningCarDetails( gosnumber ); }
 
     @MessageMapping ( value = "getAllCarTotalData" )
-    public Mono< List< CarTotalData > > getAllCarTotalData () { return CassandraDataControlForTasks
+    public Mono< ApiResponseModel > getAllCarTotalData () { return CassandraDataControlForTasks
             .getInstance()
             .getAllCarTotalData(); }
 

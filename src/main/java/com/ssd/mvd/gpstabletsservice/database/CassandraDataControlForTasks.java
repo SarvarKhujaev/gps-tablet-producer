@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.response.Status;
 import lombok.Data;
 import java.util.List;
 import java.util.UUID;
@@ -101,17 +102,27 @@ public class CassandraDataControlForTasks {
                     .convertListOfViolationsToCassandra( carTotalData.getViolationsList().getViolationsInformationsList() )
                     + ", '" + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
 
-    public Mono< List< CarTotalData > > getAllCarTotalData () {
-        return Flux.fromStream(
-                    this.session.execute(
-                                    "SELECT * FROM "
-                                            + this.dbName + "." + this.carTotalData )
-                            .all().stream() )
-            .map( row -> SerDes
-                    .getSerDes()
-                    .deserializeCarTotalData( row.getString( "object" ) ) )
-                .collectList();
-    }
+    public Mono< ApiResponseModel > getAllCarTotalData () {
+        return Mono.just(
+                ApiResponseModel
+                        .builder()
+                        .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                .builder()
+                                .data( Flux.fromStream(
+                                        this.session.execute(
+                                                "SELECT * FROM "
+                                                        + this.dbName + "." + this.carTotalData )
+                                                .all().stream() )
+                                                .map( row -> SerDes
+                                                        .getSerDes()
+                                                        .deserializeCarTotalData( row.getString( "object" ) ) )
+                                                .collectList()
+                                ).build()
+                        ).status( Status.builder()
+                                        .code( 200 )
+                                        .message( "All car total data retrieved" )
+                                        .build() )
+                        .build() ); }
 
     public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return Mono.just(
             ApiResponseModel.builder()
