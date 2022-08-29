@@ -101,14 +101,17 @@ public class CassandraDataControlForTasks {
                     .convertListOfViolationsToCassandra( carTotalData.getViolationsList().getViolationsInformationsList() )
                     + ", '" + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
 
-    public Flux< CarTotalData > getAllCarTotalData () { return Flux.fromStream(
+    public Mono< List< CarTotalData > > getAllCarTotalData () {
+        return Flux.fromStream(
                     this.session.execute(
                                     "SELECT * FROM "
                                             + this.dbName + "." + this.carTotalData )
                             .all().stream() )
             .map( row -> SerDes
                     .getSerDes()
-                    .deserializeCarTotalData( row.getString( "object" ) ) ); }
+                    .deserializeCarTotalData( row.getString( "object" ) ) )
+                .collectList();
+    }
 
     public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return Mono.just(
             ApiResponseModel.builder()

@@ -14,7 +14,6 @@ import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
-import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -132,19 +132,9 @@ public class CardController {
             .getWarningCarDetails( gosnumber ); }
 
     @MessageMapping ( value = "getAllCarTotalData" )
-    public Mono< ApiResponseModel > getAllCarTotalData () { return Mono.just(
-            ApiResponseModel.builder()
-                    .success( true )
-                    .status( Status.builder()
-                                    .message( "WarningCar Data" )
-                                    .code( 200 )
-                                    .build() )
-                    .data( Data.builder()
-                                    .data( CassandraDataControlForTasks
-                                                    .getInstance()
-                                                    .getAllCarTotalData() )
-                                    .build() )
-                    .build() ); }
+    public Mono< List< CarTotalData > > getAllCarTotalData () { return CassandraDataControlForTasks
+            .getInstance()
+            .getAllCarTotalData(); }
 
     @MessageMapping ( value = "removePatrulFromTask" )
     public Mono< ApiResponseModel > removePatrulFromTask ( UUID uuid ) {
