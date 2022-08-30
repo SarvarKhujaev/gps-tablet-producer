@@ -1072,6 +1072,8 @@ public final class CassandraDataControl {
         ).filter( row ->
                 Status.valueOf( row.getString( "status" ) ).compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
                 && TaskTypes.valueOf( row.getString( "taskTypes" ) ).compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
+                && row.getDouble( "latitude" ) > 0
+                        && row.getDouble( "longitude" ) > 0
         ).map( Patrul::new )
                 .flatMap( patrul -> {
                     patrul.setDistance( this.calculate( point, patrul ) );
