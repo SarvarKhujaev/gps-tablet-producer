@@ -21,7 +21,7 @@ public class PolygonForPatrulController { // SAM - 76
     @MessageMapping( value = "listOfPoligonsForPatrul" )
     public Flux< Polygon > listOfPoligonsForPatrul () { return CassandraDataControl
             .getInstance()
-            .getAllPoygonForPatrul(); }
+            .getAllPolygonForPatrul(); }
 
     @MessageMapping ( value = "deletePolygonForPatrul" )
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return CassandraDataControl

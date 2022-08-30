@@ -550,6 +550,7 @@ public final class CassandraDataControl {
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
             if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
             if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
+            if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
             return this.session.execute( "INSERT INTO "
@@ -646,6 +647,7 @@ public final class CassandraDataControl {
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
             if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
             if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
+            if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
             patrul.setSurnameNameFatherName( patrul.getName() + " " + patrul.getSurname() + " " + patrul.getFatherName() );
@@ -746,7 +748,7 @@ public final class CassandraDataControl {
                                         .build()
                         ).build() ); }
 
-    public Flux< Polygon > getAllPoygonForPatrul () {
+    public Flux< Polygon > getAllPolygonForPatrul () {
         return Flux.fromStream(
                 this.session.execute(
                         "Select * from "
