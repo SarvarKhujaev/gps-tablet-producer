@@ -93,7 +93,9 @@ public class PatrulController {
             .checkToken( token ); }
 
     @MessageMapping ( value = "getCurrentUser" )
-    public Mono< Patrul > getCurrentUser ( String passportSeries ) { return CassandraDataControl
+    public Mono< Patrul > getCurrentUser ( String passportSeries ) {
+        if ( passportSeries.length() < 30 ) return Mono.empty();
+        return CassandraDataControl
             .getInstance()
             .getPatrul( UUID.fromString( passportSeries ) ); }
 
