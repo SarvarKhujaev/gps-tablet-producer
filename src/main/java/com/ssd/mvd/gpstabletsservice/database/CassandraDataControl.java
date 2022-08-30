@@ -585,11 +585,10 @@ public final class CassandraDataControl {
                     patrul.getCarType() + "', '" +
                     patrul.getSurname() + "', '" +
                     patrul.getPassword() + "', '" +
-                    patrul.getCarNumber() + "', '" +
-                    patrul.getOrganName() + "', '" +
-                    patrul.getRegionName() + "', '" +
+                    ( patrul.getOrganName().contains( "'" ) ? patrul.getOrganName().replace( "'", "") : patrul.getOrganName() ) + "', '" +
+                    ( patrul.getRegionName().contains( "'" ) ? patrul.getRegionName().replace( "'", "") : patrul.getRegionName() ) + "', '" +
                     patrul.getPoliceType() + "', '" +
-                    patrul.getFatherName() + "', '" +
+                    ( patrul.getFatherName().contains( "'" ) ? patrul.getFatherName().replace( "'", "") : patrul.getFatherName() ) + "', '" +
                     patrul.getDateOfBirth() + "', '" +
                     patrul.getPhoneNumber() + "', '" +
                     patrul.getSpecialToken() + "', '" +
@@ -597,7 +596,7 @@ public final class CassandraDataControl {
                     patrul.getSimCardNumber() + "', '" +
                     patrul.getPassportNumber() + "', '" +
                     patrul.getPatrulImageLink() + "', '" +
-                    patrul.getSurnameNameFatherName() + "', '" +
+                    ( patrul.getSurnameNameFatherName().contains( "'" ) ? patrul.getSurnameNameFatherName().replace( "'", "") : patrul.getSurnameNameFatherName() ) + "', '" +
                     patrul.getStatus() + "', '" +
                     patrul.getTaskTypes() + "', " +
                     CassandraConverter
@@ -656,22 +655,27 @@ public final class CassandraDataControl {
                     ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : new Date().toInstant() ) + "', '" +
                     ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : new Date().toInstant() ) + "', '" +
                     ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : new Date().toInstant() ) + "', " +
+
                     patrul.getDistance() + ", " +
                     patrul.getLatitude() + ", " +
                     patrul.getLongitude() + ", " +
                     patrul.getLatitudeOfTask() + ", " +
                     patrul.getLongitudeOfTask() + ", " +
+
                     patrul.getUuid() + ", " +
                     patrul.getOrgan() + ", " +
                     patrul.getUuidOfEscort() + ", " +
                     patrul.getUuidForPatrulCar() + ", " +
                     patrul.getUuidForEscortCar() + ", " +
+
                     patrul.getRegionId() + ", " +
                     patrul.getMahallaId() + ", " +
                     patrul.getDistrictId() + ", " +
                     patrul.getTotalActivityTime() + ", " +
+
                     patrul.getInPolygon() + ", " +
                     patrul.getTuplePermission() + ", '" +
+
                     patrul.getName() + "', '" +
                     patrul.getRank() + "', '" +
                     patrul.getEmail() + "', '" +
@@ -681,10 +685,10 @@ public final class CassandraDataControl {
                     patrul.getSurname() + "', '" +
                     patrul.getPassword() + "', '" +
                     patrul.getCarNumber() + "', '" +
-                    patrul.getOrganName() + "', '" +
-                    patrul.getRegionName() + "', '" +
+                    ( patrul.getOrganName().contains( "'" ) ? patrul.getOrganName().replace( "'", "") : patrul.getOrganName() ) + "', '" +
+                            ( patrul.getRegionName().contains( "'" ) ? patrul.getRegionName().replace( "'", "") : patrul.getRegionName() ) + "', '" +
                     patrul.getPoliceType() + "', '" +
-                    patrul.getFatherName() + "', '" +
+                            ( patrul.getFatherName().contains( "'" ) ? patrul.getFatherName().replace( "'", "") : patrul.getFatherName() ) + "', '" +
                     patrul.getDateOfBirth() + "', '" +
                     patrul.getPhoneNumber() + "', '" +
                     patrul.getSpecialToken() + "', '" +
@@ -692,7 +696,7 @@ public final class CassandraDataControl {
                     patrul.getSimCardNumber() + "', '" +
                     patrul.getPassportNumber() + "', '" +
                     patrul.getPatrulImageLink() + "', '" +
-                    patrul.getSurnameNameFatherName() + "', '" +
+                            ( patrul.getSurnameNameFatherName().contains( "'" ) ? patrul.getSurnameNameFatherName().replace( "'", "") : patrul.getSurnameNameFatherName() ) + "', '" +
                     patrul.getStatus() + "', '" +
                     patrul.getTaskTypes() + "', " +
                     CassandraConverter
