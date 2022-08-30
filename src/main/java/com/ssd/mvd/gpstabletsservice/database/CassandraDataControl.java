@@ -1072,8 +1072,10 @@ public final class CassandraDataControl {
                                 this.dbName + "." + this.getPatrols() + ";"
                 ).all().stream()
         ).filter( row ->
-                Status.valueOf( row.getString( "status" ) ).compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
-                && TaskTypes.valueOf( row.getString( "taskTypes" ) ).compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
+                Status.valueOf( row.getString( "status" ) )
+                        .compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
+                && TaskTypes.valueOf( row.getString( "taskTypes" ) )
+                        .compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
                 && row.getDouble( "latitude" ) > 0
                         && row.getDouble( "longitude" ) > 0
         ).map( Patrul::new )
@@ -1152,13 +1154,13 @@ public final class CassandraDataControl {
 
     // uses when Patrul wants to change his status from active to pause
     public Mono< ApiResponseModel > setInPause ( String token ) { return this.getPatrul( this.decode( token ) )
-                            .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
-                                    .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
-                                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "Patrul set in pause" )
-                                            .code( 200 )
-                                            .build() )
-                                    .build() ) ); }
+            .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
+                    .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .message( "Patrul set in pause" )
+                            .code( 200 )
+                            .build() )
+                    .build() ) ); }
 
     // uses when Patrul wants to change his status from pause to active
     public Mono< ApiResponseModel > backToWork ( String token ) { return this.getPatrul( this.decode( token ) )

@@ -6,26 +6,28 @@ import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
+import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 
-import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 public class PatrulController {
     @MessageMapping ( value = "findTheClosestPatruls" )
-    public Flux< Patrul > findTheClosestPatruls ( Point point ) { return CassandraDataControl
+    public Flux< Patrul > findTheClosestPatruls ( Point point ) {
+        if ( point.getLatitude() == null && point.getLongitude() == null ) return Flux.empty();
+        return CassandraDataControl
             .getInstance()
             .findTheClosestPatruls( point )
             .sort( Comparator.comparing( Patrul::getDistance ) ); }
