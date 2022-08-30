@@ -51,6 +51,16 @@ public class EscortController {
             .getInstance()
             .getAllTupleOfCar( uuid )
             .flatMap( tupleOfCar -> {
+                CassandraDataControlForEscort
+                        .getInstance()
+                                .getAllTupleOfEscort( tupleOfCar.getUuidOfEscort().toString() )
+                                        .subscribe( escortTuple -> {
+                                            escortTuple.getTupleOfCarsList().remove( tupleOfCar.getUuid() );
+                                            escortTuple.getPatrulList().remove( tupleOfCar.getUuidOfPatrul() );
+                                            CassandraDataControlForEscort
+                                                    .getInstance()
+                                                    .update( escortTuple )
+                                                    .subscribe(); } );
                 CassandraDataControl
                         .getInstance()
                                 .getPatrul( tupleOfCar.getUuidOfPatrul() )

@@ -194,7 +194,7 @@ public final class CassandraDataControl {
         this.createTable ( this.getNotification(), Notification.class,
                 ", taskTypes text, " +
                         "status text, " +
-                        "PRIMARY KEY( (id), notificationWasCreated ) );" );
+                        "PRIMARY KEY( (uuid) ) );" );
 
         this.session.execute(
                 "CREATE TABLE IF NOT EXISTS "
@@ -972,18 +972,20 @@ public final class CassandraDataControl {
                                 + this.dbName + "." + this.notification + ";"
                 ).all().stream()
         ).map( row -> Notification.builder()
-                .uuid( row.getUUID( "id" ) )
-                .id( row.getString( "taskId" ) )
+                .id( row.getString( "id" ) )
                 .type( row.getString( "type" ) )
                 .title( row.getString( "title" ) )
-                .wasRead( row.getBool( "wasRead" ) )
                 .address( row.getString( "address" ) )
                 .carNumber( row.getString( "carNumber" ) )
                 .policeType( row.getString( "policeType" ) )
                 .nsfOfPatrul( row.getString( "nsfOfPatrul" ) )
                 .passportSeries( row.getString( "passportSeries" ) )
+
                 .latitudeOfTask( row.getDouble( "latitudeOfTask" ) )
                 .longitudeOfTask( row.getDouble( "longitudeOfTask" ) )
+
+                .uuid( row.getUUID( "uuid" ) )
+                .wasRead( row.getBool( "wasRead" ) )
                 .status( Status.valueOf( row.getString( "status" ) ) )
                 .taskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) )
                 .notificationWasCreated( row.getTimestamp( "notificationWasCreated" ) )
@@ -1018,10 +1020,10 @@ public final class CassandraDataControl {
 
     public Mono< ApiResponseModel > setNotificationAsRead ( UUID uuid ) {
         return this.session.execute(
-                "UPDATE"
-                        + this.dbName + "." + this.notification
+                "UPDATE "
+                        + this.dbName + "." + this.getNotification()
                         + " SET wasRead = " + true
-                        + " WHERE id = '" + uuid + ";"
+                        + " WHERE uuid = " + uuid + ";"
         ).wasApplied() ? Mono.just(
                 ApiResponseModel.builder()
                         .status(

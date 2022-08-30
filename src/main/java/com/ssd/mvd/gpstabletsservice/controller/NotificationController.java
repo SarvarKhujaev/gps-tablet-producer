@@ -25,7 +25,8 @@ public class NotificationController {
     public Flux< Notification > getUnreadNotifications () { return CassandraDataControl
             .getInstance()
             .getAllNotification()
-            .sort( Comparator.comparing( notification -> !notification.getWasRead() ) ); }
+            .filter( notification -> !notification.getWasRead() )
+            .sort( Comparator.comparing( Notification::getNotificationWasCreated ) ); }
 
     @MessageMapping ( value = "setAsRead" )
     public Mono< ApiResponseModel > setAsRead ( String id ) { return CassandraDataControl
