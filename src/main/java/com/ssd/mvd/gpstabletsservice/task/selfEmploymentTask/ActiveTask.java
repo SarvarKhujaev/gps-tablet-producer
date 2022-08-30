@@ -40,25 +40,25 @@ public class ActiveTask {
     private Map< UUID, Patrul > patrulList;
 
     public ActiveTask ( Card card ) {
-        this.setType( "card" );
         this.setStatus( card.getStatus() );
         this.setAddress( card.getAddress() );
         this.setLatitude( card.getLatitude() );
         this.setPatrulList( card.getPatruls() );
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
+        this.setType( TaskTypes.CARD_102.name() );
         this.setTaskId( card.getCardId().toString() );
         this.setCreatedDate( card.getCreated_date() );
         this.setPatrulStatus( this.getPatrulStatus() ); }
 
     public ActiveTask ( Card card, Status status ) {
-        this.setType( "card" );
         this.setPatrulStatus( status );
         this.setStatus( card.getStatus() );
         this.setAddress( card.getAddress() );
         this.setLatitude( card.getLatitude() );
         this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
+        this.setType( TaskTypes.CARD_102.name() );
         this.setTaskId( card.getCardId().toString() );
         this.setCreatedDate( card.getCreated_date() ); }
 
@@ -72,27 +72,29 @@ public class ActiveTask {
         this.setLatitude( card.getLatOfAccident() );
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );
-        this.setCreatedDate( card.getIncidentDate() ); }
+        this.setCreatedDate( card.getIncidentDate() );
+        this.setType( TaskTypes.SELF_EMPLOYMENT.name() ); }
 
     public ActiveTask ( SelfEmploymentTask card, Status status ) {
         this.setPatrulStatus( status );
         this.setTitle( card.getTitle() );
-        this.setType( "selfEmployment" );
         this.setAddress( card.getAddress() );
         this.setStatus( card.getTaskStatus() );
         this.setTaskId( card.getUuid().toString() );
         this.setLatitude( card.getLatOfAccident() );
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );
-        this.setCreatedDate( card.getIncidentDate() ); }
+        this.setCreatedDate( card.getIncidentDate() );
+        this.setType( TaskTypes.SELF_EMPLOYMENT.name() ); }
 
     public ActiveTask( EventFace eventFace ) {
         this.setTaskId( eventFace.getId() );
         this.setStatus( eventFace.getStatus() );
-        this.setPatrulList( eventFace.getPatruls() );
         this.setLatitude( eventFace.getLatitude() );
+        this.setPatrulList( eventFace.getPatruls() );
         this.setLongitude( eventFace.getLongitude() );
         this.setCreatedDate( eventFace.getCreated_date() );
+        this.setType( TaskTypes.FIND_FACE_EVENT_FACE.name() );
         this.setType( TaskTypes.FIND_FACE_EVENT_FACE.name() ); }
 
     public ActiveTask ( EventFace eventFace, Status status ) {

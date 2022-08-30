@@ -659,7 +659,7 @@ public final class CassandraDataControl {
                             + " ( login, password, uuid ) VALUES( '"
                             + patrul.getLogin() + "', '"
                             + patrul.getPassword() + "', "
-                            + patrul.getUuid() + " ) IF NOT EXISTS; " ).wasApplied() ?
+                            + patrul.getUuid() + " ) IF NOT EXISTS;" ).wasApplied() ?
             this.session.execute( "INSERT INTO "
                     + this.dbName + "." + this.getPatrols() +
                     CassandraConverter

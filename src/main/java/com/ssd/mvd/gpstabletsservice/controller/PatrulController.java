@@ -12,12 +12,14 @@ import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 
+import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -133,4 +135,11 @@ public class PatrulController {
     public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return RedisDataControl
             .getRedis()
             .addAllPatrulsToChatService( token ); }
+
+    @MessageMapping ( value = "getListOfPatrulsByUUID")
+    public Flux< Patrul > getListOfPatrulsByUUID ( CardRequest< ? > cardRequest ) { return Flux.fromStream(
+            cardRequest.getPatruls().stream() )
+            .flatMap( uuid -> CassandraDataControl
+                .getInstance()
+                .getPatrul( uuid ) ); }
 }
