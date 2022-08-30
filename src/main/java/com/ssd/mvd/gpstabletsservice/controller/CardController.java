@@ -152,6 +152,7 @@ public class CardController {
                     .getRedis()
                     .getCard( Long.valueOf( request.getCard().toString() ) )
                     .flatMap( card -> {
+                        System.out.println( request );
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
@@ -159,8 +160,14 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL, card ) ) );
-                        return Mono.just( ApiResponseModel.builder().build() ); } );
+                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                        return Mono.just( ApiResponseModel.builder()
+                                        .success( true )
+                                        .status( Status.builder()
+                                                        .message( request.getCard() + " has got new patrul" )
+                                                        .code( 200 )
+                                                        .build() )
+                                .build() ); } );
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
@@ -173,8 +180,14 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL, card ) ) );
-                        return Mono.just( ApiResponseModel.builder().build() ); } );
+                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
+                        return Mono.just( ApiResponseModel.builder()
+                                .success( true )
+                                .status( Status.builder()
+                                        .message( request.getCard() + " has got new patrul" )
+                                        .code( 200 )
+                                        .build() )
+                                .build() ); } );
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
@@ -188,9 +201,15 @@ public class CardController {
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
                                                 .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder().build() ); } );
+                        return Mono.just( ApiResponseModel.builder()
+                                .success( true )
+                                .status( Status.builder()
+                                        .message( request.getCard() + " has got new patrul" )
+                                        .code( 200 )
+                                        .build() )
+                                .build() ); } );
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
@@ -204,9 +223,15 @@ public class CardController {
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
                                                 .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder().build() ); } );
+                        return Mono.just( ApiResponseModel.builder()
+                                .success( true )
+                                .status( Status.builder()
+                                        .message( request.getCard() + " has got new patrul" )
+                                        .code( 200 )
+                                        .build() )
+                                .build() ); } );
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
@@ -220,9 +245,15 @@ public class CardController {
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
                                                 .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder().build() ); } );
+                        return Mono.just( ApiResponseModel.builder()
+                                .success( true )
+                                .status( Status.builder()
+                                        .message( request.getCard() + " has got new patrul" )
+                                        .code( 200 )
+                                        .build() )
+                                .build() ); } );
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
@@ -236,9 +267,15 @@ public class CardController {
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
                                                 .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder().build() ); } );
+                        return Mono.just( ApiResponseModel.builder()
+                                .success( true )
+                                .status( Status.builder()
+                                        .message( request.getCard() + " has got new patrul" )
+                                        .code( 200 )
+                                        .build() )
+                                .build() ); } );
 
             default -> CassandraDataControlForTasks
                     .getInstance()
@@ -252,7 +289,13 @@ public class CardController {
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
                                                 .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.CANCEL,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder().build() ); } ); }; }
+                        return Mono.just( ApiResponseModel.builder()
+                                .success( true )
+                                .status( Status.builder()
+                                        .message( request.getCard() + " has got new patrul" )
+                                        .code( 200 )
+                                        .build() )
+                                .build() ); } ); }; }
 }
