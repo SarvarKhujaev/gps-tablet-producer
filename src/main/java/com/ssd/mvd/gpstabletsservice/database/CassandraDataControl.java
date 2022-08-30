@@ -547,6 +547,10 @@ public final class CassandraDataControl {
                                         .build() )
                         .build() );
         if ( row.getUUID( "uuid" ).compareTo( patrul.getUuid() ) == 0 ) {
+            if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
+            if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
+            if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
+            if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             return this.session.execute( "INSERT INTO "
                     + this.dbName + "." + this.patrols +
                     CassandraConverter
@@ -585,10 +589,11 @@ public final class CassandraDataControl {
                     patrul.getCarType() + "', '" +
                     patrul.getSurname() + "', '" +
                     patrul.getPassword() + "', '" +
-                    ( patrul.getOrganName().contains( "'" ) ? patrul.getOrganName().replace( "'", "") : patrul.getOrganName() ) + "', '" +
-                    ( patrul.getRegionName().contains( "'" ) ? patrul.getRegionName().replace( "'", "") : patrul.getRegionName() ) + "', '" +
+                    patrul.getCarNumber() + "', '" +
+                    patrul.getOrganName() + "', '" +
+                    patrul.getRegionName() + "', '" +
                     patrul.getPoliceType() + "', '" +
-                    ( patrul.getFatherName().contains( "'" ) ? patrul.getFatherName().replace( "'", "") : patrul.getFatherName() ) + "', '" +
+                    patrul.getFatherName() + "', '" +
                     patrul.getDateOfBirth() + "', '" +
                     patrul.getPhoneNumber() + "', '" +
                     patrul.getSpecialToken() + "', '" +
@@ -596,7 +601,7 @@ public final class CassandraDataControl {
                     patrul.getSimCardNumber() + "', '" +
                     patrul.getPassportNumber() + "', '" +
                     patrul.getPatrulImageLink() + "', '" +
-                    ( patrul.getSurnameNameFatherName().contains( "'" ) ? patrul.getSurnameNameFatherName().replace( "'", "") : patrul.getSurnameNameFatherName() ) + "', '" +
+                    patrul.getSurnameNameFatherName() + "', '" +
                     patrul.getStatus() + "', '" +
                     patrul.getTaskTypes() + "', " +
                     CassandraConverter
@@ -638,6 +643,9 @@ public final class CassandraDataControl {
             patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
             patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
+            if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
+            if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
+            if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             patrul.setSurnameNameFatherName( patrul.getName() + " " + patrul.getSurname() + " " + patrul.getFatherName() );
             return this.session.execute(
                     "INSERT INTO "
@@ -685,10 +693,10 @@ public final class CassandraDataControl {
                     patrul.getSurname() + "', '" +
                     patrul.getPassword() + "', '" +
                     patrul.getCarNumber() + "', '" +
-                    ( patrul.getOrganName().contains( "'" ) ? patrul.getOrganName().replace( "'", "") : patrul.getOrganName() ) + "', '" +
-                            ( patrul.getRegionName().contains( "'" ) ? patrul.getRegionName().replace( "'", "") : patrul.getRegionName() ) + "', '" +
+                    patrul.getOrganName() + "', '" +
+                    patrul.getRegionName() + "', '" +
                     patrul.getPoliceType() + "', '" +
-                            ( patrul.getFatherName().contains( "'" ) ? patrul.getFatherName().replace( "'", "") : patrul.getFatherName() ) + "', '" +
+                    patrul.getFatherName() + "', '" +
                     patrul.getDateOfBirth() + "', '" +
                     patrul.getPhoneNumber() + "', '" +
                     patrul.getSpecialToken() + "', '" +
@@ -696,7 +704,7 @@ public final class CassandraDataControl {
                     patrul.getSimCardNumber() + "', '" +
                     patrul.getPassportNumber() + "', '" +
                     patrul.getPatrulImageLink() + "', '" +
-                            ( patrul.getSurnameNameFatherName().contains( "'" ) ? patrul.getSurnameNameFatherName().replace( "'", "") : patrul.getSurnameNameFatherName() ) + "', '" +
+                    patrul.getSurnameNameFatherName() + "', '" +
                     patrul.getStatus() + "', '" +
                     patrul.getTaskTypes() + "', " +
                     CassandraConverter
