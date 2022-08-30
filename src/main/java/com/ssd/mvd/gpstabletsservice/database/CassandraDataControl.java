@@ -28,6 +28,7 @@ import static java.lang.Math.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
+import java.util.HashMap;
 import java.util.Base64;
 import java.util.UUID;
 import java.util.Date;
@@ -642,6 +643,7 @@ public final class CassandraDataControl {
             patrul.setInPolygon( false );
             patrul.setTuplePermission( false );
             patrul.setUuid( UUID.randomUUID() );
+            patrul.setListOfTasks( new HashMap<>() );
             patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
             patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
