@@ -299,7 +299,7 @@ public final class CassandraDataControl {
                     + atlasLustra.getCarGosNumber() + "', '"
                     + CassandraConverter
                         .getInstance()
-                        .convertListOfCameraListToCassandra( atlasLustra.getCameraLists() )
+                        .convertListOfPointsToCassandra( atlasLustra.getCameraLists() )
                     + " )"+ ( check ? " IF NOT EXISTS" : "" ) + ";" )
             .wasApplied() ? Mono.just(
                 ApiResponseModel.builder()
@@ -386,7 +386,7 @@ public final class CassandraDataControl {
 
             CassandraConverter
                     .getInstance()
-                    .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
+                    .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
                 .wasApplied() ? Mono.just(
                         ApiResponseModel.builder()
                                 .success( true )
@@ -792,7 +792,7 @@ public final class CassandraDataControl {
 
                 CassandraConverter
                         .getInstance()
-                        .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
+                        .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
                 .wasApplied() ? Mono.just(
                 ApiResponseModel.builder()
                         .status(
@@ -839,7 +839,7 @@ public final class CassandraDataControl {
 
                         CassandraConverter
                                 .getInstance()
-                                .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() ) + ");" )
+                                .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");" )
                 .wasApplied() ? Mono.just(
                 ApiResponseModel.builder()
                         .status(

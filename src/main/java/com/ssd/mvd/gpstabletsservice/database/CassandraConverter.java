@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import com.ssd.mvd.gpstabletsservice.codec.*;
 import com.ssd.mvd.gpstabletsservice.entity.*;
+import com.ssd.mvd.gpstabletsservice.tuple.Points;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
@@ -34,25 +35,10 @@ public class CassandraConverter {
         list.forEach( s -> result += s + ", " );
         return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
 
-    public String convertListOfCameraListToCassandra ( List< CameraList > cameraLists ) {
+    public String convertListOfPointsToCassandra ( List< ? > pointsList ) {
         result = "[";
-        cameraLists.forEach ( cameraList -> result += "{ "
-                + "rtspLink : " + cameraList.getRtspLink() + ", "
-                + "cameraName : " + cameraList.getCameraName() + " }, " );
-        result = result.substring( 0, result.length() - 2 );
-        return result + "]"; }
-
-    public String convertListOfPolygonEntityToCassandra ( List< PolygonEntity > latlngs ) {
-        result = "[";
-        latlngs.forEach( polygonEntity -> result += "{ "
-                + "lat : " + polygonEntity.getLat() + ", "
-                + "lng : " + polygonEntity.getLng() + " }, " );
+        pointsList.forEach( points -> result += this.convertClassToCassandraTable( points ) + ", " );
         return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
-
-    public String convertListOfViolationsToCassandra ( List< ViolationsInformation > images ) {
-        result = "[";
-        images.forEach( s -> result += this.convertClassToCassandraTable( s ) + ", " );
-        return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 3 ) + "]"; }
 
     public String convertMapToCassandra ( Map< String, String > listOfTasks ) {
         result = "{";
@@ -160,9 +146,27 @@ public class CassandraConverter {
                                                         .getUserType( userType )
                                         ), CameraList.class ) ); }
 
+    public void registerCodecForPointsList ( String dbName, String userType ) {
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry()
+                .register (
+                        new CodecRegistrationForPointsList(
+                                CassandraDataControl
+                                        .getInstance()
+                                        .getCodecRegistry()
+                                        .codecFor(
+                                                CassandraDataControl
+                                                        .getInstance()
+                                                        .getCluster()
+                                                        .getMetadata()
+                                                        .getKeyspace( dbName )
+                                                        .getUserType( userType )
+                                        ), Points.class ) ); }
+
     public void registerCodecForPolygonEntity ( String dbName, String userType ) {
-        System.out.println( "Codec is ready" );
-        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
                 .register (
                         new CodecRegistrationForPolygonEntity (

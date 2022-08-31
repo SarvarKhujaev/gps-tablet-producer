@@ -27,10 +27,13 @@ public class CassandraDataControlForEscort {
     private final String patrols = "PATRULS"; // for table with Patruls info
     private final String tupleOfCar = "TUPLE_OF_CAR";
     private final String tupleOfEscort = "TUPLE_OF_ESCORT";
-    private final String polygonForEscort = "POLYGON_FOR_ESCORT_TEST";
 
-    private final String polygonEntity = "POLYGON_ENTITY";
     private final String carForEscortType = "CAR_FOR_ESCORT_TYPE";
+
+    private final String pointsList = "POINTS_ENTITY";
+    private final String polygonEntity = "POLYGON_ENTITY";
+    private final String polygonForEscort = "POLYGON_FOR_ESCORT";
+
 
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     private static CassandraDataControlForEscort cassandraDataControl = new CassandraDataControlForEscort();
@@ -47,28 +50,41 @@ public class CassandraDataControlForEscort {
                 "AND DURABLE_WRITES = false;" );
 
         this.session.execute("CREATE TYPE IF NOT EXISTS "
-                + this.dbName + "." + this.polygonEntity
+                + this.dbName + "." + this.getPointsList()
+                + "( lat double, "
+                + "lng double, " +
+                "pointId int, " +
+                "pointName text );" );
+
+        this.session.execute("CREATE TYPE IF NOT EXISTS "
+                + this.dbName + "." + this.getPolygonEntity()
                 + "( lat double,"
                 + "lng double );" );
 
         this.session.execute( "CREATE TABLE IF NOT EXISTS "
-                + this.dbName + "." + this.polygonForEscort
-                + "( id uuid PRIMARY KEY, " +
+                + this.dbName + "." + this.getPolygonForEscort()
+                + "( uuid uuid PRIMARY KEY, " +
                 "name text, " +
-                "latlngs list< frozen < "
-                + this.polygonEntity + " > > );" );
+                "totalTime int, " +
+                "totalDistance int, " +
+                "pointsList list< frozen < " + this.getPointsList() + " > >, " +
+                "latlngs list< frozen < " + this.getPolygonEntity() + " > > );" );
 
         this.session.execute( "CREATE TABLE IF NOT EXISTS "
-                + this.dbName + "." + this.tupleOfEscort +
-                " ( id uuid PRIMARY KEY," +
-                " countries text," +
-                " uuidOfPolygon uuid," +
+                + this.dbName + "." + this.getTupleOfEscort() +
+                " ( uuid uuid PRIMARY KEY, " +
+                " countries text, " +
+                " uuidOfPolygon uuid, " +
                 " tupleOfCarsList list< uuid >," +
                 " patrulList list< uuid > );" );
 
         CassandraConverter
                 .getInstance()
                 .registerCodecForPolygonEntity( this.dbName, this.getPolygonEntity() );
+
+        CassandraConverter
+                .getInstance()
+                .registerCodecForPointsList( this.dbName, this.getPointsList() );
 
         this.logger.info( "CassandraDataControlForEscort is ready" ); }
 
@@ -207,34 +223,47 @@ public class CassandraDataControlForEscort {
                         .success( this.session.execute(
                                 "DELETE FROM "
                                         + this.dbName + "." + this.polygonForEscort
-                                        + " where id = " + UUID.fromString( id ) + ";"
+                                        + " where uuid = " + UUID.fromString( id ) + ";"
                         ).wasApplied() )
                         .build() ); }
 
     public Flux< PolygonForEscort > getAllPolygonForEscort () { return Flux.fromStream(
             this.session.execute(
                     "SELECT * FROM "
-                            + this.dbName + "." + this.polygonForEscort + ";"
+                            + this.dbName + "." + this.getPolygonForEscort() + ";"
             ).all().stream()
         ).map( PolygonForEscort::new ); }
 
     public Mono< PolygonForEscort > getAllPolygonForEscort ( String id ) {
         Row row = this.session.execute(
                 "SELECT * FROM "
-                        + this.dbName + "." + this.polygonForEscort
-                        + " where id = " + UUID.fromString( id ) + ";" ).one();
+                        + this.dbName + "." + this.getPolygonForEscort()
+                        + " where uuid = " + UUID.fromString( id ) + ";" ).one();
         return Mono.justOrEmpty( row != null ? new PolygonForEscort( row ) : null ); }
 
     public Mono< ApiResponseModel > addValue ( PolygonForEscort polygon ) {
         return this.session.execute(
             "INSERT INTO "
-                    + this.dbName + '.' + this.polygonForEscort
-                    + "(id, name, latlngs) VALUES ("
+                    + this.dbName + '.' + this.getPolygonForEscort()
+                    + "(uuid, " +
+                    "name, " +
+                    "totalTime, " +
+                    "totalDistance, " +
+                    "pointsList, " +
+                    "latlngs ) VALUES ("
                     + polygon.getUuid() + ", '"
                     + polygon.getName() + "', "
+
+                    + polygon.getTotalTime() + ", "
+                    + polygon.getTotalDistance() + ", "
+
                     + CassandraConverter
                     .getInstance()
-                    .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() )
+                    .convertListOfPointsToCassandra( polygon.getPointsList() ) + ", "
+
+                    + CassandraConverter
+                    .getInstance()
+                    .convertListOfPointsToCassandra( polygon.getLatlngs() )
                     + ") IF NOT EXISTS;"
             ).wasApplied() ? Mono.just( ApiResponseModel.builder()
                     .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
@@ -253,15 +282,27 @@ public class CassandraDataControlForEscort {
 
     public Mono< ApiResponseModel > update ( PolygonForEscort polygon ) { return this.session.execute(
             "INSERT INTO "
-                    + this.dbName + '.' + this.polygonForEscort
-                    + "(id, name, object) VALUES ("
+                    + this.dbName + '.' + this.getPolygonForEscort()
+                    + "(uuid, " +
+                    "name, " +
+                    "totalTime, " +
+                    "totalDistance, " +
+                    "pointsList, " +
+                    "latlngs ) VALUES ("
                     + polygon.getUuid() + ", '"
                     + polygon.getName() + "', "
+
+                    + polygon.getTotalTime() + ", "
+                    + polygon.getTotalDistance() + ", "
+
                     + CassandraConverter
                     .getInstance()
-                    .convertListOfPolygonEntityToCassandra( polygon.getLatlngs() )
-                    + ") IF EXISTS;"
-    ).wasApplied() ? Mono.just( ApiResponseModel.builder()
+                    .convertListOfPointsToCassandra( polygon.getPointsList() ) + ", "
+
+                    + CassandraConverter
+                    .getInstance()
+                    .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");"
+        ).wasApplied() ? Mono.just( ApiResponseModel.builder()
             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                     .code( 200 )
                     .message( "Polygon was saved" )

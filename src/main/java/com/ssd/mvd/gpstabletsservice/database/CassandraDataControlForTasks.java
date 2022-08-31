@@ -99,8 +99,10 @@ public class CassandraDataControlForTasks {
                     + carTotalData.getGosNumber() + "', '"
                     + carTotalData.getCameraImage() + "', "
                     + CassandraConverter
-                    .getInstance()
-                    .convertListOfViolationsToCassandra( carTotalData.getViolationsList().getViolationsInformationsList() )
+                        .getInstance()
+                        .convertListOfPointsToCassandra( carTotalData
+                                .getViolationsList()
+                                .getViolationsInformationsList() )
                     + ", '" + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
 
     public Mono< ApiResponseModel > getAllCarTotalData () {
