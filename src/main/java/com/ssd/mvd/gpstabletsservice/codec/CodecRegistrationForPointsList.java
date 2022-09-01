@@ -44,6 +44,6 @@ public class CodecRegistrationForPointsList extends TypeCodec< Points > {
             userType.newValue()
                     .setDouble("lat", value.getLat() )
                     .setDouble("lng", value.getLng() )
-                    .setInt("pointId", value.getPointId() )
+                    .setUUID( "pointId", value.getPointId() )
                     .setString( "pointName", value.getPointName() ); }
 }

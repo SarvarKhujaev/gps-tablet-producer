@@ -53,7 +53,7 @@ public class CassandraDataControlForEscort {
                 + this.dbName + "." + this.getPointsList()
                 + "( lat double, "
                 + "lng double, " +
-                "pointId int, " +
+                "pointId uuid, " +
                 "pointName text );" );
 
         this.session.execute("CREATE TYPE IF NOT EXISTS "
