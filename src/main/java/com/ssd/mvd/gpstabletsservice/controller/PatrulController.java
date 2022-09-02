@@ -82,12 +82,22 @@ public class PatrulController {
             .getPatrul(); }
 
     @MessageMapping( value = "addUser" ) // adding new user
-    public Mono< ApiResponseModel > addUser ( Patrul patrul ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addUser ( Patrul patrul ) {
+        UnirestController
+                .getInstance()
+                .addUser( patrul );
+        patrul.setSpecialToken( null );
+        return CassandraDataControl
             .getInstance()
             .addValue( patrul ); }
 
     @MessageMapping ( value = "updatePatrul" )
-    public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) {
+        UnirestController
+                .getInstance()
+                .updateUser( patrul );
+        patrul.setSpecialToken( null );
+        return CassandraDataControl
             .getInstance()
             .update( patrul ); }
 
@@ -110,14 +120,19 @@ public class PatrulController {
             .flatMap( apiResponseModel -> Mono.just( apiResponseModel.getStatus() ) ); }
 
     @MessageMapping( value = "deletePatrul" )
-    public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) { return CassandraDataControl
-            .getInstance()
-            .delete(
-                    CassandraDataControl
-                            .getInstance()
-                            .getPatrols(),
-                    "uuid",
-                    passportNumber ); }
+    public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) {
+        UnirestController
+                .getInstance()
+                .deleteUser( passportNumber );
+        return CassandraDataControl
+                .getInstance()
+                .delete(
+                        CassandraDataControl
+                                .getInstance()
+                                .getPatrols(),
+                        "uuid",
+                        passportNumber );
+    }
 
     @MessageMapping ( value = "getPatrulStatistics" )
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return CassandraDataControl

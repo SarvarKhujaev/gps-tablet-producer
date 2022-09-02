@@ -84,7 +84,9 @@ public final class RedisDataControl {
                 patrul.setSpecialToken( token );
                 return Mono.just(
                         ApiResponseModel.builder()
-                                .success( UnirestController.getInstance().addUser( patrul ) )
+                                .success( UnirestController
+                                        .getInstance()
+                                        .addUser( patrul ) )
                                 .status( Status.builder()
                                         .message( patrul.getPassportNumber() + "Successfully added to chat service" )
                                         .code( 200 )

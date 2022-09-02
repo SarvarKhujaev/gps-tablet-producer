@@ -22,10 +22,11 @@ public class UnirestController {
                 .defaultHeader("token", token )
                 .build(); }
 
-    public boolean deleteUser ( Patrul patrul ) {
+    public boolean deleteUser ( String patrulId ) {
         ReqId reqId = new ReqId();
-        reqId.setId( patrul.getUuid() );
-        return restTemplate( patrul.getSpecialToken() )
+        reqId.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
+        System.out.println( reqId.getId() );
+        return restTemplate( patrulId.split( "@" )[1] )
                 .exchange( "https://ms.ssd.uz/chat/delete-user",
                         HttpMethod.POST,
                         new HttpEntity<>( reqId, null ),
@@ -35,9 +36,10 @@ public class UnirestController {
     public Boolean updateUser ( Patrul patrul ) {
         if ( patrul.getSpecialToken() == null ) return false;
         Req req = new Req();
-        req.setId( patrul.getUuid() );
         req.setRole( Role.USER );
+        req.setId( patrul.getUuid() );
         req.setUsername( patrul.getSurnameNameFatherName() );
+        System.out.println( req );
         return restTemplate( patrul
                 .getSpecialToken() )
                 .exchange("https://ms.ssd.uz/chat/edit-user",
@@ -49,11 +51,11 @@ public class UnirestController {
 
     public Boolean addUser ( Patrul patrul ) {
         Req req = new Req();
-        req.setId( patrul.getUuid() );
         req.setRole( Role.USER );
+        req.setId( patrul.getUuid() );
         req.setUsername( patrul.getSurnameNameFatherName() );
-        return restTemplate( patrul
-                .getSpecialToken() )
+        System.out.println( req );
+        return restTemplate( patrul.getSpecialToken() )
                 .exchange("https://ms.ssd.uz/chat/add-user",
                         HttpMethod.POST,
                         new HttpEntity<>( req, null ),

@@ -720,14 +720,12 @@ public final class CassandraDataControl {
                     .wasApplied() ? Mono.just(
                     ApiResponseModel.builder()
                             .success( true )
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                             .message( "Patrul was successfully saved" )
                                             .code( 200 )
                                             .build() )
                             .build()
-            ) : Mono.just(
-                    ApiResponseModel.builder()
+            ) : Mono.just( ApiResponseModel.builder()
                             .success( false )
                             .status(
                                     com.ssd.mvd.gpstabletsservice.response.Status.builder()
