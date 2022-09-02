@@ -34,7 +34,6 @@ public class CassandraDataControlForEscort {
     private final String polygonEntity = "POLYGON_ENTITY";
     private final String polygonForEscort = "POLYGON_FOR_ESCORT";
 
-
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     private static CassandraDataControlForEscort cassandraDataControl = new CassandraDataControlForEscort();
 

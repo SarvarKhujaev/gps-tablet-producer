@@ -68,6 +68,7 @@ public final class CassandraDataControl {
     private CodecRegistry codecRegistry = new CodecRegistry();
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
+
     public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl
             : ( cassandraDataControl = new CassandraDataControl() ); }
 
@@ -867,27 +868,14 @@ public final class CassandraDataControl {
                             this.session.executeAsync(
                                     "UPDATE " +
                                             this.dbName + "." + this.getPatrols() +
-                                            " inPolygon = " + true + " where uuid = " + patrul.getUuid() + " IF EXISTS;" );
+                                            " SET inPolygon = " + true
+                                            + " where uuid = " + patrul.getUuid() + ";" );
                             return Mono.just( patrul.getUuid() ); } )
                         .collectList()
-                        .flatMap( uuidList ->
-                                Mono.just(
-                                        ApiResponseModel.builder()
-                                                .success(
-                                                        this.session.execute(
-                                                                "UPDATE " +
-                                                                        this.dbName + "." + this.getPolygonForPatrul() +
-                                                                        " SET patrulList " +
-                                                                        CassandraConverter
-                                                                                .getInstance()
-                                                                                .convertListToCassandra( uuidList ) + " IF EXISTS;" )
-                                                                .wasApplied() )
-                                                .status(
-                                                        com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                                                .message( "Patrul was successfully linked to polygon" )
-                                                                .code( 200 )
-                                                                .build()
-                                                ).build() ) ) ); }
+                        .flatMap( uuidList -> {
+                            polygon.setPatrulList( uuidList );
+                            return this.updatePolygonForPatrul( polygon );
+                        } ) ); }
 
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this
             .getPatrul( UUID.fromString( request.getData() ) )
