@@ -131,8 +131,7 @@ public class PatrulController {
                                 .getInstance()
                                 .getPatrols(),
                         "uuid",
-                        passportNumber );
-    }
+                        passportNumber.split( "@" )[0] ); }
 
     @MessageMapping ( value = "getPatrulStatistics" )
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return CassandraDataControl
