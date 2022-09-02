@@ -68,6 +68,8 @@ public class Patrul {
     private TaskTypes taskTypes; // task type which was attached to the current patrul
     private Map< String, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
 
+    public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
+
     public String getSurnameNameFatherName () { return ( this.surnameNameFatherName =
             this.getName() + " "
                     + this.getSurname() + " "

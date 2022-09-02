@@ -643,7 +643,6 @@ public final class CassandraDataControl {
         if ( this.getPatrul( patrul.getPassportNumber() ) == null ) {
             patrul.setInPolygon( false );
             patrul.setTuplePermission( false );
-            patrul.setUuid( UUID.randomUUID() );
             patrul.setListOfTasks( new HashMap<>() );
             patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
             patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
