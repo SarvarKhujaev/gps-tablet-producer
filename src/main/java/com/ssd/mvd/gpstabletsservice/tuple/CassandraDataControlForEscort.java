@@ -267,7 +267,7 @@ public class CassandraDataControlForEscort {
             ).wasApplied() ? Mono.just( ApiResponseModel.builder()
                         .data( com.ssd.mvd.gpstabletsservice.entity.Data
                                 .builder()
-                                .data( polygon.getUuid() )
+                                .type( polygon.getUuid().toString() )
                                 .build() )
                     .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                             .code( 200 )
@@ -309,7 +309,7 @@ public class CassandraDataControlForEscort {
             .builder()
             .data( com.ssd.mvd.gpstabletsservice.entity.Data
                     .builder()
-                    .data( polygon.getUuid() )
+                    .type( polygon.getUuid().toString() )
                     .build() )
             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                     .code( 200 )
