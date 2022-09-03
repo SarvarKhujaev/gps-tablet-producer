@@ -400,7 +400,51 @@ public final class CassandraDataControl {
                 ApiResponseModel.builder()
                         .status(
                                 com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "This polygon has alread been saved" )
+                                        .message( "This polygon has already been saved" )
+                                        .code( 201 )
+                                        .build() ).build() ); }
+
+    public Mono< ApiResponseModel > update ( Polygon polygon ) {
+        return this.session.execute( "INSERT INTO "
+            + this.dbName + "." + this.polygon +
+            CassandraConverter
+                    .getInstance()
+                    .getALlNames( Polygon.class ) +
+            " VALUES ("
+                    + polygon.getUuid() + ", "
+                    + polygon.getOrgan() + ", "
+
+                    + polygon.getRegionId() + ", "
+                    + polygon.getMahallaId() + ", "
+                    + polygon.getDistrictId() + ", '"
+
+                    + polygon.getName() + "', '"
+                    + polygon.getColor() + "', " +
+
+            CassandraConverter
+                .getInstance()
+                .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
+
+            CassandraConverter
+                    .getInstance()
+                    .convertListToCassandra( polygon.getPatrulList() ) + ", " +
+
+            CassandraConverter
+                    .getInstance()
+                    .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");" )
+                .wasApplied() ? Mono.just(
+                        ApiResponseModel.builder()
+                                .success( true )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "Polygon was successfully updated" )
+                                        .code( 200 )
+                                        .build() )
+                                .build()
+        ) : Mono.just(
+                ApiResponseModel.builder()
+                        .status(
+                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "This polygon does not exists" )
                                         .code( 201 )
                                         .build() ).build() ); }
 

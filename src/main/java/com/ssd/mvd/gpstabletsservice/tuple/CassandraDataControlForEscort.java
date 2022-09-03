@@ -265,6 +265,10 @@ public class CassandraDataControlForEscort {
                     .convertListOfPointsToCassandra( polygon.getLatlngs() )
                     + ") IF NOT EXISTS;"
             ).wasApplied() ? Mono.just( ApiResponseModel.builder()
+                        .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                .builder()
+                                .data( polygon.getUuid() )
+                                .build() )
                     .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                             .code( 200 )
                             .message( "Polygon was saved" )
@@ -301,7 +305,12 @@ public class CassandraDataControlForEscort {
                     + CassandraConverter
                     .getInstance()
                     .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");"
-        ).wasApplied() ? Mono.just( ApiResponseModel.builder()
+        ).wasApplied() ? Mono.just( ApiResponseModel
+            .builder()
+            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                    .builder()
+                    .data( polygon.getUuid() )
+                    .build() )
             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                     .code( 200 )
                     .message( "Polygon was saved" )

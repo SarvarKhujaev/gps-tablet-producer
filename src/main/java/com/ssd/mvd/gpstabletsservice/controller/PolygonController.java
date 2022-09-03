@@ -31,7 +31,7 @@ public class PolygonController {
     @MessageMapping ( value = "updatePolygon" )
     public Mono< ApiResponseModel > updatePolygon ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
-            .addValue( polygon ); }
+            .update( polygon ); }
 
     @MessageMapping( value = "getPolygonList" )
     public Flux< Polygon > getPolygonList () { return CassandraDataControl
