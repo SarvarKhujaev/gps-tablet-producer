@@ -155,6 +155,65 @@ public final class TaskInspector {
                                                 .build() ) );
         return patrul; }
 
+    public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvent carEvents ) {
+        patrul.setStatus( status );
+        switch ( ( patrul.getStatus() ) ) {
+            case CANCEL, FINISHED -> {
+                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
+                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_CAR.name() );
+                else carEvents.getPatruls().remove( patrul.getUuid() );
+                if ( carEvents.getPatruls().size() == carEvents.getReportForCardList().size() ) {
+                    carEvents.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( carEvents.getId() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( carEvents ) ); }
+                patrul.setTaskTypes( TaskTypes.FREE );
+                patrul.setTaskDate( null );
+                patrul.setStatus( FREE );
+                patrul.setTaskId( null ); }
+            case ATTACHED -> {
+                patrul.setTaskTypes( FIND_FACE_CAR );
+                patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
+//                patrul.setLatitudeOfTask( carEvents.getCamera().getLatitude() );
+//                patrul.setLongitudeOfTask( carEvents.getCamera().getLongitude() );
+            }
+            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
+            case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
+                    .patrul( patrul )
+                    .inTime( patrul.check() )
+                    .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
+        } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis().addValue( carEvents.getId(), new ActiveTask( carEvents ) ).subscribe();
+        if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
+        CassandraDataControlForTasks
+                .getInstance()
+                .addValue( carEvents );
+
+        CassandraDataControl
+                .getInstance()
+                .update( patrul )
+                .subscribe();
+
+        KafkaDataControl.getInstance()
+                .writeToKafka(
+                        CassandraDataControl
+                                .getInstance().addValue(
+                                        Notification.builder()
+                                                .id( carEvents.getId() )
+                                                .uuid( UUID.randomUUID() )
+                                                .status( patrul.getStatus() )
+                                                .type( FIND_FACE_CAR.name() )
+                                                .carNumber( patrul.getCarNumber() )
+                                                .taskTypes( patrul.getTaskTypes() )
+                                                .notificationWasCreated( new Date() )
+                                                .policeType( patrul.getPoliceType() )
+                                                .passportSeries( patrul.getPassportNumber() )
+                                                .nsfOfPatrul( patrul.getSurnameNameFatherName() )
+//                                                .latitudeOfTask( carEvents.getCamera().getLatitude() )
+//                                                .longitudeOfTask( carEvents.getCamera().getLongitude() )
+//                                                .address( carEvents.getCamera().getName() != null ? carEvents.getCamera().getName() : "unknown" )
+                                                .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_CAR
+                                                        + ", so be so kind to check active Task and start to work )))" ).build() ) );
+        return patrul; }
+
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventFace eventFace ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
@@ -271,37 +330,39 @@ public final class TaskInspector {
                                                 .build() ) );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvent carEvents ) {
+    public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvent faceEvents ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
                 if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
                         .putIfAbsent( patrul.getTaskId(), FIND_FACE_CAR.name() );
-                else carEvents.getPatruls().remove( patrul.getUuid() );
-                if ( carEvents.getPatruls().size() == carEvents.getReportForCardList().size() ) {
-                    carEvents.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( carEvents.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( carEvents ) ); }
+                else faceEvents.getPatruls().remove( patrul.getUuid() );
+                if ( faceEvents.getPatruls().size() == faceEvents.getReportForCardList().size() ) {
+                    faceEvents.setStatus( FINISHED );
+                    RedisDataControl.getRedis().remove( faceEvents.getId() );
+                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( faceEvents ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
-                patrul.setTaskTypes( FIND_FACE_CAR );
-                patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
-//                patrul.setLatitudeOfTask( carEvents.getCamera().getLatitude() );
-//                patrul.setLongitudeOfTask( carEvents.getCamera().getLongitude() );
+                patrul.setTaskId( faceEvents.getId() ); // saving card id into patrul object
+                patrul.setTaskTypes( FIND_FACE_PERSON );
+//                patrul.setLatitudeOfTask( faceEvents.getCamera().getLatitude() );
+//                patrul.setLongitudeOfTask( faceEvents.getCamera().getLongitude() );
             }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-            case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
-                    .patrul( patrul )
-                    .inTime( patrul.check() )
-                    .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
-        } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis().addValue( carEvents.getId(), new ActiveTask( carEvents ) ).subscribe();
-        if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
+            case ARRIVED -> faceEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
+                    PatrulStatus.builder()
+                            .patrul( patrul )
+                            .inTime( patrul.check() )
+                            .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
+        } if ( status.compareTo( CANCEL ) != 0 ) faceEvents.getPatruls().put( patrul.getUuid(), patrul );
+        if ( faceEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis()
+                .addValue( faceEvents.getId(), new ActiveTask( faceEvents ) ).subscribe();
         CassandraDataControlForTasks
                 .getInstance()
-                .addValue( carEvents );
+                .addValue( faceEvents );
 
         CassandraDataControl
                 .getInstance()
@@ -311,31 +372,33 @@ public final class TaskInspector {
         KafkaDataControl.getInstance()
                 .writeToKafka(
                         CassandraDataControl
-                                .getInstance().addValue(
+                                .getInstance()
+                                .addValue(
                                         Notification.builder()
-                                                .id( carEvents.getId() )
+                                                .id( faceEvents.getId() )
                                                 .uuid( UUID.randomUUID() )
                                                 .status( patrul.getStatus() )
-                                                .type( FIND_FACE_CAR.name() )
+                                                .type( FIND_FACE_PERSON.name() )
                                                 .carNumber( patrul.getCarNumber() )
                                                 .taskTypes( patrul.getTaskTypes() )
                                                 .notificationWasCreated( new Date() )
                                                 .policeType( patrul.getPoliceType() )
                                                 .passportSeries( patrul.getPassportNumber() )
+//                                                .latitudeOfTask( faceEvents.getCamera().getLatitude() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
-//                                                .latitudeOfTask( carEvents.getCamera().getLatitude() )
-//                                                .longitudeOfTask( carEvents.getCamera().getLongitude() )
-//                                                .address( carEvents.getCamera().getName() != null ? carEvents.getCamera().getName() : "unknown" )
-                                                .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_CAR
-                                                        + ", so be so kind to check active Task and start to work )))" ).build() ) );
+//                                                .longitudeOfTask( faceEvents.getCamera().getLongitude() )
+//                                                .address( faceEvents.getCamera().getName() != null ? faceEvents.getCamera().getName() : "unknown" )
+                                                .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_PERSON
+                                                        + ", so be so kind to check active Task and start to work )))" )
+                                                .build() ) );
         return patrul; }
 
-    public void changeTaskStatus ( Patrul patrul, Status status, EscortTuple escortTuple ) {
+    public Patrul changeTaskStatus ( Patrul patrul, Status status, EscortTuple escortTuple ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
                 if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
-                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_CAR.name() );
+                        .putIfAbsent( patrul.getTaskId(), ESCORT.name() );
                 else escortTuple.getPatrulList().remove( patrul.getUuid() );
                 CassandraDataControlForEscort
                         .getInstance()
@@ -377,68 +440,6 @@ public final class TaskInspector {
                                                 .passportSeries( patrul.getPassportNumber() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
                                                 .title( "My dear: " + patrul.getName() + " you got " + ESCORT
-                                                        + ", so be so kind to check active Task and start to work )))" )
-                                                .build() ) ); }
-
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvent faceEvents ) {
-        patrul.setStatus( status );
-        switch ( ( patrul.getStatus() ) ) {
-            case CANCEL, FINISHED -> {
-                if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
-                        .putIfAbsent( patrul.getTaskId(), FIND_FACE_CAR.name() );
-                else faceEvents.getPatruls().remove( patrul.getUuid() );
-                if ( faceEvents.getPatruls().size() == faceEvents.getReportForCardList().size() ) {
-                    faceEvents.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( faceEvents.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( faceEvents ) ); }
-                patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setTaskDate( null );
-                patrul.setStatus( FREE );
-                patrul.setTaskId( null ); }
-            case ATTACHED -> {
-                patrul.setTaskId( faceEvents.getId() ); // saving card id into patrul object
-                patrul.setTaskTypes( FIND_FACE_PERSON );
-//                patrul.setLatitudeOfTask( faceEvents.getCamera().getLatitude() );
-//                patrul.setLongitudeOfTask( faceEvents.getCamera().getLongitude() );
-            }
-            case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-            case ARRIVED -> faceEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
-                    PatrulStatus.builder()
-                    .patrul( patrul )
-                    .inTime( patrul.check() )
-                    .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
-        } if ( status.compareTo( CANCEL ) != 0 ) faceEvents.getPatruls().put( patrul.getUuid(), patrul );
-        if ( faceEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis()
-                .addValue( faceEvents.getId(), new ActiveTask( faceEvents ) ).subscribe();
-        CassandraDataControlForTasks
-                .getInstance()
-                .addValue( faceEvents );
-
-        CassandraDataControl
-                .getInstance()
-                        .update( patrul )
-                                .subscribe();
-
-        KafkaDataControl.getInstance()
-                .writeToKafka(
-                        CassandraDataControl
-                                .getInstance()
-                                .addValue(
-                                        Notification.builder()
-                                                .id( faceEvents.getId() )
-                                                .uuid( UUID.randomUUID() )
-                                                .status( patrul.getStatus() )
-                                                .type( FIND_FACE_PERSON.name() )
-                                                .carNumber( patrul.getCarNumber() )
-                                                .taskTypes( patrul.getTaskTypes() )
-                                                .notificationWasCreated( new Date() )
-                                                .policeType( patrul.getPoliceType() )
-                                                .passportSeries( patrul.getPassportNumber() )
-//                                                .latitudeOfTask( faceEvents.getCamera().getLatitude() )
-                                                .nsfOfPatrul( patrul.getSurnameNameFatherName() )
-//                                                .longitudeOfTask( faceEvents.getCamera().getLongitude() )
-//                                                .address( faceEvents.getCamera().getName() != null ? faceEvents.getCamera().getName() : "unknown" )
-                                                .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_PERSON
                                                         + ", so be so kind to check active Task and start to work )))" )
                                                 .build() ) );
         return patrul; }
@@ -676,6 +677,18 @@ public final class TaskInspector {
                             .success( CassandraDataControl.getInstance().login( patrul, status ) )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                     .message( "Patrul: " + this.changeTaskStatus( patrul, status, carEvents )
+                                            .getPassportNumber() + " changed his status task to: " + status  )
+                                    .code( 200 )
+                                    .build() )
+                            .build() ) );
+
+            case ESCORT -> CassandraDataControlForEscort
+                    .getInstance()
+                    .getAllTupleOfEscort( patrul.getTaskId() )
+                    .flatMap( escortTuple -> Mono.just( ApiResponseModel.builder()
+                            .success( CassandraDataControl.getInstance().login( patrul, status ) )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .message( "Patrul: " + this.changeTaskStatus( patrul, status, escortTuple )
                                             .getPassportNumber() + " changed his status task to: " + status  )
                                     .code( 200 )
                                     .build() )

@@ -27,12 +27,7 @@ public class PolygonForPatrulController { // SAM - 76
     @MessageMapping ( value = "deletePolygonForPatrul" )
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return CassandraDataControl
             .getInstance()
-            .delete(
-                    CassandraDataControl
-                            .getInstance()
-                            .getPolygonForPatrul(),
-                    "uuid",
-                    uuid ); }
+            .deletePolygonForPatrul( uuid ); }
 
     @MessageMapping ( value = "updatePolygonForPatrul" )
     public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) { return CassandraDataControl

@@ -460,7 +460,7 @@ public final class CassandraDataControl {
                 "Select * from "
                         + this.dbName + "." + this.getPolygon()
                         + " where uuid = " + uuid ).one();
-        return Mono.just( row != null ? new Polygon( row ) : null ); }
+        return Mono.justOrEmpty( row != null ? new Polygon( row ) : null ); }
 
     public Mono< ApiResponseModel > addValue ( ReqCar reqCar ) { return this.session.execute( "INSERT INTO "
             + this.dbName + "." + this.getCars() +
@@ -855,51 +855,86 @@ public final class CassandraDataControl {
                         .build() ); }
 
     public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) {
-        return this.session.execute( "INSERT INTO "
-                        + this.dbName + "." + this.polygonForPatrul +
-                        CassandraConverter
-                                .getInstance()
-                                .getALlNames( Polygon.class ) +
-                        " VALUES ("
-                        + polygon.getUuid() + ", "
-                        + polygon.getOrgan() + ", "
+        return this.getPolygonForPatrul( polygon.getUuid().toString() )
+                        .flatMap( polygon1 -> {
+                            polygon.getPatrulList().addAll( polygon1.getPatrulList() );
+                            polygon.getPatrulList()
+                                    .forEach( uuid -> this.session.executeAsync(
+                                            "UPDATE " +
+                                                    this.dbName + "." + this.getPatrols() +
+                                                    " SET inPolygon = " + true
+                                                    + " where uuid = " + uuid + ";" ) );
+                            return Mono.just( polygon );
+                        } ).flatMap( polygon1 -> this.session.execute( "INSERT INTO "
+                                        + this.dbName + "." + this.polygonForPatrul +
+                                        CassandraConverter
+                                                .getInstance()
+                                                .getALlNames( Polygon.class ) +
+                                        " VALUES ("
+                                        + polygon.getUuid() + ", "
+                                        + polygon.getOrgan() + ", "
 
-                        + polygon.getRegionId() + ", "
-                        + polygon.getMahallaId() + ", "
-                        + polygon.getDistrictId() + ", '"
+                                        + polygon.getRegionId() + ", "
+                                        + polygon.getMahallaId() + ", "
+                                        + polygon.getDistrictId() + ", '"
 
-                        + polygon.getName() + "', '"
-                        + polygon.getColor() + "', " +
+                                        + polygon.getName() + "', '"
+                                        + polygon.getColor() + "', " +
 
-                        CassandraConverter
-                                .getInstance()
-                                .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
+                                        CassandraConverter
+                                                .getInstance()
+                                                .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
 
-                        CassandraConverter
-                                .getInstance()
-                                .convertListToCassandra( polygon.getPatrulList() ) + ", " +
+                                        CassandraConverter
+                                                .getInstance()
+                                                .convertListToCassandra( polygon.getPatrulList() ) + ", " +
 
-                        CassandraConverter
-                                .getInstance()
-                                .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");" )
-                .wasApplied() ? Mono.just(
-                ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Polygon: " + polygon.getUuid() + " was updated successfully" )
-                                        .code( 200 )
+                                        CassandraConverter
+                                                .getInstance()
+                                                .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");" )
+                                .wasApplied() ? Mono.just(
+                                ApiResponseModel.builder()
+                                        .status(
+                                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                                        .message( "Polygon: " + polygon.getUuid() + " was updated successfully" )
+                                                        .code( 200 )
+                                                        .build()
+                                        ).success( true )
                                         .build()
-                        ).success( true )
-                        .build()
-        ) : Mono.just(
-                ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "This polygon has already been created" )
-                                        .code( 201 )
-                                        .build()
-                        ).success( false )
-                        .build() ); }
+                        ) : Mono.just( ApiResponseModel
+                            .builder()
+                            .status(
+                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .message( "This polygon has already been created" )
+                                            .code( 201 )
+                                            .build()
+                                        ).success( false )
+                                        .build() ) ); }
+
+    public Mono< ApiResponseModel > deletePolygonForPatrul ( String id ) {
+       return this.getPolygonForPatrul( id )
+                .flatMap( polygon1 -> {
+                    polygon1.getPatrulList()
+                            .forEach( uuid -> this.session.executeAsync(
+                                "UPDATE " +
+                                        this.dbName + "." + this.getPatrols() +
+                                        " SET inPolygon = " + false
+                                        + " where uuid = " + uuid + ";" ) );
+                    return Mono.just( polygon1 );
+                } ).flatMap( polygon1 -> {
+                        this.session.execute(
+                                "DELETE FROM "
+                                        + this.dbName + "." + this.getPolygonForPatrul()
+                                        + " where uuid = " + UUID.fromString( id ) + ";" );
+                        return Mono.just( ApiResponseModel
+                                .builder()
+                                        .success( true )
+                                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                                .builder()
+                                                .message( "Polygon " + id + " successfully deleted" )
+                                                .code( 200 )
+                                                .build() )
+                                .build() ); } ); }
 
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return this.getPolygonForPatrul( scheduleForPolygonPatrul.getUuid() )
