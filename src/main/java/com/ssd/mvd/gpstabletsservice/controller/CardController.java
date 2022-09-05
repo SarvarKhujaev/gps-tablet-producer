@@ -141,6 +141,7 @@ public class CardController {
         return CassandraDataControl
                 .getInstance()
                 .getPatrul( uuid )
+                .filter( patrul -> patrul.getTaskTypes().compareTo( TaskTypes.FREE ) != 0 )
                 .flatMap( patrul -> TaskInspector
                         .getInstance()
                         .removePatrulFromTask( patrul ) ); }

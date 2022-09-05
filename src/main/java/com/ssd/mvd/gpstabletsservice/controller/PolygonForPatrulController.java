@@ -6,6 +6,7 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.entity.ScheduleForPolygonPatrul;
 
+import com.ssd.mvd.gpstabletsservice.response.Status;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,7 +40,18 @@ public class PolygonForPatrulController { // SAM - 76
             .updatePolygonForPatrul( polygon ); }
 
     @MessageMapping ( value = "addPatrulToPolygon" )
-    public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
+        if ( scheduleForPolygonPatrul.getPatrulUUIDs() == null
+                || scheduleForPolygonPatrul.getPatrulUUIDs().size() == 0 )
+            return Mono.just( ApiResponseModel
+                            .builder()
+                            .success( false )
+                            .status( Status
+                                    .builder()
+                                    .code( 201 )
+                                    .message( "Wrong params" )
+                                    .build() ).build() );
+        return CassandraDataControl
             .getInstance()
             .addPatrulToPolygon( scheduleForPolygonPatrul ); }
 

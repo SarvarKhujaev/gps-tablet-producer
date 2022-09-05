@@ -43,6 +43,7 @@ public final class TaskInspector {
                 if ( card.getPatruls().size() == card.getReportForCardList().size() ) {
                     card.setStatus( FINISHED );
                     RedisDataControl.getRedis().remove( card.getCardId() );
+                    RedisDataControl.getRedis().remove( card.getCardId().toString() );
                     KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( card ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );

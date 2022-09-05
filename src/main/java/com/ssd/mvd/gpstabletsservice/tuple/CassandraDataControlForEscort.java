@@ -264,24 +264,28 @@ public class CassandraDataControlForEscort {
                     .getInstance()
                     .convertListOfPointsToCassandra( polygon.getLatlngs() )
                     + ") IF NOT EXISTS;"
-            ).wasApplied() ? Mono.just( ApiResponseModel.builder()
-                        .data( com.ssd.mvd.gpstabletsservice.entity.Data
+            ).wasApplied() ? Mono.just( ApiResponseModel
+                .builder()
+                .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                        .builder()
+                        .type( polygon.getUuid().toString() )
+                        .build() )
+                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                        .builder()
+                        .code( 200 )
+                        .message( "Polygon was saved" )
+                        .build() )
+                .success( true )
+                .build() )
+                    : Mono.just( ApiResponseModel
+                        .builder()
+                        .success( false )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
                                 .builder()
-                                .type( polygon.getUuid().toString() )
+                                .code( 201 )
+                                .message( "This polygon has already been saved" )
                                 .build() )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                            .code( 200 )
-                            .message( "Polygon was saved" )
-                            .build() )
-                    .success( true )
-                    .build() )
-                    : Mono.just( ApiResponseModel.builder()
-                    .success( false )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                            .code( 201 )
-                            .message( "This polygon has already been saved" )
-                            .build() )
-                    .build() ); }
+                        .build() ); }
 
     public Mono< ApiResponseModel > update ( PolygonForEscort polygon ) { return this.session.execute(
             "INSERT INTO "
