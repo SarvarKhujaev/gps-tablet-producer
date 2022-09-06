@@ -126,12 +126,7 @@ public class PatrulController {
                 .deleteUser( passportNumber );
         return CassandraDataControl
                 .getInstance()
-                .delete(
-                        CassandraDataControl
-                                .getInstance()
-                                .getPatrols(),
-                        "uuid",
-                        passportNumber.split( "@" )[0] ); }
+                .deletePatrul( UUID.fromString( passportNumber.split( "@" )[0] ) ); }
 
     @MessageMapping ( value = "getPatrulStatistics" )
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return CassandraDataControl
@@ -152,7 +147,7 @@ public class PatrulController {
             .getRedis()
             .addAllPatrulsToChatService( token ); }
 
-    @MessageMapping ( value = "getListOfPatrulsByUUID")
+    @MessageMapping ( value = "getListOfPatrulsByUUID" )
     public Flux< Patrul > getListOfPatrulsByUUID ( CardRequest< ? > cardRequest ) { return Flux.fromStream(
             cardRequest.getPatruls().stream() )
             .flatMap( uuid -> CassandraDataControl

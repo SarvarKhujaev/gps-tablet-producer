@@ -566,6 +566,13 @@ public final class CassandraDataControl {
             ).all().stream()
     ).map( Patrul::new ); }
 
+    public Row getPatrul( String pasportNumber ) { return
+            this.session.execute(
+                    "SELECT * FROM "
+                            + this.dbName + "." + this.getPatrols()
+                            + " WHERE passportNumber = '" + pasportNumber + "';"
+            ).one(); }
+
     public Mono< Patrul > getPatrul ( UUID uuid ) {
         Row row = this.session.execute(
                 "SELECT * FROM "
@@ -574,12 +581,18 @@ public final class CassandraDataControl {
         ).one();
         return Mono.justOrEmpty( row != null ? new Patrul( row ) : null ); }
 
-    public Row getPatrul( String pasportNumber ) { return
-            this.session.execute(
-                    "SELECT * FROM "
-                            + this.dbName + "." + this.getPatrols()
-                            + " WHERE passportNumber = '" + pasportNumber + "';"
-            ).one(); }
+    public Mono< ApiResponseModel > deletePatrul ( UUID uuid ) { return this.getPatrul( uuid )
+            .flatMap( patrul -> {
+                this.session.execute(
+                        "DELETE FROM "
+                                + this.dbName + "." + this.getPatrolsLogin()
+                                + " WHERE login = '" + patrul.getLogin() + "';" );
+
+                return this.delete( CassandraDataControl
+                                .getInstance()
+                                .getPatrols(),
+                        "uuid",
+                        patrul.getUuid().toString() ); } ); }
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
         Row row = this.getPatrul( patrul.getPassportNumber() );
