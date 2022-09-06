@@ -24,7 +24,6 @@ public class Card {
     private Integer sEventFormsAddId;  //??
     private Integer initSeventFormsId;  //??
 
-    private Status status = Status.CREATED;
     private String fabula;   //????
     private String address;
     private String userFio; //Ariza berivchining F.I.SH
@@ -42,6 +41,8 @@ public class Card {
     private EventAddress eventAddress;   //Voqea manzili
     @JsonDeserialize
     private EventHuman eventHuman;   // Aybdor inson
+
+    private Status status = Status.CREATED;
 
     @JsonDeserialize
     private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event

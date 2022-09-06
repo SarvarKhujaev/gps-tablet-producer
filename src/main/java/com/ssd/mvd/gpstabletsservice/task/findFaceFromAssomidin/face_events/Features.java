@@ -13,26 +13,26 @@ import lombok.*;
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class Features {
     @JsonDeserialize
-    @SerializedName("gender")
+    @SerializedName( "gender" )
     private Gender gender;
 
     @JsonDeserialize
-    @SerializedName("age")
+    @SerializedName( "age" )
     private Age age;
 
     @JsonDeserialize
-    @SerializedName("emotions")
+    @SerializedName( "emotions" )
     private Emotions emotions;
 
     @JsonDeserialize
-    @SerializedName("beard")
+    @SerializedName( "beard" )
     private Beard beard;
 
     @JsonDeserialize
-    @SerializedName("glasses")
+    @SerializedName( "glasses" )
     private Glasses glasses;
 
     @JsonDeserialize
-    @SerializedName("medmask")
+    @SerializedName( "medmask" )
     private Medmask medmask;
 }

@@ -25,6 +25,10 @@ public class ActiveTask {
     private Double latitude;
     private Double longitude;
 
+    private Integer region;
+    private Integer district;
+    private Integer countryside;
+
     private String type;
     private String title;
     private String taskId;
@@ -145,45 +149,75 @@ public class ActiveTask {
         this.setType( TaskTypes.FIND_FACE_CAR.name() ); }
 
     public ActiveTask ( FaceEvent faceEvents ) {
-        this.setTaskId( faceEvents.getId() );
         this.setStatus( faceEvents.getStatus() );
         this.setPatrulList( faceEvents.getPatruls() );
+
+        this.setRegion( faceEvents.getDataInfo().getData().getRegion() );
+        this.setDistrict( faceEvents.getDataInfo().getData().getDistrict() );
+        this.setCountryside( faceEvents.getDataInfo().getData().getCountryside() );
+
+        this.setTaskId( faceEvents.getId() );
         this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-//        this.setLatitude( faceEvents.getCamera().getLatitude() );
-//        this.setLongitude( faceEvents.getCamera().getLongitude() );
+        this.setAddress( faceEvents.getDataInfo().getData().getAddress() );
+
+        this.setLatitude( faceEvents.getDataInfo().getData().getLatitude() );
+        this.setLongitude( faceEvents.getDataInfo().getData().getLongitude() );
+
         try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( faceEvents.getCreated_date() ) ); }
         catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
 
-    public ActiveTask ( FaceEvent eventCar, Status status ) {
+    public ActiveTask ( FaceEvent faceEvent, Status status ) {
         this.setPatrulStatus( status );
-        this.setTaskId( eventCar.getId() );
-        this.setStatus( eventCar.getStatus() );
-        this.setPatrulList( eventCar.getPatruls() );
+        this.setStatus( faceEvent.getStatus() );
+
+        this.setRegion( faceEvent.getDataInfo().getData().getRegion() );
+        this.setDistrict( faceEvent.getDataInfo().getData().getDistrict() );
+        this.setCountryside( faceEvent.getDataInfo().getData().getCountryside() );
+
+        this.setTaskId( faceEvent.getId() );
         this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-//        this.setLatitude( eventCar.getCamera().getLatitude() );
-//        this.setLongitude( eventCar.getCamera().getLongitude() );
-        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( eventCar.getCreated_date() ) ); }
+        this.setAddress( faceEvent.getDataInfo().getData().getAddress() );
+
+        this.setLatitude( faceEvent.getDataInfo().getData().getLatitude() );
+        this.setLongitude( faceEvent.getDataInfo().getData().getLongitude() );
+
+        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( faceEvent.getCreated_date() ) ); }
         catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
 
-    public ActiveTask ( CarEvent faceEvents ) {
-        this.setTaskId( faceEvents.getId() );
-        this.setStatus( faceEvents.getStatus() );
-        this.setPatrulList( faceEvents.getPatruls() );
+    public ActiveTask ( CarEvent carEvent ) {
+        this.setStatus( carEvent.getStatus() );
+        this.setPatrulList( carEvent.getPatruls() );
+
+        this.setRegion( carEvent.getDataInfo().getData().getRegion() );
+        this.setDistrict( carEvent.getDataInfo().getData().getDistrict() );
+        this.setCountryside( carEvent.getDataInfo().getData().getCountryside() );
+
+        this.setTaskId( carEvent.getId() );
         this.setType( TaskTypes.FIND_FACE_CAR.name() );
-//        this.setLatitude( faceEvents.getCamera().getLatitude() );
-//        this.setLongitude( faceEvents.getCamera().getLongitude() );
-        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( faceEvents.getCreated_date() ) ); }
+        this.setAddress( carEvent.getDataInfo().getData().getAddress() );
+
+        this.setLatitude( carEvent.getDataInfo().getData().getLatitude() );
+        this.setLongitude( carEvent.getDataInfo().getData().getLongitude() );
+
+        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( carEvent.getCreated_date() ) ); }
         catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
 
-    public ActiveTask ( CarEvent eventCar, Status status ) {
+    public ActiveTask ( CarEvent carEvent, Status status ) {
         this.setPatrulStatus( status );
-        this.setTaskId( eventCar.getId() );
-        this.setStatus( eventCar.getStatus() );
-        this.setPatrulList( eventCar.getPatruls() );
+        this.setStatus( carEvent.getStatus() );
+
+        this.setRegion( carEvent.getDataInfo().getData().getRegion() );
+        this.setDistrict( carEvent.getDataInfo().getData().getDistrict() );
+        this.setCountryside( carEvent.getDataInfo().getData().getCountryside() );
+
+        this.setTaskId( carEvent.getId() );
         this.setType( TaskTypes.FIND_FACE_CAR.name() );
-//        this.setLatitude( eventCar.getCamera().getLatitude() );
-//        this.setLongitude( eventCar.getCamera().getLongitude() );
-        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( eventCar.getCreated_date() ) ); }
+        this.setAddress( carEvent.getDataInfo().getData().getAddress() );
+
+        this.setLatitude( carEvent.getDataInfo().getData().getLatitude() );
+        this.setLongitude( carEvent.getDataInfo().getData().getLongitude() );
+
+        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( carEvent.getCreated_date() ) ); }
         catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
 
     public ActiveTask( EscortTuple escortTuple, Status status ) {

@@ -1,6 +1,5 @@
-package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
+package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.gson.annotations.SerializedName;
 import lombok.extern.jackson.Jacksonized;
 import java.util.List;
@@ -11,13 +10,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class First {
-    @SerializedName( "timestamp" )
+    @SerializedName("timestamp")
     private String timestamp;
 
-    @JsonDeserialize
-    @SerializedName( "bbox" )
+    @SerializedName("bbox")
     private List< Integer > bbox;
 
-    @SerializedName( "quality" )
+    @SerializedName("quality")
     private Double quality;
 }

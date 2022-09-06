@@ -1,11 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.extern.jackson.Jacksonized;
 import lombok.*;
 
 @Data
-@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 public class TintedGlass {

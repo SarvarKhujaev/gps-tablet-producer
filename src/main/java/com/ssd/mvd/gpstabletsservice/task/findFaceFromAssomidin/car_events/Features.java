@@ -11,16 +11,22 @@ import lombok.*;
 public class Features {
     @JsonDeserialize
     private Body body;
+
     @JsonDeserialize
     private Make make;
-    @JsonDeserialize
-    private Model model;
+
     @JsonDeserialize
     private Color color;
+
     @JsonDeserialize
-    private LicensePlateRegion license_plate_region;
+    private Model model;
+
     @JsonDeserialize
     private LicensePlateNumber license_plate_number;
+
+    @JsonDeserialize
+    private LicensePlateRegion license_plate_region;
+
     @JsonDeserialize
     private LicensePlateCountry license_plate_country;
 }

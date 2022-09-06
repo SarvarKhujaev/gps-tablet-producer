@@ -75,15 +75,7 @@ public final class CassandraDataControl {
     public void register () {
         CassandraConverter
                 .getInstance()
-                .registerCodecForPolygonType( this.dbName, this.getPolygonType() );
-
-        CassandraConverter
-                .getInstance()
                 .registerCodecForPatrul( this.dbName, this.getPatrulType() );
-
-        CassandraConverter
-                .getInstance()
-                .registerCodecForPolygonEntity( this.dbName, this.getPolygonEntity() );
 
         CassandraConverter
                 .getInstance()
@@ -91,15 +83,23 @@ public final class CassandraDataControl {
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForViolationsInformation( this.dbName, this.getViolationListType() );
-
-        CassandraConverter
-                .getInstance()
                 .registerCodecForReport( this.dbName, this.getReportForCard() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForPoliceType( this.dbName, this.getPoliceType() ); }
+                .registerCodecForPoliceType( this.dbName, this.getPoliceType() );
+
+        CassandraConverter
+                .getInstance()
+                .registerCodecForPolygonType( this.dbName, this.getPolygonType() );
+
+        CassandraConverter
+                .getInstance()
+                .registerCodecForPolygonEntity( this.dbName, this.getPolygonEntity() );
+
+        CassandraConverter
+                .getInstance()
+                .registerCodecForViolationsInformation( this.dbName, this.getViolationListType() ); }
 
     private void createType ( String typeName, Class object ) {
         this.session.execute("CREATE TYPE IF NOT EXISTS "
@@ -448,19 +448,19 @@ public final class CassandraDataControl {
                                         .code( 201 )
                                         .build() ).build() ); }
 
-    public Flux< Polygon > getAllPolygons () { return Flux.fromStream(
-            this.session.execute(
-                    "SELECT * FROM "
-                    + this.dbName + "." + this.getPolygon() + ";"
-            ).all().stream()
-    ).map( Polygon::new ); }
-
     public Mono< Polygon > getPolygon ( UUID uuid ) {
         Row row = this.session.execute(
                 "Select * from "
                         + this.dbName + "." + this.getPolygon()
                         + " where uuid = " + uuid ).one();
         return Mono.justOrEmpty( row != null ? new Polygon( row ) : null ); }
+
+    public Flux< Polygon > getAllPolygons () { return Flux.fromStream(
+            this.session.execute(
+                    "SELECT * FROM "
+                    + this.dbName + "." + this.getPolygon() + ";"
+            ).all().stream()
+    ).map( Polygon::new ); }
 
     public Mono< ApiResponseModel > addValue ( ReqCar reqCar ) { return this.session.execute( "INSERT INTO "
             + this.dbName + "." + this.getCars() +
@@ -807,6 +807,31 @@ public final class CassandraDataControl {
                         + " where uuid = " + UUID.fromString( id ) ).one();
         return Mono.just( row != null ? new Polygon( row ) : null ); }
 
+    public Mono< ApiResponseModel > deletePolygonForPatrul ( String id ) {
+        return this.getPolygonForPatrul( id )
+                .flatMap( polygon1 -> {
+                    polygon1.getPatrulList()
+                            .forEach( uuid -> this.session.executeAsync(
+                                    "UPDATE " +
+                                            this.dbName + "." + this.getPatrols() +
+                                            " SET inPolygon = " + false
+                                            + " where uuid = " + uuid + ";" ) );
+                    return Mono.just( polygon1 );
+                } ).flatMap( polygon1 -> {
+                    this.session.execute(
+                            "DELETE FROM "
+                                    + this.dbName + "." + this.getPolygonForPatrul()
+                                    + " where uuid = " + UUID.fromString( id ) + ";" );
+                    return Mono.just( ApiResponseModel
+                            .builder()
+                            .success( true )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
+                                    .message( "Polygon " + id + " successfully deleted" )
+                                    .code( 200 )
+                                    .build() )
+                            .build() ); } ); }
+
     public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) {
         return this.session.execute( "INSERT INTO "
                 + this.dbName + "." + this.polygonForPatrul +
@@ -910,31 +935,6 @@ public final class CassandraDataControl {
                                             .build()
                                         ).success( false )
                                         .build() ) ); }
-
-    public Mono< ApiResponseModel > deletePolygonForPatrul ( String id ) {
-       return this.getPolygonForPatrul( id )
-                .flatMap( polygon1 -> {
-                    polygon1.getPatrulList()
-                            .forEach( uuid -> this.session.executeAsync(
-                                "UPDATE " +
-                                        this.dbName + "." + this.getPatrols() +
-                                        " SET inPolygon = " + false
-                                        + " where uuid = " + uuid + ";" ) );
-                    return Mono.just( polygon1 );
-                } ).flatMap( polygon1 -> {
-                        this.session.execute(
-                                "DELETE FROM "
-                                        + this.dbName + "." + this.getPolygonForPatrul()
-                                        + " where uuid = " + UUID.fromString( id ) + ";" );
-                        return Mono.just( ApiResponseModel
-                                .builder()
-                                        .success( true )
-                                        .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                                .builder()
-                                                .message( "Polygon " + id + " successfully deleted" )
-                                                .code( 200 )
-                                                .build() )
-                                .build() ); } ); }
 
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return this.getPolygonForPatrul( scheduleForPolygonPatrul.getUuid() )

@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.extern.jackson.Jacksonized;
+
 import java.io.Serializable;
 import lombok.*;
 
@@ -10,9 +11,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Age implements Serializable {
-    @SerializedName("name")
+    @SerializedName( "name" )
     private String name;
 
-    @SerializedName("confidence")
+    @SerializedName( "confidence" )
     private Integer confidence;
 }

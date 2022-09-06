@@ -6,6 +6,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Color {
-    private String name;
     private Double confidence;
+    private String name;
 }

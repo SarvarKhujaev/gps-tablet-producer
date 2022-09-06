@@ -173,9 +173,8 @@ public final class TaskInspector {
             case ATTACHED -> {
                 patrul.setTaskTypes( FIND_FACE_CAR );
                 patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
-//                patrul.setLatitudeOfTask( carEvents.getCamera().getLatitude() );
-//                patrul.setLongitudeOfTask( carEvents.getCamera().getLongitude() );
-            }
+                patrul.setLatitudeOfTask( carEvents.getDataInfo().getData().getLatitude() );
+                patrul.setLongitudeOfTask( carEvents.getDataInfo().getData().getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
@@ -207,11 +206,13 @@ public final class TaskInspector {
                                                 .policeType( patrul.getPoliceType() )
                                                 .passportSeries( patrul.getPassportNumber() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
-//                                                .latitudeOfTask( carEvents.getCamera().getLatitude() )
-//                                                .longitudeOfTask( carEvents.getCamera().getLongitude() )
-//                                                .address( carEvents.getCamera().getName() != null ? carEvents.getCamera().getName() : "unknown" )
+                                                .latitudeOfTask( carEvents.getDataInfo().getData().getLatitude() )
+                                                .longitudeOfTask( carEvents.getDataInfo().getData().getLongitude() )
+                                                .address( carEvents.getDataInfo().getData().getAddress() != null ?
+                                                        carEvents.getDataInfo().getData().getAddress() : "unknown" )
                                                 .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_CAR
-                                                        + ", so be so kind to check active Task and start to work )))" ).build() ) );
+                                                        + ", so be so kind to check active Task and start to work )))" )
+                                                .build() ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventFace eventFace ) {
@@ -348,9 +349,8 @@ public final class TaskInspector {
             case ATTACHED -> {
                 patrul.setTaskId( faceEvents.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( FIND_FACE_PERSON );
-//                patrul.setLatitudeOfTask( faceEvents.getCamera().getLatitude() );
-//                patrul.setLongitudeOfTask( faceEvents.getCamera().getLongitude() );
-            }
+                patrul.setLatitudeOfTask( faceEvents.getDataInfo().getData().getLatitude() );
+                patrul.setLongitudeOfTask( faceEvents.getDataInfo().getData().getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> faceEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
                     PatrulStatus.builder()
@@ -384,10 +384,11 @@ public final class TaskInspector {
                                                 .notificationWasCreated( new Date() )
                                                 .policeType( patrul.getPoliceType() )
                                                 .passportSeries( patrul.getPassportNumber() )
-//                                                .latitudeOfTask( faceEvents.getCamera().getLatitude() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
-//                                                .longitudeOfTask( faceEvents.getCamera().getLongitude() )
-//                                                .address( faceEvents.getCamera().getName() != null ? faceEvents.getCamera().getName() : "unknown" )
+                                                .latitudeOfTask( faceEvents.getDataInfo().getData().getLatitude() )
+                                                .longitudeOfTask( faceEvents.getDataInfo().getData().getLongitude() )
+                                                .address( faceEvents.getDataInfo().getData().getAddress() != null ?
+                                                        faceEvents.getDataInfo().getData().getAddress() : "unknown" )
                                                 .title( "My dear: " + patrul.getName() + " you got " + FIND_FACE_PERSON
                                                         + ", so be so kind to check active Task and start to work )))" )
                                                 .build() ) );

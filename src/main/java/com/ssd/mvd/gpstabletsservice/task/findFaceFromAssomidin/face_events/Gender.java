@@ -10,6 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class Gender {
-    private String name;
     private Integer confidence;
+    private String name;
 }

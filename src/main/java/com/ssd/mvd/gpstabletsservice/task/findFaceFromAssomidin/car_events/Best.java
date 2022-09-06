@@ -1,23 +1,24 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.gson.annotations.SerializedName;
+import lombok.extern.jackson.Jacksonized;
+import java.util.List;
 import lombok.*;
 
-import java.util.List;
-
-@Setter
-@Getter
-@AllArgsConstructor
+@Data
+@Jacksonized
 @NoArgsConstructor
-@ToString
+@AllArgsConstructor
 public class Best {
-
     @SerializedName("timestamp")
     private String timestamp;
 
+    @JsonDeserialize
     @SerializedName("bbox")
     private List< Integer > bbox;
 
+    @JsonDeserialize
     @SerializedName("quality")
     private Object quality;
 

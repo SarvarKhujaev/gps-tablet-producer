@@ -8,7 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Bbox implements Serializable {
-
     @SerializedName("bottom")
     private int bottom;
 
@@ -20,5 +19,4 @@ public class Bbox implements Serializable {
 
     @SerializedName("left")
     private int left;
-
 }
