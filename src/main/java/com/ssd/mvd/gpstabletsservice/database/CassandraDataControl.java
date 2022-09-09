@@ -1,11 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
+import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
