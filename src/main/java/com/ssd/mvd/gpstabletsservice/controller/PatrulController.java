@@ -8,7 +8,6 @@ import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.database.RedisDataControl;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
@@ -143,8 +142,8 @@ public class PatrulController {
             .filter( patrul -> patrul.getSurnameNameFatherName().contains( name ) ); }
 
     @MessageMapping ( value = "addAllPatrulsToChatService" )
-    public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return RedisDataControl
-            .getRedis()
+    public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return CassandraDataControl
+            .getInstance()
             .addAllPatrulsToChatService( token ); }
 
     @MessageMapping ( value = "getListOfPatrulsByUUID" )

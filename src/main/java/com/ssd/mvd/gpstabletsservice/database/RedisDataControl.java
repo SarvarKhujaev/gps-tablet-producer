@@ -2,7 +2,6 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
-import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
@@ -78,20 +77,6 @@ public final class RedisDataControl {
                         .writeToKafka( SerDes.getSerDes().serialize( activeTask ) ) ) ); }
 
     public void remove ( String id ) { this.activeTasks.remove( id ).subscribe(); }
-
-    public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return this.getAllPatruls()
-            .flatMap( patrul -> {
-                patrul.setSpecialToken( token );
-                return Mono.just(
-                        ApiResponseModel.builder()
-                                .success( UnirestController
-                                        .getInstance()
-                                        .addUser( patrul ) )
-                                .status( Status.builder()
-                                        .message( patrul.getPassportNumber() + "Successfully added to chat service" )
-                                        .code( 200 )
-                                        .build()
-                                ).build() ); } ); }
 
     public Flux< ActiveTask > getActiveTasks() { return this.activeTasks.valueIterator()
             .flatMap( s -> Mono.just( SerDes.getSerDes().deserializeActiveTask( s ) ) ); }

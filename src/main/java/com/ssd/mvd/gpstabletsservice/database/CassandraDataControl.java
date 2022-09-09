@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED;
@@ -1277,4 +1278,18 @@ public final class CassandraDataControl {
                                         .message( "See you soon my darling )))" )
                                         .code( 200 )
                                         .build() ).build() ) ); } ); }
+
+    public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return this.getPatrul()
+            .flatMap( patrul -> {
+                patrul.setSpecialToken( token );
+                return Mono.just(
+                        ApiResponseModel.builder()
+                                .success( UnirestController
+                                        .getInstance()
+                                        .addUser( patrul ) )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( patrul.getPassportNumber() + "Successfully added to chat service" )
+                                        .code( 200 )
+                                        .build()
+                                ).build() ); } ); }
 }
