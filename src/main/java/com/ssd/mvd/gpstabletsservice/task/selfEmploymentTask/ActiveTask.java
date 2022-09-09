@@ -45,26 +45,38 @@ public class ActiveTask {
 
     public ActiveTask ( Card card ) {
         this.setStatus( card.getStatus() );
-        this.setAddress( card.getAddress() );
-        this.setLatitude( card.getLatitude() );
         this.setPatrulList( card.getPatruls() );
+        this.setCreatedDate( card.getCreated_date() );
+
+        this.setRegion( card.getEventAddress().getSOblastiId() );
+        this.setDistrict( card.getEventAddress().getSRegionId() );
+        this.setCountryside( card.getEventAddress().getSMahallyaId() );
+
+        this.setAddress( card.getAddress() );
         this.setDescription( card.getFabula() );
-        this.setLongitude( card.getLongitude() );
         this.setType( TaskTypes.CARD_102.name() );
         this.setTaskId( card.getCardId().toString() );
-        this.setCreatedDate( card.getCreated_date() );
-        this.setPatrulStatus( this.getPatrulStatus() ); }
+
+        this.setLatitude( card.getLatitude() );
+        this.setLongitude( card.getLongitude() );
+    }
 
     public ActiveTask ( Card card, Status status ) {
         this.setPatrulStatus( status );
         this.setStatus( card.getStatus() );
-        this.setAddress( card.getAddress() );
+        this.setCreatedDate( card.getCreated_date() );
+
         this.setLatitude( card.getLatitude() );
-        this.setDescription( card.getFabula() );
         this.setLongitude( card.getLongitude() );
+
+        this.setAddress( card.getAddress() );
+        this.setDescription( card.getFabula() );
         this.setType( TaskTypes.CARD_102.name() );
         this.setTaskId( card.getCardId().toString() );
-        this.setCreatedDate( card.getCreated_date() ); }
+
+        this.setRegion( card.getEventAddress().getSOblastiId() );
+        this.setDistrict( card.getEventAddress().getSRegionId() );
+        this.setCountryside( card.getEventAddress().getSMahallyaId() ); }
 
     public ActiveTask ( SelfEmploymentTask card ) {
         this.setTitle( card.getTitle() );
@@ -132,8 +144,8 @@ public class ActiveTask {
     public ActiveTask ( EventCar eventCar ) {
         this.setTaskId( eventCar.getId() );
         this.setStatus( eventCar.getStatus() );
-        this.setPatrulList( eventCar.getPatruls() );
         this.setLatitude( eventCar.getLatitude() );
+        this.setPatrulList( eventCar.getPatruls() );
         this.setLongitude( eventCar.getLongitude() );
         this.setCreatedDate( eventCar.getCreated_date() );
         this.setType( TaskTypes.FIND_FACE_CAR.name() ); }
