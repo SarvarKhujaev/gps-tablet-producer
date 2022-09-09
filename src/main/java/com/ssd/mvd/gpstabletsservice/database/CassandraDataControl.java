@@ -1,15 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
-import com.datastax.driver.core.policies.DefaultRetryPolicy;
-import com.datastax.driver.core.policies.TokenAwarePolicy;
-import com.datastax.driver.core.*;
-
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
+import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
@@ -18,6 +14,11 @@ import com.ssd.mvd.gpstabletsservice.controller.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
+
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.driver.core.*;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,15 +45,8 @@ public final class CassandraDataControl {
     private final String lustre = "LUSTRA";
     private final String patrols = "PATRULS"; // for table with Patruls info
     private final String polygon = "POLYGON";
-    private final String patrolsLogin = "PATRULS_LOGIN_TABLE"; // using in login situation
-
-    private final String faceCar = "faceCar";
-    private final String eventCar = "eventCar";
-    private final String eventFace = "eventFace";
-    private final String eventBody = "eventBody";
-    private final String facePerson = "facePerson";
-    private final String carTotalData = "carTotalData";
     private final String notification = "notification";
+    private final String patrolsLogin = "PATRULS_LOGIN_TABLE"; // using in login situation
 
     private final String patrulType = "PATRUL_TYPE";
     private final String policeType = "POLICE_TYPE";
@@ -62,7 +56,6 @@ public final class CassandraDataControl {
     private final String violationListType = "VIOLATION_LIST_TYPE";
 
     private final String reportForCard = "REPORT_FOR_CARD";
-    private final String selfEmployment = "SELFEMPLOYMENT";
     private final String polygonForPatrul = "POLYGON_FOR_PATRUl";
 
     private CodecRegistry codecRegistry = new CodecRegistry();
@@ -1285,4 +1278,18 @@ public final class CassandraDataControl {
                                         .message( "See you soon my darling )))" )
                                         .code( 200 )
                                         .build() ).build() ) ); } ); }
+
+    public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return this.getPatrul()
+            .flatMap( patrul -> {
+                patrul.setSpecialToken( token );
+                return Mono.just(
+                        ApiResponseModel.builder()
+                                .success( UnirestController
+                                        .getInstance()
+                                        .addUser( patrul ) )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( patrul.getPassportNumber() + "Successfully added to chat service" )
+                                        .code( 200 )
+                                        .build()
+                                ).build() ); } ); }
 }
