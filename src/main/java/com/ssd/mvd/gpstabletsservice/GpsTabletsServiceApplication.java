@@ -1,6 +1,8 @@
 package com.ssd.mvd.gpstabletsservice;
 
-import com.ssd.mvd.gpstabletsservice.database.*;
+import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
