@@ -362,26 +362,27 @@ public class CassandraDataControlForEscort {
                             .message( "This car does not exists" )
                             .build() ).build() ); }
 
+    public Mono< TupleTotalData > getTupleTotalData ( String uuid ) {
+        TupleTotalData tupleTotalData = new TupleTotalData();
+        return this.getAllTupleOfEscort( uuid )
+                .flatMap( escortTuple -> {
+                    if ( escortTuple.getUuidOfPolygon() != null )
+                        this.getAllPolygonForEscort( escortTuple.getUuidOfPolygon().toString() )
+                                .subscribe( tupleTotalData::setPolygonForEscort );
+                    escortTuple.getPatrulList().forEach( uuid1 -> CassandraDataControl
+                            .getInstance()
+                            .getPatrul( uuid1 )
+                            .subscribe( patrul -> tupleTotalData.getPatrulList().add( patrul ) ) );
+                    escortTuple.getTupleOfCarsList().forEach( uuid1 -> CassandraDataControlForEscort
+                            .getInstance()
+                            .getAllTupleOfCar( uuid1 )
+                            .subscribe( escortTuple1 -> tupleTotalData.getTupleOfCarList().add( escortTuple1 ) ) );
+                    return Mono.just( tupleTotalData ); } ); }
+
     public Mono< TupleOfCar > getAllTupleOfCar ( UUID uuid ) {
         return Mono.just( this.session.execute(
                 "SELECT * FROM "
                         + this.dbName + "." + this.getTupleOfCar()
                         + " where uuid = " + uuid + ";"
         ).one() ).map( TupleOfCar::new ); }
-
-    public Mono< TupleTotalData > getTupleTotalData ( String uuid ) {
-        TupleTotalData tupleTotalData = new TupleTotalData();
-        return this.getAllTupleOfEscort( uuid )
-                .flatMap( escortTuple -> this.getAllPolygonForEscort( escortTuple.getUuidOfPolygon().toString() )
-                                .flatMap( polygon -> {
-                                    escortTuple.getPatrulList().forEach( uuid1 -> CassandraDataControl
-                                            .getInstance()
-                                            .getPatrul( uuid1 )
-                                            .subscribe( patrul -> tupleTotalData.getPatrulList().add( patrul ) ) );
-                                    escortTuple.getTupleOfCarsList().forEach( uuid1 -> CassandraDataControlForEscort
-                                            .getInstance()
-                                            .getAllTupleOfCar( uuid1 )
-                                            .subscribe( escortTuple1 -> tupleTotalData.getTupleOfCarList().add( escortTuple1 ) ) );
-                                    tupleTotalData.setPolygonForEscort( polygon );
-                                    return Mono.just( tupleTotalData ); } ) ); }
 }

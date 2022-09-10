@@ -794,7 +794,7 @@ public final class CassandraDataControl {
                         .status(
                                 com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "This patrul is already exists" )
-                                        .code( 200 )
+                                        .code( 201 )
                                         .build()
                         ).build() ); }
 

@@ -22,45 +22,54 @@ public class UnirestController {
                 .defaultHeader("token", token )
                 .build(); }
 
-    public boolean deleteUser ( String patrulId ) {
+    public void deleteUser ( String patrulId ) {
         ReqId reqId = new ReqId();
-        reqId.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
-        System.out.println( reqId.getId() );
-        return restTemplate( patrulId.split( "@" )[1] )
-                .exchange( "https://ms.ssd.uz/chat/delete-user",
-                        HttpMethod.POST,
-                        new HttpEntity<>( reqId, null ),
-                        String.class )
-                .getStatusCodeValue() == 200; }
+        try {
+            reqId.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
+            System.out.println( reqId.getId() );
+            System.out.println( restTemplate( patrulId.split( "@" )[1] )
+                    .exchange( "https://ms.ssd.uz/chat/delete-user",
+                            HttpMethod.POST,
+                            new HttpEntity<>( reqId, null ),
+                            String.class )
+                    .getStatusCodeValue() == 200 );
+        } catch ( Exception e ) { System.out.println( "Error deleting user: " + e.getMessage() ); }; }
 
     public Boolean updateUser ( Patrul patrul ) {
         if ( patrul.getSpecialToken() == null ) return false;
-        Req req = new Req();
-        req.setRole( Role.USER );
-        req.setId( patrul.getUuid() );
-        req.setUsername( patrul.getSurnameNameFatherName() );
-        System.out.println( req );
-        return restTemplate( patrul
-                .getSpecialToken() )
-                .exchange("https://ms.ssd.uz/chat/edit-user",
-                        HttpMethod.POST,
-                        new HttpEntity<>( req, null ),
-                        String.class )
-                .getStatusCode()
-                .is2xxSuccessful(); }
+        try {
+            Req req = new Req();
+            req.setRole( Role.USER );
+            req.setId( patrul.getUuid() );
+            req.setUsername( patrul.getSurnameNameFatherName() );
+            System.out.println( req );
+            return restTemplate( patrul
+                    .getSpecialToken() )
+                    .exchange("https://ms.ssd.uz/chat/edit-user",
+                            HttpMethod.POST,
+                            new HttpEntity<>( req, null ),
+                            String.class )
+                    .getStatusCode()
+                    .is2xxSuccessful();
+        } catch ( Exception e ) {
+            System.out.println( e.getMessage() );
+            return false; } }
 
     public Boolean addUser ( Patrul patrul ) {
-        Req req = new Req();
-        req.setRole( Role.USER );
-        req.setId( patrul.getUuid() );
-        req.setUsername( patrul.getSurnameNameFatherName() );
-        System.out.println( req );
-        return restTemplate( patrul.getSpecialToken() )
-                .exchange("https://ms.ssd.uz/chat/add-user",
-                        HttpMethod.POST,
-                        new HttpEntity<>( req, null ),
-                        String.class )
-                .getStatusCode().is2xxSuccessful(); }
+        try { Req req = new Req();
+            req.setRole( Role.USER );
+            req.setId( patrul.getUuid() );
+            req.setUsername( patrul.getSurnameNameFatherName() );
+            System.out.println( req );
+            return restTemplate( patrul.getSpecialToken() )
+                    .exchange("https://ms.ssd.uz/chat/add-user",
+                            HttpMethod.POST,
+                            new HttpEntity<>( req, null ),
+                            String.class )
+                    .getStatusCode().is2xxSuccessful();
+        } catch ( Exception e ) {
+            System.out.println( e.getMessage() );
+            return false; } }
 
     @Data
     public static class ReqId {
