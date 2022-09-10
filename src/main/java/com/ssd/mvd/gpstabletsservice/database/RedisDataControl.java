@@ -36,9 +36,6 @@ public final class RedisDataControl {
         this.patrulMap = this.redissonReactiveClient.getMap( "patrulMap" ); // for patrul
         this.cardMap = this.redissonReactiveClient.getMap( "cardMap" ); }
 
-    public Flux< Patrul > getAllPatruls () { return this.patrulMap.valueIterator()
-            .flatMap( value -> Mono.just( SerDes.getSerDes().deserialize( value ) ) ); }
-
     public Mono< ApiResponseModel > update ( Patrul patrul ) { return this.patrulMap
             .fastPutIfExists( patrul.getPassportNumber(), SerDes.getSerDes().serialize( patrul ) )
             .flatMap( aBoolean -> aBoolean ?
@@ -65,6 +62,9 @@ public final class RedisDataControl {
             SerDes.getSerDes().serialize( card ) ).subscribe(); }
 
     public Mono< Card > getCard ( Long cardId ) { return this.cardMap.get( cardId )
+            .flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
+
+    public Flux< Card > getCard () { return this.cardMap.valueIterator()
             .flatMap( s -> Mono.just( SerDes.getSerDes().deserializeCard( s ) ) ); }
 
     public void remove ( Long cardId ) { this.cardMap.remove( cardId ).subscribe(); }
