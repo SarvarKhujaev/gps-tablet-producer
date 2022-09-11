@@ -70,7 +70,8 @@ public class Patrul {
 
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    public String getSurnameNameFatherName () { return ( this.surnameNameFatherName =
+    public String getSurnameNameFatherName () { return this.surnameNameFatherName != null ? this.surnameNameFatherName
+            : ( this.surnameNameFatherName =
             this.getName() + " "
                     + this.getSurname() + " "
                     + this.getFatherName() ); }
