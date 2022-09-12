@@ -580,8 +580,7 @@ public final class CassandraDataControl {
         if ( row == null ) return Mono.just(
                 ApiResponseModel.builder()
                         .success( false )
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Wrong patrul data" )
                                         .code( 201 )
                                         .build() )
@@ -593,6 +592,12 @@ public final class CassandraDataControl {
             if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
+            this.session.execute(
+                    "UPDATE "
+                    + this.dbName + "." + this.getPatrolsLogin()
+                    + " SET password = '" + patrul.getPassword() +
+                            "' WHERE login = '" + patrul.getPassportNumber()
+                    + "' AND uuid = " + patrul.getUuid() + ";" );
             return this.session.execute( "INSERT INTO "
                     + this.dbName + "." + this.patrols +
                     CassandraConverter
@@ -1265,17 +1270,10 @@ public final class CassandraDataControl {
                                         .code( 200 )
                                         .build() ).build() ) ); } ); }
 
-    public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return this.getPatrul()
-            .flatMap( patrul -> {
+    public void addAllPatrulsToChatService ( String token ) { this.getPatrul()
+            .subscribe( patrul -> {
                 patrul.setSpecialToken( token );
-                return Mono.just(
-                        ApiResponseModel.builder()
-                                .success( UnirestController
-                                        .getInstance()
-                                        .addUser( patrul ) )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( patrul.getPassportNumber() + "Successfully added to chat service" )
-                                        .code( 200 )
-                                        .build()
-                                ).build() ); } ); }
+                UnirestController
+                        .getInstance()
+                        .addUser( patrul ); } ); }
 }

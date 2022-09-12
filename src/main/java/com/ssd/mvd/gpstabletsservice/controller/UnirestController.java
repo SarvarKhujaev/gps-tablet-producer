@@ -60,7 +60,6 @@ public class UnirestController {
             req.setRole( Role.USER );
             req.setId( patrul.getUuid() );
             req.setUsername( patrul.getSurnameNameFatherName() );
-            System.out.println( req );
             return restTemplate( patrul.getSpecialToken() )
                     .exchange("https://ms.ssd.uz/chat/add-user",
                             HttpMethod.POST,
