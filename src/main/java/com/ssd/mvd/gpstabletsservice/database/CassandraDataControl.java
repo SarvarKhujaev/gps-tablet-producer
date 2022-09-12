@@ -213,17 +213,13 @@ public final class CassandraDataControl {
                                         + policeType.getUuid() + ", '"
                                         + policeType.getPoliceType()
                                         + "' );" )
-                                .wasApplied() ? Mono.just(
-                                    ApiResponseModel.builder()
-                                            .status(
-                                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .wasApplied() ? Mono.just( ApiResponseModel.builder()
+                                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                                             .message( "PoliceType was saved successfully" )
                                                             .code( 200 )
                                                             .build()
-                                            ).build() ) : Mono.just(
-                                    ApiResponseModel.builder()
-                                            .status(
-                                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            ).build() ) : Mono.just( ApiResponseModel.builder()
+                                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                                             .message( "This PoliceType has already been applied" )
                                                             .code( 201 )
                                                             .build()
@@ -250,17 +246,13 @@ public final class CassandraDataControl {
                         " VALUES("
                         + policeType.getUuid() + ", '"
                         + policeType.getPoliceType() + "' );" )
-                .wasApplied() ? Mono.just(
-                    ApiResponseModel.builder()
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                .wasApplied() ? Mono.just( ApiResponseModel.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                             .message( "PoliceType was updated successfully" )
                                             .code( 200 )
                                             .build()
-                            ).build() ) : Mono.just(
-                    ApiResponseModel.builder()
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            ).build() ) : Mono.just( ApiResponseModel.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                             .message( "This PoliceType has already been applied" )
                                             .code( 201 )
                                             .build() ).build() ); }
@@ -381,16 +373,14 @@ public final class CassandraDataControl {
             CassandraConverter
                     .getInstance()
                     .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
-                .wasApplied() ? Mono.just(
-                        ApiResponseModel.builder()
+                .wasApplied() ? Mono.just( ApiResponseModel.builder()
                                 .success( true )
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Polygon was successfully saved" )
                                         .code( 200 )
                                         .build() )
                                 .build()
-        ) : Mono.just(
-                ApiResponseModel.builder()
+        ) : Mono.just( ApiResponseModel.builder()
                         .status(
                                 com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "This polygon has already been saved" )
@@ -425,16 +415,14 @@ public final class CassandraDataControl {
             CassandraConverter
                     .getInstance()
                     .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");" )
-                .wasApplied() ? Mono.just(
-                        ApiResponseModel.builder()
+                .wasApplied() ? Mono.just( ApiResponseModel.builder()
                                 .success( true )
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Polygon was successfully updated" )
                                         .code( 200 )
                                         .build() )
                                 .build()
-        ) : Mono.just(
-                ApiResponseModel.builder()
+        ) : Mono.just( ApiResponseModel.builder()
                         .status(
                                 com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "This polygon does not exists" )
@@ -1098,16 +1086,14 @@ public final class CassandraDataControl {
                         + " WHERE uuid = " + uuid + ";"
         ).wasApplied() ? Mono.just(
                 ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Notification " + uuid + " was updated successfully" )
                                         .code( 200 )
                                         .build()
                         ).success( true )
                         .build() )
                 : Mono.just( ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Notification " + uuid + " was not updated" )
                                         .code( 200 )
                                         .build()
