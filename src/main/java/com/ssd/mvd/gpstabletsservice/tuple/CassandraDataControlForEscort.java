@@ -212,8 +212,7 @@ public class CassandraDataControlForEscort {
                                 .build() )
                         .build() ); }
 
-    public Mono< ApiResponseModel > delete ( String id ) {
-        return Mono.just(
+    public Mono< ApiResponseModel > delete ( String id ) { return Mono.just(
                 ApiResponseModel.builder()
                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                 .code( 200 )

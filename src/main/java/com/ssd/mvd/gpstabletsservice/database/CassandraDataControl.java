@@ -503,8 +503,7 @@ public final class CassandraDataControl {
                                             .message( "This car is linked to patrul" )
                                             .code( 201 )
                                             .build() )
-                                    .build() );
-                } ); }
+                                    .build() ); } ); }
 
     public Mono< ApiResponseModel > update ( ReqCar reqCar ) { return this.session.execute( "INSERT INTO "
             + this.dbName + "." + this.getCars() +
@@ -580,22 +579,36 @@ public final class CassandraDataControl {
         Row row = this.session.execute(
                 "SELECT * FROM "
                         + this.dbName + "." + this.getPatrols()
-                        + " WHERE uuid = " + uuid + ";"
-        ).one();
+                        + " WHERE uuid = " + uuid + ";" ).one();
         return Mono.justOrEmpty( row != null ? new Patrul( row ) : null ); }
 
-    public Mono< ApiResponseModel > deletePatrul ( UUID uuid ) { return this.getPatrul( uuid )
+    public Mono< ApiResponseModel > deletePatrul ( UUID uuid ) {
+        return this.getPatrul( uuid )
             .flatMap( patrul -> {
-                this.session.execute(
-                        "DELETE FROM "
-                                + this.dbName + "." + this.getPatrolsLogin()
-                                + " WHERE login = '" + patrul.getLogin() + "';" );
+                if ( patrul.getTaskId().equals( "null" )
+                        && patrul.getCarNumber().equals( "null" )
+                        && patrul.getUuidOfEscort().compareTo( null ) == 0
+                        && patrul.getUuidForPatrulCar().compareTo( null ) == 0
+                        && patrul.getUuidForEscortCar().compareTo( null ) == 0
+                        && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0
+                ) { this.session.execute (
+                            "DELETE FROM "
+                                    + this.dbName + "." + this.getPatrolsLogin()
+                                    + " WHERE login = '" + patrul.getLogin() + "';" );
 
-                return this.delete( CassandraDataControl
-                                .getInstance()
-                                .getPatrols(),
-                        "uuid",
-                        patrul.getUuid().toString() ); } ); }
+                    return this.delete( CassandraDataControl
+                                    .getInstance()
+                                    .getPatrols(),
+                            "uuid",
+                            patrul.getUuid().toString() ); }
+
+                else return Mono.just( ApiResponseModel.builder()
+                                .success( false )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .message( "You cannot delete this patrul" )
+                                        .code( 201 )
+                                        .build() )
+                        .build() ); } ); }
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
         Row row = this.getPatrul( patrul.getPassportNumber() );
@@ -605,8 +618,8 @@ public final class CassandraDataControl {
                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Wrong patrul data" )
                                         .code( 201 )
-                                        .build() )
-                        .build() );
+                                        .build() ).build() );
+
         if ( row.getUUID( "uuid" ).compareTo( patrul.getUuid() ) == 0 ) {
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
             if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
@@ -614,14 +627,16 @@ public final class CassandraDataControl {
             if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
+
             this.session.execute(
                     "UPDATE "
                     + this.dbName + "." + this.getPatrolsLogin()
                     + " SET password = '" + patrul.getPassword() +
                             "' WHERE login = '" + patrul.getPassportNumber()
                     + "' AND uuid = " + patrul.getUuid() + ";" );
+
             return this.session.execute( "INSERT INTO "
-                    + this.dbName + "." + this.patrols +
+                    + this.dbName + "." + this.getPatrols() +
                     CassandraConverter
                             .getInstance()
                             .getALlNames( Patrul.class ) + " VALUES ('" +
@@ -707,7 +722,6 @@ public final class CassandraDataControl {
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
         if ( this.getPatrul( patrul.getPassportNumber() ) == null ) {
             patrul.setInPolygon( false );
-            patrul.setTuplePermission( false );
             patrul.setListOfTasks( new HashMap<>() );
             patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
             patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
@@ -753,7 +767,7 @@ public final class CassandraDataControl {
                     patrul.getTotalActivityTime() + ", " +
 
                     patrul.getInPolygon() + ", " +
-                    patrul.getTuplePermission() + ", '" +
+                    ( patrul.getTuplePermission() != null ? patrul.getTuplePermission() : false ) + ", '" +
 
                     patrul.getName() + "', '" +
                     patrul.getRank() + "', '" +
