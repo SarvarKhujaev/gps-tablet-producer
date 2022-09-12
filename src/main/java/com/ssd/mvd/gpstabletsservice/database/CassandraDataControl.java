@@ -484,6 +484,28 @@ public final class CassandraDataControl {
                                             .build()
                             ).build() ); }
 
+    public Mono< ApiResponseModel > delete ( String gosno ) {
+        return this.getCar( UUID.fromString( gosno ) )
+                .flatMap( reqCar -> {
+                    if ( reqCar.getPatrulPassportSeries() == null
+                    && reqCar.getPatrulPassportSeries().equals( "null" ) ) {
+                        this.session.execute(
+                                "DELETE FROM trackers.trackersId where trackersId = '"
+                                        + reqCar.getTrackerId() + "';" );
+                        return this.delete( CassandraDataControl
+                                        .getInstance()
+                                        .getCars(),
+                                "uuid",
+                                gosno );
+                    } else return Mono.just( ApiResponseModel.builder()
+                                    .success( false )
+                                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .message( "This car is linked to patrul" )
+                                            .code( 201 )
+                                            .build() )
+                                    .build() );
+                } ); }
+
     public Mono< ApiResponseModel > update ( ReqCar reqCar ) { return this.session.execute( "INSERT INTO "
             + this.dbName + "." + this.getCars() +
             CassandraConverter
