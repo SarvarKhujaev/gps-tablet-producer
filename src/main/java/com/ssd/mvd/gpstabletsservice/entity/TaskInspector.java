@@ -43,8 +43,7 @@ public final class TaskInspector {
                 if ( card.getPatruls().size() == card.getReportForCardList().size() ) {
                     card.setStatus( FINISHED );
                     RedisDataControl.getRedis().remove( card.getCardId() );
-                    RedisDataControl.getRedis().remove( card.getCardId().toString() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( card ) ); }
+                    RedisDataControl.getRedis().remove( card.getCardId().toString() ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
@@ -106,8 +105,7 @@ public final class TaskInspector {
                 else eventCar.getPatruls().remove( patrul.getUuid() );
                 if ( eventCar.getPatruls().size() == eventCar.getReportForCardList().size() ) {
                     eventCar.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( eventCar.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventCar ) ); }
+                    RedisDataControl.getRedis().remove( eventCar.getId() ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
@@ -164,8 +162,7 @@ public final class TaskInspector {
                 else carEvents.getPatruls().remove( patrul.getUuid() );
                 if ( carEvents.getPatruls().size() == carEvents.getReportForCardList().size() ) {
                     carEvents.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( carEvents.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( carEvents ) ); }
+                    RedisDataControl.getRedis().remove( carEvents.getId() ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
@@ -224,8 +221,7 @@ public final class TaskInspector {
                 else eventFace.getPatruls().remove( patrul.getUuid() );
                 if ( eventFace.getPatruls().size() == eventFace.getReportForCardList().size() ) {
                     eventFace.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( eventFace.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventFace ) ); }
+                    RedisDataControl.getRedis().remove( eventFace.getId() ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
@@ -282,8 +278,7 @@ public final class TaskInspector {
                 else eventBody.getPatruls().remove( patrul.getUuid() );
                 if ( eventBody.getPatruls().size() == eventBody.getReportForCardList().size() ) {
                     eventBody.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( eventBody.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( eventBody ) ); }
+                    RedisDataControl.getRedis().remove( eventBody.getId() ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
@@ -340,8 +335,7 @@ public final class TaskInspector {
                 else faceEvents.getPatruls().remove( patrul.getUuid() );
                 if ( faceEvents.getPatruls().size() == faceEvents.getReportForCardList().size() ) {
                     faceEvents.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( faceEvents.getId() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( faceEvents ) ); }
+                    RedisDataControl.getRedis().remove( faceEvents.getId() ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
@@ -454,8 +448,7 @@ public final class TaskInspector {
                 else selfEmploymentTask.getPatruls().remove( patrul.getUuid() );
                 if ( selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ) {
                     selfEmploymentTask.setTaskStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
-                    KafkaDataControl.getInstance().writeToKafka( SerDes.getSerDes().serialize( selfEmploymentTask ) ); }
+                    RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
