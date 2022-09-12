@@ -55,20 +55,20 @@ public class UnirestController {
             System.out.println( e.getMessage() );
             return false; } }
 
-    public Boolean addUser ( Patrul patrul ) {
+    public void addUser ( Patrul patrul ) {
         try { Req req = new Req();
             req.setRole( Role.USER );
             req.setId( patrul.getUuid() );
             req.setUsername( patrul.getSurnameNameFatherName() );
-            return restTemplate( patrul.getSpecialToken() )
-                    .exchange("https://ms.ssd.uz/chat/add-user",
-                            HttpMethod.POST,
-                            new HttpEntity<>( req, null ),
-                            String.class )
-                    .getStatusCode().is2xxSuccessful();
-        } catch ( Exception e ) {
-            System.out.println( e.getMessage() );
-            return false; } }
+            System.out.println(
+                    restTemplate( patrul.getSpecialToken() )
+                            .exchange("https://ms.ssd.uz/chat/add-user",
+                                    HttpMethod.POST,
+                                    new HttpEntity<>( req, null ),
+                                    String.class )
+                            .getBody() );
+            patrul.setSpecialToken( null );
+        } catch ( Exception e ) { System.out.println( e.getMessage() ); } }
 
     @Data
     public static class ReqId {

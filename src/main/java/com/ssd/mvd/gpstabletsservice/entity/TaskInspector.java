@@ -906,8 +906,13 @@ public final class TaskInspector {
                     .getCard( Long.parseLong( patrul.getTaskId() ) )
                     .flatMap( card -> Mono.just( ApiResponseModel.builder()
                             .success( true )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .message( "Your task details" )
+                                    .code( 200 )
+                                    .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                     .data( new CardDetails( card, "ru" ) )
+                                    .type( CARD_102.name() )
                                     .build() )
                             .build() ) );
 
@@ -917,11 +922,12 @@ public final class TaskInspector {
                     .flatMap( eventBody -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .code( 200 )
                                     .message( "Your task details" )
+                                    .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                     .data( new CardDetails( eventBody ) )
+                                    .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
                             .build() ) );
 
@@ -931,11 +937,13 @@ public final class TaskInspector {
                     .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .code( 200 )
                                     .message( "Your task details" )
+                                    .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
-                                    .data( new CardDetails( eventFace ) ).build() ) // TO-DO
+                                    .data( new CardDetails( eventFace ) )
+                                    .type( FIND_FACE_PERSON.name() )
+                                    .build() ) // TO-DO
                             .build() ) );
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
@@ -944,11 +952,12 @@ public final class TaskInspector {
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .code( 200 )
                                     .message( "Your task details" )
+                                    .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                     .data( new CardDetails( eventCar ) )
+                                    .type( FIND_FACE_CAR.name() )
                                     .build() ) // TO-DO
                             .build() ) );
 
@@ -958,11 +967,12 @@ public final class TaskInspector {
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .code( 200 )
                                     .message( "Your task details" )
+                                    .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                     .data( new CardDetails( eventCar ) )
+                                    .type( FIND_FACE_CAR.name() )
                                     .build() ) // TO-DO
                             .build() ) );
 
@@ -972,11 +982,12 @@ public final class TaskInspector {
                     .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .code( 200 )
                                     .message( "Your task details" )
+                                    .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                     .data( new CardDetails( eventCar ) )
+                                    .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
                             .build() ) );
 
@@ -990,30 +1001,39 @@ public final class TaskInspector {
                                             .get(
                                                     escortTuple
                                                             .getPatrulList()
-                                                            .indexOf( patrul.getUuid() )
-                                            )
+                                                            .indexOf( patrul.getUuid() ) )
                             ).flatMap( tupleOfCar -> Mono.just( ApiResponseModel.builder()
                                     .success( true )
                                     .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .code( 200 )
                                             .message( "Your task details" )
+                                            .code( 200 )
                                             .build() )
                                     .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                             .data( new CardDetails( escortTuple, "ru", tupleOfCar ) )
+                                            .type( ESCORT.name() )
                                             .build() )
                                     .build() ) ) );
 
-            default -> CassandraDataControlForTasks
+            case SELF_EMPLOYMENT -> CassandraDataControlForTasks
                     .getInstance()
                     .getSelfEmploymentTask( UUID.fromString( patrul.getTaskId() ) )
                     .flatMap( selfEmploymentTask -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                    .code( 200 )
                                     .message( "Your task details" )
+                                    .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                     .data( new CardDetails( selfEmploymentTask, "ru", patrul.getPassportNumber() ) )
+                                    .type( TaskTypes.SELF_EMPLOYMENT.name() )
                                     .build() )
-                            .build() ) ); }; }
+                            .build() ) );
+
+            default -> Mono.just( ApiResponseModel.builder()
+                            .success( false )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .message( "You have no tasks" )
+                                    .code( 201 )
+                                    .build() )
+                    .build() ); }; }
 }
