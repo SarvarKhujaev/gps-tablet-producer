@@ -42,23 +42,15 @@ public class CarController {
 
     @MessageMapping( value = "deleteCar" )
     public Mono< ApiResponseModel > deleteCar ( String gosno ) {
-        return CassandraDataControl
-                .getInstance()
-                .getCar( UUID.fromString( gosno ) )
-                .flatMap( reqCar -> reqCar.getPatrulPassportSeries() == null ? CassandraDataControl
-                                .getInstance()
-                                .delete( CassandraDataControl
-                                                .getInstance()
-                                                .getCars(),
-                                        "uuid",
-                                        gosno ) : Mono.just( ApiResponseModel.builder()
+        try { return CassandraDataControl
+                    .getInstance()
+                    .delete( gosno );
+        } catch ( Exception e ) { return Mono.just(
+                ApiResponseModel.builder()
                         .success( false )
-                        .status( Status.builder()
-                                .message( "OOOps this car is linked to patrul: "
-                                        + reqCar.getPatrulPassportSeries()
-                                        + " so firstly eliminate this link" )
-                                .code( 201 )
-                                .build() )
-                        .build() ) );
-    }
+                        .status(
+                                Status.builder()
+                                        .code( 201 )
+                                        .message( "Wrong Car params" )
+                                        .build() ) .build() ); } }
 }
