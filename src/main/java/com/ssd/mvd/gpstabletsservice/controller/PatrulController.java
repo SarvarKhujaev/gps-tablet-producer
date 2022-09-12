@@ -142,9 +142,17 @@ public class PatrulController {
             .filter( patrul -> patrul.getSurnameNameFatherName().contains( name ) ); }
 
     @MessageMapping ( value = "addAllPatrulsToChatService" )
-    public Flux< ApiResponseModel > addAllPatrulsToChatService ( String token ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addAllPatrulsToChatService ( String token ) {
+        CassandraDataControl
             .getInstance()
-            .addAllPatrulsToChatService( token ); }
+            .addAllPatrulsToChatService( token );
+        return Mono.just( ApiResponseModel.builder()
+                        .success( true )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .message( "Successfully added to chat service" )
+                                .code( 200 )
+                                .build()
+                        ).build() ); }
 
     @MessageMapping ( value = "getListOfPatrulsByUUID" )
     public Flux< Patrul > getListOfPatrulsByUUID ( CardRequest< ? > cardRequest ) { return Flux.fromStream(
