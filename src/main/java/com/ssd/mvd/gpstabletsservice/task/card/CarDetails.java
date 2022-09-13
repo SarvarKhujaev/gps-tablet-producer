@@ -9,15 +9,12 @@ import lombok.Data;
 @Data
 public class CarDetails {
     private String ip;
-    private String FIO;
     private String date;
     private String time;
-    private String cameraImage; // фото человека с камеры
-    private String originalImage; // фото человека с паспорта
-    private String passportSeries;
-
     private String carData;
     private String carNumber;
+    private String cameraImage; // фото человека с камеры
+    private String originalImage; // фото человека с паспорта
 
     private Integer confidence;
 
@@ -32,11 +29,16 @@ public class CarDetails {
             this.setCarNumber( eventCar
                     .getCarTotalData()
                     .getModelForCar()
-                    .getPlateNumber() );
-            this.setCarData(
+                    .getPlateNumber() != null ?
+                    eventCar
+                            .getCarTotalData()
+                            .getModelForCar()
+                            .getPlateNumber() : eventCar
+                    .getCarTotalData()
+                    .getGosNumber() );
+            this.setCarData( eventCar.getCarTotalData().getModelForCar().getModel() + " " +
                     eventCar.getCarTotalData().getModelForCar().getVehicleType() + " " +
-                            eventCar.getCarTotalData().getModelForCar().getModel() + " " +
-                            eventCar.getCarTotalData().getModelForCar().getPlateNumber() ); } }
+                    eventCar.getCarTotalData().getModelForCar().getColor() ); } }
 
     public CarDetails ( CarEvent carEvent ) {
         this.setDate( carEvent.getCreated_date() );
@@ -49,9 +51,15 @@ public class CarDetails {
             this.setCarNumber( carEvent
                     .getCarTotalData()
                     .getModelForCar()
-                    .getPlateNumber() );
-            this.setCarData( carEvent.getCarTotalData().getModelForCar().getPlateNumber() + " " +
-                    carEvent.getCarTotalData().getModelForCar().getPlateNumber() + " " +
-                    carEvent.getCarTotalData().getModelForCar().getPlateNumber() ); } }
+                    .getPlateNumber() != null ?
+                    carEvent
+                            .getCarTotalData()
+                            .getModelForCar()
+                            .getPlateNumber() : carEvent
+                    .getCarTotalData()
+                    .getGosNumber() );
+            this.setCarData( carEvent.getCarTotalData().getModelForCar().getModel() + " " +
+                    carEvent.getCarTotalData().getModelForCar().getVehicleType() + " " +
+                    carEvent.getCarTotalData().getModelForCar().getColor() ); } }
 
 }

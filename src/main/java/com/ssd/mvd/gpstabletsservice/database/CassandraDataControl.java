@@ -152,7 +152,8 @@ public final class CassandraDataControl {
                     .setMaxRequestsPerConnection( HostDistance.REMOTE, 256 )
                     .setMaxRequestsPerConnection( HostDistance.LOCAL, 256 )
                     .setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
-                .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName + " WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy'," +
+                .execute( "CREATE KEYSPACE IF NOT EXISTS " + this.dbName +
+                        " WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy'," +
                         "'datacenter1':3 } AND DURABLE_WRITES = false;" );
 
         this.createType( this.getPatrulType(), Patrul.class );
@@ -1190,10 +1191,8 @@ public final class CassandraDataControl {
                 "DELETE FROM "
                         + this.dbName + "." + table
                         + " WHERE " + param + " = " + UUID.fromString( id ) + ";" );
-        return Mono.just(
-                ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+        return Mono.just( ApiResponseModel.builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "Deleting has been finished successfully" )
                                         .code( 200 )
                                         .build()
