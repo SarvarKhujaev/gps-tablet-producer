@@ -9,121 +9,17 @@ import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.constants.Details;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
 @Data
 public class CardDetails {
-    private String ip;
-    private String FIO;
-    private String date;
-    private String time;
-    private String cameraImage; // фото человека с камеры
-    private String originalImage; // фото человека с паспорта
-    private String passportSeries;
-
-    private String carData;
-    private String carNumber;
-
-    private Integer confidence;
+    private CarDetails carDetails;
+    private PersonDetails personDetails;
     private Map< Details, List< Item > > details = new HashMap<>();
 
-    public CardDetails ( EventBody eventBody ) {
-        this.setIp( eventBody.getCameraIp() );
-        this.setDate( eventBody.getCreated_date().toString() );
-        this.setTime( eventBody.getCreated_date().toString() );
-        this.setConfidence( eventBody.getConfidence().intValue() );
-        if ( eventBody.getPsychologyCard() != null
-            && eventBody.getPsychologyCard().getPapilonData() != null
-            && eventBody.getPsychologyCard().getPapilonData().size() > 0 ) {
-            this.setCameraImage( eventBody.getPsychologyCard().getPersonImage() );
-            this.setOriginalImage( eventBody.getPsychologyCard().getPapilonData().get( 0 ).getPhoto() );
-            this.setPassportSeries( eventBody
-                    .getPsychologyCard()
-                    .getPapilonData()
-                    .get( 0 )
-                    .getPassport() );
-            if ( eventBody.getPsychologyCard().getPinpp() != null )
-                this.setFIO( eventBody.getPsychologyCard().getPinpp().getName() + " " +
-                                eventBody.getPsychologyCard().getPinpp().getSurname() + " " +
-                                eventBody.getPsychologyCard().getPinpp().getPatronym() ); } }
+    public CardDetails ( CarDetails carDetails ) { this.setCarDetails( carDetails ); }
 
-    public CardDetails ( EventFace eventFace ) {
-        this.setIp( eventFace.getCameraIp() );
-        this.setDate( eventFace.getCreated_date().toString() );
-        this.setTime( eventFace.getCreated_date().toString() );
-        this.setConfidence( eventFace.getConfidence().intValue() );
-        if ( eventFace.getPsychologyCard() != null
-                && eventFace.getPsychologyCard().getPapilonData() != null
-                && eventFace.getPsychologyCard().getPapilonData().size() > 0 ) {
-            this.setCameraImage( eventFace.getPsychologyCard().getPersonImage() );
-            this.setOriginalImage( eventFace.getPsychologyCard().getPapilonData().get( 0 ).getPhoto() );
-            this.setPassportSeries( eventFace
-                    .getPsychologyCard()
-                    .getPapilonData()
-                    .get( 0 )
-                    .getPassport() );
-            if ( eventFace.getPsychologyCard().getPinpp() != null )
-                this.setFIO( eventFace.getPsychologyCard().getPinpp().getName() + " " +
-                        eventFace.getPsychologyCard().getPinpp().getSurname() + " " +
-                        eventFace.getPsychologyCard().getPinpp().getPatronym() ); } }
-
-    public CardDetails ( EventCar eventCar ) {
-        this.setIp( eventCar.getCameraIp() );
-        this.setDate( eventCar.getCreated_date().toString() );
-        this.setConfidence( eventCar.getConfidence().intValue() );
-        this.setTime( String.valueOf( eventCar.getCreated_date().getTime() ) );
-        this.setCameraImage( Arrays.toString( eventCar.getFullframebytes() ) );
-        if ( eventCar.getCarTotalData() != null
-                && eventCar.getCarTotalData().getModelForCar() != null ) {
-            this.setCarNumber( eventCar
-                            .getCarTotalData()
-                            .getModelForCar()
-                            .getPlateNumber() );
-            this.setCarData(
-                            eventCar.getCarTotalData().getModelForCar().getVehicleType() + " " +
-                                    eventCar.getCarTotalData().getModelForCar().getModel() + " " +
-                                    eventCar.getCarTotalData().getModelForCar().getPlateNumber() ); } }
-
-    public CardDetails ( CarEvent carEvent ) {
-        this.setDate( carEvent.getCreated_date() );
-        this.setConfidence( carEvent.getConfidence() );
-        this.setCameraImage( carEvent.getFullframe() );
-        this.setIp( carEvent.getDataInfo().getData().getIp() );
-        this.setTime( String.valueOf( carEvent.getCreated_date() ) );
-        if ( carEvent.getCarTotalData() != null
-            && carEvent.getCarTotalData().getModelForCar() != null ) {
-            this.setCarNumber( carEvent
-                            .getCarTotalData()
-                            .getModelForCar()
-                            .getPlateNumber() );
-            this.setCarData( carEvent.getCarTotalData().getModelForCar().getPlateNumber() + " " +
-                            carEvent.getCarTotalData().getModelForCar().getPlateNumber() + " " +
-                            carEvent.getCarTotalData().getModelForCar().getPlateNumber() ); } }
-
-    public CardDetails ( FaceEvent faceEvent ) {
-        this.setDate( faceEvent.getCreated_date() );
-        this.setTime( faceEvent.getCreated_date() );
-        this.setConfidence( faceEvent.getConfidence() );
-        this.setIp( faceEvent.getDataInfo().getData().getIp() );
-        if ( faceEvent.getPsychologyCard() != null
-                && faceEvent.getPsychologyCard().getPapilonData() != null
-                && faceEvent.getPsychologyCard().getPapilonData().size() > 0 ) {
-            this.setCameraImage( faceEvent.getPsychologyCard().getPersonImage() );
-            this.setOriginalImage( faceEvent.getPsychologyCard().getPapilonData().get( 0 ).getPhoto() );
-            this.setPassportSeries( faceEvent
-                    .getPsychologyCard()
-                    .getPapilonData()
-                    .get( 0 )
-                    .getPassport() );
-            if ( faceEvent.getPsychologyCard().getPinpp() != null )
-                this.setFIO( faceEvent.getPsychologyCard().getPinpp().getName() + " " +
-                        faceEvent.getPsychologyCard().getPinpp().getSurname() + " " +
-                        faceEvent.getPsychologyCard().getPinpp().getPatronym() ); } }
+    public CardDetails ( PersonDetails personDetails ) { this.setPersonDetails( personDetails ); }
 
     public CardDetails ( CarTotalData carTotalData ) {
         this.getDetails().putIfAbsent( Details.TONIROVKA, new ArrayList<>() );

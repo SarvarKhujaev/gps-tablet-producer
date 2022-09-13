@@ -1,18 +1,15 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
+import com.ssd.mvd.gpstabletsservice.task.card.*;
 import lombok.Data;
 import java.util.Date;
 import java.util.UUID;
 import reactor.core.publisher.Mono;
 
 import com.ssd.mvd.gpstabletsservice.database.*;
-import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
-import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
-import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
@@ -926,7 +923,7 @@ public final class TaskInspector {
                                     .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
-                                    .data( new CardDetails( eventBody ) )
+                                    .data( new CardDetails( new PersonDetails( eventBody ) ) )
                                     .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
                             .build() ) );
@@ -941,7 +938,7 @@ public final class TaskInspector {
                                     .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
-                                    .data( new CardDetails( eventFace ) )
+                                    .data( new CardDetails( new PersonDetails( eventFace ) ) )
                                     .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
                             .build() ) );
@@ -956,7 +953,7 @@ public final class TaskInspector {
                                     .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
-                                    .data( new CardDetails( eventCar ) )
+                                    .data( new CardDetails( new CarDetails( eventCar ) ) )
                                     .type( FIND_FACE_CAR.name() )
                                     .build() ) // TO-DO
                             .build() ) );
@@ -971,7 +968,7 @@ public final class TaskInspector {
                                     .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
-                                    .data( new CardDetails( eventCar ) )
+                                    .data( new CardDetails( new CarDetails( eventCar ) ) )
                                     .type( FIND_FACE_CAR.name() )
                                     .build() ) // TO-DO
                             .build() ) );
@@ -979,14 +976,14 @@ public final class TaskInspector {
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
                     .getFaceEvents( patrul.getTaskId() )
-                    .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( faceEvent -> Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
-                                    .data( new CardDetails( eventCar ) )
+                                    .data( new CardDetails( new PersonDetails( faceEvent ) ) )
                                     .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
                             .build() ) );

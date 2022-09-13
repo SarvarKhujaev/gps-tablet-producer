@@ -98,21 +98,38 @@ public class CassandraDataControlForEscort {
     public Mono< EscortTuple > getAllTupleOfEscort ( String id ) {
         Row row = this.session.execute(
                 "SELECT * FROM "
-                        + this.dbName + "." + this.tupleOfEscort
+                        + this.dbName + "." + this.getTupleOfEscort()
                         + " where id = " + UUID.fromString( id ) + ";" ).one();
         return Mono.justOrEmpty( row != null ? new EscortTuple( row ) : null ); }
 
     public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) {
-        this.session.execute( "DELETE FROM "
-                + this.dbName + "." + this.tupleOfEscort
-                + " where id = " + UUID.fromString( id ) + ";" );
-        return Mono.just( ApiResponseModel.builder()
-                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                        .message( id + " was successfully deleted" )
-                        .code( 200 )
-                        .build() )
-                .success( true )
-                .build() ); }
+        return this.getAllTupleOfEscort( id )
+                .flatMap( escortTuple -> {
+                    if ( escortTuple.getPatrulList() != null
+                            && !escortTuple.getPatrulList().isEmpty()
+                            && escortTuple.getPatrulList().size() > 0 ) escortTuple.getPatrulList()
+                            .forEach( uuid -> this.session.execute(
+                                    "UPDATE tablets.patruls SET uuidOfEscort = " + null
+                                    + ", uuidForEscortCar = " + null + " where uuid = " + uuid + ";" ) );
+
+                    if ( escortTuple.getTupleOfCarsList() != null
+                            && !escortTuple.getTupleOfCarsList().isEmpty()
+                            && escortTuple.getTupleOfCarsList().size() > 0 ) escortTuple.getTupleOfCarsList()
+                            .forEach( uuid -> this.session.execute(
+                                    "UPDATE escort.tuple_of_car SET uuidOfEscort = " + null
+                                            + ", uuidOfPatrul = " + null + " where uuid = " + uuid + ";" ) );
+
+                    return Mono.just( ApiResponseModel.builder()
+                                    .success(
+                                            this.session.execute( "DELETE FROM "
+                                                    + this.dbName + "." + this.tupleOfEscort
+                                                    + " where id = " + UUID.fromString( id ) + ";" ).wasApplied() )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .message( id + " was successfully deleted" )
+                                    .code( 200 )
+                                    .build() )
+                            .success( true )
+                            .build() ); } ); }
 
     private static Integer i;
 
@@ -212,8 +229,8 @@ public class CassandraDataControlForEscort {
                                 .build() )
                         .build() ); }
 
-    public Mono< ApiResponseModel > delete ( String id ) { return Mono.just(
-                ApiResponseModel.builder()
+    public Mono< ApiResponseModel > delete ( String id ) {
+        return Mono.just( ApiResponseModel.builder()
                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                 .code( 200 )
                                 .message( id + " was removed successfully" )

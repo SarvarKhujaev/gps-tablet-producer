@@ -443,7 +443,26 @@ public final class CassandraDataControl {
             ).all().stream()
     ).map( Polygon::new ); }
 
-    public Mono< ApiResponseModel > addValue ( ReqCar reqCar ) { return this.session.execute( "INSERT INTO "
+    // checks trackers. if this tracker already exists in database, it checks usual cars and escort database
+    private Boolean checkTracker ( String trackerId ) {
+        return this.session.execute(
+                "SELECT * FROM "
+                        + "escort.trackersid where trackersId = '" + trackerId + "';" ).one() == null
+                && this.session.execute(
+                "SELECT * FROM "
+                        + "trackers.trackersid where trackersId = '" + trackerId + "';" ).one() == null; }
+
+    private Boolean checkCarNumber ( String carNumber ) {
+        return this.session.execute(
+                "SELECT * FROM "
+                        + "escort.tuple_of_car where gosnumber = '" + carNumber + "';" ).one() == null
+                && this.session.execute(
+                "SELECT * FROM "
+                        + "tablets.cars where trackersId = '" + carNumber + "';" ).one() == null; }
+
+    public Mono< ApiResponseModel > addValue ( ReqCar reqCar ) {
+        return this.checkTracker( reqCar.getTrackerId() ) && this.checkCarNumber( reqCar.getGosNumber() )
+                ? this.session.execute( "INSERT INTO "
             + this.dbName + "." + this.getCars() +
             CassandraConverter
                     .getInstance()
@@ -465,8 +484,7 @@ public final class CassandraDataControl {
             + reqCar.getLongitude() + ", "
             + reqCar.getAverageFuelSize() + ", "
             + reqCar.getAverageFuelConsumption()
-            + ") IF NOT EXISTS;" ).wasApplied() ? Mono.just(
-                    ApiResponseModel.builder()
+            + ") IF NOT EXISTS;" ).wasApplied() ? Mono.just( ApiResponseModel.builder()
                             .success( true )
                             .status(
                                     com.ssd.mvd.gpstabletsservice.response.Status.builder()
@@ -474,15 +492,19 @@ public final class CassandraDataControl {
                                             .code( 200 )
                                             .build()
                             ).build()
-            ) : Mono.just(
-                    ApiResponseModel.builder()
+            ) : Mono.just( ApiResponseModel.builder()
                             .success( false )
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                             .message( "This car was already saved, choose another one" )
                                             .code( 201 )
                                             .build()
-                            ).build() ); }
+                            ).build() ) : Mono.just( ApiResponseModel.builder()
+                        .success( false )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .message( "This trackers or gosnumber is already registered to another car, so choose another one" )
+                                .code( 201 )
+                                .build() )
+                .build() ); }
 
     public Mono< ApiResponseModel > delete ( String gosno ) {
         return this.getCar( UUID.fromString( gosno ) )
@@ -505,46 +527,68 @@ public final class CassandraDataControl {
                                             .build() )
                                     .build() ); } ); }
 
-    public Mono< ApiResponseModel > update ( ReqCar reqCar ) { return this.session.execute( "INSERT INTO "
-            + this.dbName + "." + this.getCars() +
-            CassandraConverter
-                    .getInstance()
-                    .getALlNames( ReqCar.class ) +
-            " VALUES ("
-            + reqCar.getUuid() + ", "
-            + reqCar.getLustraId() + ", '"
-
-            + reqCar.getGosNumber() + "', '"
-            + reqCar.getTrackerId() + "', '"
-            + reqCar.getVehicleType() + "', '"
-            + reqCar.getCarImageLink() + "', '"
-            + reqCar.getPatrulPassportSeries() + "', "
-
-            + reqCar.getSideNumber() + ", "
-            + reqCar.getSimCardNumber() + ", "
-
-            + reqCar.getLatitude() + ", "
-            + reqCar.getLongitude() + ", "
-            + reqCar.getAverageFuelSize() + ", "
-            + reqCar.getAverageFuelConsumption()
-            + ") IF NOT EXISTS;" ).wasApplied() ? Mono.just(
-                    ApiResponseModel.builder()
-                            .success( true )
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "Car was successfully saved" )
-                                            .code( 200 )
-                                            .build()
-                            ).build()
-            ) : Mono.just(
-                    ApiResponseModel.builder()
-                            .success( false )
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "This car does not exist, choose another one" )
+    public Mono< ApiResponseModel > update ( ReqCar reqCar ) {
+        return this.getCar( reqCar.getUuid() )
+                .flatMap( reqCar1 -> {
+                    if ( !reqCar.getTrackerId().equals( reqCar1.getTrackerId() )
+                            && !this.checkTracker( reqCar.getTrackerId() ) ) return Mono.just( ApiResponseModel.builder()
+                                    .success( false )
+                                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                            .message( "Wrong TrackerId" )
                                             .code( 201 )
-                                            .build()
-                            ).build() ); }
+                                            .build() ).build() );
+                    if ( !reqCar.getPatrulPassportSeries().equals( reqCar1.getPatrulPassportSeries() ) ) {
+                        this.session.execute ( "UPDATE "
+                                + this.dbName + "." + this.getPatrols()
+                                + " SET carnumber = '" + reqCar.getGosNumber() + "', "
+                                + "cartype = '" + reqCar.getVehicleType() + "' where uuid = " + this.getPatrul(
+                                        reqCar1.getPatrulPassportSeries() )
+                                .getUUID( "uuid" ) + ";" );
+
+                        this.session.execute ( "UPDATE "
+                                + this.dbName + "." + this.getPatrols()
+                                + " SET carnumber = '" + null + "', "
+                                + "cartype = '" + null + "' where uuid = " + this.getPatrul(
+                                        reqCar1.getPatrulPassportSeries() )
+                                .getUUID( "uuid" ) + ";" ); }
+                    return this.session.execute( "INSERT INTO "
+                            + this.dbName + "." + this.getCars() +
+                            CassandraConverter
+                                    .getInstance()
+                                    .getALlNames( ReqCar.class ) +
+                            " VALUES ("
+                            + reqCar.getUuid() + ", "
+                            + reqCar.getLustraId() + ", '"
+
+                            + reqCar.getGosNumber() + "', '"
+                            + reqCar.getTrackerId() + "', '"
+                            + reqCar.getVehicleType() + "', '"
+                            + reqCar.getCarImageLink() + "', '"
+                            + reqCar.getPatrulPassportSeries() + "', "
+
+                            + reqCar.getSideNumber() + ", "
+                            + reqCar.getSimCardNumber() + ", "
+
+                            + reqCar.getLatitude() + ", "
+                            + reqCar.getLongitude() + ", "
+                            + reqCar.getAverageFuelSize() + ", "
+                            + reqCar.getAverageFuelConsumption()
+                            + ");" ).wasApplied() ? Mono.just( ApiResponseModel.builder()
+                            .success( true )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .message( "Car was successfully saved" )
+                                    .code( 200 )
+                                    .build()
+                            ).build()
+                    ) : Mono.just( ApiResponseModel.builder()
+                            .success( false )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .message( "This car does not exist, choose another one" )
+                                    .code( 201 )
+                                    .build()
+                            ).build() );
+                } );
+    }
 
     public Mono< ReqCar > getCar ( UUID uuid ) { return Mono.just(
             this.session.execute(
@@ -568,7 +612,7 @@ public final class CassandraDataControl {
             ).all().stream()
     ).map( Patrul::new ); }
 
-    public Row getPatrul( String pasportNumber ) { return
+    public Row getPatrul ( String pasportNumber ) { return
             this.session.execute(
                     "SELECT * FROM "
                             + this.dbName + "." + this.getPatrols()
