@@ -1,12 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import com.ssd.mvd.gpstabletsservice.task.card.*;
 import lombok.Data;
 import java.util.Date;
 import java.util.UUID;
 import reactor.core.publisher.Mono;
 
 import com.ssd.mvd.gpstabletsservice.database.*;
+import com.ssd.mvd.gpstabletsservice.task.card.*;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
@@ -167,14 +167,19 @@ public final class TaskInspector {
             case ATTACHED -> {
                 patrul.setTaskTypes( FIND_FACE_CAR );
                 patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
-                patrul.setLatitudeOfTask( carEvents.getDataInfo().getData().getLatitude() );
-                patrul.setLongitudeOfTask( carEvents.getDataInfo().getData().getLongitude() ); }
+                if ( carEvents.getDataInfo() != null
+                        && carEvents.getDataInfo().getData() != null ) {
+                    patrul.setLatitudeOfTask( carEvents.getDataInfo().getData().getLatitude() );
+                    patrul.setLongitudeOfTask( carEvents.getDataInfo().getData().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
                     .inTime( patrul.check() )
                     .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
-        } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis().addValue( carEvents.getId(), new ActiveTask( carEvents ) ).subscribe();
+        } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
+                .getRedis()
+                .addValue( carEvents.getId(), new ActiveTask( carEvents ) ).subscribe();
+
         if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
@@ -340,8 +345,10 @@ public final class TaskInspector {
             case ATTACHED -> {
                 patrul.setTaskId( faceEvents.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( FIND_FACE_PERSON );
-                patrul.setLatitudeOfTask( faceEvents.getDataInfo().getData().getLatitude() );
-                patrul.setLongitudeOfTask( faceEvents.getDataInfo().getData().getLongitude() ); }
+                if ( faceEvents.getDataInfo() != null
+                        && faceEvents.getDataInfo().getData() != null ) {
+                    patrul.setLatitudeOfTask( faceEvents.getDataInfo().getData().getLatitude() );
+                    patrul.setLongitudeOfTask( faceEvents.getDataInfo().getData().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> faceEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(),
                     PatrulStatus.builder()
@@ -349,8 +356,10 @@ public final class TaskInspector {
                             .inTime( patrul.check() )
                             .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
         } if ( status.compareTo( CANCEL ) != 0 ) faceEvents.getPatruls().put( patrul.getUuid(), patrul );
-        if ( faceEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl.getRedis()
+        if ( faceEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
+                .getRedis()
                 .addValue( faceEvents.getId(), new ActiveTask( faceEvents ) ).subscribe();
+
         CassandraDataControlForTasks
                 .getInstance()
                 .addValue( faceEvents );
