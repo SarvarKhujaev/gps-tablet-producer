@@ -86,7 +86,7 @@ public class KafkaDataControl {
                     + LocalDateTime.now() ); }
 
             @Override
-            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got Card: "
+            public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got ActiveTask: "
                     + " with offset: "
                     + result.getRecordMetadata().offset() ); }
         } ); return card; }

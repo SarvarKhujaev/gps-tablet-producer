@@ -141,7 +141,3 @@ public class FaceEvent {
     @JsonDeserialize
     private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }
-
-
-
-
