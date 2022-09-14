@@ -71,9 +71,11 @@ public final class RedisDataControl {
 
     public Mono< Boolean > addValue ( String id, ActiveTask activeTask ) {
         return this.activeTasks.containsKey( id )
-                .flatMap( aBoolean -> aBoolean ? this.activeTasks.fastPutIfExists( id, KafkaDataControl.getInstance()
+                .flatMap( aBoolean -> aBoolean ? this.activeTasks.fastPutIfExists( id, KafkaDataControl
+                        .getInstance()
                         .writeToKafka( SerDes.getSerDes().serialize( activeTask ) ) )
-                        : this.activeTasks.fastPutIfAbsent( id, KafkaDataControl.getInstance()
+                        : this.activeTasks.fastPutIfAbsent( id, KafkaDataControl
+                        .getInstance()
                         .writeToKafka( SerDes.getSerDes().serialize( activeTask ) ) ) ); }
 
     public void remove ( String id ) { this.activeTasks.remove( id ).subscribe(); }
