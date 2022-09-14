@@ -6,9 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -44,22 +41,21 @@ public class ActiveTask {
     private Map< UUID, Patrul > patrulList;
 
     public ActiveTask ( Card card ) {
+        this.setLatitude( card.getLatitude() );
+        this.setLongitude( card.getLongitude() );
+
         this.setStatus( card.getStatus() );
         this.setPatrulList( card.getPatruls() );
         this.setCreatedDate( card.getCreated_date() );
-
-        this.setRegion( card.getEventAddress().getSOblastiId() );
-        this.setDistrict( card.getEventAddress().getSRegionId() );
-        this.setCountryside( card.getEventAddress().getSMahallyaId() );
 
         this.setAddress( card.getAddress() );
         this.setDescription( card.getFabula() );
         this.setType( TaskTypes.CARD_102.name() );
         this.setTaskId( card.getCardId().toString() );
 
-        this.setLatitude( card.getLatitude() );
-        this.setLongitude( card.getLongitude() );
-    }
+        this.setRegion( card.getEventAddress().getSOblastiId() );
+        this.setDistrict( card.getEventAddress().getSRegionId() );
+        this.setCountryside( card.getEventAddress().getSMahallyaId() ); }
 
     public ActiveTask ( Card card, Status status ) {
         this.setPatrulStatus( status );
@@ -119,17 +115,17 @@ public class ActiveTask {
         this.setLatitude( eventFace.getLatitude() );
         this.setPatrulList( eventFace.getPatruls() );
         this.setLongitude( eventFace.getLongitude() );
-        this.setCreatedDate( eventFace.getCreated_date() );
-        this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+        this.setCreatedDate( eventFace.getCreated_date() ); }
 
     public ActiveTask( EventBody eventBody ) {
         this.setTaskId( eventBody.getId() );
         this.setStatus( eventBody.getStatus() );
-        this.setPatrulList( eventBody.getPatruls() );
         this.setLatitude( eventBody.getLatitude() );
+        this.setPatrulList( eventBody.getPatruls() );
         this.setLongitude( eventBody.getLongitude() );
-        this.setCreatedDate( eventBody.getCreated_date() );
-        this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+        this.setCreatedDate( eventBody.getCreated_date() ); }
 
     public ActiveTask ( EventBody eventBody, Status status ) {
         this.setPatrulStatus( status );
@@ -138,8 +134,8 @@ public class ActiveTask {
         this.setLatitude( eventBody.getLatitude() );
         this.setPatrulList( eventBody.getPatruls() );
         this.setLongitude( eventBody.getLongitude() );
-        this.setCreatedDate( eventBody.getCreated_date() );
-        this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+        this.setCreatedDate( eventBody.getCreated_date() ); }
 
     public ActiveTask ( EventCar eventCar ) {
         this.setTaskId( eventCar.getId() );
@@ -147,8 +143,8 @@ public class ActiveTask {
         this.setLatitude( eventCar.getLatitude() );
         this.setPatrulList( eventCar.getPatruls() );
         this.setLongitude( eventCar.getLongitude() );
-        this.setCreatedDate( eventCar.getCreated_date() );
-        this.setType( TaskTypes.FIND_FACE_CAR.name() ); }
+        this.setType( TaskTypes.FIND_FACE_CAR.name() );
+        this.setCreatedDate( eventCar.getCreated_date() ); }
 
     public ActiveTask ( EventCar eventCar, Status status ) {
         this.setPatrulStatus( status );
@@ -157,10 +153,11 @@ public class ActiveTask {
         this.setLatitude( eventCar.getLatitude() );
         this.setPatrulList( eventCar.getPatruls() );
         this.setLongitude( eventCar.getLongitude() );
-        this.setCreatedDate( eventCar.getCreated_date() );
-        this.setType( TaskTypes.FIND_FACE_CAR.name() ); }
+        this.setType( TaskTypes.FIND_FACE_CAR.name() );
+        this.setCreatedDate( eventCar.getCreated_date() ); }
 
     public ActiveTask ( FaceEvent faceEvents ) {
+        this.setCreatedDate( new Date() );
         this.setStatus( faceEvents.getStatus() );
         this.setPatrulList( faceEvents.getPatruls() );
 
@@ -174,13 +171,11 @@ public class ActiveTask {
             this.setLatitude( faceEvents.getDataInfo().getData().getLatitude() );
             this.setDistrict( faceEvents.getDataInfo().getData().getDistrict() );
             this.setLongitude( faceEvents.getDataInfo().getData().getLongitude() );
-            this.setCountryside( faceEvents.getDataInfo().getData().getCountryside() ); }
-
-        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( faceEvents.getCreated_date() ) ); }
-        catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
+            this.setCountryside( faceEvents.getDataInfo().getData().getCountryside() ); } }
 
     public ActiveTask ( FaceEvent faceEvent, Status status ) {
         this.setPatrulStatus( status );
+        this.setCreatedDate( new Date() );
         this.setStatus( faceEvent.getStatus() );
 
         this.setTaskId( faceEvent.getId() );
@@ -193,12 +188,10 @@ public class ActiveTask {
             this.setLatitude( faceEvent.getDataInfo().getData().getLatitude() );
             this.setDistrict( faceEvent.getDataInfo().getData().getDistrict() );
             this.setLongitude( faceEvent.getDataInfo().getData().getLongitude() );
-            this.setCountryside( faceEvent.getDataInfo().getData().getCountryside() ); }
-
-        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( faceEvent.getCreated_date() ) ); }
-        catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
+            this.setCountryside( faceEvent.getDataInfo().getData().getCountryside() ); } }
 
     public ActiveTask ( CarEvent carEvent ) {
+        this.setCreatedDate( new Date() );
         this.setStatus( carEvent.getStatus() );
         this.setPatrulList( carEvent.getPatruls() );
 
@@ -212,13 +205,11 @@ public class ActiveTask {
             this.setLatitude( carEvent.getDataInfo().getData().getLatitude() );
             this.setDistrict( carEvent.getDataInfo().getData().getDistrict() );
             this.setLongitude( carEvent.getDataInfo().getData().getLongitude() );
-            this.setCountryside( carEvent.getDataInfo().getData().getCountryside() ); }
-
-        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( carEvent.getCreated_date() ) ); }
-        catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
+            this.setCountryside( carEvent.getDataInfo().getData().getCountryside() ); } }
 
     public ActiveTask ( CarEvent carEvent, Status status ) {
         this.setPatrulStatus( status );
+        this.setCreatedDate( new Date() );
         this.setStatus( carEvent.getStatus() );
 
         this.setTaskId( carEvent.getId() );
@@ -231,10 +222,7 @@ public class ActiveTask {
             this.setLatitude( carEvent.getDataInfo().getData().getLatitude() );
             this.setDistrict( carEvent.getDataInfo().getData().getDistrict() );
             this.setLongitude( carEvent.getDataInfo().getData().getLongitude() );
-            this.setCountryside( carEvent.getDataInfo().getData().getCountryside() ); }
-
-        try { this.setCreatedDate( new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse( carEvent.getCreated_date() ) ); }
-        catch ( ParseException e ) { this.setCreatedDate( new Date() ); } }
+            this.setCountryside( carEvent.getDataInfo().getData().getCountryside() ); } }
 
     public ActiveTask( EscortTuple escortTuple, Status status ) {
         this.setPatrulStatus( status );

@@ -184,7 +184,9 @@ public final class TaskInspector {
             case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
                     .inTime( patrul.check() )
-                    .totalTimeConsumption( TimeInspector.getInspector().getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
+                    .totalTimeConsumption( TimeInspector
+                            .getInspector()
+                            .getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
         } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
                 .getRedis()
                 .addValue( carEvents.getId(), new ActiveTask( carEvents ) ).subscribe();
