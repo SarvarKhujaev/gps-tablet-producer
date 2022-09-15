@@ -951,7 +951,7 @@ public final class TaskInspector {
                                     .code( 200 )
                                     .build() )
                             .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
-                                    .data( new CardDetails( card, "ru" ) )
+                                    .data( new CardDetails( card, patrul, "ru" ) )
                                     .type( CARD_102.name() )
                                     .build() )
                             .build() ) );
