@@ -81,7 +81,8 @@ public final class TaskInspector {
                 patrul.setTaskId( card.getCardId().toString() ); // saving card id into patrul object
                 patrul.setLongitudeOfTask( card.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-            case ARRIVED -> card.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
+            case ARRIVED -> card.getPatrulStatuses()
+                    .putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
                     .inTime( patrul.check() )
                     .totalTimeConsumption( TimeInspector
@@ -1039,7 +1040,9 @@ public final class TaskInspector {
                                     ).build() ) ); }; }
 
     private Integer getReportIndex ( List< ReportForCard > reportForCardList, UUID uuid ) {
-        for ( int i = 0; i < reportForCardList.size(); i++ ) if ( reportForCardList.get( i ).getUuidOfPatrul().compareTo( uuid ) == 0 ) return i;
+        for ( int i = 0; i < reportForCardList.size(); i++ ) if ( reportForCardList.get( i )
+                .getUuidOfPatrul()
+                .compareTo( uuid ) == 0 ) return i;
         return 0; }
 
     public Mono< ApiResponseModel > getListOfPatrulTasks ( Patrul patrul ) {
@@ -1060,7 +1063,8 @@ public final class TaskInspector {
                                             .reportForCard( card
                                                     .getReportForCardList()
                                                     .get( this.getReportIndex( card
-                                                            .getReportForCardList(), patrul.getUuid() ) ) )
+                                                            .getReportForCardList(),
+                                                            patrul.getUuid() ) ) )
                                             .totalTimeConsumption( card
                                                     .getPatrulStatuses()
                                                     .get( patrul.getPassportNumber() )
