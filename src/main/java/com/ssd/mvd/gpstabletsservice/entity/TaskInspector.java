@@ -34,7 +34,7 @@ public final class TaskInspector {
 
     public static TaskInspector getInstance() { return taskInspector != null ? taskInspector : new TaskInspector(); }
 
-    private String generatText ( Patrul patrul, Status status ) {
+    private String generateText ( Patrul patrul, Status status ) {
         return switch ( status ) {
             case ATTACHED -> patrul.getName()
                     + " got new task: " + patrul.getTaskId()
@@ -122,7 +122,7 @@ public final class TaskInspector {
                                                 .passportSeries( patrul.getPassportNumber() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
                                                 .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                                                .title( this.generatText( patrul, status ) )
+                                                .title( this.generateText( patrul, status ) )
                                                 .build() ) );
         return patrul; }
 
@@ -192,7 +192,7 @@ public final class TaskInspector {
                                                 .latitudeOfTask( eventCar.getLatitude() )
                                                 .longitudeOfTask( eventCar.getLongitude() )
                                                 .passportSeries( patrul.getPassportNumber() )
-                                                .address( this.generatText( patrul, status ) )
+                                                .address( this.generateText( patrul, status ) )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
                                                 .build() ) );
         return patrul; }
@@ -272,7 +272,7 @@ public final class TaskInspector {
                                                         && carEvents.getDataInfo().getData() != null
                                                         && carEvents.getDataInfo().getData().getAddress() != null ?
                                                         carEvents.getDataInfo().getData().getAddress() : "unknown" )
-                                                .title( this.generatText( patrul, status ) )
+                                                .title( this.generateText( patrul, status ) )
                                                 .build() ) );
         return patrul; }
 
@@ -336,7 +336,7 @@ public final class TaskInspector {
                                                 .notificationWasCreated( new Date() )
                                                 .policeType( patrul.getPoliceType() )
                                                 .latitudeOfTask( eventFace.getLatitude() )
-                                                .title( this.generatText( patrul, status ) )
+                                                .title( this.generateText( patrul, status ) )
                                                 .longitudeOfTask( eventFace.getLongitude() )
                                                 .passportSeries( patrul.getPassportNumber() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
@@ -408,7 +408,7 @@ public final class TaskInspector {
                                                 .policeType( patrul.getPoliceType() )
                                                 .latitudeOfTask( eventBody.getLatitude() )
                                                 .longitudeOfTask( eventBody.getLongitude() )
-                                                .title( this.generatText( patrul, status ) )
+                                                .title( this.generateText( patrul, status ) )
                                                 .passportSeries( patrul.getPassportNumber() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
                                                 .address( eventBody.getAddress() != null ? eventBody.getAddress() : "unknown" )
@@ -480,13 +480,17 @@ public final class TaskInspector {
                                                 .policeType( patrul.getPoliceType() )
                                                 .passportSeries( patrul.getPassportNumber() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
-                                                .latitudeOfTask( faceEvent.getDataInfo().getData().getLatitude() )
-                                                .longitudeOfTask( faceEvent.getDataInfo().getData().getLongitude() )
+                                                .latitudeOfTask( faceEvent.getDataInfo() != null
+                                                        && faceEvent.getDataInfo().getData() != null
+                                                        ? faceEvent.getDataInfo().getData().getLatitude() : null )
+                                                .longitudeOfTask( faceEvent.getDataInfo() != null
+                                                        && faceEvent.getDataInfo().getData() != null
+                                                        ? faceEvent.getDataInfo().getData().getLongitude() : null )
                                                 .address( faceEvent.getDataInfo() != null
                                                         && faceEvent.getDataInfo().getData() != null
                                                         && faceEvent.getDataInfo().getData().getAddress() != null ?
                                                         faceEvent.getDataInfo().getData().getAddress() : "unknown" )
-                                                .title( this.generatText( patrul, status ) )
+                                                .title( this.generateText( patrul, status ) )
                                                 .build() ) );
         return patrul; }
 
@@ -598,7 +602,7 @@ public final class TaskInspector {
                                                 .longitudeOfTask( selfEmploymentTask.getLanOfAccident() )
                                                 .address( selfEmploymentTask.getAddress() != null ?
                                                         selfEmploymentTask.getAddress() : "unknown" )
-                                                .title( this.generatText( patrul, status ) )
+                                                .title( this.generateText( patrul, status ) )
                                                 .build() ) );
         return patrul; }
 
@@ -785,9 +789,11 @@ public final class TaskInspector {
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
                     .getFaceEvents( patrul.getTaskId() )
-                    .flatMap( faceEvents -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( faceEvents -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( CassandraDataControl.getInstance().login( patrul, status ) )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Patrul: " + this.changeTaskStatus( patrul, status, faceEvents )
                                             .getPassportNumber() + " changed his status task to: " + status  )
                                     .code( 200 )
