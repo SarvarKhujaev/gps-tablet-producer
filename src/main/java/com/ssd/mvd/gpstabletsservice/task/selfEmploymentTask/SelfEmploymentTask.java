@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
-import com.datastax.driver.core.Row;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

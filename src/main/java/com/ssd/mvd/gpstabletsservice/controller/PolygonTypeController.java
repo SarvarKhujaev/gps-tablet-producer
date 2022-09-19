@@ -27,7 +27,7 @@ public class PolygonTypeController {
     @MessageMapping ( value = "getCurrentPolygonType" )
     public Mono< PolygonType > getCurrentPolygonType ( UUID uuid ) { return CassandraDataControl
             .getInstance()
-            .getCurrentPolygonType( uuid ); }
+            .getAllPolygonType( uuid ); }
 
     @MessageMapping ( value = "deletePolygonType" )
     public Mono< ApiResponseModel > deletePolygonType ( UUID uuid ) { return CassandraDataControl

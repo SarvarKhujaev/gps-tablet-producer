@@ -113,4 +113,11 @@ public class KafkaDataControl {
                     + notification.getTitle()
                     + " at: " + notification.getNotificationWasCreated()
                     + " with offset: " + result.getRecordMetadata().offset() ); } } ); }
+
+    public void clear () {
+        instance = null;
+        this.client.close();
+        this.kafkaTemplate.flush();
+        CassandraDataControl.getInstance().delete();
+        this.logger.info( "Kafka is closed successfully" ); }
 }

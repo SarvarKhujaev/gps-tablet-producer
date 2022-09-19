@@ -2,8 +2,6 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
-
-import java.util.Arrays;
 import lombok.Data;
 
 @Data
@@ -13,17 +11,22 @@ public class CarDetails {
     private String time;
     private String carData;
     private String carNumber;
-    private String cameraImage; // фото человека с камеры
-    private String originalImage; // фото человека с паспорта
+    private String thumbnail;
+    private String cameraImage;
+    private String dossier_photo;
 
-    private Integer confidence;
+    private Double confidence;
 
     public CarDetails ( EventCar eventCar ) {
         this.setIp( eventCar.getCameraIp() );
+        this.setConfidence( eventCar.getConfidence() );
         this.setDate( eventCar.getCreated_date().toString() );
-        this.setConfidence( eventCar.getConfidence().intValue() );
         this.setTime( String.valueOf( eventCar.getCreated_date().getTime() ) );
-        this.setCameraImage( Arrays.toString( eventCar.getFullframebytes() ) );
+
+        this.setThumbnail( eventCar.getThumbnail() );
+        this.setCameraImage( eventCar.getFullframe() );
+        this.setDossier_photo( eventCar.getMatched_dossier() );
+
         if ( eventCar.getCarTotalData() != null
                 && eventCar.getCarTotalData().getModelForCar() != null ) {
             this.setCarNumber( eventCar
@@ -43,9 +46,15 @@ public class CarDetails {
     public CarDetails ( CarEvent carEvent ) {
         this.setDate( carEvent.getCreated_date() );
         this.setConfidence( carEvent.getConfidence() );
-        this.setCameraImage( carEvent.getFullframe() );
-        this.setIp( carEvent.getDataInfo().getData().getIp() );
         this.setTime( String.valueOf( carEvent.getCreated_date() ) );
+        this.setIp( carEvent.getDataInfo() != null
+                && carEvent.getDataInfo().getData() != null ?
+                carEvent.getDataInfo().getData().getIp() : null );
+
+        this.setThumbnail( carEvent.getThumbnail() ); // short version of the image from camera
+        this.setCameraImage( carEvent.getFullframe() ); // original version of the image from camera
+        this.setDossier_photo( carEvent.getDossier_photo() );
+
         if ( carEvent.getCarTotalData() != null
                 && carEvent.getCarTotalData().getModelForCar() != null ) {
             this.setCarNumber( carEvent

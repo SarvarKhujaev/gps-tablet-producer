@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -9,11 +10,14 @@ import java.util.logging.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSetFuture;
 
+import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.response.Status;
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
@@ -80,14 +84,19 @@ public class CassandraDataControlForTasks {
                         + this.dbName + "." + this.getFaceCar()
                         + "( id text PRIMARY KEY, object text );" );
 
-        this.session.execute(
+        this.session.execute (
                 "CREATE TABLE IF NOT EXISTS "
                         + this.dbName + "." + this.getSelfEmployment()
                         + "( id uuid PRIMARY KEY, object text );" );
 
-        this.session.execute(
+        this.session.execute (
                 "CREATE TABLE IF NOT EXISTS "
                         + this.dbName + "." + this.getFacePerson()
+                        + "( id text PRIMARY KEY, object text );" );
+
+        this.session.execute (
+                "CREATE TABLE IF NOT EXISTS "
+                        + this.dbName + "." + TaskTypes.CARD_102
                         + "( id text PRIMARY KEY, object text );" );
 
         this.logger.info("Starting CassandraDataControl for tasks" ); }
@@ -162,22 +171,6 @@ public class CassandraDataControlForTasks {
                                     + " where id = '" + id + "';"
                     ).one().getString( "object" ) ) ); }
 
-    public Mono< EventFace > getEventFace ( String id ) { return Mono.just(
-            SerDes.getSerDes().deserializeEventFace(
-                    this.session.execute(
-                            "select * from "
-                                    + this.dbName + "." + this.eventFace
-                                    + " where id = '" + id + "';"
-                    ).one().getString( "object" ) ) ); }
-
-    public Mono< EventCar > getEventCar ( String id ) { return Mono.just(
-            SerDes.getSerDes().deserializeEventCar(
-                    this.session.execute(
-                            "select * from "
-                                    + this.dbName + "." + this.eventCar
-                                    + " where id = '" + id + "';"
-                    ).one().getString( "object" ) ) ); }
-
     public Mono< FaceEvent > getFaceEvents ( String id ) { return Mono.just(
             SerDes.getSerDes().deserializeFaceEvents(
                     this.session.execute(
@@ -186,13 +179,66 @@ public class CassandraDataControlForTasks {
                                     + " where id = '" + id + "';"
                     ).one().getString( "object" ) ) ); }
 
-    public Mono< CarEvent > getCarEvents ( String id ) { return Mono.just(
-            SerDes.getSerDes().deserializeCarEvents(
+    public Mono< EventFace > getEventFace ( String id ) { return Mono.just(
+            SerDes.getSerDes().deserializeEventFace(
                     this.session.execute(
                             "select * from "
-                                    + this.dbName + "." + this.faceCar
+                                    + this.dbName + "." + this.eventFace
                                     + " where id = '" + id + "';"
                     ).one().getString( "object" ) ) ); }
+
+    public Mono< CarEvent > getCarEvents ( String id ) {
+        Row row = this.session.execute( "select * from "
+                        + this.dbName + "." + this.faceCar
+                        + " where id = '" + id + "';" ).one();
+        return row != null ? Mono.just( SerDes
+                .getSerDes()
+                .deserializeCarEvents( row.getString( "object" ) ) )
+                : Mono.empty(); }
+
+    public Mono< EventCar > getEventCar ( String id ) {
+        Row row = this.session.execute(
+                "select * from "
+                        + this.dbName + "." + this.eventCar
+                        + " where id = '" + id + "';" ).one();
+        return row != null ? Mono.just(
+            SerDes.getSerDes().deserializeEventCar(
+                    row.getString( "object" ) ) ) : Mono.empty(); }
+
+    public Mono< Card > getCard102 ( String id ) {
+        Row row = this.session.execute(
+                "select * from "
+                        + this.dbName + "." + TaskTypes.CARD_102
+                        + " where id = " + Long.valueOf( id ) + ";" ).one();
+        return row != null ? Mono.just(
+                SerDes
+                    .getSerDes()
+                    .deserializeCard(
+                    row.getString( "object" ) ) ) : Mono.empty(); }
+
+    public Flux< SelfEmploymentTask > getSelfEmploymentTasks () { return Flux.fromStream(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.selfEmployment + ";"
+                    ).all().stream() )
+            .map( row -> SerDes.getSerDes()
+                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
+
+    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.selfEmployment
+                                    + " where id = " + id + ";"
+                    ).one() )
+            .map( row -> SerDes.getSerDes()
+                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
+
+    public void addValue ( Card card ) { this.session
+            .executeAsync( "INSERT INTO "
+                + this.dbName + "." + TaskTypes.CARD_102
+                + "(id, object) VALUES ('"
+                + card.getCardId() + "', '"
+                + SerDes.getSerDes().serialize( card ) + "');" ); }
 
     public Boolean addValue ( EventCar eventCar ) { return this.session
             .executeAsync( "INSERT INTO "
@@ -234,19 +280,13 @@ public class CassandraDataControlForTasks {
                     + carEvents.getId() + "', '"
                     + SerDes.getSerDes().serialize( carEvents ) + "');" ); }
 
-    public ResultSetFuture addValue ( FaceEvent faceEvents ) { return this.session.executeAsync( "INSERT INTO "
+    public ResultSetFuture addValue ( FaceEvent faceEvents ) {
+        if ( faceEvents.getCreated_date() == null ) faceEvents.setCreated_date( new Date().toString() );
+        return this.session.executeAsync( "INSERT INTO "
             + this.dbName + "." + this.facePerson
             + "(id, object) VALUES ('"
             + faceEvents.getId() + "', '"
             + SerDes.getSerDes().serialize( faceEvents ) + "');" ); }
-
-    public Flux< SelfEmploymentTask > getSelfEmploymentTasks () { return Flux.fromStream(
-                    this.session.execute(
-                            "select * from "
-                                    + this.dbName + "." + this.selfEmployment + ";"
-                    ).all().stream() )
-            .map( row -> SerDes.getSerDes()
-                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
 
     public Boolean addValue ( SelfEmploymentTask selfEmploymentTask ) { return this.session
             .executeAsync( "INSERT INTO "
@@ -254,14 +294,5 @@ public class CassandraDataControlForTasks {
                     " ( id, object ) VALUES("
                     + selfEmploymentTask.getUuid() + ", '"
                     + SerDes.getSerDes().serialize( selfEmploymentTask )
-                        + "');" ).isDone(); }
-
-    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
-                    this.session.execute(
-                            "select * from "
-                                    + this.dbName + "." + this.selfEmployment
-                                    + " where id = " + id + ";"
-                    ).one() )
-            .map( row -> SerDes.getSerDes()
-                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
+                    + "');" ).isDone(); }
 }

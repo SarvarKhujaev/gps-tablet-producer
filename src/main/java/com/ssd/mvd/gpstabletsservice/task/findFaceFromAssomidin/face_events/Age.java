@@ -17,5 +17,5 @@ public class Age implements Serializable {
     private String name;
 
     @SerializedName( "confidence" )
-    private Integer confidence;
+    private Double confidence;
 }

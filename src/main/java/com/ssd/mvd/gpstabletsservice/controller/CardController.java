@@ -34,14 +34,17 @@ public class CardController {
             .getActiveTasks()
             .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
 
-    @MessageMapping ( value = "getCurrentCard" )
-    public Mono< Card > getCurrentCard ( Long cardId ) { return RedisDataControl.getRedis().getCard( cardId ); }
-
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
         if ( request.getTaskType().compareTo( TaskTypes.CARD_102 ) == 0 ) {
             Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
-            RedisDataControl.getRedis().addValue( card );
+            CassandraDataControlForTasks
+                    .getInstance()
+                    .addValue( card );
+
+            RedisDataControl
+                    .getRedis()
+                    .addValue( card.getCardId().toString(), new ActiveTask( card ) );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
@@ -149,11 +152,10 @@ public class CardController {
     @MessageMapping ( value = "addNewPatrulsToTask" )
     public Mono< ApiResponseModel > addNewPatrulsToTask ( CardRequest< ? > request ) {
         return switch ( request.getTaskType() ) {
-            case CARD_102 -> RedisDataControl
-                    .getRedis()
-                    .getCard( Long.valueOf( request.getCard().toString() ) )
+            case CARD_102 -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getCard102( request.getCard().toString() )
                     .flatMap( card -> {
-                        System.out.println( request );
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
@@ -162,12 +164,14 @@ public class CardController {
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
                                                 .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
-                        return Mono.just( ApiResponseModel.builder()
+                        return Mono.just( ApiResponseModel
+                                .builder()
                                         .success( true )
-                                        .status( Status.builder()
-                                                        .message( request.getCard() + " has got new patrul" )
-                                                        .code( 200 )
-                                                        .build() )
+                                        .status( Status
+                                                .builder()
+                                                .message( request.getCard() + " has got new patrul" )
+                                                .code( 200 )
+                                                .build() )
                                 .build() ); } );
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
@@ -299,4 +303,23 @@ public class CardController {
                                         .code( 200 )
                                         .build() )
                                 .build() ); } ); }; }
+
+    @MessageMapping ( value = "getListOfPatrulTasks" )
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( String token ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( CassandraDataControl.getInstance().decode( token ) )
+            .flatMap( patrul -> {
+                if ( patrul.getListOfTasks().keySet().size() > 0 ) return TaskInspector
+                        .getInstance()
+                        .getListOfPatrulTasks( patrul );
+
+                else return Mono.just( ApiResponseModel
+                        .builder()
+                        .success( false )
+                        .status( Status
+                                .builder()
+                                .message( "You have not completed any task, so try to fix this problem please" )
+                                .code( 201 )
+                                .build() )
+                        .build() ); } ); }
 }

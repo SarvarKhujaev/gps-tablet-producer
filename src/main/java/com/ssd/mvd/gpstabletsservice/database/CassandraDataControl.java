@@ -229,7 +229,8 @@ public final class CassandraDataControl {
                                         .success( false )
                                         .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                                 .message( "This policeType name is already defined, choose another one" )
-                                                .code( 201 ).build() ).build() ) ); }
+                                                .code( 201 ).build() ).build() ) )
+                .doOnError( throwable -> this.delete() ); }
 
     public Mono< ApiResponseModel > update ( PoliceType policeType ) {
         this.getPatrul()
@@ -256,7 +257,8 @@ public final class CassandraDataControl {
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                             .message( "This PoliceType has already been applied" )
                                             .code( 201 )
-                                            .build() ).build() ); }
+                                            .build() ).build() )
+                .doOnError( throwable -> this.delete() ); }
 
     public Flux< PoliceType > getAllPoliceTypes () {
         return Flux.fromStream(
@@ -264,15 +266,8 @@ public final class CassandraDataControl {
                         "SELECT * FROM "
                                 + this.dbName + "." + this.getPoliceType() + " ;"
                 ).all().stream()
-        ).map( PoliceType::new ); }
-
-    public Flux< AtlasLustra > getAllLustra () {
-        return Flux.fromStream(
-                this.session.execute(
-                        "SELECT * FROM "
-                                + this.dbName + "." + this.getLustre() + " ;"
-                ).all().stream()
-        ).map( AtlasLustra::new ); }
+        ).map( PoliceType::new )
+                .doOnError( throwable -> this.delete() ); }
 
     public Mono< ApiResponseModel > addValue ( AtlasLustra atlasLustra, Boolean check ) { return this.session
             .execute( "INSERT INTO "
@@ -302,7 +297,19 @@ public final class CassandraDataControl {
                                         .message( "This Lustra has already been applied" )
                                         .code( 201 )
                                         .build()
-                        ).build() ); }
+                        ).build() )
+            .doOnError( throwable -> this.delete() ); }
+
+    public Flux< AtlasLustra > getAllLustra () {
+        return Flux.fromStream(
+                this.session.execute(
+                        "SELECT * FROM "
+                                + this.dbName + "." + this.getLustre() + " ;"
+                ).all().stream()
+        ).map( AtlasLustra::new )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ApiResponseModel > addValue ( PolygonType polygonType ) { return this.session
             .execute( "INSERT INTO "
@@ -327,16 +334,22 @@ public final class CassandraDataControl {
                                                 .message( "This polygonType has already been applied" )
                                                 .code( 201 )
                                                 .build()
-                                ).build() ); }
+                                ).build() )
+            .doOnError( throwable -> {
+                this.delete();
+                this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
-    public Mono< PolygonType > getCurrentPolygonType ( UUID uuid ) {
+    public Mono< PolygonType > getAllPolygonType ( UUID uuid ) {
         return Mono.just(
                 this.session.execute(
                         "SELECT * FROM "
                         + this.dbName + "." + this.polygonType
                                 + " WHERE uuid = " + uuid + " ;"
                 ).one()
-        ).map( PolygonType::new ); }
+        ).map( PolygonType::new )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Flux< PolygonType > getAllPolygonType () {
         return Flux.fromStream(
@@ -348,45 +361,48 @@ public final class CassandraDataControl {
 
     public Mono< ApiResponseModel > addValue ( Polygon polygon ) {
         return this.session.execute( "INSERT INTO "
-            + this.dbName + "." + this.polygon +
-            CassandraConverter
-                    .getInstance()
-                    .getALlNames( Polygon.class ) +
-            " VALUES ("
-                    + polygon.getUuid() + ", "
-                    + polygon.getOrgan() + ", "
+                        + this.dbName + "." + this.polygon +
+                        CassandraConverter
+                                .getInstance()
+                                .getALlNames( Polygon.class ) +
+                        " VALUES ("
+                        + polygon.getUuid() + ", "
+                        + polygon.getOrgan() + ", "
 
-                    + polygon.getRegionId() + ", "
-                    + polygon.getMahallaId() + ", "
-                    + polygon.getDistrictId() + ", '"
+                        + polygon.getRegionId() + ", "
+                        + polygon.getMahallaId() + ", "
+                        + polygon.getDistrictId() + ", '"
 
-                    + polygon.getName() + "', '"
-                    + polygon.getColor() + "', " +
+                        + polygon.getName() + "', '"
+                        + polygon.getColor() + "', " +
 
-            CassandraConverter
-                .getInstance()
-                .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
+                        CassandraConverter
+                                .getInstance()
+                                .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
 
-            CassandraConverter
-                    .getInstance()
-                    .convertListToCassandra( polygon.getPatrulList() ) + ", " +
+                        CassandraConverter
+                                .getInstance()
+                                .convertListToCassandra( polygon.getPatrulList() ) + ", " +
 
-            CassandraConverter
-                    .getInstance()
-                    .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
+                        CassandraConverter
+                                .getInstance()
+                                .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
                 .wasApplied() ? Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Polygon was successfully saved" )
-                                        .code( 200 )
-                                        .build() )
-                                .build()
+                .success( true )
+                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        .message( "Polygon was successfully saved" )
+                        .code( 200 )
+                        .build() )
+                .build()
         ) : Mono.just( ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "This polygon has already been saved" )
-                                        .code( 201 )
-                                        .build() ).build() ); }
+                .status(
+                        com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .message( "This polygon has already been saved" )
+                                .code( 201 )
+                                .build() ).build() )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ApiResponseModel > update ( Polygon polygon ) {
         return this.session.execute( "INSERT INTO "
@@ -418,17 +434,22 @@ public final class CassandraDataControl {
                     .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");" )
                 .wasApplied() ? Mono.just( ApiResponseModel.builder()
                                 .success( true )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "Polygon was successfully updated" )
                                         .code( 200 )
                                         .build() )
                                 .build()
-        ) : Mono.just( ApiResponseModel.builder()
+        ) : Mono.just( ApiResponseModel
+                        .builder()
                         .status(
                                 com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                         .message( "This polygon does not exists" )
                                         .code( 201 )
-                                        .build() ).build() ); }
+                                        .build() ).build() )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< Polygon > getPolygon ( UUID uuid ) {
         Row row = this.session.execute(
@@ -461,52 +482,6 @@ public final class CassandraDataControl {
                 "SELECT * FROM "
                         + "tablets.cars where trackersId = '" + carNumber + "';" ).one() == null; }
 
-    public Mono< ApiResponseModel > addValue ( ReqCar reqCar ) {
-        return this.checkTracker( reqCar.getTrackerId() ) && this.checkCarNumber( reqCar.getGosNumber() )
-                ? this.session.execute( "INSERT INTO "
-            + this.dbName + "." + this.getCars() +
-            CassandraConverter
-                    .getInstance()
-                    .getALlNames( ReqCar.class ) +
-            " VALUES ("
-            + reqCar.getUuid() + ", "
-            + reqCar.getLustraId() + ", '"
-
-            + reqCar.getGosNumber() + "', '"
-            + reqCar.getTrackerId() + "', '"
-            + reqCar.getVehicleType() + "', '"
-            + reqCar.getCarImageLink() + "', '"
-            + reqCar.getPatrulPassportSeries() + "', "
-
-            + reqCar.getSideNumber() + ", "
-            + reqCar.getSimCardNumber() + ", "
-
-            + reqCar.getLatitude() + ", "
-            + reqCar.getLongitude() + ", "
-            + reqCar.getAverageFuelSize() + ", "
-            + reqCar.getAverageFuelConsumption()
-            + ") IF NOT EXISTS;" ).wasApplied() ? Mono.just( ApiResponseModel.builder()
-                            .success( true )
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "Car was successfully saved" )
-                                            .code( 200 )
-                                            .build()
-                            ).build()
-            ) : Mono.just( ApiResponseModel.builder()
-                            .success( false )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "This car was already saved, choose another one" )
-                                            .code( 201 )
-                                            .build()
-                            ).build() ) : Mono.just( ApiResponseModel.builder()
-                        .success( false )
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                .message( "This trackers or gosnumber is already registered to another car, so choose another one" )
-                                .code( 201 )
-                                .build() )
-                .build() ); }
-
     public Mono< ApiResponseModel > delete ( String gosno ) {
         return this.getCar( UUID.fromString( gosno ) )
                 .flatMap( reqCar -> {
@@ -526,7 +501,10 @@ public final class CassandraDataControl {
                                             .message( "This car is linked to patrul" )
                                             .code( 201 )
                                             .build() )
-                                    .build() ); } ); }
+                                    .build() ); } )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ApiResponseModel > update ( ReqCar reqCar ) {
         return this.getCar( reqCar.getUuid() )
@@ -587,9 +565,56 @@ public final class CassandraDataControl {
                                     .message( "This car does not exist, choose another one" )
                                     .code( 201 )
                                     .build()
-                            ).build() );
-                } );
-    }
+                            ).build() ); } ); }
+
+    public Mono< ApiResponseModel > addValue ( ReqCar reqCar ) {
+        return this.checkTracker( reqCar.getTrackerId() ) && this.checkCarNumber( reqCar.getGosNumber() )
+                ? this.session.execute( "INSERT INTO "
+                + this.dbName + "." + this.getCars() +
+                CassandraConverter
+                        .getInstance()
+                        .getALlNames( ReqCar.class ) +
+                " VALUES ("
+                + reqCar.getUuid() + ", "
+                + reqCar.getLustraId() + ", '"
+
+                + reqCar.getGosNumber() + "', '"
+                + reqCar.getTrackerId() + "', '"
+                + reqCar.getVehicleType() + "', '"
+                + reqCar.getCarImageLink() + "', '"
+                + reqCar.getPatrulPassportSeries() + "', "
+
+                + reqCar.getSideNumber() + ", "
+                + reqCar.getSimCardNumber() + ", "
+
+                + reqCar.getLatitude() + ", "
+                + reqCar.getLongitude() + ", "
+                + reqCar.getAverageFuelSize() + ", "
+                + reqCar.getAverageFuelConsumption()
+                + ") IF NOT EXISTS;" ).wasApplied() ? Mono.just( ApiResponseModel.builder()
+                .success( true )
+                .status(
+                        com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .message( "Car was successfully saved" )
+                                .code( 200 )
+                                .build()
+                ).build()
+        ) : Mono.just( ApiResponseModel.builder()
+                .success( false )
+                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        .message( "This car was already saved, choose another one" )
+                        .code( 201 )
+                        .build()
+                ).build() ) : Mono.just( ApiResponseModel.builder()
+                .success( false )
+                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        .message( "This trackers or gosnumber is already registered to another car, so choose another one" )
+                        .code( 201 )
+                        .build() )
+                .build() )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ReqCar > getCar ( UUID uuid ) { return Mono.just(
             this.session.execute(
@@ -617,8 +642,7 @@ public final class CassandraDataControl {
             this.session.execute(
                     "SELECT * FROM "
                             + this.dbName + "." + this.getPatrols()
-                            + " WHERE passportNumber = '" + pasportNumber + "';"
-            ).one(); }
+                            + " WHERE passportNumber = '" + pasportNumber + "';" ).one(); }
 
     public Mono< Patrul > getPatrul ( UUID uuid ) {
         Row row = this.session.execute(
@@ -653,7 +677,10 @@ public final class CassandraDataControl {
                                         .message( "You cannot delete this patrul" )
                                         .code( 201 )
                                         .build() )
-                        .build() ); } ); }
+                        .build() ); } )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
         Row row = this.getPatrul( patrul.getPassportNumber() );
@@ -762,7 +789,10 @@ public final class CassandraDataControl {
                                         .message( "There is no such a patrul" )
                                         .code( 201 )
                                         .build() )
-                        .build() ); }
+                        .build() )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
         if ( this.getPatrul( patrul.getPassportNumber() ) == null ) {
@@ -870,7 +900,10 @@ public final class CassandraDataControl {
                                         .message( "This patrul is already exists" )
                                         .code( 201 )
                                         .build()
-                        ).build() ); }
+                        ).build() )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Flux< Polygon > getAllPolygonForPatrul () {
         return Flux.fromStream(
@@ -957,7 +990,10 @@ public final class CassandraDataControl {
                                         .code( 201 )
                                         .build()
                         ).success( false )
-                        .build() ); }
+                        .build() )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) {
         return this.getPolygonForPatrul( polygon.getUuid().toString() )
@@ -997,8 +1033,8 @@ public final class CassandraDataControl {
                                         CassandraConverter
                                                 .getInstance()
                                                 .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");" )
-                                .wasApplied() ? Mono.just(
-                                ApiResponseModel.builder()
+                                .wasApplied() ? Mono.just( ApiResponseModel
+                                        .builder()
                                         .status(
                                                 com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                                         .message( "Polygon: " + polygon.getUuid() + " was updated successfully" )
@@ -1014,7 +1050,22 @@ public final class CassandraDataControl {
                                             .code( 201 )
                                             .build()
                                         ).success( false )
-                                        .build() ) ); }
+                                        .build() ) )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
+
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this
+            .getPatrul( UUID.fromString( request.getData() ) )
+            .flatMap( patrul -> request.getSubject() == null && request.getSubject() == null ?
+                    Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
+                            + this.dbName + "."
+                            + this.patrols + patrul.getPassportNumber() ).all().stream() ) ) )
+                    : Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
+                            + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE date >= '"
+                            + SerDes.getSerDes().convertDate( request.getObject().toString() ).toInstant()
+                            + "' and date <= '" + SerDes.getSerDes().convertDate( request.getSubject().toString() ).toInstant() + "';" )
+                    .all().stream() ) ) ) ); }
 
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return this.getPolygonForPatrul( scheduleForPolygonPatrul.getUuid() )
@@ -1032,18 +1083,6 @@ public final class CassandraDataControl {
                             polygon.setPatrulList( uuidList );
                             return this.updatePolygonForPatrul( polygon );
                         } ) ); }
-
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this
-            .getPatrul( UUID.fromString( request.getData() ) )
-            .flatMap( patrul -> request.getSubject() == null && request.getSubject() == null ?
-                    Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
-                            + this.dbName + "."
-                            + this.patrols + patrul.getPassportNumber() ).all().stream() ) ) )
-                    : Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
-                            + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE date >= '"
-                            + SerDes.getSerDes().convertDate( request.getObject().toString() ).toInstant()
-                            + "' and date <= '" + SerDes.getSerDes().convertDate( request.getSubject().toString() ).toInstant() + "';" )
-                    .all().stream() ) ) ) ); }
 
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account
@@ -1105,14 +1144,8 @@ public final class CassandraDataControl {
                 + " with simCard "
                 + patrul.getSimCardNumber() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
-    public void delete () {
-        this.session.close();
-        this.cluster.close();
-        cassandraDataControl = null;
-        this.logger.info( "Cassandra is closed!!!" ); }
-
     public Flux< Notification > getAllNotification () {
-        return Flux.fromStream(
+        return Flux.fromStream (
                 this.session.execute(
                         "SELECT * FROM "
                                 + this.dbName + "." + this.notification + ";"
@@ -1355,4 +1388,11 @@ public final class CassandraDataControl {
                 UnirestController
                         .getInstance()
                         .addUser( patrul ); } ); }
+
+    public void delete () {
+        this.session.close();
+        this.cluster.close();
+        cassandraDataControl = null;
+        KafkaDataControl.getInstance().clear();
+        this.logger.info( "Cassandra is closed!!!" ); }
 }
