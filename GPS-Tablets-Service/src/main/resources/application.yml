@@ -1,0 +1,39 @@
+server:
+    port: 9090
+    address: localhost
+
+spring:
+    data:
+        cassandra:
+            port: 9942
+            keyspace-name: TABLETS
+            contact-points: 10.254.1.227
+            schema-action: CREATE_IF_NOT_EXISTS
+
+            request:
+                timeout: 10s
+
+            connection:
+                connect-timeout: 10s
+                init-query-timeout: 10s
+
+    rsocket:
+        server:
+            port: 6060
+            address: localhost
+
+    kafka:
+        bootstrap-servers: 10.254.1.209:9092, 10.254.1.211:9092, 10.254.1.212:9092
+
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+        consumer:
+            group-id: SSD.TABLETS
+            auto-offset-reset: earliest
+            key-deserializer: org.apache.kafka.common.serialization.StringSerializer
+            value-deserializer: org.apache.kafka.common.serialization.StringSerializer
+
+        admin:
+            client-id: SSD.TABLETS
