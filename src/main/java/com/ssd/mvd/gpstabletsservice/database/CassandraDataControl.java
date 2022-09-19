@@ -1360,7 +1360,7 @@ public final class CassandraDataControl {
                                         .build() )
                                 .build() ) ); } ); }
 
-//    uses when patrul finishes his work in the evening
+    // uses when patrul finishes his work in the evening
     public Mono< ApiResponseModel > stopToWork ( String token ) { return this.getPatrul( this.decode( token ) )
             .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
                     .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.STOP_TO_WORK ) )
