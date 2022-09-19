@@ -30,79 +30,96 @@ public class Archive {
 
     public static Archive getAchieve () { return archive != null ? archive : ( archive = new Archive() ); }
 
-    // uses to link Card to current Patrul object, either additional Patrul in case of necessary
-    public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
-        TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
-        return RedisDataControl.getRedis().update( patrul )
-                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder().success( true )
-                        .status( Status.builder()
-                                .message( card + " was linked to: " + patrul.getName() ).build() ).build() ) ); }
-
-    public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
-            TaskInspector.getInstance().changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask );
-            return RedisDataControl.getRedis()
-                    .update( patrul )
-                    .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                            .status( Status.builder()
-                                    .message( "SelfEmployment was saved" )
-                                    .code( 200 )
-                                    .build() )
-                            .success( true )
-                            .build() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventFace card ) {
-        TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
-        return RedisDataControl.getRedis().update( patrul )
-                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                        .success( true )
-                        .status( Status.builder()
-                                .message( card + " was linked to: " + patrul.getName() )
-                                .build() )
-                        .build() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventBody card ) {
-        TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
-        return RedisDataControl.getRedis().update( patrul )
-                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                        .success( true )
-                        .status( Status.builder()
-                                .message( card + " was linked to: " + patrul.getName() )
-                                .build() )
-                        .build() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventCar card ) {
-        TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
-        return RedisDataControl.getRedis().update( patrul )
-                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                        .success( true )
-                        .status( Status.builder()
-                                .message( card + " was linked to: " + patrul.getName() )
-                                .build() )
-                        .build() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvent card ) {
-        TaskInspector.getInstance()
-                .changeTaskStatus( patrul, ATTACHED, card );
-        return RedisDataControl.getRedis().update( patrul )
-                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                        .success( true )
-                        .status( Status.builder()
-                                .message( card + " was linked to: " + patrul.getName() )
-                                .build() )
-                        .build() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, CarEvent card ) {
-        TaskInspector.getInstance().changeTaskStatus( patrul, ATTACHED, card );
-        return RedisDataControl.getRedis().update( patrul )
-                .flatMap( apiResponseModel -> Mono.just( ApiResponseModel.builder()
-                        .success( true )
-                        .status( Status.builder()
-                                .message( card + " was linked to: " + patrul.getName()  )
-                                .build() )
-                        .build() ) ); }
-
     public String generateToken () {
         byte[] bytes = new byte[ 24 ];
         this.secureRandom.nextBytes( bytes );
         return this.encoder.encodeToString( bytes ); }
+
+    // uses to link Card to current Patrul object, either additional Patrul in case of necessary
+    public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
+        return Mono.just( ApiResponseModel
+                .builder()
+                .success( true )
+                .status( Status.builder()
+                        .message( card + " was linked to: "
+                                + TaskInspector
+                                .getInstance()
+                                .changeTaskStatus( patrul, ATTACHED, card )
+                                .getName() ).build() ).build() ); }
+
+    public Mono< ApiResponseModel > save ( Patrul patrul, EventCar card ) {
+        return Mono.just( ApiResponseModel
+                .builder()
+                .success( true )
+                .status( Status
+                        .builder()
+                        .message( card + " was linked to: " + TaskInspector
+                                .getInstance()
+                                .changeTaskStatus( patrul, ATTACHED, card )
+                                .getName() )
+                        .build() )
+                .build() ); }
+
+    public Mono< ApiResponseModel > save ( Patrul patrul, EventFace card ) {
+        return Mono.just( ApiResponseModel
+                .builder()
+                .success( true )
+                .status( Status
+                        .builder()
+                        .message( card + " was linked to: " + TaskInspector
+                                .getInstance()
+                                .changeTaskStatus( patrul, ATTACHED, card )
+                                .getName() )
+                        .build() )
+                .build() ); }
+
+    public Mono< ApiResponseModel > save ( Patrul patrul, CarEvent card ) {
+        return Mono.just( ApiResponseModel
+                .builder()
+                .success( true )
+                .status( Status
+                        .builder()
+                        .message( card + " was linked to: " + TaskInspector
+                                .getInstance()
+                                .changeTaskStatus( patrul, ATTACHED, card )
+                                .getName() )
+                        .build() )
+                .build() ); }
+
+    public Mono< ApiResponseModel > save ( Patrul patrul, EventBody card ) {
+        return Mono.just( ApiResponseModel
+                .builder()
+                .success( true )
+                .status( Status
+                        .builder()
+                        .message( card + " was linked to: " + TaskInspector
+                                .getInstance()
+                                .changeTaskStatus( patrul, ATTACHED, card )
+                                .getName() )
+                        .build() )
+                .build() ); }
+
+    public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvent card ) {
+        return Mono.just( ApiResponseModel
+                .builder()
+                .success( true )
+                .status( Status
+                        .builder()
+                        .message( card + " was linked to: " + TaskInspector
+                                .getInstance()
+                                .changeTaskStatus( patrul, ATTACHED, card ).getName() )
+                        .build() )
+                .build() ); }
+
+    public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
+        TaskInspector
+                .getInstance()
+                .changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask );
+        return Mono.just( ApiResponseModel.builder()
+                .status( Status.builder()
+                        .message( "SelfEmployment was saved" )
+                        .code( 200 )
+                        .build() )
+                .success( true )
+                .build() ); }
 }

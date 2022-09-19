@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class Emotions {
-    private Integer confidence;
+    private Double confidence;
     private String name;
 }

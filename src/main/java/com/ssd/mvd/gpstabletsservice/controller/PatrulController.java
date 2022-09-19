@@ -32,8 +32,11 @@ public class PatrulController {
             .sort( Comparator.comparing( Patrul::getDistance ) ); }
 
     @MessageMapping ( value = "getTaskDetails" )
-    public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector.getInstance()
-            .getTaskDetails( SerDes.getSerDes().deserialize( data.getData() ) ); }
+    public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector
+            .getInstance()
+            .getTaskDetails( SerDes
+                    .getSerDes()
+                    .deserialize( data.getData() ) ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( String token ) { return CassandraDataControl
@@ -139,16 +142,20 @@ public class PatrulController {
     public Flux< Patrul > getPatrulByPortion ( String name ) { return CassandraDataControl
             .getInstance()
             .getPatrul()
-            .filter( patrul -> patrul.getSurnameNameFatherName().contains( name ) ); }
+            .filter( patrul -> patrul
+                    .getSurnameNameFatherName()
+                    .contains( name ) ); }
 
     @MessageMapping ( value = "addAllPatrulsToChatService" )
     public Mono< ApiResponseModel > addAllPatrulsToChatService ( String token ) {
         CassandraDataControl
             .getInstance()
             .addAllPatrulsToChatService( token );
-        return Mono.just( ApiResponseModel.builder()
-                        .success( true )
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+        return Mono.just( ApiResponseModel
+                .builder()
+                .success( true )
+                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
                                 .message( "Successfully added to chat service" )
                                 .code( 200 )
                                 .build()

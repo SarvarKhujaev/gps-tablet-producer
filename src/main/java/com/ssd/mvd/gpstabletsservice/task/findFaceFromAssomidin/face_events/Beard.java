@@ -10,6 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class Beard  {
-	private Integer confidence;
+	private Double confidence;
 	private String name;
 }

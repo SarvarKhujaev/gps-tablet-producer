@@ -10,6 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class Medmask {
-    private Integer confidence;
+    private Double confidence;
     private String name;
 }

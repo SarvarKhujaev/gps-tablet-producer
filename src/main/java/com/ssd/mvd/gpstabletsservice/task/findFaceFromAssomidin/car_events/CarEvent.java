@@ -92,7 +92,7 @@ public class CarEvent {
     private Integer frame_coords_bottom;
 
     @JsonProperty("confidence")
-    private Integer confidence;
+    private Double confidence;
 
     @JsonProperty("cluster_confidence")
     private Integer cluster_confidence;
@@ -136,7 +136,7 @@ public class CarEvent {
     @JsonDeserialize
     private List<VictimHumans> victimHumans = new ArrayList<>();  // Jabirlanuchi inson
     @JsonDeserialize
-    private List<ReportForCard> reportForCardList = new ArrayList<>(); // the list of reports for the current card
+    private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize
     private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }

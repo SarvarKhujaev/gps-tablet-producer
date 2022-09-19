@@ -4,14 +4,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import lombok.extern.jackson.Jacksonized;
 import java.util.*;
 import lombok.*;
 
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
-import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.task.card.VictimHumans;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
@@ -102,7 +102,7 @@ public class FaceEvent {
     private Integer frame_coords_bottom;
 
     @JsonProperty("confidence")
-    private Integer confidence;
+    private Double confidence;
 
     @JsonProperty("cluster_confidence")
     private Integer cluster_confidence;
@@ -121,23 +121,24 @@ public class FaceEvent {
     private DataInfo dataInfo;
 
     @JsonDeserialize
-    @JsonProperty("detector_params")
+    @JsonProperty( "detector_params" )
     private DetectorParams detector_params;
 
     @JsonDeserialize
-    @JsonProperty("features")
+    @JsonProperty( "features" )
     private Features features;
 
     private Status status = Status.CREATED;
+
     @JsonDeserialize
     private PsychologyCard psychologyCard;
 
     @JsonDeserialize
-    private Map<UUID, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event
+    private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize
-    private List<VictimHumans> victimHumans = new ArrayList<>();  // Jabirlanuchi inson
+    private List< VictimHumans > victimHumans = new ArrayList<>();  // Jabirlanuchi inson
     @JsonDeserialize
-    private List<ReportForCard> reportForCardList = new ArrayList<>(); // the list of reports for the current card
+    private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize
     private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }
