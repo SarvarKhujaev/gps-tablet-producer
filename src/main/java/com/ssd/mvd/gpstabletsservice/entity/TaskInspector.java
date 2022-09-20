@@ -1080,7 +1080,7 @@ public final class TaskInspector {
                                     .type( FIND_FACE_CAR.name() )
                                     .data( FinishedTask
                                             .builder()
-                                            .taskTypes( CARD_102 )
+                                            .taskTypes( FIND_FACE_CAR )
                                             .task( carEvent.getName() )
                                             .createdDate( carEvent.getCreated_date() )
                                             .cardDetails( new CardDetails( new CarDetails( carEvent ) ) )
@@ -1103,7 +1103,7 @@ public final class TaskInspector {
                                     .type( FIND_FACE_PERSON.name() )
                                     .data( FinishedTask
                                             .builder()
-                                            .taskTypes( CARD_102 )
+                                            .taskTypes( FIND_FACE_PERSON )
                                             .task( faceEvent.getName() )
                                             .createdDate( faceEvent.getCreated_date() )
                                             .cardDetails( new CardDetails( new PersonDetails( faceEvent ) ) )
@@ -1126,8 +1126,8 @@ public final class TaskInspector {
                                     .type( FIND_FACE_EVENT_CAR.name() )
                                     .data( FinishedTask
                                             .builder()
-                                            .taskTypes( CARD_102 )
                                             .task( eventCar.getId() )
+                                            .taskTypes( FIND_FACE_EVENT_CAR )
                                             .createdDate( eventCar.getCreated_date().toString() )
                                             .cardDetails( new CardDetails( new CarDetails( eventCar ) ) )
                                             .reportForCard( eventCar
@@ -1149,8 +1149,8 @@ public final class TaskInspector {
                                     .type( FIND_FACE_EVENT_BODY.name() )
                                     .data( FinishedTask
                                             .builder()
-                                            .taskTypes( CARD_102 )
                                             .task( eventBody.getId() )
+                                            .taskTypes( FIND_FACE_EVENT_BODY )
                                             .createdDate( eventBody.getCreated_date().toString() )
                                             .cardDetails( new CardDetails( new PersonDetails( eventBody ) ) )
                                             .reportForCard( eventBody
@@ -1172,8 +1172,8 @@ public final class TaskInspector {
                                     .type( FIND_FACE_EVENT_FACE.name() )
                                     .data( FinishedTask
                                             .builder()
-                                            .taskTypes( CARD_102 )
                                             .task( eventFace.getId() )
+                                            .taskTypes( FIND_FACE_EVENT_FACE )
                                             .createdDate( eventFace.getCreated_date().toString() )
                                             .cardDetails( new CardDetails( new PersonDetails( eventFace ) ) )
                                             .reportForCard( eventFace
@@ -1195,7 +1195,7 @@ public final class TaskInspector {
                                     .type( TaskTypes.SELF_EMPLOYMENT.name() )
                                     .data( FinishedTask
                                             .builder()
-                                            .taskTypes( CARD_102 )
+                                            .taskTypes( TaskTypes.SELF_EMPLOYMENT )
                                             .task( selfEmploymentTask.getDescription() )
                                             .createdDate( selfEmploymentTask.getIncidentDate().toString() )
                                             .cardDetails( new CardDetails( selfEmploymentTask, "ru", patrul ) )
@@ -1206,7 +1206,7 @@ public final class TaskInspector {
                                             .build() )
                                     .build() ); } )
                 .collectList()
-                .flatMap( data -> Mono.just( ApiResponseModel
+                .flatMap( dataList -> Mono.just( ApiResponseModel
                         .builder()
                         .success( true )
                         .status( com.ssd.mvd.gpstabletsservice.response.Status
@@ -1216,7 +1216,7 @@ public final class TaskInspector {
                                 .build() )
                         .data( com.ssd.mvd.gpstabletsservice.entity.Data
                                 .builder()
-                                .data( data )
+                                .data( dataList )
                                 .build() )
                         .build() ) ); }
 
@@ -1227,11 +1227,13 @@ public final class TaskInspector {
                     .getCard102( patrul.getTaskId() )
                     .flatMap( card -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( card, patrul, "ru" ) )
                                     .type( CARD_102.name() )
                                     .build() )
@@ -1240,13 +1242,16 @@ public final class TaskInspector {
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
                     .getEventBody( patrul.getTaskId() )
-                    .flatMap( eventBody -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( eventBody -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( new PersonDetails( eventBody ) ) )
                                     .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
@@ -1255,13 +1260,16 @@ public final class TaskInspector {
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
                     .getEventFace( patrul.getTaskId() )
-                    .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( eventFace -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( new PersonDetails( eventFace ) ) )
                                     .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
@@ -1270,13 +1278,16 @@ public final class TaskInspector {
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
                     .getEventCar( patrul.getTaskId() )
-                    .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( eventCar -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( new CarDetails( eventCar ) ) )
                                     .type( FIND_FACE_CAR.name() )
                                     .build() ) // TO-DO
@@ -1285,13 +1296,16 @@ public final class TaskInspector {
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
                     .getCarEvents( patrul.getTaskId() )
-                    .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( eventCar -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( new CarDetails( eventCar ) ) )
                                     .type( FIND_FACE_CAR.name() )
                                     .build() ) // TO-DO
