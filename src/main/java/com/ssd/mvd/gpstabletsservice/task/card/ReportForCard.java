@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.datastax.driver.core.UDTValue;
 
-import java.util.List;
-import java.util.Date;
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Date;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -24,8 +24,8 @@ public class ReportForCard { // creates when some of Patrul from current Card ha
     private String description;
     private String passportSeries;
 
-    private UUID uuidOfPatrul;
     private Date date; // the date when report was created
+    private UUID uuidOfPatrul;
     @JsonDeserialize
     private List< String > imagesIds; // contains all images Ids which was downloaded in advance
 

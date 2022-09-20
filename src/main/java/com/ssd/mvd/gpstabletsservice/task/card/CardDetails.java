@@ -411,14 +411,5 @@ public class CardDetails {
                         .add( new Item( "Время прибытия", selfEmploymentTask
                                 .getPatruls()
                                 .get( patrul.getUuid() )
-                                .getTaskDate() ) );
-                case REPORT -> Flux.fromStream( selfEmploymentTask.getReportForCards().stream() )
-                        .filter( reportForCard -> reportForCard
-                                .getPassportSeries()
-                                .equals( patrul.getPassportNumber() ) )
-                        .subscribe( reportForCard -> {
-                            this.getDetails().get( Details.SELF_EMPLOYMENT )
-                                    .add( new Item( "Отчет", reportForCard ) );
-                            this.getDetails().get( Details.SELF_EMPLOYMENT )
-                                    .add( new Item( "Время отчета", reportForCard ) ); } ); } } ); }
+                                .getTaskDate() ) ); } } ); }
 }

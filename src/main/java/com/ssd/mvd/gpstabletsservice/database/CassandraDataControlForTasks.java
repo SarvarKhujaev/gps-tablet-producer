@@ -15,7 +15,6 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSetFuture;
 
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
-import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -113,7 +112,7 @@ public class CassandraDataControlForTasks {
                                 .getViolationsInformationsList() )
                     + ", '" + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
 
-    public Mono< ApiResponseModel > getAllCarTotalData () {
+    public Flux< CarTotalData > getAllCarTotalData () {
         return Flux.fromStream(
                         this.session.execute(
                                         "SELECT * FROM "
@@ -121,20 +120,7 @@ public class CassandraDataControlForTasks {
                                 .all().stream() )
                 .map( row -> SerDes
                         .getSerDes()
-                        .deserializeCarTotalData( row.getString( "object" ) ) )
-                .collectList()
-                .flatMap( carTotalData1 -> Mono.just(
-                        ApiResponseModel
-                                .builder()
-                                .data( com.ssd.mvd.gpstabletsservice.entity.Data
-                                                .builder()
-                                                .data( carTotalData1 )
-                                                .build()
-                                ).status( Status.builder()
-                                                .message( "CarTotalDataList" )
-                                                .code( 200 )
-                                                .build()
-                                ).build() ) ); }
+                        .deserializeCarTotalData( row.getString( "object" ) ) ); }
 
     public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return Mono.just(
             ApiResponseModel.builder()

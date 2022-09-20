@@ -1197,6 +1197,7 @@ public final class TaskInspector {
                                     .taskTypes( TaskTypes.SELF_EMPLOYMENT )
                                     .task( selfEmploymentTask.getDescription() )
                                     .createdDate( selfEmploymentTask.getIncidentDate().toString() )
+                                    .cardDetails( new CardDetails( selfEmploymentTask, "ru", patrul ) )
                                     .totalTimeConsumption( selfEmploymentTask
                                             .getPatrulStatuses()
                                             .containsKey( patrul.getPassportNumber() )
