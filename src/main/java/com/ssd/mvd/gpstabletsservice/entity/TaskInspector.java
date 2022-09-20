@@ -81,7 +81,8 @@ public final class TaskInspector {
                 patrul.setTaskId( card.getCardId().toString() ); // saving card id into patrul object
                 patrul.setLongitudeOfTask( card.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
-            case ARRIVED -> card.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
+            case ARRIVED -> card.getPatrulStatuses()
+                    .putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
                     .patrul( patrul )
                     .inTime( patrul.check() )
                     .totalTimeConsumption( TimeInspector
@@ -563,7 +564,15 @@ public final class TaskInspector {
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
-            case ATTACHED, ACCEPTED, ARRIVED -> {
+            case ARRIVED -> selfEmploymentTask.getPatrulStatuses()
+                    .putIfAbsent( patrul.getPassportNumber(), PatrulStatus.builder()
+                            .patrul( patrul )
+                            .inTime( patrul.check() )
+                            .totalTimeConsumption( TimeInspector
+                                    .getInspector()
+                                    .getTimeDifference( patrul.getTaskDate().toInstant() ) )
+                            .build() );
+            case ATTACHED, ACCEPTED -> {
                 patrul.setTaskTypes( TaskTypes.SELF_EMPLOYMENT );
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object
                 patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
@@ -1039,7 +1048,9 @@ public final class TaskInspector {
                                     ).build() ) ); }; }
 
     private Integer getReportIndex ( List< ReportForCard > reportForCardList, UUID uuid ) {
-        for ( int i = 0; i < reportForCardList.size(); i++ ) if ( reportForCardList.get( i ).getUuidOfPatrul().compareTo( uuid ) == 0 ) return i;
+        for ( int i = 0; i < reportForCardList.size(); i++ ) if ( reportForCardList.get( i )
+                .getUuidOfPatrul()
+                .compareTo( uuid ) == 0 ) return i;
         return 0; }
 
     public Mono< ApiResponseModel > getListOfPatrulTasks ( Patrul patrul ) {
@@ -1048,161 +1059,158 @@ public final class TaskInspector {
                     case CARD_102 -> CassandraDataControlForTasks
                             .getInstance()
                             .getCard102( key )
-                            .map( card -> com.ssd.mvd.gpstabletsservice.entity.Data
+                            .map( card -> FinishedTask
                                     .builder()
-                                    .type( CARD_102.name() )
-                                    .data( FinishedTask
-                                            .builder()
-                                            .taskTypes( CARD_102 )
-                                            .task( card.getFabula() )
-                                            .createdDate( card.getCreated_date().toString() )
-                                            .cardDetails( new CardDetails( card, patrul, "ru" ) )
-                                            .reportForCard( card
-                                                    .getReportForCardList()
-                                                    .get( this.getReportIndex( card
-                                                            .getReportForCardList(), patrul.getUuid() ) ) )
-                                            .totalTimeConsumption( card
-                                                    .getPatrulStatuses()
-                                                    .get( patrul.getPassportNumber() )
-                                                    .getTotalTimeConsumption() )
-                                            .build() )
+                                    .taskTypes( CARD_102 )
+                                    .task( card.getFabula() )
+                                    .createdDate( card.getCreated_date().toString() )
+                                    .cardDetails( new CardDetails( card, patrul, "ru" ) )
+                                    .reportForCard( card
+                                            .getReportForCardList()
+                                            .get( this.getReportIndex( card
+                                                            .getReportForCardList(),
+                                                    patrul.getUuid() ) ) )
+                                    .totalTimeConsumption( card
+                                            .getPatrulStatuses()
+                                            .containsKey( patrul.getPassportNumber() )
+                                            ? card
+                                            .getPatrulStatuses()
+                                            .get( patrul.getPassportNumber() )
+                                            .getTotalTimeConsumption() : 0 )
                                     .build() );
 
                     case FIND_FACE_CAR -> CassandraDataControlForTasks
                             .getInstance()
                             .getCarEvents( key )
-                            .map( carEvent -> com.ssd.mvd.gpstabletsservice.entity.Data
+                            .map( carEvent -> FinishedTask
                                     .builder()
-                                    .type( FIND_FACE_CAR.name() )
-                                    .data( FinishedTask
-                                            .builder()
-                                            .taskTypes( CARD_102 )
-                                            .task( carEvent.getName() )
-                                            .createdDate( carEvent.getCreated_date() )
-                                            .cardDetails( new CardDetails( new CarDetails( carEvent ) ) )
-                                            .reportForCard( carEvent
-                                                    .getReportForCardList()
-                                                    .get( this.getReportIndex( carEvent
-                                                                    .getReportForCardList(), patrul.getUuid() ) ) )
-                                            .totalTimeConsumption( carEvent
-                                                    .getPatrulStatuses()
-                                                    .get( patrul.getPassportNumber() )
-                                                    .getTotalTimeConsumption() )
-                                            .build() )
+                                    .taskTypes( FIND_FACE_CAR )
+                                    .task( carEvent.getName() )
+                                    .createdDate( carEvent.getCreated_date() )
+                                    .cardDetails( new CardDetails( new CarDetails( carEvent ) ) )
+                                    .reportForCard( carEvent
+                                            .getReportForCardList()
+                                            .get( this.getReportIndex( carEvent
+                                                    .getReportForCardList(), patrul.getUuid() ) ) )
+                                    .totalTimeConsumption( carEvent
+                                            .getPatrulStatuses()
+                                            .containsKey( patrul.getPassportNumber() )
+                                            ? carEvent
+                                            .getPatrulStatuses()
+                                            .get( patrul.getPassportNumber() )
+                                            .getTotalTimeConsumption() : 0 )
                                     .build() );
 
                     case FIND_FACE_PERSON -> CassandraDataControlForTasks
                             .getInstance()
                             .getFaceEvents( key )
-                            .map( faceEvent -> com.ssd.mvd.gpstabletsservice.entity.Data
+                            .map( faceEvent -> FinishedTask
                                     .builder()
-                                    .type( FIND_FACE_PERSON.name() )
-                                    .data( FinishedTask
-                                            .builder()
-                                            .taskTypes( CARD_102 )
-                                            .task( faceEvent.getName() )
-                                            .createdDate( faceEvent.getCreated_date() )
-                                            .cardDetails( new CardDetails( new PersonDetails( faceEvent ) ) )
-                                            .reportForCard( faceEvent
-                                                    .getReportForCardList()
-                                                    .get( this.getReportIndex( faceEvent
-                                                            .getReportForCardList(), patrul.getUuid() ) ) )
-                                            .totalTimeConsumption( faceEvent
-                                                    .getPatrulStatuses()
-                                                    .get( patrul.getPassportNumber() )
-                                                    .getTotalTimeConsumption() )
-                                            .build() )
+                                    .taskTypes( FIND_FACE_PERSON )
+                                    .task( faceEvent.getName() )
+                                    .createdDate( faceEvent.getCreated_date() )
+                                    .cardDetails( new CardDetails( new PersonDetails( faceEvent ) ) )
+                                    .reportForCard( faceEvent
+                                            .getReportForCardList()
+                                            .get( this.getReportIndex( faceEvent
+                                                    .getReportForCardList(), patrul.getUuid() ) ) )
+                                    .totalTimeConsumption( faceEvent
+                                            .getPatrulStatuses()
+                                            .containsKey( patrul.getPassportNumber() )
+                                            ? faceEvent
+                                            .getPatrulStatuses()
+                                            .get( patrul.getPassportNumber() )
+                                            .getTotalTimeConsumption() : 0 )
                                     .build() );
 
                     case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                             .getInstance()
                             .getEventCar( key )
-                            .map( eventCar -> com.ssd.mvd.gpstabletsservice.entity.Data
+                            .map( eventCar -> FinishedTask
                                     .builder()
-                                    .type( FIND_FACE_EVENT_CAR.name() )
-                                    .data( FinishedTask
-                                            .builder()
-                                            .taskTypes( CARD_102 )
-                                            .task( eventCar.getId() )
-                                            .createdDate( eventCar.getCreated_date().toString() )
-                                            .cardDetails( new CardDetails( new CarDetails( eventCar ) ) )
-                                            .reportForCard( eventCar
-                                                    .getReportForCardList()
-                                                    .get( this.getReportIndex( eventCar
-                                                            .getReportForCardList(), patrul.getUuid() ) ) )
-                                            .totalTimeConsumption( eventCar
-                                                    .getPatrulStatuses()
-                                                    .get( patrul.getPassportNumber() )
-                                                    .getTotalTimeConsumption() )
-                                            .build() )
+                                    .task( eventCar.getId() )
+                                    .taskTypes( FIND_FACE_EVENT_CAR )
+                                    .createdDate( eventCar.getCreated_date().toString() )
+                                    .cardDetails( new CardDetails( new CarDetails( eventCar ) ) )
+                                    .reportForCard( eventCar
+                                            .getReportForCardList()
+                                            .get( this.getReportIndex( eventCar
+                                                    .getReportForCardList(), patrul.getUuid() ) ) )
+                                    .totalTimeConsumption( eventCar
+                                            .getPatrulStatuses()
+                                            .containsKey( patrul.getPassportNumber() )
+                                            ? eventCar
+                                            .getPatrulStatuses()
+                                            .get( patrul.getPassportNumber() )
+                                            .getTotalTimeConsumption() : 0 )
                                     .build() );
 
                     case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                             .getInstance()
                             .getEventBody( key )
-                            .map( eventBody -> com.ssd.mvd.gpstabletsservice.entity.Data
+                            .map( eventBody -> FinishedTask
                                     .builder()
-                                    .type( FIND_FACE_EVENT_BODY.name() )
-                                    .data( FinishedTask
-                                            .builder()
-                                            .taskTypes( CARD_102 )
-                                            .task( eventBody.getId() )
-                                            .createdDate( eventBody.getCreated_date().toString() )
-                                            .cardDetails( new CardDetails( new PersonDetails( eventBody ) ) )
-                                            .reportForCard( eventBody
-                                                    .getReportForCardList()
-                                                    .get( this.getReportIndex( eventBody
-                                                            .getReportForCardList(), patrul.getUuid() ) ) )
-                                            .totalTimeConsumption( eventBody
-                                                    .getPatrulStatuses()
-                                                    .get( patrul.getPassportNumber() )
-                                                    .getTotalTimeConsumption() )
-                                            .build() )
+                                    .task( eventBody.getId() )
+                                    .taskTypes( FIND_FACE_EVENT_BODY )
+                                    .createdDate( eventBody.getCreated_date().toString() )
+                                    .cardDetails( new CardDetails( new PersonDetails( eventBody ) ) )
+                                    .reportForCard( eventBody
+                                            .getReportForCardList()
+                                            .get( this.getReportIndex( eventBody
+                                                    .getReportForCardList(), patrul.getUuid() ) ) )
+                                    .totalTimeConsumption( eventBody
+                                            .getPatrulStatuses()
+                                            .containsKey( patrul.getPassportNumber() )
+                                            ? eventBody
+                                            .getPatrulStatuses()
+                                            .get( patrul.getPassportNumber() )
+                                            .getTotalTimeConsumption() : 0 )
                                     .build() );
 
                     case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                             .getInstance()
                             .getEventFace( key )
-                            .map( eventFace -> com.ssd.mvd.gpstabletsservice.entity.Data
+                            .map( eventFace -> FinishedTask
                                     .builder()
-                                    .type( FIND_FACE_EVENT_FACE.name() )
-                                    .data( FinishedTask
-                                            .builder()
-                                            .taskTypes( CARD_102 )
-                                            .task( eventFace.getId() )
-                                            .createdDate( eventFace.getCreated_date().toString() )
-                                            .cardDetails( new CardDetails( new PersonDetails( eventFace ) ) )
-                                            .reportForCard( eventFace
-                                                    .getReportForCardList()
-                                                    .get( this.getReportIndex( eventFace
-                                                            .getReportForCardList(), patrul.getUuid() ) ) )
-                                            .totalTimeConsumption( eventFace
-                                                    .getPatrulStatuses()
-                                                    .get( patrul.getPassportNumber() )
-                                                    .getTotalTimeConsumption() )
-                                            .build() )
+                                    .task( eventFace.getId() )
+                                    .taskTypes( FIND_FACE_EVENT_FACE )
+                                    .createdDate( eventFace.getCreated_date().toString() )
+                                    .cardDetails( new CardDetails( new PersonDetails( eventFace ) ) )
+                                    .reportForCard( eventFace
+                                            .getReportForCardList()
+                                            .get( this.getReportIndex( eventFace
+                                                    .getReportForCardList(), patrul.getUuid() ) ) )
+                                    .totalTimeConsumption( eventFace
+                                            .getPatrulStatuses()
+                                            .containsKey( patrul.getPassportNumber() )
+                                            ? eventFace
+                                            .getPatrulStatuses()
+                                            .get( patrul.getPassportNumber() )
+                                            .getTotalTimeConsumption() : 0 )
                                     .build() );
 
                     default -> CassandraDataControlForTasks
                             .getInstance()
                             .getSelfEmploymentTask( UUID.fromString( key ) )
-                            .map( selfEmploymentTask -> com.ssd.mvd.gpstabletsservice.entity.Data
+                            .map( selfEmploymentTask -> FinishedTask
                                     .builder()
-                                    .type( TaskTypes.SELF_EMPLOYMENT.name() )
-                                    .data( FinishedTask
-                                            .builder()
-                                            .taskTypes( CARD_102 )
-                                            .task( selfEmploymentTask.getDescription() )
-                                            .createdDate( selfEmploymentTask.getIncidentDate().toString() )
-                                            .cardDetails( new CardDetails( selfEmploymentTask, "ru", patrul ) )
-                                            .reportForCard( selfEmploymentTask
-                                                    .getReportForCards()
-                                                    .get( this.getReportIndex( selfEmploymentTask
-                                                            .getReportForCards(), patrul.getUuid() ) ) )
-                                            .build() )
+                                    .taskTypes( TaskTypes.SELF_EMPLOYMENT )
+                                    .task( selfEmploymentTask.getDescription() )
+                                    .createdDate( selfEmploymentTask.getIncidentDate().toString() )
+                                    .totalTimeConsumption( selfEmploymentTask
+                                            .getPatrulStatuses()
+                                            .containsKey( patrul.getPassportNumber() )
+                                            ? selfEmploymentTask
+                                            .getPatrulStatuses()
+                                            .get( patrul.getPassportNumber() )
+                                            .getTotalTimeConsumption() : 0 )
+                                    .reportForCard( selfEmploymentTask
+                                            .getReportForCards()
+                                            .get( this.getReportIndex( selfEmploymentTask
+                                                    .getReportForCards(), patrul.getUuid() ) ) )
                                     .build() ); } )
                 .collectList()
-                .flatMap( data -> Mono.just( ApiResponseModel
+                .flatMap( finishedTasks -> Mono.just( ApiResponseModel
                         .builder()
                         .success( true )
                         .status( com.ssd.mvd.gpstabletsservice.response.Status
@@ -1212,7 +1220,7 @@ public final class TaskInspector {
                                 .build() )
                         .data( com.ssd.mvd.gpstabletsservice.entity.Data
                                 .builder()
-                                .data( data )
+                                .data( finishedTasks )
                                 .build() )
                         .build() ) ); }
 
@@ -1223,11 +1231,13 @@ public final class TaskInspector {
                     .getCard102( patrul.getTaskId() )
                     .flatMap( card -> Mono.just( ApiResponseModel.builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( card, patrul, "ru" ) )
                                     .type( CARD_102.name() )
                                     .build() )
@@ -1236,13 +1246,16 @@ public final class TaskInspector {
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
                     .getEventBody( patrul.getTaskId() )
-                    .flatMap( eventBody -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( eventBody -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( new PersonDetails( eventBody ) ) )
                                     .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
@@ -1251,13 +1264,16 @@ public final class TaskInspector {
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
                     .getEventFace( patrul.getTaskId() )
-                    .flatMap( eventFace -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( eventFace -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( new PersonDetails( eventFace ) ) )
                                     .type( FIND_FACE_PERSON.name() )
                                     .build() ) // TO-DO
@@ -1266,13 +1282,16 @@ public final class TaskInspector {
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
                     .getEventCar( patrul.getTaskId() )
-                    .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( eventCar -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( new CarDetails( eventCar ) ) )
                                     .type( FIND_FACE_CAR.name() )
                                     .build() ) // TO-DO
@@ -1281,13 +1300,16 @@ public final class TaskInspector {
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
                     .getCarEvents( patrul.getTaskId() )
-                    .flatMap( eventCar -> Mono.just( ApiResponseModel.builder()
+                    .flatMap( eventCar -> Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Your task details" )
                                     .code( 200 )
                                     .build() )
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .data( new CardDetails( new CarDetails( eventCar ) ) )
                                     .type( FIND_FACE_CAR.name() )
                                     .build() ) // TO-DO

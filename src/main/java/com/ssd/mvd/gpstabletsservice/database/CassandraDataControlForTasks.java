@@ -208,7 +208,7 @@ public class CassandraDataControlForTasks {
         Row row = this.session.execute(
                 "select * from "
                         + this.dbName + "." + TaskTypes.CARD_102
-                        + " where id = " + Long.valueOf( id ) + ";" ).one();
+                        + " where id = '" + id + "';" ).one();
         return row != null ? Mono.just(
                 SerDes
                     .getSerDes()

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
@@ -35,7 +36,10 @@ public class SelfEmploymentTask {
 
     private List< String > images;
     @JsonDeserialize
+    private List< ReportForCard > reportForCards = new ArrayList<>();
+
+    @JsonDeserialize
     private Map< UUID, Patrul > patruls = new HashMap<>();
     @JsonDeserialize
-    private List< ReportForCard > reportForCards = new ArrayList<>();
+    private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }
