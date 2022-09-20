@@ -1,10 +1,8 @@
 package com.ssd.mvd.gpstabletsservice;
 
-import com.ssd.mvd.gpstabletsservice.database.Archive;
-import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
@@ -13,6 +11,5 @@ public class GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-        CassandraDataControl.getInstance().register();
-        Archive.getAchieve(); }
+        CassandraDataControl.getInstance().register(); }
 }
