@@ -39,6 +39,7 @@ public class Patrul {
     private Long districtId; // choosing from dictionary
     private Long totalActivityTime;
 
+    private Integer batteryLevel;
     private Boolean inPolygon;
     private Boolean tuplePermission; // показывает модноо ли патрульному участвовать в кортеже
 

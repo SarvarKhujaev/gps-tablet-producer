@@ -207,8 +207,7 @@ public class CassandraDataControlForTasks {
                     .deserializeCard(
                     row.getString( "object" ) ) ) : Mono.empty(); }
 
-    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) {
-        return Mono.just(
+    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
                     this.session.execute(
                             "select * from "
                                     + this.dbName + "." + this.selfEmployment
