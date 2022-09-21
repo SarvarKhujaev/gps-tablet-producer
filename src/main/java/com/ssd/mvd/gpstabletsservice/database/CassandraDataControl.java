@@ -1081,8 +1081,7 @@ public final class CassandraDataControl {
                         .collectList()
                         .flatMap( uuidList -> {
                             polygon.setPatrulList( uuidList );
-                            return this.updatePolygonForPatrul( polygon );
-                        } ) ); }
+                            return this.updatePolygonForPatrul( polygon ); } ) ); }
 
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account

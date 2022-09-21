@@ -15,11 +15,6 @@ import java.util.UUID;
 
 @RestController
 public class SelfEmploymentController {
-    @MessageMapping ( value = "getAllSelfEmploymentTask" )
-    public Flux< SelfEmploymentTask > getAllSelfEmploymentTask () { return CassandraDataControlForTasks
-            .getInstance()
-            .getSelfEmploymentTasks(); }
-
     @MessageMapping ( value = "getSelfEmployment" ) // returns the current Card
     public Mono< SelfEmploymentTask > getSelfEmployment ( UUID uuid ) { return CassandraDataControlForTasks
             .getInstance()
