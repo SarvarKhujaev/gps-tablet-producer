@@ -115,31 +115,36 @@ public class CassandraDataControlForTasks {
     public Flux< CarTotalData > getAllCarTotalData () {
         return Flux.fromStream(
                         this.session.execute(
-                                        "SELECT * FROM "
-                                                + this.dbName + "." + this.carTotalData + ";" )
+                                "SELECT * FROM "
+                                        + this.dbName + "." + this.carTotalData + ";" )
                                 .all().stream() )
                 .map( row -> SerDes
                         .getSerDes()
                         .deserializeCarTotalData( row.getString( "object" ) ) ); }
 
     public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return Mono.just(
-            ApiResponseModel.builder()
+            ApiResponseModel
+                    .builder()
                     .success( true )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                            .builder()
                             .message( "Warning car details" )
                             .code( 200 )
                             .build() )
                     .data( com.ssd.mvd.gpstabletsservice.entity.Data
                             .builder()
                             .data( new CardDetails(
-                                    SerDes.getSerDes().deserializeCarTotalData(
-                                            this.session
-                                                    .execute(
-                                                            "select * FROM "
-                                                                    + this.dbName + "." + this.carTotalData
-                                                                    + " WHERE gosnumber = '" + gosnumber + "';"
-                                                    ).one().getString( "object" ) ) ) )
-                            .build() ).build() ); }
+                                    SerDes
+                                            .getSerDes()
+                                            .deserializeCarTotalData(
+                                                this.session
+                                                        .execute(
+                                                                "select * FROM "
+                                                                        + this.dbName + "." + this.carTotalData
+                                                                        + " WHERE gosnumber = '" + gosnumber + "';"
+                                                        ).one().getString( "object" ) ) ) )
+                            .build() )
+                    .build() ); }
 
     public List< ViolationsInformation > getViolationsInformationList ( String gosnumber ) { return this.session
             .execute(
@@ -148,7 +153,7 @@ public class CassandraDataControlForTasks {
                             + " WHERE gosnumber = '" + gosnumber + "';"
             ).one().getList( "violationsInformationsList", ViolationsInformation.class ); }
 
-    public Mono< EventBody > getEventBody ( String id ) { return Mono.just(
+    public Mono< EventBody > getEventBody ( String id ) { return Mono.justOrEmpty(
             SerDes.getSerDes().deserializeEventBody(
                     this.session.execute(
                             "select * from "
@@ -156,7 +161,7 @@ public class CassandraDataControlForTasks {
                                     + " where id = '" + id + "';"
                     ).one().getString( "object" ) ) ); }
 
-    public Mono< FaceEvent > getFaceEvents ( String id ) { return Mono.just(
+    public Mono< FaceEvent > getFaceEvents ( String id ) { return Mono.justOrEmpty(
             SerDes.getSerDes().deserializeFaceEvents(
                     this.session.execute(
                             "select * from "
@@ -173,7 +178,8 @@ public class CassandraDataControlForTasks {
                     ).one().getString( "object" ) ) ); }
 
     public Mono< CarEvent > getCarEvents ( String id ) {
-        Row row = this.session.execute( "select * from "
+        Row row = this.session.execute(
+                "select * from "
                         + this.dbName + "." + this.faceCar
                         + " where id = '" + id + "';" ).one();
         return row != null ? Mono.just( SerDes
@@ -201,15 +207,8 @@ public class CassandraDataControlForTasks {
                     .deserializeCard(
                     row.getString( "object" ) ) ) : Mono.empty(); }
 
-    public Flux< SelfEmploymentTask > getSelfEmploymentTasks () { return Flux.fromStream(
-                    this.session.execute(
-                            "select * from "
-                                    + this.dbName + "." + this.selfEmployment + ";"
-                    ).all().stream() )
-            .map( row -> SerDes.getSerDes()
-                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
-
-    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
+    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) {
+        return Mono.just(
                     this.session.execute(
                             "select * from "
                                     + this.dbName + "." + this.selfEmployment

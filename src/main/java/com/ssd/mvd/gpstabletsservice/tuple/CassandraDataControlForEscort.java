@@ -28,11 +28,10 @@ public class CassandraDataControlForEscort {
     private final String tupleOfCar = "TUPLE_OF_CAR";
     private final String tupleOfEscort = "TUPLE_OF_ESCORT";
 
-    private final String carForEscortType = "CAR_FOR_ESCORT_TYPE";
-
     private final String pointsList = "POINTS_ENTITY";
     private final String polygonEntity = "POLYGON_ENTITY";
     private final String polygonForEscort = "POLYGON_FOR_ESCORT";
+    private final String carForEscortType = "CAR_FOR_ESCORT_TYPE";
 
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     private static CassandraDataControlForEscort cassandraDataControl = new CassandraDataControlForEscort();
@@ -115,9 +114,11 @@ public class CassandraDataControlForEscort {
                     if ( escortTuple.getTupleOfCarsList() != null
                             && !escortTuple.getTupleOfCarsList().isEmpty()
                             && escortTuple.getTupleOfCarsList().size() > 0 ) escortTuple.getTupleOfCarsList()
-                            .forEach( uuid -> this.session.execute(
-                                    "UPDATE escort.tuple_of_car SET uuidOfEscort = " + null
-                                            + ", uuidOfPatrul = " + null + " where uuid = " + uuid + ";" ) );
+                            .forEach( uuid -> this.getAllTupleOfCar( uuid )
+                                    .subscribe( tupleOfCar1 -> this.session.execute(
+                                            "UPDATE escort.tuple_of_car SET uuidOfEscort = " + null
+                                                    + ", uuidOfPatrul = " + null + " where uuid = " + uuid +
+                                                    " and trackerid = '" + tupleOfCar1.getTrackerId() + "';" ) ) );
 
                     return Mono.just( ApiResponseModel.builder()
                                     .success(

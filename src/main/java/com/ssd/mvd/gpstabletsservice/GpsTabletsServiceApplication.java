@@ -6,7 +6,7 @@ import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GpsTabletsServiceApplication {
+public class    GpsTabletsServiceApplication {
     public static ApplicationContext context;
 
     public static void main( String[] args ) {

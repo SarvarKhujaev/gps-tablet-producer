@@ -13,6 +13,7 @@ import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.response.Status;
+import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
@@ -305,13 +306,13 @@ public class CardController {
                                 .build() ); } ); }; }
 
     @MessageMapping ( value = "getListOfPatrulTasks" )
-    public Mono< ApiResponseModel > getListOfPatrulTasks ( String token ) { return CassandraDataControl
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( Request request ) { return CassandraDataControl
             .getInstance()
-            .getPatrul( CassandraDataControl.getInstance().decode( token ) )
+            .getPatrul( CassandraDataControl.getInstance().decode( request.getData() ) )
             .flatMap( patrul -> {
                 if ( patrul.getListOfTasks().keySet().size() > 0 ) return TaskInspector
                         .getInstance()
-                        .getListOfPatrulTasks( patrul );
+                        .getListOfPatrulTasks( patrul, (Integer) request.getObject(), (Integer) request.getSubject() );
 
                 else return Mono.just( ApiResponseModel
                         .builder()
