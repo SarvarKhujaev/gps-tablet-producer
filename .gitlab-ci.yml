@@ -8,12 +8,12 @@ cache:
   key: "$CI_BUILD_REF_NAME"
 
 stages:
+  - compile
   - build
-  - test
   - deploy
 
-build-job:
-  stage: build
+compile-job:
+  stage: compile
   tags:
     - build
   only:
@@ -26,15 +26,31 @@ build-job:
       - target/
     expire_in: 1 hour
 
-unittest-job:
-  stage: test
+build-dev-job:
+  stage: build
   tags:
-    - test
+    - build
   dependencies:
-    - build-job
+    - compile-job
+  only:
+    - dev
+  environment:
+    name: development
+  script:
+    - "mvn package $MAVEN_CLI_OPTS"
+  artifacts:
+    paths:
+      - target/
+    expire_in: 1 hour
+
+build-job:
+  stage: build
+  tags:
+    - build
+  dependencies:
+    - compile-job
   only:
     - master
-    - dev
   environment:
     name: production
   script:
@@ -42,21 +58,36 @@ unittest-job:
   artifacts:
     paths:
       - target/
-    expire_in: 1 day
+    expire_in: 1 hour
 
-deploy-job:
+deploy-dev-job:
   stage: deploy
   tags:
     - deploy
   dependencies:
-    - unittest-job
+    - build-dev-job
+  only:
+    - dev
+  environment:
+    name: development
+  script:
+    - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+    - "docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_NAME} ."
+    - "docker push $CI_REGISTRY/$CI_PROJECT_PATH:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_NAME}"
+    - "docker stack deploy --with-registry-auth -c docker-stack.yml ${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}"
+
+deploy-job:
+  stage: deploy
+  tags:
+    - sam-deploy-production
+  dependencies:
+    - build-job
   only:
     - master
   environment:
     name: production
   script:
-    - "env"
     - "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
-    - "docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:latest ."
-    - "docker push $CI_REGISTRY/$CI_PROJECT_PATH:latest"
-    - "docker stack deploy -c docker-stack.yml $CI_PROJECT_NAME --with-registry-auth"
+    - "docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_NAME} ."
+    - "docker push $CI_REGISTRY/$CI_PROJECT_PATH:${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_REF_NAME}"
+    - "docker stack deploy --with-registry-auth -c docker-stack.yml ${CI_PROJECT_NAME}-${CI_COMMIT_REF_NAME}"
