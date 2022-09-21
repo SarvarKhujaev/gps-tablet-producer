@@ -47,6 +47,7 @@ public final class CassandraDataControl {
     private final String polygon = "POLYGON";
     private final String notification = "notification";
     private final String patrolsLogin = "PATRULS_LOGIN_TABLE"; // using in login situation
+    private final String patrolsStatusTable = "PATRULS_STATUS_TABLE"; // for table with Patruls info
 
     private final String patrulType = "PATRUL_TYPE";
     private final String policeType = "POLICE_TYPE";
@@ -631,7 +632,7 @@ public final class CassandraDataControl {
             ).all().stream()
     ).map( ReqCar::new ); }
 
-    public Flux< Patrul > getPatrul() { return Flux.fromStream(
+    public Flux< Patrul > getPatrul () { return Flux.fromStream(
             this.session.execute(
                     "SELECT * FROM "
                             + this.dbName + "." + this.getPatrols() + ";"
@@ -734,6 +735,7 @@ public final class CassandraDataControl {
                     patrul.getDistrictId() + ", " +
                     patrul.getTotalActivityTime() + ", " +
 
+                    ( patrul.getBatteryLevel() != null ? patrul.getBatteryLevel() : 0 ) + ", " +
                     patrul.getInPolygon() + ", " +
                     patrul.getTuplePermission() + ", '" +
 
@@ -800,6 +802,7 @@ public final class CassandraDataControl {
             patrul.setListOfTasks( new HashMap<>() );
             patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
             patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
+            if ( patrul.getBatteryLevel() == null ) patrul.setBatteryLevel( 0 );
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
             if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
             if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
@@ -841,6 +844,7 @@ public final class CassandraDataControl {
                     patrul.getDistrictId() + ", " +
                     patrul.getTotalActivityTime() + ", " +
 
+                    ( patrul.getBatteryLevel() != null ? patrul.getBatteryLevel() : 0 ) + ", " +
                     patrul.getInPolygon() + ", " +
                     ( patrul.getTuplePermission() != null ? patrul.getTuplePermission() : false ) + ", '" +
 
@@ -1086,7 +1090,7 @@ public final class CassandraDataControl {
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account
         case LOGOUT -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.patrols
+                + this.dbName + "." + this.getPatrols()
                 + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('"
                 + new Date().toInstant() + "', '"
                 + status + "', 'log out at: "
@@ -1141,7 +1145,8 @@ public final class CassandraDataControl {
                 + status + "', 'log in at: "
                 + patrul.getStartedToWorkDate().toInstant()
                 + " with simCard "
-                + patrul.getSimCardNumber() + "', " + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
+                + patrul.getSimCardNumber() + "', "
+                + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
     public Flux< Notification > getAllNotification () {
         return Flux.fromStream (

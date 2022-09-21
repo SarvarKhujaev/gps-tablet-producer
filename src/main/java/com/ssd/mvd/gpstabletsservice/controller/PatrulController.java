@@ -167,4 +167,7 @@ public class PatrulController {
             .flatMap( uuid -> CassandraDataControl
                 .getInstance()
                 .getPatrul( uuid ) ); }
+
+     @MessageMapping ( value = "ping" )
+    public Mono< Boolean > ping ( String ping ) { return Mono.just( true ); }
 }
