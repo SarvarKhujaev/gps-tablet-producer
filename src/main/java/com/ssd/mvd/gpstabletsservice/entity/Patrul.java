@@ -1,17 +1,17 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.UDTValue;
-
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
-import java.time.Duration;
-import java.util.*;
+import com.datastax.driver.core.UDTValue;
+import com.datastax.driver.core.Row;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
+
+import java.time.Duration;
+import java.util.*;
 
 @Data
 @NoArgsConstructor

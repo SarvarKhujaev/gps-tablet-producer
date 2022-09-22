@@ -1224,7 +1224,7 @@ public final class CassandraDataControl {
                         .build() ); }
 
     public Mono< ApiResponseModel > delete ( String table, String param, String id ) {
-        this.session.execute(
+        this.session.execute (
                 "DELETE FROM "
                         + this.dbName + "." + table
                         + " WHERE " + param + " = " + UUID.fromString( id ) + ";" );
