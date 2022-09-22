@@ -26,7 +26,7 @@ public class PolygonForEscortController {
     @MessageMapping ( value = "deletePolygonForEscort" )
     public Mono< ApiResponseModel > deletePolygonForEscort ( String id ) { return CassandraDataControlForEscort
             .getInstance()
-            .delete( id ); }
+            .deletePolygonForEscort( id ); }
 
     @MessageMapping ( value = "updatePolygonForEscort" )
     public Mono< ApiResponseModel > updatePolygonForEscort ( PolygonForEscort polygon ) { return CassandraDataControlForEscort

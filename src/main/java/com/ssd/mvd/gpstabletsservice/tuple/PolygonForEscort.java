@@ -16,8 +16,10 @@ import java.util.UUID;
 public class PolygonForEscort {
     private UUID uuid;
     private String name;
+    private UUID uuidOfEscort;
 
     private Integer totalTime;
+    private Integer routeIndex;
     private Integer totalDistance;
 
     private List< Points > pointsList;
@@ -28,11 +30,12 @@ public class PolygonForEscort {
     public PolygonForEscort ( Row row ) {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setName( row.getString( "name" ) );
+        this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );
 
         this.setTotalTime( row.getInt( "totalTime" ) );
+        this.setRouteIndex( row.getInt( "routeIndex" ) );
         this.setTotalDistance( row.getInt( "totalDistance" ) );
 
         this.setPointsList( row.getList( "pointsList", Points.class ) );
-        this.setLatlngs( row.getList( "latlngs", PolygonEntity.class ) );
-    }
+        this.setLatlngs( row.getList( "latlngs", PolygonEntity.class ) ); }
 }
