@@ -28,10 +28,12 @@ public class KafkaDataControl {
     private final KafkaTemplate< String, String > kafkaTemplate;
     private static KafkaDataControl instance = new KafkaDataControl();
     private final Logger logger = Logger.getLogger( KafkaDataControl.class.toString() );
+
     public final String PATH = GpsTabletsServiceApplication
             .context
             .getEnvironment()
             .getProperty( "variables.KAFKA_BROKER" );
+
     public final String ID = GpsTabletsServiceApplication
             .context
             .getEnvironment()
