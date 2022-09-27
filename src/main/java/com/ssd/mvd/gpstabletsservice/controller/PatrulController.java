@@ -168,18 +168,6 @@ public class PatrulController {
                 .getInstance()
                 .getPatrul( uuid ) ); }
 
-     @MessageMapping ( value = "ping" )
-    public Mono< Boolean > ping ( String ping ) { return Mono.just( true ); }
-
-    @MessageMapping ( value = "test" )
-    public Mono< ApiResponseModel > test () { return Mono.just(
-            ApiResponseModel
-                    .builder()
-                    .success( true )
-                    .status( Status
-                            .builder()
-                            .code( 200 )
-                            .message( "Server is working" )
-                            .build() )
-                    .build() ); }
+    @MessageMapping ( value = "ping" )
+    public Mono< Boolean > ping () { return Mono.just( true ); }
 }

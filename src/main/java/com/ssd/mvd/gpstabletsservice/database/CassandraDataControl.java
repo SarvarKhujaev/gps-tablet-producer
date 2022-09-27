@@ -47,7 +47,7 @@ public final class CassandraDataControl {
     private final String polygon = "POLYGON";
     private final String notification = "notification";
     private final String patrolsLogin = "PATRULS_LOGIN_TABLE"; // using in login situation
-    private final String patrolsStatusTable = "PATRULS_STATUS_TABLE"; // for table with Patruls info
+    private final String patrolsStatusTable = "PATRULS_STATUS_TABLE";
 
     private final String patrulType = "PATRUL_TYPE";
     private final String policeType = "POLICE_TYPE";
@@ -198,6 +198,16 @@ public final class CassandraDataControl {
                 + this.dbName + "." + this.getPatrolsLogin()
                 + " ( login text, password text, uuid uuid, PRIMARY KEY ( (login), uuid ) );" );
 
+        this.session.execute(
+                "CREATE TABLE IF NOT EXISTS "
+                        + this.dbName + "." + this.getPatrolsStatusTable()
+                        + " ( uuid uuid, " +
+                        "date timestamp, " +
+                        "status text, " +
+                        "message text, " +
+                        "totalActivityTime bigint, " +
+                        " PRIMARY KEY( status, uuid ) );" );
+
         this.logger.info( "Cassandra is ready" ); }
 
     public Mono< ApiResponseModel > addValue ( PoliceType policeType ) {
@@ -215,22 +225,30 @@ public final class CassandraDataControl {
                                         + policeType.getUuid() + ", '"
                                         + policeType.getPoliceType()
                                         + "' );" )
-                                .wasApplied() ? Mono.just( ApiResponseModel.builder()
-                                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                                            .message( "PoliceType was saved successfully" )
-                                                            .code( 200 )
-                                                            .build()
-                                            ).build() ) : Mono.just( ApiResponseModel.builder()
-                                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                                            .message( "This PoliceType has already been applied" )
-                                                            .code( 201 )
-                                                            .build()
+                                .wasApplied() ? Mono.just( ApiResponseModel
+                                            .builder()
+                                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                                    .builder()
+                                                    .message( "PoliceType was saved successfully" )
+                                                    .code( 200 )
+                                                    .build()
+                                            ).build() ) : Mono.just( ApiResponseModel
+                                            .builder()
+                                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                                    .builder()
+                                                    .message( "This PoliceType has already been applied" )
+                                                    .code( 201 )
+                                                    .build()
                                             ).build() ) :
-                                Mono.just( ApiResponseModel.builder()
+                                Mono.just( ApiResponseModel
+                                        .builder()
                                         .success( false )
-                                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                                .builder()
                                                 .message( "This policeType name is already defined, choose another one" )
-                                                .code( 201 ).build() ).build() ) )
+                                                .code( 201 )
+                                                .build() )
+                                        .build() ) )
                 .doOnError( throwable -> this.delete() ); }
 
     public Mono< ApiResponseModel > update ( PoliceType policeType ) {
@@ -249,21 +267,23 @@ public final class CassandraDataControl {
                         " VALUES("
                         + policeType.getUuid() + ", '"
                         + policeType.getPoliceType() + "' );" )
-                .wasApplied() ? Mono.just( ApiResponseModel.builder()
+                .wasApplied() ? Mono.just( ApiResponseModel
+                            .builder()
                             .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
                                             .message( "PoliceType was updated successfully" )
                                             .code( 200 )
                                             .build()
                             ).build() ) : Mono.just( ApiResponseModel.builder()
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "This PoliceType has already been applied" )
-                                            .code( 201 )
-                                            .build() ).build() )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
+                                    .message( "This PoliceType has already been applied" )
+                                    .code( 201 )
+                                    .build() )
+                        .build() )
                 .doOnError( throwable -> this.delete() ); }
 
     public Flux< PoliceType > getAllPoliceTypes () {
-        return Flux.fromStream(
-                this.session.execute(
+        return Flux.fromStream( this.session.execute(
                         "SELECT * FROM "
                                 + this.dbName + "." + this.getPoliceType() + " ;"
                 ).all().stream()
@@ -284,17 +304,17 @@ public final class CassandraDataControl {
                         .getInstance()
                         .convertListOfPointsToCassandra( atlasLustra.getCameraLists() )
                     + " )"+ ( check ? " IF NOT EXISTS" : "" ) + ";" )
-            .wasApplied() ? Mono.just(
-                ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+            .wasApplied() ? Mono.just( ApiResponseModel
+                        .builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "Lustra was saved successfully" )
                                         .code( 200 )
                                         .build()
-                        ).build() ) : Mono.just(
-                ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        ).build() ) : Mono.just( ApiResponseModel
+                        .builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "This Lustra has already been applied" )
                                         .code( 201 )
                                         .build()
@@ -321,17 +341,17 @@ public final class CassandraDataControl {
             " VALUES("
             + polygonType.getUuid() + ", '"
             + polygonType.getName() + "') IF NOT EXISTS;" )
-            .wasApplied() ? Mono.just(
-                ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+            .wasApplied() ? Mono.just( ApiResponseModel
+                        .builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "PolygonType was saved successfully" )
                                         .code( 200 )
                                         .build()
-                        ).build() ) : Mono.just(
-                        ApiResponseModel.builder()
-                                .status(
-                                        com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        ).build() ) : Mono.just( ApiResponseModel
+                                .builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                                .builder()
                                                 .message( "This polygonType has already been applied" )
                                                 .code( 201 )
                                                 .build()
@@ -388,22 +408,25 @@ public final class CassandraDataControl {
                         CassandraConverter
                                 .getInstance()
                                 .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
-                .wasApplied() ? Mono.just( ApiResponseModel.builder()
-                .success( true )
-                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                        .message( "Polygon was successfully saved" )
-                        .code( 200 )
-                        .build() )
-                .build()
-        ) : Mono.just( ApiResponseModel.builder()
-                .status(
-                        com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                .message( "This polygon has already been saved" )
-                                .code( 201 )
-                                .build() ).build() )
-                .doOnError( throwable -> {
-                    this.delete();
-                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
+                .wasApplied() ? Mono.just( ApiResponseModel
+                        .builder()
+                        .success( true )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "Polygon was successfully saved" )
+                                .code( 200 )
+                                .build() )
+                        .build()
+        ) : Mono.just( ApiResponseModel
+                        .builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
+                                        .message( "This polygon has already been saved" )
+                                        .code( 201 )
+                                        .build() ).build() )
+                        .doOnError( throwable -> {
+                            this.delete();
+                            this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ApiResponseModel > update ( Polygon polygon ) {
         return this.session.execute( "INSERT INTO "
@@ -433,7 +456,8 @@ public final class CassandraDataControl {
             CassandraConverter
                     .getInstance()
                     .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ");" )
-                .wasApplied() ? Mono.just( ApiResponseModel.builder()
+                .wasApplied() ? Mono.just( ApiResponseModel
+                                .builder()
                                 .success( true )
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status
                                         .builder()
@@ -444,7 +468,8 @@ public final class CassandraDataControl {
         ) : Mono.just( ApiResponseModel
                         .builder()
                         .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "This polygon does not exists" )
                                         .code( 201 )
                                         .build() ).build() )
@@ -496,9 +521,11 @@ public final class CassandraDataControl {
                                         .getCars(),
                                 "uuid",
                                 gosno );
-                    } else return Mono.just( ApiResponseModel.builder()
+                    } else return Mono.just( ApiResponseModel
+                                    .builder()
                                     .success( false )
-                                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                            .builder()
                                             .message( "This car is linked to patrul" )
                                             .code( 201 )
                                             .build() )
@@ -553,16 +580,20 @@ public final class CassandraDataControl {
                             + reqCar.getLongitude() + ", "
                             + reqCar.getAverageFuelSize() + ", "
                             + reqCar.getAverageFuelConsumption()
-                            + ");" ).wasApplied() ? Mono.just( ApiResponseModel.builder()
+                            + ");" ).wasApplied() ? Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Car was successfully saved" )
                                     .code( 200 )
                                     .build()
                             ).build()
-                    ) : Mono.just( ApiResponseModel.builder()
+                    ) : Mono.just( ApiResponseModel
+                            .builder()
                             .success( false )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "This car does not exist, choose another one" )
                                     .code( 201 )
                                     .build()
@@ -592,30 +623,35 @@ public final class CassandraDataControl {
                 + reqCar.getLongitude() + ", "
                 + reqCar.getAverageFuelSize() + ", "
                 + reqCar.getAverageFuelConsumption()
-                + ") IF NOT EXISTS;" ).wasApplied() ? Mono.just( ApiResponseModel.builder()
-                .success( true )
-                .status(
-                        com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                + ") IF NOT EXISTS;" ).wasApplied() ? Mono.just( ApiResponseModel
+                        .builder()
+                        .success( true )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
                                 .message( "Car was successfully saved" )
                                 .code( 200 )
                                 .build()
-                ).build()
-        ) : Mono.just( ApiResponseModel.builder()
+                        ).build()
+        ) : Mono.just( ApiResponseModel
+                .builder()
                 .success( false )
-                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                        .builder()
                         .message( "This car was already saved, choose another one" )
                         .code( 201 )
                         .build()
-                ).build() ) : Mono.just( ApiResponseModel.builder()
-                .success( false )
-                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                        .message( "This trackers or gosnumber is already registered to another car, so choose another one" )
-                        .code( 201 )
+                ).build() ) : Mono.just( ApiResponseModel
+                        .builder()
+                        .success( false )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "This trackers or gosnumber is already registered to another car, so choose another one" )
+                                .code( 201 )
+                                .build() )
                         .build() )
-                .build() )
-                .doOnError( throwable -> {
-                    this.delete();
-                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
+                        .doOnError( throwable -> {
+                            this.delete();
+                            this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ReqCar > getCar ( UUID uuid ) { return Mono.just(
             this.session.execute(
@@ -672,9 +708,11 @@ public final class CassandraDataControl {
                             "uuid",
                             patrul.getUuid().toString() ); }
 
-                else return Mono.just( ApiResponseModel.builder()
+                else return Mono.just( ApiResponseModel
+                                .builder()
                                 .success( false )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "You cannot delete this patrul" )
                                         .code( 201 )
                                         .build() )
@@ -686,9 +724,11 @@ public final class CassandraDataControl {
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
         Row row = this.getPatrul( patrul.getPassportNumber() );
         if ( row == null ) return Mono.just(
-                ApiResponseModel.builder()
+                ApiResponseModel
+                        .builder()
                         .success( false )
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "Wrong patrul data" )
                                         .code( 201 )
                                         .build() ).build() );
@@ -765,29 +805,31 @@ public final class CassandraDataControl {
                     CassandraConverter
                             .getInstance()
                             .convertMapToCassandra( patrul.getListOfTasks() ) + " );"
-            ).wasApplied() ? Mono.just(
-                    ApiResponseModel.builder()
+            ).wasApplied() ? Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                            .builder()
                                             .message( "Patrul was successfully updated" )
                                             .code( 200 )
                                             .build() )
                             .build()
-            ) : Mono.just(
-                    ApiResponseModel.builder()
+            ) : Mono.just( ApiResponseModel
+                            .builder()
                             .success( false )
                             .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    com.ssd.mvd.gpstabletsservice.response.Status
+                                            .builder()
                                             .message( "There is no such a patrul" )
                                             .code( 201 )
                                             .build() )
                             .build() ); }
-        else return Mono.just(
-                ApiResponseModel.builder()
+        else return Mono.just( ApiResponseModel
+                        .builder()
                         .success( false )
                         .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "There is no such a patrul" )
                                         .code( 201 )
                                         .build() )
@@ -874,33 +916,37 @@ public final class CassandraDataControl {
                     CassandraConverter
                             .getInstance()
                             .convertMapToCassandra( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;" )
-                    .wasApplied() ? Mono.just(
-                    ApiResponseModel.builder()
+                    .wasApplied() ? Mono.just( ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "Patrul was successfully saved" )
-                                            .code( 200 )
-                                            .build() )
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
+                                    .message( "Patrul was successfully saved" )
+                                    .code( 200 )
+                                    .build() )
                             .build()
-            ) : Mono.just( ApiResponseModel.builder()
+            ) : Mono.just( ApiResponseModel
+                            .builder()
                             .success( false )
                             .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                    com.ssd.mvd.gpstabletsservice.response.Status
+                                            .builder()
                                             .message( "Patrul has already been saved. choose another one" )
                                             .code( 201 )
                                             .build() )
                             .build() ) : Mono.just(
-                    ApiResponseModel.builder()
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "Wrong login. it has to be unique" )
-                                            .code( 200 )
-                                            .build()
+                    ApiResponseModel
+                            .builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
+                                    .message( "Wrong login. it has to be unique" )
+                                    .code( 200 )
+                                    .build()
                             ).build() );
-        } else return Mono.just(
-                ApiResponseModel.builder()
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status.builder()
+        } else return Mono.just( ApiResponseModel
+                        .builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "This patrul is already exists" )
                                         .code( 201 )
                                         .build()
@@ -1090,57 +1136,71 @@ public final class CassandraDataControl {
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account
         case LOGOUT -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.getPatrols()
-                + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('"
+                + this.dbName + "." + this.getPatrolsStatusTable()
+                + "(uuid, date, status, message, totalActivityTime) VALUES("
+                + patrul.getUuid() + ", '"
                 + new Date().toInstant() + "', '"
                 + status + "', 'log out at: "
-                + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+                + new Date().toInstant() + "', "
+                + patrul.getTotalActivityTime() + ");" ).isDone();
+
         case ACCEPTED -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.patrols
-                + patrul.getPassportNumber() + "(date, status, message, totalActivityTime) VALUES('"
-                + new Date().toInstant() + "', '" + status + "', 'accepted new task at: "
-                + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+                + this.dbName + "." + this.getPatrolsStatusTable()
+                + " ( uuid, date, status, message, totalActivityTime ) VALUES("
+                + patrul.getUuid() + ", '"
+                + new Date().toInstant() + "', '"
+                + status + "', 'accepted new task at: "
+                + new Date().toInstant() + "', "
+                + patrul.getTotalActivityTime() + ");" ).isDone();
         // when Patrul wants to set in pause his work
         case SET_IN_PAUSE -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.patrols + patrul.getPassportNumber()
-                + "(date, status, message, totalActivityTime) VALUES('" + new Date().toInstant() + "', '"
-                + status + "', 'put in pause at: " + new Date().toInstant() + "', "
+                + this.dbName + "." + this.getPatrolsStatusTable()
+                + "(date, status, message, totalActivityTime) VALUES("
+                + patrul.getUuid() + ", '"
+                + new Date().toInstant() + "', '"
+                + status + "', 'put in pause at: "
+                + new Date().toInstant() + "', "
                 + patrul.getTotalActivityTime() + ");" ).isDone();
         // uses when at the end of the day User finishes his job
         case STOP_TO_WORK -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.patrols + patrul.getPassportNumber()
-                + "(date, status, message, totalActivityTime) VALUES('"
+                + this.dbName + "." + this.getPatrolsStatusTable()
+                + "(date, status, message, totalActivityTime) VALUES("
+                + patrul.getUuid() + ", '"
                 + new Date().toInstant() + "', '"
                 + status + "', 'stopped to work at: "
                 + new Date().toInstant() + "', "
                 + patrul.getTotalActivityTime() + ");" ).isDone();
         // uses to when User wants to back to work after pause
         case START_TO_WORK -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.patrols + patrul.getPassportNumber()
-                + "(date, status, message, totalActivityTime) VALUES('"
-                + new Date().toInstant() + "', '" + status + "', 'started to work at: "
-                + new Date().toInstant() + "', " + patrul.getTotalActivityTime() + ");" ).isDone();
+                + this.dbName + "." + this.getPatrolsStatusTable()
+                + "(date, status, message, totalActivityTime) VALUES("
+                + patrul.getUuid() + ", '"
+                + new Date().toInstant() + "', '"
+                + status + "', 'started to work at: "
+                + new Date().toInstant() + "', "
+                + patrul.getTotalActivityTime() + ");" ).isDone();
         // uses to start to work every day in the morning
         case RETURNED_TO_WORK -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.patrols + patrul.getPassportNumber()
-                + "(date, status, message, totalActivityTime) VALUES('"
+                + this.dbName + "." + this.getPatrolsStatusTable()
+                + "(date, status, message, totalActivityTime) VALUES("
+                + patrul.getUuid() + ", '"
                 + new Date().toInstant() + "', '"
                 + status + "', 'returned to work at: "
                 + new Date().toInstant() + "', "
                 + patrul.getTotalActivityTime() + ");" ).isDone();
         case ARRIVED -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.patrols
-                + patrul.getPassportNumber()
-                + "(date, status, message, totalActivityTime) VALUES('"
+                + this.dbName + "." + this.getPatrolsStatusTable()
+                + "(date, status, message, totalActivityTime) VALUES("
+                + patrul.getUuid() + ", '"
                 + new Date().toInstant() + "', '"
                 + status + "', 'arrived to given task location at: "
                 + new Date().toInstant() + "', "
                 + patrul.getTotalActivityTime() + ");" ).isDone();
         // by default, it means t o log in to account
         default -> this.session.executeAsync( "INSERT INTO "
-                + this.dbName + "." + this.patrols
-                + patrul.getPassportNumber()
-                + "(date, status, message, totalActivityTime) VALUES ('"
+                + this.dbName + "." + this.getPatrolsStatusTable()
+                + "(date, status, message, totalActivityTime) VALUES ("
+                + patrul.getUuid() + ", '"
                 + new Date().toInstant() + "', '"
                 + status + "', 'log in at: "
                 + patrul.getStartedToWorkDate().toInstant()
@@ -1148,8 +1208,7 @@ public final class CassandraDataControl {
                 + patrul.getSimCardNumber() + "', "
                 + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
-    public Flux< Notification > getAllNotification () {
-        return Flux.fromStream (
+    public Flux< Notification > getAllNotification () { return Flux.fromStream (
                 this.session.execute(
                         "SELECT * FROM "
                                 + this.dbName + "." + this.notification + ";"
@@ -1207,19 +1266,22 @@ public final class CassandraDataControl {
                         + this.dbName + "." + this.getNotification()
                         + " SET wasRead = " + true
                         + " WHERE uuid = " + uuid + ";"
-        ).wasApplied() ? Mono.just(
-                ApiResponseModel.builder()
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Notification " + uuid + " was updated successfully" )
-                                        .code( 200 )
-                                        .build()
+        ).wasApplied() ? Mono.just( ApiResponseModel
+                        .builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "Notification " + uuid + " was updated successfully" )
+                                .code( 200 )
+                                .build()
                         ).success( true )
                         .build() )
-                : Mono.just( ApiResponseModel.builder()
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Notification " + uuid + " was not updated" )
-                                        .code( 200 )
-                                        .build()
+                : Mono.just( ApiResponseModel
+                        .builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "Notification " + uuid + " was not updated" )
+                                .code( 200 )
+                                .build()
                         ).success( false )
                         .build() ); }
 
@@ -1228,17 +1290,20 @@ public final class CassandraDataControl {
                 "DELETE FROM "
                         + this.dbName + "." + table
                         + " WHERE " + param + " = " + UUID.fromString( id ) + ";" );
-        return Mono.just( ApiResponseModel.builder()
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                        .message( "Deleting has been finished successfully" )
-                                        .code( 200 )
-                                        .build()
+        return Mono.just( ApiResponseModel
+                        .builder()
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "Deleting has been finished successfully" )
+                                .code( 200 )
+                                .build()
                         ).success( true )
                         .build() ); }
 
     private static final Double p = PI / 180;
 
-    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 - cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2
+    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 -
+            cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2
             + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p )
             * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
 
@@ -1310,10 +1375,13 @@ public final class CassandraDataControl {
                 .build() ); }
 
     public Mono< ApiResponseModel > checkToken ( String token ) { return this.getPatrul( this.decode( token ) )
-            .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
-                    .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+            .flatMap( patrul -> Mono.just( ApiResponseModel
+                    .builder()
+                    .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                            .builder()
                             .data( patrul ).build() )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                            .builder()
                             .message( patrul.getUuid().toString() )
                             .code( 200 )
                             .build() )
@@ -1326,14 +1394,17 @@ public final class CassandraDataControl {
 
     public Mono< ApiResponseModel > arrived ( String token ) { return this.getPatrul( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
-            .flatMap( patrul -> TaskInspector.getInstance()
+            .flatMap( patrul -> TaskInspector
+                    .getInstance()
                     .changeTaskStatus( patrul, ARRIVED ) ); }
 
     // uses when Patrul wants to change his status from active to pause
     public Mono< ApiResponseModel > setInPause ( String token ) { return this.getPatrul( this.decode( token ) )
-            .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
+            .flatMap( patrul -> Mono.just( ApiResponseModel
+                    .builder()
                     .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                            .builder()
                             .message( "Patrul set in pause" )
                             .code( 200 )
                             .build() )
@@ -1341,9 +1412,11 @@ public final class CassandraDataControl {
 
     // uses when Patrul wants to change his status from pause to active
     public Mono< ApiResponseModel > backToWork ( String token ) { return this.getPatrul( this.decode( token ) )
-            .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
+            .flatMap( patrul -> Mono.just( ApiResponseModel
+                    .builder()
                     .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.RETURNED_TO_WORK ) )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                            .builder()
                             .message( "Patrul returned to work" )
                             .code( 200 )
                             .build() )
@@ -1355,10 +1428,13 @@ public final class CassandraDataControl {
                 patrul.setTotalActivityTime( 0L ); // set to 0 every day
                 patrul.setStartedToWorkDate( new Date() ); // registration of time every day
                 return this.update( patrul )
-                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel.builder()
-                                .success( CassandraDataControl.getInstance()
+                        .flatMap( aBoolean1 -> Mono.just( ApiResponseModel
+                                .builder()
+                                .success( CassandraDataControl
+                                        .getInstance()
                                         .login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.START_TO_WORK ) )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "Patrul started to work" )
                                         .code( 200 )
                                         .build() )
@@ -1366,9 +1442,11 @@ public final class CassandraDataControl {
 
     // uses when patrul finishes his work in the evening
     public Mono< ApiResponseModel > stopToWork ( String token ) { return this.getPatrul( this.decode( token ) )
-            .flatMap( patrul -> Mono.just( ApiResponseModel.builder()
+            .flatMap( patrul -> Mono.just( ApiResponseModel
+                    .builder()
                     .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.STOP_TO_WORK ) )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                            .builder()
                             .message( "Patrul stopped his job" )
                             .code( 200 )
                             .build() )
@@ -1378,10 +1456,12 @@ public final class CassandraDataControl {
             .flatMap( patrul -> {
                 patrul.setTokenForLogin( null );
                 return this.update( patrul )
-                        .flatMap( aBoolean -> Mono.just( ApiResponseModel.builder()
+                        .flatMap( aBoolean -> Mono.just( ApiResponseModel
+                                .builder()
                                 .success( this
                                         .login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGOUT ) )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
                                         .message( "See you soon my darling )))" )
                                         .code( 200 )
                                         .build() ).build() ) ); } ); }

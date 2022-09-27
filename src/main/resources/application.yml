@@ -1,51 +1,51 @@
 server:
-  port: ${SERVER_PORT}
-  address: ${SERVER_ADDR}
+    port: ${SERVER_PORT}
+    address: ${SERVER_ADDR}
 
 spring:
-  data:
-    cassandra:
-      port: ${CASSANDRA_PORT}
-      keyspace-name: ${KEYSPACE_NAME}
-      contact-points: ${CASSANDRA_HOST}
-      local-datacenter: ${CASSANDRA_DC}
-      schema-action: CREATE_IF_NOT_EXISTS
+    data:
+        cassandra:
+            port: ${CASSANDRA_PORT}
+            keyspace-name: ${KEYSPACE_NAME}
+            contact-points: ${CASSANDRA_HOST}
+            local-datacenter: ${CASSANDRA_DC}
+            schema-action: CREATE_IF_NOT_EXISTS
 
-      request:
-        timeout: ${REQUEST_TIMEOUT_FOR_CASSANDRA}
-        consistency: quorum
+        request:
+            timeout: ${REQUEST_TIMEOUT_FOR_CASSANDRA}
+            consistency: quorum
 
-      connection:
-        connect-timeout: ${CONNECTION_TIMEOUT_FOR_CASSANDRA}
-        init-query-timeout: ${INIT_QUERY_TIMEOUT_FOR_CASSANDRA}
+        connection:
+            connect-timeout: ${CONNECTION_TIMEOUT_FOR_CASSANDRA}
+            init-query-timeout: ${INIT_QUERY_TIMEOUT_FOR_CASSANDRA}
 
-  rsocket:
-    server:
-      port: ${RSOCKET_PORT}
-      address: ${SERVER_ADDR}
+    rsocket:
+        server:
+            port: ${RSOCKET_PORT}
+            address: ${SERVER_ADDR}
 
-  redis:
-    port: ${REDIS_PORT}
-    host: ${REDIS_HOST}
-    password: ${REDIS_PASSWORD}
-    client-name: ${REDIS_CLIENT_NAME}
+    redis:
+        port: ${REDIS_PORT}
+        host: ${REDIS_HOST}
+        password: ${REDIS_PASSWORD}
+        client-name: ${REDIS_CLIENT_NAME}
 
 variables:
-  REDIS_HOST: ${REDIS_HOST}
-  REDIS_PORT: ${REDIS_PORT}
-  REDIS_PASSWORD: ${REDIS_PASSWORD}
-  REDIS_CLIENT_NAME: ${REDIS_CLIENT_NAME}
+    REDIS_HOST: ${REDIS_HOST}
+    REDIS_PORT: ${REDIS_PORT}
+    REDIS_PASSWORD: ${REDIS_PASSWORD}
+    REDIS_CLIENT_NAME: ${REDIS_CLIENT_NAME}
 
-  KAFKA_BROKER: ${KAFKA_BROKER}
-  GROUP_ID_FOR_KAFKA: ${GROUP_ID_FOR_KAFKA}
+    KAFKA_BROKER: ${KAFKA_BROKER}
+    GROUP_ID_FOR_KAFKA: ${GROUP_ID_FOR_KAFKA}
 
-  ACTIVE_TASK: ${ACTIVE_TASK}
-  NOTIFICATION: ${NOTIFICATION}
-  CAR_TOTAL_DATA: ${CAR_TOTAL_DATA}
+    ACTIVE_TASK: ${ACTIVE_TASK}
+    NOTIFICATION: ${NOTIFICATION}
+    CAR_TOTAL_DATA: ${CAR_TOTAL_DATA}
 
-  CASSANDRA_PORT: ${CASSANDRA_PORT}
+    CASSANDRA_PORT: ${CASSANDRA_PORT}
 
-  CASSANDRA_MAX_CONN_LOCAL: 10
-  CASSANDRA_MAX_CONN_REMOTE: 4
-  CASSANDRA_CORE_CONN_LOCAL: 4
-  CASSANDRA_CORE_CONN_REMOTE: 2
+    CASSANDRA_MAX_CONN_LOCAL: 10
+    CASSANDRA_MAX_CONN_REMOTE: 4
+    CASSANDRA_CORE_CONN_LOCAL: 4
+    CASSANDRA_CORE_CONN_REMOTE: 2
