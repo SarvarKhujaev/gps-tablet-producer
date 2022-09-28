@@ -199,7 +199,7 @@ public class CassandraDataControlForTasks {
             SerDes.getSerDes().deserializeEventFace(
                     this.session.execute(
                             "select * from "
-                                    + this.dbName + "." + this.eventFace
+                                    + this.dbName + "." + this.getEventFace()
                                     + " where id = '" + id + "';"
                     ).one().getString( "object" ) ) ); }
 
