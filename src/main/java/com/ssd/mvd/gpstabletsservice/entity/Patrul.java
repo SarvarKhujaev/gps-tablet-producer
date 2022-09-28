@@ -106,6 +106,7 @@ public class Patrul {
         this.setTotalActivityTime( row.getLong( "totalActivityTime" ) );
 
         this.setInPolygon( row.getBool( "inPolygon" ) );
+        this.setBatteryLevel( row.getInt( "batteryLevel" ) );
         this.setTuplePermission( row.getBool( "tuplePermission" ) );
 
         this.setName( row.getString( "name" ) );
@@ -156,6 +157,7 @@ public class Patrul {
         this.setTotalActivityTime( row.getLong( "totalActivityTime" ) );
 
         this.setInPolygon( row.getBool( "inPolygon" ) );
+        this.setBatteryLevel( row.getInt( "batteryLevel" ) );
         this.setTuplePermission( row.getBool( "tuplePermission" ) );
 
         this.setName( row.getString( "name" ) );
@@ -182,5 +184,5 @@ public class Patrul {
 
         this.setStatus( Status.valueOf( row.getString( "status" ) ) );
         this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
-        this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) );;}
+        this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); }
 }

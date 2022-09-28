@@ -29,9 +29,10 @@ import java.util.UUID;
 
 @RestController
 public class CardController {
+
     @MessageMapping ( value = "getListOfCards" )
-    public Flux< ActiveTask > getListOfCards () { return RedisDataControl
-            .getRedis()
+    public Flux< ActiveTask > getListOfCards () { return CassandraDataControlForTasks
+            .getInstance()
             .getActiveTasks()
             .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
 
@@ -43,8 +44,8 @@ public class CardController {
                     .getInstance()
                     .addValue( card );
 
-            RedisDataControl
-                    .getRedis()
+            CassandraDataControlForTasks
+                    .getInstance()
                     .addValue( card.getCardId().toString(), new ActiveTask( card ) );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl

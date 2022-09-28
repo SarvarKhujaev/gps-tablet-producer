@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import lombok.Data;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,7 @@ public class CassandraDataControlForTasks {
     private final String eventFace = "eventFace";
     private final String eventBody = "eventBody";
     private final String facePerson = "facePerson";
+    private final String active_Task = "ACTIVE_TASK";
     private final String carTotalData = "carTotalData";
 
     private final String reportForCard = "REPORT_FOR_CARD";
@@ -97,6 +99,11 @@ public class CassandraDataControlForTasks {
                         + this.dbName + "." + TaskTypes.CARD_102
                         + "( id text PRIMARY KEY, object text );" );
 
+        this.session.execute (
+                "CREATE TABLE IF NOT EXISTS "
+                        + this.dbName + "." + this.getActive_Task()
+                        + "( id text PRIMARY KEY, object text );" );
+
         this.logger.info("Starting CassandraDataControl for tasks" ); }
 
     public Boolean addValue ( CarTotalData carTotalData ) { return this.session
@@ -111,6 +118,16 @@ public class CassandraDataControlForTasks {
                                 .getViolationsList()
                                 .getViolationsInformationsList() )
                     + ", '" + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
+
+    public Flux< ActiveTask > getActiveTasks () {
+        return Flux.fromStream(
+                        this.session.execute(
+                                "SELECT * FROM "
+                                        + this.dbName + "." + this.getActive_Task() + ";" )
+                                .all().stream() )
+                .map( row -> SerDes
+                        .getSerDes()
+                        .deserializeActiveTask( row.getString( "object" ) ) ); }
 
     public Flux< CarTotalData > getAllCarTotalData () {
         return Flux.fromStream(
@@ -152,6 +169,15 @@ public class CassandraDataControlForTasks {
                             + this.dbName + "." + this.getCarTotalData()
                             + " WHERE gosnumber = '" + gosnumber + "';"
             ).one().getList( "violationsInformationsList", ViolationsInformation.class ); }
+
+    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
+                    this.session.execute(
+                            "select * from "
+                                    + this.dbName + "." + this.selfEmployment
+                                    + " where id = " + id + ";"
+                    ).one() )
+            .map( row -> SerDes.getSerDes()
+                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
 
     public Mono< EventBody > getEventBody ( String id ) { return Mono.justOrEmpty(
             SerDes.getSerDes().deserializeEventBody(
@@ -206,15 +232,6 @@ public class CassandraDataControlForTasks {
                     .getSerDes()
                     .deserializeCard(
                     row.getString( "object" ) ) ) : Mono.empty(); }
-
-    public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
-                    this.session.execute(
-                            "select * from "
-                                    + this.dbName + "." + this.selfEmployment
-                                    + " where id = " + id + ";"
-                    ).one() )
-            .map( row -> SerDes.getSerDes()
-                    .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
 
     public void addValue ( Card card ) { this.session
             .executeAsync( "INSERT INTO "
@@ -271,6 +288,13 @@ public class CassandraDataControlForTasks {
             + faceEvents.getId() + "', '"
             + SerDes.getSerDes().serialize( faceEvents ) + "');" ); }
 
+    public void addValue ( String id, ActiveTask activeTask ) { this.session
+            .executeAsync( "INSERT INTO "
+                    + this.dbName + "." + this.getActive_Task()
+                    + "(id, object) VALUES ('"
+                    + id + "', '"
+                    + SerDes.getSerDes().serialize( activeTask ) + "');" ); }
+
     public Boolean addValue ( SelfEmploymentTask selfEmploymentTask ) { return this.session
             .executeAsync( "INSERT INTO "
                     + this.dbName + "." + this.selfEmployment +
@@ -278,4 +302,9 @@ public class CassandraDataControlForTasks {
                     + selfEmploymentTask.getUuid() + ", '"
                     + SerDes.getSerDes().serialize( selfEmploymentTask )
                     + "');" ).isDone(); }
+
+    public void remove ( String id ) {
+        this.session.execute( "DELETE FROM "
+                + this.dbName + "." + this.getActive_Task()
+                + " WHERE id = '" + id + "';" ); }
 }
