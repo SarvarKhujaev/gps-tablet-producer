@@ -67,7 +67,7 @@ public final class TaskInspector {
                 else card.getPatruls().remove( patrul.getUuid() );
                 if ( card.getPatruls().size() == card.getReportForCardList().size() ) {
                     card.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( card.getCardId().toString() );
+                    CassandraDataControlForTasks.getInstance().remove( card.getCardId().toString() );
                     KafkaDataControl
                             .getInstance()
                             .writeToKafka( SerDes.getSerDes().serialize( new ActiveTask( card ) ) ); }
@@ -95,10 +95,10 @@ public final class TaskInspector {
                 .update( patrul )
                 .subscribe();
 
-        if ( card.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
-                .getRedis()
+        if ( card.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+                .getInstance()
                 .addValue( card.getCardId().toString(),
-                new ActiveTask( card ) ).subscribe();
+                new ActiveTask( card ) );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -136,7 +136,7 @@ public final class TaskInspector {
                 else eventCar.getPatruls().remove( patrul.getUuid() );
                 if ( eventCar.getPatruls().size() == eventCar.getReportForCardList().size() ) {
                     eventCar.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( eventCar.getId() );
+                    CassandraDataControlForTasks.getInstance().remove( eventCar.getId() );
                     KafkaDataControl
                             .getInstance()
                             .writeToKafka( SerDes
@@ -161,10 +161,9 @@ public final class TaskInspector {
                                     .getTimeDifference( patrul
                                             .getTaskDate()
                                             .toInstant() ) ).build() );
-        } if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
-                .getRedis()
-                .addValue( eventCar.getId(), new ActiveTask( eventCar ) )
-                .subscribe();
+        } if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+                .getInstance()
+                .addValue( eventCar.getId(), new ActiveTask( eventCar ) );
 
         if ( status.compareTo( CANCEL ) != 0 ) eventCar.getPatruls().put( patrul.getUuid(), patrul );
 
@@ -207,7 +206,7 @@ public final class TaskInspector {
                 else carEvents.getPatruls().remove( patrul.getUuid() );
                 if ( carEvents.getPatruls().size() == carEvents.getReportForCardList().size() ) {
                     carEvents.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( carEvents.getId() );
+                    CassandraDataControlForTasks.getInstance().remove( carEvents.getId() );
                     KafkaDataControl
                             .getInstance()
                             .writeToKafka( SerDes
@@ -233,9 +232,9 @@ public final class TaskInspector {
                         .totalTimeConsumption( TimeInspector
                                 .getInspector()
                                 .getTimeDifference( patrul.getTaskDate().toInstant() ) ).build() );
-        } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
-                .getRedis()
-                .addValue( carEvents.getId(), new ActiveTask( carEvents ) ).subscribe();
+        } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+                .getInstance()
+                .addValue( carEvents.getId(), new ActiveTask( carEvents ) );
 
         if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
 
@@ -286,7 +285,7 @@ public final class TaskInspector {
                 else eventFace.getPatruls().remove( patrul.getUuid() );
                 if ( eventFace.getPatruls().size() == eventFace.getReportForCardList().size() ) {
                     eventFace.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( eventFace.getId() );
+                    CassandraDataControlForTasks.getInstance().remove( eventFace.getId() );
                     KafkaDataControl
                             .getInstance()
                             .writeToKafka( SerDes.getSerDes().serialize( new ActiveTask( eventFace ) ) ); }
@@ -309,10 +308,9 @@ public final class TaskInspector {
                                     .getTimeDifference( patrul
                                             .getTaskDate()
                                             .toInstant() ) ).build() );
-        } if ( eventFace.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
-                .getRedis()
-                .addValue( eventFace.getId(), new ActiveTask( eventFace ) )
-                .subscribe();
+        } if ( eventFace.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+                .getInstance()
+                .addValue( eventFace.getId(), new ActiveTask( eventFace ) );
         if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
@@ -354,7 +352,7 @@ public final class TaskInspector {
                 else eventBody.getPatruls().remove( patrul.getUuid() );
                 if ( eventBody.getPatruls().size() == eventBody.getReportForCardList().size() ) {
                     eventBody.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( eventBody.getId() );
+                    CassandraDataControlForTasks.getInstance().remove( eventBody.getId() );
                     KafkaDataControl
                             .getInstance()
                             .writeToKafka( SerDes
@@ -379,10 +377,9 @@ public final class TaskInspector {
                             .getTimeDifference( patrul
                                     .getTaskDate()
                                     .toInstant() ) ).build() );
-        } if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
-                .getRedis()
-                .addValue( eventBody.getId(), new ActiveTask( eventBody ) )
-                .subscribe();
+        } if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+                .getInstance()
+                .addValue( eventBody.getId(), new ActiveTask( eventBody ) );
         if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul );
 
         CassandraDataControlForTasks
@@ -425,7 +422,7 @@ public final class TaskInspector {
                 else faceEvent.getPatruls().remove( patrul.getUuid() );
                 if ( faceEvent.getPatruls().size() == faceEvent.getReportForCardList().size() ) {
                     faceEvent.setStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( faceEvent.getId() );
+                    CassandraDataControlForTasks.getInstance().remove( faceEvent.getId() );
                     KafkaDataControl
                             .getInstance()
                             .writeToKafka( SerDes.getSerDes().serialize( new ActiveTask( faceEvent ) ) ); }
@@ -451,10 +448,9 @@ public final class TaskInspector {
                                             .getTaskDate()
                                             .toInstant() ) ).build() );
         } if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul );
-        if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
-                .getRedis()
-                .addValue( faceEvent.getId(), new ActiveTask( faceEvent ) )
-                .subscribe();
+        if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+                .getInstance()
+                .addValue( faceEvent.getId(), new ActiveTask( faceEvent ) );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -555,7 +551,7 @@ public final class TaskInspector {
                 else selfEmploymentTask.getPatruls().remove( patrul.getUuid() );
                 if ( selfEmploymentTask.getPatruls().size() == selfEmploymentTask.getReportForCards().size() ) {
                     selfEmploymentTask.setTaskStatus( FINISHED );
-                    RedisDataControl.getRedis().remove( selfEmploymentTask.getUuid().toString() );
+                    CassandraDataControlForTasks.getInstance().remove( selfEmploymentTask.getUuid().toString() );
                     KafkaDataControl
                             .getInstance()
                             .writeToKafka( SerDes
@@ -577,10 +573,10 @@ public final class TaskInspector {
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object
                 patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
                 patrul.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() ); } }
-        if ( selfEmploymentTask.getTaskStatus().compareTo( FINISHED ) != 0 ) RedisDataControl
-                .getRedis()
+        if ( selfEmploymentTask.getTaskStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+                .getInstance()
                 .addValue( selfEmploymentTask.getUuid().toString(),
-                    new ActiveTask( selfEmploymentTask ) ).subscribe();
+                    new ActiveTask( selfEmploymentTask ) );
         if ( status.compareTo( CANCEL ) != 0 ) selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()

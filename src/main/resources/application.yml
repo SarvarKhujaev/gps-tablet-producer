@@ -24,18 +24,7 @@ spring:
             port: ${RSOCKET_PORT}
             address: ${SERVER_ADDR}
 
-    redis:
-        port: ${REDIS_PORT}
-        host: ${REDIS_HOST}
-        password: ${REDIS_PASSWORD}
-        client-name: ${REDIS_CLIENT_NAME}
-
 variables:
-    REDIS_HOST: ${REDIS_HOST}
-    REDIS_PORT: ${REDIS_PORT}
-    REDIS_PASSWORD: ${REDIS_PASSWORD}
-    REDIS_CLIENT_NAME: ${REDIS_CLIENT_NAME}
-
     KAFKA_BROKER: ${KAFKA_BROKER}
     GROUP_ID_FOR_KAFKA: ${GROUP_ID_FOR_KAFKA}
 

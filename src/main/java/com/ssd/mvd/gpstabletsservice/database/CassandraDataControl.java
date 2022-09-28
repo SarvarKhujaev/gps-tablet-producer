@@ -675,7 +675,7 @@ public final class CassandraDataControl {
             ).all().stream()
     ).map( Patrul::new ); }
 
-    public Row getPatrul ( String pasportNumber ) { return
+    private Row getPatrul ( String pasportNumber ) { return
             this.session.execute(
                     "SELECT * FROM "
                             + this.dbName + "." + this.getPatrols()
@@ -717,123 +717,6 @@ public final class CassandraDataControl {
                                         .code( 201 )
                                         .build() )
                         .build() ); } )
-                .doOnError( throwable -> {
-                    this.delete();
-                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
-
-    public Mono< ApiResponseModel > update ( Patrul patrul ) {
-        Row row = this.getPatrul( patrul.getPassportNumber() );
-        if ( row == null ) return Mono.just(
-                ApiResponseModel
-                        .builder()
-                        .success( false )
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                        .builder()
-                                        .message( "Wrong patrul data" )
-                                        .code( 201 )
-                                        .build() ).build() );
-
-        if ( row.getUUID( "uuid" ).compareTo( patrul.getUuid() ) == 0 ) {
-            if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
-            if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
-            if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
-            if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
-            if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
-            if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
-
-            this.session.execute(
-                    "UPDATE "
-                    + this.dbName + "." + this.getPatrolsLogin()
-                    + " SET password = '" + patrul.getPassword() +
-                            "' WHERE login = '" + patrul.getPassportNumber()
-                    + "' AND uuid = " + patrul.getUuid() + ";" );
-
-            return this.session.execute( "INSERT INTO "
-                    + this.dbName + "." + this.getPatrols() +
-                    CassandraConverter
-                            .getInstance()
-                            .getALlNames( Patrul.class ) + " VALUES ('" +
-                    ( patrul.getTaskDate() != null ? patrul.getTaskDate().toInstant() : new Date().toInstant() ) + "', '" +
-                    ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : new Date().toInstant() ) + "', '" +
-                    ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : new Date().toInstant() ) + "', '" +
-                    ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : new Date().toInstant() ) + "', " +
-
-                    patrul.getDistance() + ", " +
-                    patrul.getLatitude() + ", " +
-                    patrul.getLongitude() + ", " +
-                    patrul.getLatitudeOfTask() + ", " +
-                    patrul.getLongitudeOfTask() + ", " +
-
-                    patrul.getUuid() + ", " +
-                    patrul.getOrgan() + ", " +
-                    patrul.getUuidOfEscort() + ", " +
-                    patrul.getUuidForPatrulCar() + ", " +
-                    patrul.getUuidForEscortCar() + ", " +
-
-                    patrul.getRegionId() + ", " +
-                    patrul.getMahallaId() + ", " +
-                    patrul.getDistrictId() + ", " +
-                    patrul.getTotalActivityTime() + ", " +
-
-                    ( patrul.getBatteryLevel() != null ? patrul.getBatteryLevel() : 0 ) + ", " +
-                    patrul.getInPolygon() + ", " +
-                    patrul.getTuplePermission() + ", '" +
-
-                    patrul.getName() + "', '" +
-                    patrul.getRank() + "', '" +
-                    patrul.getEmail() + "', '" +
-                    patrul.getLogin() + "', '" +
-                    patrul.getTaskId() + "', '" +
-                    patrul.getCarType() + "', '" +
-                    patrul.getSurname() + "', '" +
-                    patrul.getPassword() + "', '" +
-                    patrul.getCarNumber() + "', '" +
-                    patrul.getOrganName() + "', '" +
-                    patrul.getRegionName() + "', '" +
-                    patrul.getPoliceType() + "', '" +
-                    patrul.getFatherName() + "', '" +
-                    patrul.getDateOfBirth() + "', '" +
-                    patrul.getPhoneNumber() + "', '" +
-                    patrul.getSpecialToken() + "', '" +
-                    patrul.getTokenForLogin() + "', '" +
-                    patrul.getSimCardNumber() + "', '" +
-                    patrul.getPassportNumber() + "', '" +
-                    patrul.getPatrulImageLink() + "', '" +
-                    patrul.getSurnameNameFatherName() + "', '" +
-                    patrul.getStatus() + "', '" +
-                    patrul.getTaskTypes() + "', " +
-                    CassandraConverter
-                            .getInstance()
-                            .convertMapToCassandra( patrul.getListOfTasks() ) + " );"
-            ).wasApplied() ? Mono.just( ApiResponseModel
-                            .builder()
-                            .success( true )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                            .builder()
-                                            .message( "Patrul was successfully updated" )
-                                            .code( 200 )
-                                            .build() )
-                            .build()
-            ) : Mono.just( ApiResponseModel
-                            .builder()
-                            .success( false )
-                            .status(
-                                    com.ssd.mvd.gpstabletsservice.response.Status
-                                            .builder()
-                                            .message( "There is no such a patrul" )
-                                            .code( 201 )
-                                            .build() )
-                            .build() ); }
-        else return Mono.just( ApiResponseModel
-                        .builder()
-                        .success( false )
-                        .status(
-                                com.ssd.mvd.gpstabletsservice.response.Status
-                                        .builder()
-                                        .message( "There is no such a patrul" )
-                                        .code( 201 )
-                                        .build() )
-                        .build() )
                 .doOnError( throwable -> {
                     this.delete();
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
@@ -951,6 +834,123 @@ public final class CassandraDataControl {
                                         .code( 201 )
                                         .build()
                         ).build() )
+                .doOnError( throwable -> {
+                    this.delete();
+                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
+
+    public Mono< ApiResponseModel > update ( Patrul patrul ) {
+        Row row = this.getPatrul( patrul.getPassportNumber() );
+        if ( row == null ) return Mono.just(
+                ApiResponseModel
+                        .builder()
+                        .success( false )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "Wrong patrul data" )
+                                .code( 201 )
+                                .build() ).build() );
+
+        if ( row.getUUID( "uuid" ).compareTo( patrul.getUuid() ) == 0 ) {
+            if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
+            if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
+            if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
+            if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
+            if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
+            if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
+
+            this.session.execute(
+                    "UPDATE "
+                            + this.dbName + "." + this.getPatrolsLogin()
+                            + " SET password = '" + patrul.getPassword() +
+                            "' WHERE login = '" + patrul.getPassportNumber()
+                            + "' AND uuid = " + patrul.getUuid() + ";" );
+
+            return this.session.execute( "INSERT INTO "
+                    + this.dbName + "." + this.getPatrols() +
+                    CassandraConverter
+                            .getInstance()
+                            .getALlNames( Patrul.class ) + " VALUES ('" +
+                    ( patrul.getTaskDate() != null ? patrul.getTaskDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : new Date().toInstant() ) + "', '" +
+                    ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : new Date().toInstant() ) + "', " +
+
+                    patrul.getDistance() + ", " +
+                    patrul.getLatitude() + ", " +
+                    patrul.getLongitude() + ", " +
+                    patrul.getLatitudeOfTask() + ", " +
+                    patrul.getLongitudeOfTask() + ", " +
+
+                    patrul.getUuid() + ", " +
+                    patrul.getOrgan() + ", " +
+                    patrul.getUuidOfEscort() + ", " +
+                    patrul.getUuidForPatrulCar() + ", " +
+                    patrul.getUuidForEscortCar() + ", " +
+
+                    patrul.getRegionId() + ", " +
+                    patrul.getMahallaId() + ", " +
+                    patrul.getDistrictId() + ", " +
+                    patrul.getTotalActivityTime() + ", " +
+
+                    ( patrul.getBatteryLevel() != null ? patrul.getBatteryLevel() : 0 ) + ", " +
+                    patrul.getInPolygon() + ", " +
+                    patrul.getTuplePermission() + ", '" +
+
+                    patrul.getName() + "', '" +
+                    patrul.getRank() + "', '" +
+                    patrul.getEmail() + "', '" +
+                    patrul.getLogin() + "', '" +
+                    patrul.getTaskId() + "', '" +
+                    patrul.getCarType() + "', '" +
+                    patrul.getSurname() + "', '" +
+                    patrul.getPassword() + "', '" +
+                    patrul.getCarNumber() + "', '" +
+                    patrul.getOrganName() + "', '" +
+                    patrul.getRegionName() + "', '" +
+                    patrul.getPoliceType() + "', '" +
+                    patrul.getFatherName() + "', '" +
+                    patrul.getDateOfBirth() + "', '" +
+                    patrul.getPhoneNumber() + "', '" +
+                    patrul.getSpecialToken() + "', '" +
+                    patrul.getTokenForLogin() + "', '" +
+                    patrul.getSimCardNumber() + "', '" +
+                    patrul.getPassportNumber() + "', '" +
+                    patrul.getPatrulImageLink() + "', '" +
+                    patrul.getSurnameNameFatherName() + "', '" +
+                    patrul.getStatus() + "', '" +
+                    patrul.getTaskTypes() + "', " +
+                    CassandraConverter
+                            .getInstance()
+                            .convertMapToCassandra( patrul.getListOfTasks() ) + " );"
+            ).wasApplied() ? Mono.just( ApiResponseModel
+                    .builder()
+                    .success( true )
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                            .builder()
+                            .message( "Patrul was successfully updated" )
+                            .code( 200 )
+                            .build() )
+                    .build()
+            ) : Mono.just( ApiResponseModel
+                    .builder()
+                    .success( false )
+                    .status(
+                            com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
+                                    .message( "There is no such a patrul" )
+                                    .code( 201 )
+                                    .build() )
+                    .build() ); }
+        else return Mono.just( ApiResponseModel
+                        .builder()
+                        .success( false )
+                        .status(
+                                com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
+                                        .message( "There is no such a patrul" )
+                                        .code( 201 )
+                                        .build() )
+                        .build() )
                 .doOnError( throwable -> {
                     this.delete();
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
