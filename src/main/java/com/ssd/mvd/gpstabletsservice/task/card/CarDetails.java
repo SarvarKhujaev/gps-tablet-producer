@@ -2,26 +2,28 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
+
+import java.text.SimpleDateFormat;
 import lombok.Data;
 
 @Data
 public class CarDetails {
     private String ip;
-    private String date;
-    private String time;
     private String carData;
     private String carNumber;
     private String thumbnail;
     private String cameraImage;
     private String dossier_photo;
 
+    private Long date;
+    private Long time;
     private Double confidence;
 
     public CarDetails ( EventCar eventCar ) {
         this.setIp( eventCar.getCameraIp() );
         this.setConfidence( eventCar.getConfidence() );
-        this.setDate( eventCar.getCreated_date().toString() );
-        this.setTime( String.valueOf( eventCar.getCreated_date().getTime() ) );
+        this.setDate( eventCar.getCreated_date().getTime() );
+        this.setTime( eventCar.getCreated_date().getTime() );
 
         this.setThumbnail( eventCar.getThumbnail() );
         this.setCameraImage( eventCar.getFullframe() );
@@ -44,9 +46,15 @@ public class CarDetails {
                     eventCar.getCarTotalData().getModelForCar().getColor() ); } }
 
     public CarDetails ( CarEvent carEvent ) {
-        this.setDate( carEvent.getCreated_date() );
         this.setConfidence( carEvent.getConfidence() );
-        this.setTime( String.valueOf( carEvent.getCreated_date() ) );
+
+        if ( carEvent.getCreated_date() != null
+                && !carEvent.getCreated_date().equals( "null" ) )
+            try { this.setTime( ( this.date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                    .parse( carEvent.getCreated_date() )
+                    .getTime() ) );
+            } catch ( Exception e ) { System.out.println( e.getMessage() ); }
+
         this.setIp( carEvent.getDataInfo() != null
                 && carEvent.getDataInfo().getData() != null ?
                 carEvent.getDataInfo().getData().getIp() : null );
@@ -70,5 +78,4 @@ public class CarDetails {
             this.setCarData( carEvent.getCarTotalData().getModelForCar().getModel() + " " +
                     carEvent.getCarTotalData().getModelForCar().getVehicleType() + " " +
                     carEvent.getCarTotalData().getModelForCar().getColor() ); } }
-
 }
