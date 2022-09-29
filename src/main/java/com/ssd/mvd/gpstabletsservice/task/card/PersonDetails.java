@@ -3,27 +3,29 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
+
+import java.text.SimpleDateFormat;
 import lombok.Data;
 
 @Data
 public class PersonDetails {
     private String ip;
     private String FIO;
-    private String date;
-    private String time;
     private String thumbnail;
     private String cameraImage; // фото человека с камеры
     private String originalImage; // фото человека с паспорта
     private String dossier_photo;
     private String passportSeries;
 
+    private Long date;
+    private Long time;
     private Double confidence;
 
     public PersonDetails ( EventBody eventBody ) {
         this.setIp( eventBody.getCameraIp() );
         this.setConfidence( eventBody.getConfidence() );
-        this.setDate( eventBody.getCreated_date().toString() );
-        this.setTime( eventBody.getCreated_date().toString() );
+        this.setDate( eventBody.getCreated_date().getTime() );
+        this.setTime( eventBody.getCreated_date().getTime() );
 
         this.setThumbnail( eventBody.getThumbnail() );
         this.setCameraImage( eventBody.getFullframe() );
@@ -46,8 +48,8 @@ public class PersonDetails {
     public PersonDetails ( EventFace eventFace ) {
         this.setIp( eventFace.getCameraIp() );
         this.setConfidence( eventFace.getConfidence() );
-        this.setDate( eventFace.getCreated_date().toString() );
-        this.setTime( eventFace.getCreated_date().toString() );
+        this.setDate( eventFace.getCreated_date().getTime() );
+        this.setTime( eventFace.getCreated_date().getTime() );
 
         this.setThumbnail( eventFace.getThumbnail() );
         this.setCameraImage( eventFace.getFullframe() );
@@ -72,9 +74,13 @@ public class PersonDetails {
                         .getPassport().split( " " )[0] ); } } }
 
     public PersonDetails ( FaceEvent faceEvent ) {
-        this.setDate( faceEvent.getCreated_date() );
-        this.setTime( faceEvent.getCreated_date() );
         this.setConfidence( faceEvent.getConfidence() );
+        if ( faceEvent.getCreated_date() != null
+        && !faceEvent.getCreated_date().equals( "null" ) )
+            try { this.setTime( ( this.date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                        .parse( faceEvent.getCreated_date() )
+                        .getTime() ) );
+            } catch ( Exception e ) { System.out.println( e.getMessage() ); }
         this.setIp( faceEvent.getDataInfo() != null
                 && faceEvent.getDataInfo().getData() != null ?
                 faceEvent.getDataInfo().getData().getIp() : null );
