@@ -17,6 +17,6 @@ public class Country {
     public Country ( Row row ) {
         this.setSymbol( row.getString( "symbol" ) );
         this.setCountryNameEn( row.getString( "countryNameEN" ) );
-        this.setCountryNameUz( row.getString( "countryNameRu" ) );
-        this.setCountryNameRu( row.getString( "countryNameUz" ) ); }
+        this.setCountryNameUz( row.getString( "countryNameUz" ) );
+        this.setCountryNameRu( row.getString( "countryNameRu" ) ); }
 }
