@@ -515,16 +515,17 @@ public class CassandraDataControlForEscort {
                         "countryNameUz, " +
                         "countryNameRu, " +
                         "symbol ) VALUES('"
-                        + country.getCountryNameEn() + "', "
-                        + country.getCountryNameUz() + "', "
-                        + country.getCountryNameRu() + "', "
-                        + country.getSymbol() + "');"
+                        + country.getCountryNameEn().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
+                        + country.getCountryNameUz().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
+                        + country.getCountryNameRu().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
+                        + country.getSymbol().toUpperCase( Locale.ROOT ).replaceAll( "'", "" )
+                        + "');"
         ).wasApplied() ? Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
                         .builder()
-                        .message( "New country was added to database" )
+                        .message( "New country was updated successfully" )
                         .code( 200 )
                         .build() )
                 .build() ) : Mono.just( ApiResponseModel
