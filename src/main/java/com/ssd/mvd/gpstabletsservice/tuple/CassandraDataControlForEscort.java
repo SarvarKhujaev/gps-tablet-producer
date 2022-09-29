@@ -509,23 +509,19 @@ public class CassandraDataControlForEscort {
                 .build() ); }
 
     public Mono< ApiResponseModel > update ( Country country ) { return this.session.execute(
-                "INSERT INTO "
-                        + this.dbName + "." + this.countries +
-                        "( countryNameEN, " +
-                        "countryNameUz, " +
-                        "countryNameRu, " +
-                        "symbol ) VALUES('"
-                        + country.getCountryNameEn().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
-                        + country.getCountryNameUz().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
-                        + country.getCountryNameRu().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
-                        + country.getSymbol().toUpperCase( Locale.ROOT ).replaceAll( "'", "" )
-                        + "');"
+                "UPDATE "
+                        + this.dbName + "." + this.getCountries() +
+                        " SET countryNameUz = '" + country.getCountryNameUz().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', " +
+                        "countryNameRu = '" + country.getCountryNameRu().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', " +
+                        "symbol = '" + country.getSymbol().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) +
+                        "' WHERE countryNameEN = '" + country.getCountryNameEn().toUpperCase( Locale.ROOT ).replaceAll( "'", "" )
+                        + "' IF EXISTS;"
         ).wasApplied() ? Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
                         .builder()
-                        .message( "New country was updated successfully" )
+                        .message( country.getCountryNameEn() + " was updated successfully" )
                         .code( 200 )
                         .build() )
                 .build() ) : Mono.just( ApiResponseModel
@@ -533,7 +529,7 @@ public class CassandraDataControlForEscort {
                 .success( false )
                 .status( Status
                         .builder()
-                        .message( "This country has already been inserted" )
+                        .message( "This country has not been inserted yet" )
                         .code( 201 )
                         .build() )
                 .build() ); }
