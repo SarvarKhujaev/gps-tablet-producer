@@ -96,7 +96,7 @@ public final class CassandraDataControl {
                 .registerCodecForViolationsInformation( this.dbName, this.getViolationListType() ); }
 
     private void createType ( String typeName, Class object ) {
-        this.session.execute("CREATE TYPE IF NOT EXISTS "
+        this.session.execute( "CREATE TYPE IF NOT EXISTS "
                 + this.dbName + "."
                 + typeName +
                 CassandraConverter
@@ -104,8 +104,7 @@ public final class CassandraDataControl {
                         .convertClassToCassandra( object ) + " );" ); }
 
     private void createTable ( String tableName, Class object, String prefix ) {
-        this.session.execute(
-                "CREATE TABLE IF NOT EXISTS "
+        this.session.execute( "CREATE TABLE IF NOT EXISTS "
                         + this.dbName + "." + tableName +
                         CassandraConverter
                                 .getInstance()
@@ -168,8 +167,7 @@ public final class CassandraDataControl {
         this.createTable( this.getCars(), ReqCar.class, ", PRIMARY KEY ( uuid ) );" );
         this.createTable( this.getPoliceType(), PoliceType.class, ", PRIMARY KEY ( uuid ) );" );
         this.createTable( this.getPolygonType(), PolygonType.class, ", PRIMARY KEY ( uuid ) );" );
-        this.createTable( this.getPatrols(), Patrul.class, ", status text, taskTypes text, listOfTasks map< text, text >," +
-                "PRIMARY KEY ( uuid ) );" );
+        this.createTable( this.getPatrols(), Patrul.class, ", status text, taskTypes text, listOfTasks map< text, text >, PRIMARY KEY ( uuid ) );" );
 
         this.createTable( this.getPolygon(), Polygon.class,
                 ", polygonType frozen< " + this.getPolygonType() + " >, " +
@@ -210,45 +208,12 @@ public final class CassandraDataControl {
 
         this.logger.info( "Cassandra is ready" ); }
 
-    public Mono< ApiResponseModel > addValue ( PoliceType policeType ) {
-        return this.getAllPoliceTypes()
-                .filter( policeType1 -> policeType1.getPoliceType().equals( policeType.getPoliceType() ) )
-                .count()
-                .flatMap( aBoolean1 -> aBoolean1 == 0 ?
-                        this.session
-                                .execute( "INSERT INTO "
-                                        + this.dbName + "." + this.getPoliceType() +
-                                        CassandraConverter
-                                                .getInstance()
-                                                .getALlNames( PoliceType.class ) +
-                                        " VALUES("
-                                        + policeType.getUuid() + ", '"
-                                        + policeType.getPoliceType()
-                                        + "' );" )
-                                .wasApplied() ? Mono.just( ApiResponseModel
-                                            .builder()
-                                            .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                                    .builder()
-                                                    .message( "PoliceType was saved successfully" )
-                                                    .code( 200 )
-                                                    .build()
-                                            ).build() ) : Mono.just( ApiResponseModel
-                                            .builder()
-                                            .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                                    .builder()
-                                                    .message( "This PoliceType has already been applied" )
-                                                    .code( 201 )
-                                                    .build()
-                                            ).build() ) :
-                                Mono.just( ApiResponseModel
-                                        .builder()
-                                        .success( false )
-                                        .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                                .builder()
-                                                .message( "This policeType name is already defined, choose another one" )
-                                                .code( 201 )
-                                                .build() )
-                                        .build() ) )
+    public Flux< PoliceType > getAllPoliceTypes () {
+        return Flux.fromStream( this.session.execute(
+                                "SELECT * FROM "
+                                        + this.dbName + "." + this.getPoliceType() + " ;"
+                        ).all().stream()
+                ).map( PoliceType::new )
                 .doOnError( throwable -> this.delete() ); }
 
     public Mono< ApiResponseModel > update ( PoliceType policeType ) {
@@ -282,12 +247,45 @@ public final class CassandraDataControl {
                         .build() )
                 .doOnError( throwable -> this.delete() ); }
 
-    public Flux< PoliceType > getAllPoliceTypes () {
-        return Flux.fromStream( this.session.execute(
-                        "SELECT * FROM "
-                                + this.dbName + "." + this.getPoliceType() + " ;"
-                ).all().stream()
-        ).map( PoliceType::new )
+    public Mono< ApiResponseModel > addValue ( PoliceType policeType ) {
+        return this.getAllPoliceTypes()
+                .filter( policeType1 -> policeType1.getPoliceType().equals( policeType.getPoliceType() ) )
+                .count()
+                .flatMap( aBoolean1 -> aBoolean1 == 0 ?
+                        this.session
+                                .execute( "INSERT INTO "
+                                        + this.dbName + "." + this.getPoliceType() +
+                                        CassandraConverter
+                                                .getInstance()
+                                                .getALlNames( PoliceType.class ) +
+                                        " VALUES("
+                                        + policeType.getUuid() + ", '"
+                                        + policeType.getPoliceType()
+                                        + "' );" )
+                                .wasApplied() ? Mono.just( ApiResponseModel
+                                .builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
+                                        .message( "PoliceType was saved successfully" )
+                                        .code( 200 )
+                                        .build()
+                                ).build() ) : Mono.just( ApiResponseModel
+                                .builder()
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
+                                        .message( "This PoliceType has already been applied" )
+                                        .code( 201 )
+                                        .build()
+                                ).build() ) :
+                        Mono.just( ApiResponseModel
+                                .builder()
+                                .success( false )
+                                .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                        .builder()
+                                        .message( "This policeType name is already defined, choose another one" )
+                                        .code( 201 )
+                                        .build() )
+                                .build() ) )
                 .doOnError( throwable -> this.delete() ); }
 
     public Mono< ApiResponseModel > addValue ( AtlasLustra atlasLustra, Boolean check ) { return this.session
@@ -1105,18 +1103,6 @@ public final class CassandraDataControl {
                     this.delete();
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this
-            .getPatrul( UUID.fromString( request.getData() ) )
-            .flatMap( patrul -> request.getSubject() == null && request.getSubject() == null ?
-                    Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
-                            + this.dbName + "."
-                            + this.patrols + patrul.getPassportNumber() ).all().stream() ) ) )
-                    : Mono.just( new PatrulActivityStatistics( patrul, Flux.fromStream( this.session.execute( "SELECT * FROM "
-                            + this.dbName + "." + this.patrols + patrul.getPassportNumber() + " WHERE date >= '"
-                            + SerDes.getSerDes().convertDate( request.getObject().toString() ).toInstant()
-                            + "' and date <= '" + SerDes.getSerDes().convertDate( request.getSubject().toString() ).toInstant() + "';" )
-                    .all().stream() ) ) ) ); }
-
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return this.getPolygonForPatrul( scheduleForPolygonPatrul.getUuid() )
                 .flatMap( polygon -> Flux.fromStream( scheduleForPolygonPatrul.getPatrulUUIDs().stream() )
@@ -1132,6 +1118,44 @@ public final class CassandraDataControl {
                         .flatMap( uuidList -> {
                             polygon.setPatrulList( uuidList );
                             return this.updatePolygonForPatrul( polygon ); } ) ); }
+
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) { return this
+            .getPatrul( UUID.fromString( request.getData() ) )
+            .flatMap( patrul -> {
+                if ( request.getSubject() == null && request.getObject() == null ) return Flux.fromStream(
+                        this.session.execute(
+                                "SELECT * FROM "
+                                + this.dbName + "." + this.getPatrolsStatusTable() + ";"
+                        ).all().stream() )
+                        .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.LOGOUT ) == 0 )
+                        .map( row -> row.getLong( "totalActivityTime" ) )
+                        .collectList()
+                        .map( longs -> PatrulActivityStatistics
+                                .builder()
+                                .dateList( longs )
+                                .patrul( patrul )
+                                .build() );
+                else return Flux.fromStream(
+                        this.session.execute(
+                                "SELECT * FROM "
+                                        + this.dbName + "." + this.getPatrolsStatusTable()
+                                        + " WHERE date >= '"
+                                        + SerDes
+                                        .getSerDes()
+                                        .convertDate( request.getObject().toString() ).toInstant()
+                                        + "' and date <= '"
+                                        + SerDes
+                                        .getSerDes()
+                                        .convertDate( request.getSubject().toString() ).toInstant() + "';"
+                        ).all().stream() )
+                        .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.LOGOUT ) == 0 )
+                        .map( row -> row.getLong( "totalActivityTime" ) )
+                        .collectList()
+                        .map( longs -> PatrulActivityStatistics
+                                .builder()
+                                .dateList( longs )
+                                .patrul( patrul )
+                                .build() ); } ); }
 
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account

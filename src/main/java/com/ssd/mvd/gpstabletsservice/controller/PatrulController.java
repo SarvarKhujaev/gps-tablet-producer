@@ -1,5 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import java.util.UUID;
+import java.util.Comparator;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
@@ -15,28 +21,10 @@ import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.Comparator;
-import java.util.UUID;
-
 @RestController
 public class PatrulController {
-    @MessageMapping ( value = "findTheClosestPatruls" )
-    public Flux< Patrul > findTheClosestPatruls ( Point point ) {
-        if ( point.getLatitude() == null && point.getLongitude() == null ) return Flux.empty();
-        return CassandraDataControl
-            .getInstance()
-            .findTheClosestPatruls( point )
-            .sort( Comparator.comparing( Patrul::getDistance ) ); }
-
-    @MessageMapping ( value = "getTaskDetails" )
-    public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector
-            .getInstance()
-            .getTaskDetails( SerDes
-                    .getSerDes()
-                    .deserialize( data.getData() ) ); }
+    @MessageMapping ( value = "ping" )
+    public Mono< Boolean > ping () { return Mono.just( true ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( String token ) { return CassandraDataControl
@@ -53,6 +41,18 @@ public class PatrulController {
             .getInstance()
             .setInPause( token ); }
 
+    @MessageMapping ( value = "START_TO_WORK" )
+    public Mono< ApiResponseModel > starToWork ( String token ) { return CassandraDataControl
+            .getInstance()
+            .startToWork( token ); }
+
+    @MessageMapping ( value = "getTaskDetails" )
+    public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector
+            .getInstance()
+            .getTaskDetails( SerDes
+                    .getSerDes()
+                    .deserialize( data.getData() ) ); }
+
     @MessageMapping ( value = "LOGOUT" ) // used to Log out from current Account
     public Mono< ApiResponseModel > patrulLogout ( String token ) { return CassandraDataControl
             .getInstance()
@@ -62,11 +62,6 @@ public class PatrulController {
     public Mono< ApiResponseModel > setInActive ( String token ) { return CassandraDataControl
             .getInstance()
             .backToWork( token ); }
-
-    @MessageMapping ( value = "START_TO_WORK" )
-    public Mono< ApiResponseModel > starToWork ( String token ) { return CassandraDataControl
-            .getInstance()
-            .startToWork( token ); }
 
     @MessageMapping ( value = "STOP_TO_WORK" )
     public Mono< ApiResponseModel > finishWorkOfPatrul ( String token ) { return CassandraDataControl
@@ -83,6 +78,14 @@ public class PatrulController {
             .getInstance()
             .getPatrul(); }
 
+    @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
+    public Flux< Patrul > getPatrulByPortion ( String name ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul()
+            .filter( patrul -> patrul
+                    .getSurnameNameFatherName()
+                    .contains( name ) ); }
+
     @MessageMapping( value = "addUser" ) // adding new user
     public Mono< ApiResponseModel > addUser ( Patrul patrul ) {
         UnirestController
@@ -93,6 +96,25 @@ public class PatrulController {
             .getInstance()
             .addValue( patrul ); }
 
+    @MessageMapping ( value = "findTheClosestPatruls" )
+    public Flux< Patrul > findTheClosestPatruls ( Point point ) {
+        if ( point.getLatitude() == null && point.getLongitude() == null ) return Flux.empty();
+        return CassandraDataControl
+                .getInstance()
+                .findTheClosestPatruls( point )
+                .sort( Comparator.comparing( Patrul::getDistance ) ); }
+
+    @MessageMapping ( value = "checkToken" )
+    public Mono< ApiResponseModel > checkToken ( String token ) { return CassandraDataControl
+            .getInstance()
+            .checkToken( token ); }
+
+    @MessageMapping ( value = "getPatrulDataByToken" )
+    public Mono< Status > getPatrulDataByToken ( String token ) { return CassandraDataControl
+            .getInstance()
+            .checkToken( token )
+            .flatMap( apiResponseModel -> Mono.just( apiResponseModel.getStatus() ) ); }
+
     @MessageMapping ( value = "updatePatrul" )
     public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) {
         UnirestController
@@ -100,26 +122,15 @@ public class PatrulController {
                 .updateUser( patrul );
         patrul.setSpecialToken( null );
         return CassandraDataControl
-            .getInstance()
-            .update( patrul ); }
-
-    @MessageMapping ( value = "checkToken" )
-    public Mono< ApiResponseModel > checkToken ( String token ) { return CassandraDataControl
-            .getInstance()
-            .checkToken( token ); }
+                .getInstance()
+                .update( patrul ); }
 
     @MessageMapping ( value = "getCurrentUser" )
     public Mono< Patrul > getCurrentUser ( String passportSeries ) {
         if ( passportSeries.length() < 30 ) return Mono.empty();
         return CassandraDataControl
-            .getInstance()
-            .getPatrul( UUID.fromString( passportSeries ) ); }
-
-    @MessageMapping ( value = "getPatrulDataByToken" )
-    public Mono< Status > getPatrulDataByToken ( String token ) { return CassandraDataControl
-            .getInstance()
-            .checkToken( token )
-            .flatMap( apiResponseModel -> Mono.just( apiResponseModel.getStatus() ) ); }
+                .getInstance()
+                .getPatrul( UUID.fromString( passportSeries ) ); }
 
     @MessageMapping( value = "deletePatrul" )
     public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) {
@@ -129,22 +140,6 @@ public class PatrulController {
         return CassandraDataControl
                 .getInstance()
                 .deletePatrul( UUID.fromString( passportNumber.split( "@" )[0] ) ); }
-
-    @MessageMapping ( value = "getPatrulStatistics" )
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request passportNumber ) { return CassandraDataControl
-            .getInstance()
-            .getPatrul( UUID.fromString( passportNumber.getData() ) )
-            .flatMap( patrul -> CassandraDataControl
-                    .getInstance()
-                    .getPatrulStatistics( passportNumber ) ); }
-
-    @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
-    public Flux< Patrul > getPatrulByPortion ( String name ) { return CassandraDataControl
-            .getInstance()
-            .getPatrul()
-            .filter( patrul -> patrul
-                    .getSurnameNameFatherName()
-                    .contains( name ) ); }
 
     @MessageMapping ( value = "addAllPatrulsToChatService" )
     public Mono< ApiResponseModel > addAllPatrulsToChatService ( String token ) {
@@ -168,6 +163,12 @@ public class PatrulController {
                 .getInstance()
                 .getPatrul( uuid ) ); }
 
-    @MessageMapping ( value = "ping" )
-    public Mono< Boolean > ping () { return Mono.just( true ); }
+    @MessageMapping ( value = "getPatrulStatistics" )
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) {
+        return request.getData() != null ? CassandraDataControl
+            .getInstance()
+            .getPatrul( UUID.fromString( request.getData() ) )
+            .flatMap( patrul -> CassandraDataControl
+                    .getInstance()
+                    .getPatrulStatistics( request ) ) : Mono.empty(); }
 }

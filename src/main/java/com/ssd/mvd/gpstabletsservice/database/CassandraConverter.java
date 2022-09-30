@@ -15,14 +15,9 @@ import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.Violation
 public class CassandraConverter {
     private String result;
 
-    private static CassandraConverter cassandraConverter = new CassandraConverter();
+    private final static CassandraConverter cassandraConverter = new CassandraConverter();
 
     public static CassandraConverter getInstance() { return cassandraConverter; }
-
-    public Stream< Field > getFields ( Class object ) { return Arrays.stream(
-                    object.getDeclaredFields() )
-            .toList()
-            .stream(); }
 
     public String getALlNames ( Class object ) {
         StringBuilder result = new StringBuilder( "( " );
@@ -30,20 +25,10 @@ public class CassandraConverter {
             .forEach( field -> result.append( field.getName() ).append( ", " ) );
         return result.substring( 0, result.length() - 2 ) + " )"; }
 
-    public String convertListToCassandra ( List< UUID > list ) {
-        result = "[";
-        list.forEach( s -> result += s + ", " );
-        return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
-
-    public String convertListOfPointsToCassandra ( List< ? > pointsList ) {
-        result = "[";
-        pointsList.forEach( points -> result += this.convertClassToCassandraTable( points ) + ", " );
-        return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
-
-    public String convertMapToCassandra ( Map< String, String > listOfTasks ) {
-        result = "{";
-        listOfTasks.keySet().forEach( s -> result += "'" + s + "' : '" + listOfTasks.get( s ) + "', " );
-        return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
+    public Stream< Field > getFields ( Class object ) { return Arrays.stream(
+                    object.getDeclaredFields() )
+            .toList()
+            .stream(); }
 
     public String convertClassToCassandra ( Class object ) {
         StringBuilder result = new StringBuilder( "( " );
@@ -57,7 +42,7 @@ public class CassandraConverter {
                                 ^ field.getType().equals( Date.class )
                                 ^ field.getType().equals( Boolean.class ) )
                 .forEach( field -> {
-                        result.append( field.getName() );
+                    result.append( field.getName() );
                     if ( field.getType().equals( String.class ) ) result.append( " text, " );
                     else if ( field.getType().equals( UUID.class ) ) result.append( " uuid, " );
                     else if ( field.getType().equals( Long.class ) ) result.append( " bigint, " );
@@ -66,6 +51,11 @@ public class CassandraConverter {
                     else if ( field.getType().equals( Date.class ) ) result.append( " timestamp, " );
                     else if ( field.getType().equals( Boolean.class ) ) result.append( " boolean, " ); } );
         return result.substring( 0, result.toString().length() - 2 ); }
+
+    public String convertListToCassandra ( List< UUID > list ) {
+        result = "[";
+        list.forEach( s -> result += s + ", " );
+        return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
 
     public String convertClassToCassandraTable ( Object object ) {
         StringBuilder result = new StringBuilder( "{ " );
@@ -76,10 +66,20 @@ public class CassandraConverter {
                                 .append( " : " );
                         org.springframework.util.ReflectionUtils.makeAccessible( field );
                         result.append( field.get( object ) instanceof String ?
-                                        "'" + ( (String) field.get( object ) ).replaceAll( "'", "" ) + "'"
+                                "'" + ( (String) field.get( object ) ).replaceAll( "'", "" ) + "'"
                                 : field.get( object ) ).append( ", " );
                     } catch ( IllegalAccessException e ) { e.printStackTrace(); }
                 } ); return result.substring( 0, result.length() - 2 ) + "}"; }
+
+    public String convertListOfPointsToCassandra ( List< ? > pointsList ) {
+        result = "[";
+        pointsList.forEach( points -> result += this.convertClassToCassandraTable( points ) + ", " );
+        return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
+
+    public String convertMapToCassandra ( Map< String, String > listOfTasks ) {
+        result = "{";
+        listOfTasks.keySet().forEach( s -> result += "'" + s + "' : '" + listOfTasks.get( s ) + "', " );
+        return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
 
     public void registerCodecForPatrul ( String dbName, String userType ) {
         CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
@@ -164,6 +164,22 @@ public class CassandraConverter {
                                                         .getUserType( userType )
                                         ), Points.class ) ); }
 
+    public void registerCodecForPolygonType ( String dbName, String userType ) {
+        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry().register(
+                        new CodecRegistrationForPolygonType (
+                                CassandraDataControl
+                                        .getInstance()
+                                        .getCodecRegistry()
+                                        .codecFor(
+                                                CassandraDataControl
+                                                        .getInstance()
+                                                        .getCluster()
+                                                        .getMetadata()
+                                                        .getKeyspace( dbName )
+                                                        .getUserType( userType )
+                                        ), PolygonType.class ) ); }
+
     public void registerCodecForPolygonEntity ( String dbName, String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
@@ -197,20 +213,4 @@ public class CassandraConverter {
                                                         .getKeyspace( dbName )
                                                         .getUserType( userType )
                                         ), ViolationsInformation.class ) ); }
-
-    public void registerCodecForPolygonType ( String dbName, String userType ) {
-        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
-                .getCodecRegistry().register(
-                        new CodecRegistrationForPolygonType (
-                                CassandraDataControl
-                                        .getInstance()
-                                        .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
-                                                        .getInstance()
-                                                        .getCluster()
-                                                        .getMetadata()
-                                                        .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), PolygonType.class ) ); }
 }
