@@ -20,7 +20,7 @@ public class UnirestController {
     public RestTemplate restTemplate ( String token ) { return new RestTemplateBuilder()
                 .setConnectTimeout( Duration.ofSeconds( 10 ) )
                 .setReadTimeout( Duration.ofSeconds( 60 ) )
-                .defaultHeader("token", token )
+                .defaultHeader( "token", token )
                 .build(); }
 
     public void deleteUser ( String patrulId ) {
@@ -58,20 +58,18 @@ public class UnirestController {
 
     public void addUser ( Patrul patrul ) {
         try { Mono.just( new Req() )
-                    .map( req -> {
+                .map( req -> {
                         req.setUsername( patrul.getSurnameNameFatherName() );
                         req.setId( patrul.getUuid() );
                         req.setRole( Role.USER );
                         return req; } )
-                .doOnError( throwable -> System.out.println( throwable.getMessage() ) )
                 .onErrorStop()
-                .log()
-                .subscribe( req -> restTemplate( patrul.getSpecialToken() )
-                            .exchange("https://ms.ssd.uz/chat/add-user",
-                                    HttpMethod.POST,
-                                    new HttpEntity<>( req, null ),
-                                    String.class )
-                            .getBody() );
+                .doOnError( throwable -> System.out.println( throwable.getMessage() ) )
+                .subscribe( req -> this.restTemplate( patrul.getSpecialToken() )
+                        .exchange("https://ms.ssd.uz/chat/add-user",
+                                HttpMethod.POST,
+                                new HttpEntity<>( req, null ),
+                                String.class ) );
             patrul.setSpecialToken( null );
         } catch ( Exception e ) { System.out.println( e.getMessage() ); } }
 
