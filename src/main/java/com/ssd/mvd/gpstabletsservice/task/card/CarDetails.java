@@ -2,8 +2,7 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
-
-import java.text.SimpleDateFormat;
+import com.ssd.mvd.gpstabletsservice.entity.TimeInspector;
 import lombok.Data;
 
 @Data
@@ -50,10 +49,7 @@ public class CarDetails {
 
         if ( carEvent.getCreated_date() != null
                 && !carEvent.getCreated_date().equals( "null" ) )
-            try { this.setTime( ( this.date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                    .parse( carEvent.getCreated_date() )
-                    .getTime() ) );
-            } catch ( Exception e ) { System.out.println( e.getMessage() ); }
+            this.setTime( ( this.date = TimeInspector.getInspector().convertTimeToLong( carEvent.getCreated_date() ) ) );
 
         this.setIp( carEvent.getDataInfo() != null
                 && carEvent.getDataInfo().getData() != null ?

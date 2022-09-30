@@ -59,7 +59,7 @@ public final class CassandraDataControl {
     private final String reportForCard = "REPORT_FOR_CARD";
     private final String polygonForPatrul = "POLYGON_FOR_PATRUl";
 
-    private CodecRegistry codecRegistry = new CodecRegistry();
+    private final CodecRegistry codecRegistry = new CodecRegistry();
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
 
