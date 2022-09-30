@@ -20,19 +20,20 @@ public class TimeInspector {
 
     private static TimeInspector inspector = new TimeInspector();
 
+    // for checking current time of task ending
+    public Boolean checkDate ( Instant instant ) { return TimeInspector.getInspector().getEndTimeForEvening() >= this.setDate().getHours()
+            && this.date.getHours() >= TimeInspector.getInspector().getStartTimeForMorning() ?
+            ( this.getTimeDifference( instant ) <= 10 ) : ( this.getTimeDifference( instant ) <= 7 ); }
+
+    public Long convertTimeToLong ( String time ) {
+        try { return new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
+                .parse( time )
+                .getTime();
+        } catch ( ParseException e ) { return 0L; } }
+
     private Date setDate () { return ( this.date = new Date() ); }
 
     public Long getTimeDifference ( Instant instant ) { return Duration.between( Instant.now(), instant ).toMinutes(); } // for comparing time difference between instance and current time
 
     public static TimeInspector getInspector () { return inspector != null ? inspector : ( inspector = new TimeInspector() ); }
-
-    // for checking current time of task ending
-    public Boolean checkDate ( Instant instant ) { return TimeInspector.getInspector().getEndTimeForEvening() >= this.setDate().getHours() && this.date.getHours() >= TimeInspector.getInspector().getStartTimeForMorning() ?
-                ( this.getTimeDifference( instant ) <= 10 ) : ( this.getTimeDifference( instant ) <= 7 ); }
-
-    public Long convertTimeToLong ( String time ) {
-        try { return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                .parse( time )
-                .getTime();
-        } catch ( ParseException e ) { return 0L; } }
 }
