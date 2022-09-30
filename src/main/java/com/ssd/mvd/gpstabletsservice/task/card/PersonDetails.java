@@ -12,7 +12,6 @@ public class PersonDetails {
     private String FIO;
     private String thumbnail;
     private String cameraImage; // фото человека с камеры
-    private String originalImage; // фото человека с паспорта
     private String dossier_photo;
     private String passportSeries;
 
@@ -36,13 +35,12 @@ public class PersonDetails {
                         eventBody.getPsychologyCard().getPinpp().getSurname() + " " +
                         eventBody.getPsychologyCard().getPinpp().getPatronym() );
             if ( eventBody.getPsychologyCard().getPapilonData() != null
-                    && eventBody.getPsychologyCard().getPapilonData().size() > 0 ) {
-                this.setOriginalImage( eventBody.getPsychologyCard().getPapilonData().get( 0 ).getPhoto() );
+                    && eventBody.getPsychologyCard().getPapilonData().size() > 0 )
                 this.setPassportSeries( eventBody
                         .getPsychologyCard()
                         .getPapilonData()
                         .get( 0 )
-                        .getPassport().split( " " )[0] ); } } }
+                        .getPassport().split( " " )[0] ); } }
 
     public PersonDetails ( EventFace eventFace ) {
         this.setIp( eventFace.getCameraIp() );
@@ -60,17 +58,12 @@ public class PersonDetails {
                         eventFace.getPsychologyCard().getPinpp().getSurname() + " " +
                         eventFace.getPsychologyCard().getPinpp().getPatronym() );
             if ( eventFace.getPsychologyCard().getPapilonData() != null
-                    && eventFace.getPsychologyCard().getPapilonData().size() > 0 ) {
-                this.setOriginalImage( eventFace
-                        .getPsychologyCard()
-                        .getPapilonData()
-                        .get( 0 )
-                        .getPhoto() );
+                    && eventFace.getPsychologyCard().getPapilonData().size() > 0 )
                 this.setPassportSeries( eventFace
                         .getPsychologyCard()
                         .getPapilonData()
                         .get( 0 )
-                        .getPassport().split( " " )[0] ); } } }
+                        .getPassport().split( " " )[0] ); } }
 
     public PersonDetails ( FaceEvent faceEvent ) {
         this.setConfidence( faceEvent.getConfidence() );
@@ -91,15 +84,10 @@ public class PersonDetails {
                         faceEvent.getPsychologyCard().getPinpp().getSurname() + " " +
                         faceEvent.getPsychologyCard().getPinpp().getPatronym() );
             if ( faceEvent.getPsychologyCard().getPapilonData() != null
-                    && faceEvent.getPsychologyCard().getPapilonData().size() > 0 ) {
-                this.setOriginalImage( faceEvent
-                        .getPsychologyCard()
-                        .getPapilonData()
-                        .get( 0 )
-                        .getPhoto() );
+                    && faceEvent.getPsychologyCard().getPapilonData().size() > 0 )
                 this.setPassportSeries( faceEvent
                         .getPsychologyCard()
                         .getPapilonData()
                         .get( 0 )
-                        .getPassport().split( " " )[0] ); } } }
+                        .getPassport().split( " " )[0] ); } }
 }
