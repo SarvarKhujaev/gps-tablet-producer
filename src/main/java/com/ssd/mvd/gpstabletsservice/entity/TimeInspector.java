@@ -1,7 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
 import java.text.SimpleDateFormat;
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -26,10 +25,11 @@ public class TimeInspector {
             ( this.getTimeDifference( instant ) <= 10 ) : ( this.getTimeDifference( instant ) <= 7 ); }
 
     public Long convertTimeToLong ( String time ) {
-        try { return new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
+        try { return time != null && !time.contains( "null" ) ?
+                new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
                 .parse( time )
-                .getTime();
-        } catch ( ParseException e ) { return 0L; } }
+                .getTime() : 0L;
+        } catch ( Exception e ) { return 0L; } }
 
     private Date setDate () { return ( this.date = new Date() ); }
 
