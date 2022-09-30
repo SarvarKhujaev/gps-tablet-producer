@@ -1,10 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import lombok.Data;
-
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import lombok.Data;
 
 @Data
 public class TimeInspector {
@@ -28,4 +29,10 @@ public class TimeInspector {
     // for checking current time of task ending
     public Boolean checkDate ( Instant instant ) { return TimeInspector.getInspector().getEndTimeForEvening() >= this.setDate().getHours() && this.date.getHours() >= TimeInspector.getInspector().getStartTimeForMorning() ?
                 ( this.getTimeDifference( instant ) <= 10 ) : ( this.getTimeDifference( instant ) <= 7 ); }
+
+    public Long convertTimeToLong ( String time ) {
+        try { return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                .parse( time )
+                .getTime();
+        } catch ( ParseException e ) { return 0L; } }
 }

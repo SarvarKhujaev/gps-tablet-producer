@@ -623,7 +623,7 @@ public final class TaskInspector {
                                     .builder()
                                     .taskTypes( CARD_102 )
                                     .task( card.getFabula() )
-                                    .createdDate( card.getCreated_date().toString() )
+                                    .createdDate( card.getCreated_date().getTime() )
                                     .cardDetails( new CardDetails( card, patrul, "ru" ) )
                                     .reportForCard( card
                                             .getReportForCardList()
@@ -646,7 +646,7 @@ public final class TaskInspector {
                                     .builder()
                                     .taskTypes( FIND_FACE_CAR )
                                     .task( carEvent.getName() )
-                                    .createdDate( carEvent.getCreated_date() )
+                                    .createdDate( TimeInspector.getInspector().convertTimeToLong( carEvent.getCreated_date() ) )
                                     .cardDetails( new CardDetails( new CarDetails( carEvent ) ) )
                                     .reportForCard( carEvent
                                             .getReportForCardList()
@@ -668,8 +668,8 @@ public final class TaskInspector {
                                     .builder()
                                     .taskTypes( FIND_FACE_PERSON )
                                     .task( faceEvent.getName() )
-                                    .createdDate( faceEvent.getCreated_date() )
                                     .cardDetails( new CardDetails( new PersonDetails( faceEvent ) ) )
+                                    .createdDate( TimeInspector.getInspector().convertTimeToLong( faceEvent.getCreated_date() ) )
                                     .reportForCard( faceEvent
                                             .getReportForCardList()
                                             .get( this.getReportIndex( faceEvent
@@ -690,7 +690,7 @@ public final class TaskInspector {
                                     .builder()
                                     .task( eventCar.getId() )
                                     .taskTypes( FIND_FACE_EVENT_CAR )
-                                    .createdDate( eventCar.getCreated_date().toString() )
+                                    .createdDate( eventCar.getCreated_date().getTime() )
                                     .cardDetails( new CardDetails( new CarDetails( eventCar ) ) )
                                     .reportForCard( eventCar
                                             .getReportForCardList()
@@ -712,7 +712,7 @@ public final class TaskInspector {
                                     .builder()
                                     .task( eventBody.getId() )
                                     .taskTypes( FIND_FACE_EVENT_BODY )
-                                    .createdDate( eventBody.getCreated_date().toString() )
+                                    .createdDate( eventBody.getCreated_date().getTime() )
                                     .cardDetails( new CardDetails( new PersonDetails( eventBody ) ) )
                                     .reportForCard( eventBody
                                             .getReportForCardList()
@@ -734,7 +734,7 @@ public final class TaskInspector {
                                     .builder()
                                     .task( eventFace.getId() )
                                     .taskTypes( FIND_FACE_EVENT_FACE )
-                                    .createdDate( eventFace.getCreated_date().toString() )
+                                    .createdDate( eventFace.getCreated_date().getTime() )
                                     .cardDetails( new CardDetails( new PersonDetails( eventFace ) ) )
                                     .reportForCard( eventFace
                                             .getReportForCardList()
@@ -756,7 +756,7 @@ public final class TaskInspector {
                                     .builder()
                                     .taskTypes( TaskTypes.SELF_EMPLOYMENT )
                                     .task( selfEmploymentTask.getDescription() )
-                                    .createdDate( selfEmploymentTask.getIncidentDate().toString() )
+                                    .createdDate( selfEmploymentTask.getIncidentDate().getTime() )
                                     .cardDetails( new CardDetails( selfEmploymentTask, "ru", patrul ) )
                                     .totalTimeConsumption( selfEmploymentTask
                                             .getPatrulStatuses()

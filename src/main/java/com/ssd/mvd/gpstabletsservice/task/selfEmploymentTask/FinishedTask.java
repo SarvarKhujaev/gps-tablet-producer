@@ -11,7 +11,7 @@ import lombok.Data;
 @Builder
 public class FinishedTask {
     private String task;
-    private String createdDate;
+    private Long createdDate;
     private Long totalTimeConsumption; // показывает сколько времени Патрульный потратил на всю задачу от начала до конца
 
     private TaskTypes taskTypes;

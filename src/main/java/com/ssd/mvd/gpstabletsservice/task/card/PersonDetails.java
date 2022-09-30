@@ -3,8 +3,7 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
-
-import java.text.SimpleDateFormat;
+import com.ssd.mvd.gpstabletsservice.entity.TimeInspector;
 import lombok.Data;
 
 @Data
@@ -77,10 +76,7 @@ public class PersonDetails {
         this.setConfidence( faceEvent.getConfidence() );
         if ( faceEvent.getCreated_date() != null
         && !faceEvent.getCreated_date().equals( "null" ) )
-            try { this.setTime( ( this.date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                        .parse( faceEvent.getCreated_date() )
-                        .getTime() ) );
-            } catch ( Exception e ) { System.out.println( e.getMessage() ); }
+            this.setTime( TimeInspector.getInspector().convertTimeToLong( faceEvent.getCreated_date() ) );
         this.setIp( faceEvent.getDataInfo() != null
                 && faceEvent.getDataInfo().getData() != null ?
                 faceEvent.getDataInfo().getData().getIp() : null );
