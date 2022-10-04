@@ -2,13 +2,12 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
-import static com.ssd.mvd.gpstabletsservice.constants.Status.ACCEPTED;
-import static com.ssd.mvd.gpstabletsservice.constants.Status.ARRIVED;
-import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
+import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.controller.Point;
@@ -29,11 +28,8 @@ import static java.lang.Math.cos;
 import static java.lang.Math.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.logging.Logger;
-import java.util.HashMap;
-import java.util.Base64;
-import java.util.UUID;
-import java.util.Date;
 
 @Data
 public final class CassandraDataControl {
@@ -44,7 +40,7 @@ public final class CassandraDataControl {
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
 
-    public static CassandraDataControl getInstance() { return cassandraDataControl != null ? cassandraDataControl
+    public static CassandraDataControl getInstance () { return cassandraDataControl != null ? cassandraDataControl
             : ( cassandraDataControl = new CassandraDataControl() ); }
 
     public void register () {
@@ -148,6 +144,7 @@ public final class CassandraDataControl {
         this.createTable( CassandraTables.CARS.name(), ReqCar.class, ", PRIMARY KEY ( uuid ) );" );
         this.createTable( CassandraTables.POLICE_TYPE.name(), PoliceType.class, ", PRIMARY KEY ( uuid ) );" );
         this.createTable( CassandraTables.POLYGON_TYPE.name(), PolygonType.class, ", PRIMARY KEY ( uuid ) );" );
+        this.createTable( CassandraTables.TABLETS_USAGE_TABLE.name(), TabletUsage.class, ", PRIMARY KEY ( uuidOfPatrul, simCardNumber ) );" );
         this.createTable( CassandraTables.PATRULS.name(), Patrul.class, ", status text, taskTypes text, listOfTasks map< text, text >, PRIMARY KEY ( uuid ) );" );
 
         this.createTable( CassandraTables.POLYGON.name(), Polygon.class,
@@ -305,10 +302,9 @@ public final class CassandraDataControl {
                         ).build() )
             .doOnError( throwable -> this.delete() ); }
 
-    public Mono< ApiResponseModel > addValue ( PolygonType polygonType ) { return this.session
-            .execute( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON_TYPE.name() +
-            CassandraConverter
+    public Mono< ApiResponseModel > addValue ( PolygonType polygonType ) { return this.session.execute( "INSERT INTO "
+            + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON_TYPE.name()
+            + CassandraConverter
                     .getInstance()
                     .getALlNames( PolygonType.class ) +
             " VALUES("
@@ -334,25 +330,23 @@ public final class CassandraDataControl {
                 this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< PolygonType > getAllPolygonType ( UUID uuid ) { return Mono.just(
-                this.session.execute(
-                        "SELECT * FROM "
+                this.session.execute( "SELECT * FROM "
                         + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON_TYPE.name()
-                                + " WHERE uuid = " + uuid + " ;"
-                ).one()
-        ).map( PolygonType::new )
+                                + " WHERE uuid = " + uuid + ";" ).one() )
+            .map( PolygonType::new )
                 .doOnError( throwable -> {
                     this.delete();
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Flux< PolygonType > getAllPolygonType () { return Flux.fromStream(
                 this.session.execute( "SELECT * FROM "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON_TYPE.name() + ";"
-                ).all().stream()
-        ).map( PolygonType::new ); }
+                        + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON_TYPE.name() + ";" )
+                        .all().stream() )
+            .map( PolygonType::new ); }
 
     public Mono< ApiResponseModel > addValue ( Polygon polygon ) { return this.session.execute( "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name() +
-                        CassandraConverter
+                        + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name()
+                        + CassandraConverter
                                 .getInstance()
                                 .getALlNames( Polygon.class ) +
                         " VALUES ("
@@ -625,28 +619,24 @@ public final class CassandraDataControl {
 
     public Flux< ReqCar > getCar () { return Flux.fromStream(
             this.session.execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "." + CassandraTables.CARS.name() + ";"
-            ).all().stream()
-    ).map( ReqCar::new ); }
+                    + CassandraTables.TABLETS.name() + "." + CassandraTables.CARS.name() + ";" )
+                    .all().stream() )
+            .map( ReqCar::new ); }
 
-    public Flux< Patrul > getPatrul () { return Flux.fromStream(
-            this.session.execute(
-                    "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name() + ";"
-            ).all().stream()
-    ).map( Patrul::new ); }
+    public Flux< Patrul > getPatrul () { return Flux.fromStream( this.session.execute( "SELECT * FROM "
+                            + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name() + ";" )
+            .all().stream() )
+            .map( Patrul::new ); }
 
     public Mono< Patrul > getPatrul ( UUID uuid ) {
-        Row row = this.session.execute(
-                "SELECT * FROM "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name()
-                        + " WHERE uuid = " + uuid + ";" ).one();
+        Row row = this.session.execute( "SELECT * FROM "
+                + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name()
+                + " WHERE uuid = " + uuid + ";" ).one();
         return Mono.justOrEmpty( row != null ? new Patrul( row ) : null ); }
 
-    private Row getPatrul ( String pasportNumber ) { return this.session.execute(
-                    "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name()
-                            + " WHERE passportNumber = '" + pasportNumber + "';" ).one(); }
+    private Row getPatrul ( String pasportNumber ) { return this.session.execute( "SELECT * FROM "
+            + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name()
+            + " WHERE passportNumber = '" + pasportNumber + "';" ).one(); }
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
         Row row = this.getPatrul( patrul.getPassportNumber() );
@@ -890,8 +880,8 @@ public final class CassandraDataControl {
                                             .message( "Patrul has already been saved. choose another one" )
                                             .code( 201 )
                                             .build() )
-                            .build() ) : Mono.just(
-                    ApiResponseModel
+                            .build() )
+                    : Mono.just( ApiResponseModel
                             .builder()
                             .status( com.ssd.mvd.gpstabletsservice.response.Status
                                     .builder()
@@ -905,8 +895,8 @@ public final class CassandraDataControl {
                                         .builder()
                                         .message( "This patrul is already exists" )
                                         .code( 201 )
-                                        .build()
-                        ).build() )
+                                        .build() )
+                        .build() )
                 .doOnError( throwable -> {
                     this.delete();
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
@@ -914,8 +904,8 @@ public final class CassandraDataControl {
     public Flux< Polygon > getAllPolygonForPatrul () { return Flux.fromStream(
                 this.session.execute( "Select * from "
                                 + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON_FOR_PATRUl.name() + ";"
-                ).all().stream()
-        ).map( Polygon::new ); }
+                ).all().stream() )
+            .map( Polygon::new ); }
 
     public Mono< Polygon > getPolygonForPatrul ( String id ) {
         Row row = this.session.execute(
@@ -1232,7 +1222,8 @@ public final class CassandraDataControl {
                 + new Date().toInstant() + "', '"
                 + status + "', 'log out at: "
                 + new Date().toInstant() + "', "
-                + patrul.getTotalActivityTime() + ");" ).isDone();
+                + patrul.getTotalActivityTime() + ");" )
+                .isDone();
 
         case ACCEPTED -> this.session.executeAsync( "INSERT INTO "
                 + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS_STATUS_TABLE.name()
@@ -1298,52 +1289,114 @@ public final class CassandraDataControl {
                 + patrul.getSimCardNumber() + "', "
                 + patrul.getTotalActivityTime() + ");" ).isDone(); }; }
 
+    private TabletUsage checkTableUsage ( Patrul patrul ) {
+        Row row = this.session.execute( "SELECT * FROM "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.TABLETS_USAGE_TABLE.name()
+                        + " WHERE uuidOfPatrul = " + patrul.getUuid()
+                        + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one();
+        return row != null ? new TabletUsage( row ) : null; }
+
+    private void updateStatus ( Patrul patrul, Status status ) {
+        Mono.just( this.session.execute ( "SELECT * FROM "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.TABLETS_USAGE_TABLE.name()
+                        + " WHERE uuidOfPatrul = " + patrul.getUuid()
+                        + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one() )
+                .subscribe( row -> this.session.execute( "UPDATE "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.TABLETS_USAGE_TABLE.name()
+                        + " SET lastActiveDate = '" + new Date().toInstant() + "'"
+                        + ( status.compareTo( LOGOUT ) == 0
+                        ? ", totalActivityTime = " + Math.abs( TimeInspector
+                        .getInspector()
+                        .getTimeDifferenceInSEconds( row.getTimestamp( "startedToUse" ).toInstant() ) ) : "" )
+                        + " WHERE uuidOfPatrul = " + patrul.getUuid()
+                        + " AND simCardNumber = '" + row.getString( "simCardNumber" ) + "';" ) ); }
+
     public Mono< ApiResponseModel > login ( PatrulLoginRequest patrulLoginRequest ) {
         Row row = this.session.execute( "SELECT * FROM " +
-                        CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS_LOGIN_TABLE.name()
-                        + " where login = '" + patrulLoginRequest.getLogin() + "';" ).one();
+                CassandraTables.TABLETS.name() + "."
+                + CassandraTables.PATRULS_LOGIN_TABLE.name()
+                + " where login = '" + patrulLoginRequest.getLogin() + "';" ).one();
         return row != null ? this.getPatrul( row.getUUID( "uuid" ) )
             .flatMap( patrul -> {
-                if ( patrul.getPassword()
-                        .equals( patrulLoginRequest.getPassword() ) ) {
+                if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {
                     patrul.setStartedToWorkDate( new Date() );
+                    if ( !patrul.getSimCardNumber().equals( "null" )
+                        && !patrul.getSimCardNumber().equals( patrulLoginRequest.getSimCardNumber() ) )
+                        this.updateStatus( patrul, LOGOUT );
                     patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
                     patrul.setTokenForLogin( Base64.getEncoder().encodeToString( (
                             patrul.getUuid() + "@" +
                                     patrul.getPassportNumber()
                                     + "@" + patrul.getPassword()
+                                    + "@" + patrul.getSimCardNumber()
                                     + "@" + Archive.getAchieve().generateToken() )
                             .getBytes( StandardCharsets.UTF_8 ) ) );
                     this.update( patrul ).subscribe(); // savs all new changes in patrul object
-                    return Mono.just( ApiResponseModel.builder()
-                            .data( com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                    TabletUsage tabletUsage1 = this.checkTableUsage( patrul );
+                    if ( tabletUsage1 == null ) Mono.just( new TabletUsage( patrul ) )
+                            .subscribe( tabletUsage -> this.session.execute( "INSERT INTO "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.TABLETS_USAGE_TABLE.name()
+                                    + CassandraConverter
+                                        .getInstance()
+                                        .getALlNames( TabletUsage.class )
+                                    + " VALUES ('"
+                                    + tabletUsage.getStartedToUse().toInstant() + "', '"
+                                    + tabletUsage.getLastActiveDate().toInstant() + "', "
+
+                                    + tabletUsage.getUuidOfPatrul() + ", '"
+                                    + tabletUsage.getSimCardNumber() + "', "
+                                    + tabletUsage.getTotalActivityTime() + ") IF NOT EXISTS;" ) );
+                    else Mono.just( tabletUsage1 )
+                            .subscribe( tabletUsage -> this.session.execute( "UPDATE "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.TABLETS_USAGE_TABLE.name()
+                                    + " SET lastActiveDate = '" + new Date().toInstant() + "' "
+                                    + " WHERE uuidOfPatrul = " + patrul.getUuid()
+                                    + " AND simCardNumber = '" + patrul.getSimCardNumber() + "' IF EXISTS;" ) );
+
+                    return Mono.just( ApiResponseModel
+                            .builder()
+                            .data( com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
                                     .type( patrul.getUuid().toString() )
                                     .data( patrul )
                                     .build() )
-                            .success( CassandraDataControl.getInstance()
+                            .success( CassandraDataControl
+                                    .getInstance()
                                     .login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
                                     .message( "Authentication successfully passed" )
                                     .code( 200 )
                                     .build() )
                             .build() );
-                } else return Mono.just( ApiResponseModel.builder() // in case of wrong password
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
+                } else return Mono.just( ApiResponseModel
+                        .builder() // in case of wrong password
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
                                 .code( 201 )
                                 .message( "Wrong Login or password" )
                                 .build() )
                         .success( false )
-                        .build() ); } ) : Mono.just( ApiResponseModel.builder() // in case of wrong login
-                .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                        .code( 201 )
-                        .message( "Wrong Login or password" )
-                        .build() )
-                .success( false )
-                .build() ); }
+                        .build() ); } ) :
+                Mono.just( ApiResponseModel
+                    .builder() // in case of wrong login
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                            .builder()
+                            .code( 201 )
+                            .message( "Wrong Login or password" )
+                            .build() )
+                    .success( false )
+                    .build() ); }
 
     // sets every day when Patrul start to work in morning
     public Mono< ApiResponseModel > startToWork ( String token ) { return this.getPatrul( this.decode( token ) )
             .flatMap( patrul -> {
+                this.updateStatus( patrul, START_TO_WORK );
                 patrul.setTotalActivityTime( 0L ); // set to 0 every day
                 patrul.setStartedToWorkDate( new Date() ); // registration of time every day
                 return this.update( patrul )
@@ -1376,53 +1429,66 @@ public final class CassandraDataControl {
 
     // uses when Patrul wants to change his status from active to pause
     public Mono< ApiResponseModel > setInPause ( String token ) { return this.getPatrul( this.decode( token ) )
-            .flatMap( patrul -> Mono.just( ApiResponseModel
-                    .builder()
-                    .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status
-                            .builder()
-                            .message( "Patrul set in pause" )
-                            .code( 200 )
-                            .build() )
-                    .build() ) ); }
+            .flatMap( patrul -> {
+                this.updateStatus( patrul, SET_IN_PAUSE );
+                return Mono.just( ApiResponseModel
+                        .builder()
+                        .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ) )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "Patrul set in pause" )
+                                .code( 200 )
+                                .build() )
+                        .build() ); } ); }
 
     // uses when Patrul wants to change his status from pause to active
     public Mono< ApiResponseModel > backToWork ( String token ) { return this.getPatrul( this.decode( token ) )
-            .flatMap( patrul -> Mono.just( ApiResponseModel
-                    .builder()
-                    .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.RETURNED_TO_WORK ) )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status
-                            .builder()
-                            .message( "Patrul returned to work" )
-                            .code( 200 )
-                            .build() )
-                    .build() ) ); }
+            .flatMap( patrul -> {
+                this.updateStatus( patrul, RETURNED_TO_WORK );
+                return Mono.just( ApiResponseModel
+                        .builder()
+                        .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.RETURNED_TO_WORK ) )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "Patrul returned to work" )
+                                .code( 200 )
+                                .build() )
+                        .build() ); } ); }
 
     // uses when patrul finishes his work in the evening
     public Mono< ApiResponseModel > stopToWork ( String token ) { return this.getPatrul( this.decode( token ) )
-            .flatMap( patrul -> Mono.just( ApiResponseModel
-                    .builder()
-                    .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.STOP_TO_WORK ) )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status
-                            .builder()
-                            .message( "Patrul stopped his job" )
-                            .code( 200 )
-                            .build() )
-                    .build() ) ); }
+            .flatMap( patrul -> {
+                this.updateStatus( patrul, STOP_TO_WORK );
+                return Mono.just( ApiResponseModel
+                        .builder()
+                        .success( this.login( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.STOP_TO_WORK ) )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .message( "Patrul stopped his job" )
+                                .code( 200 )
+                                .build() )
+                        .build() ); } ); }
 
     public Mono< ApiResponseModel > accepted ( String token ) { return this.getPatrul( this.decode( token ) )
-            .flatMap( patrul -> TaskInspector.getInstance()
-                    .changeTaskStatus( patrul, ACCEPTED ) ); }
+            .flatMap( patrul -> {
+                this.updateStatus( patrul, ACCEPTED );
+                return TaskInspector
+                        .getInstance()
+                        .changeTaskStatus( patrul, ACCEPTED ); } ); }
 
     public Mono< ApiResponseModel > arrived ( String token ) { return this.getPatrul( this.decode( token ) )
             .map( s -> SerDes.getSerDes().deserialize( s ) )
-            .flatMap( patrul -> TaskInspector
-                    .getInstance()
-                    .changeTaskStatus( patrul, ARRIVED ) ); }
+            .flatMap( patrul -> {
+                this.updateStatus( patrul, ARRIVED );
+                return TaskInspector
+                        .getInstance()
+                        .changeTaskStatus( patrul, ARRIVED ); } ); }
 
     public Mono< ApiResponseModel > logout ( String token ) { return this.getPatrul( this.decode( token ) )
             .flatMap( patrul -> {
                 patrul.setTokenForLogin( null );
+                patrul.setSimCardNumber( null );
+                this.updateStatus( patrul, LOGOUT );
                 return this.update( patrul )
                         .flatMap( aBoolean -> Mono.just( ApiResponseModel
                                 .builder()
@@ -1432,7 +1498,16 @@ public final class CassandraDataControl {
                                         .builder()
                                         .message( "See you soon my darling )))" )
                                         .code( 200 )
-                                        .build() ).build() ) ); } ); }
+                                        .build() )
+                                .build() ) ); } ); }
+
+    public Mono< List< TabletUsage > > getAllUsedTablets (Patrul patrul ) { return Flux.fromStream(
+            this.session.execute( "SELECT * FROM "
+                            + CassandraTables.TABLETS.name() + "." + CassandraTables.TABLETS_USAGE_TABLE.name()
+                        + " WHERE uuidOfPatrul = " + patrul.getUuid() + ";" )
+                .all().stream() )
+                .map( TabletUsage::new )
+                .collectList(); }
 
     public void addAllPatrulsToChatService ( String token ) { this.getPatrul()
             .subscribe( patrul -> {

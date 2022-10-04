@@ -523,8 +523,7 @@ public final class TaskInspector {
                 .subscribe();
 
         KafkaDataControl.getInstance()
-                .writeToKafka(
-                        CassandraDataControl
+                .writeToKafka( CassandraDataControl
                                 .getInstance().addValue(
                                         Notification.builder()
                                                 .type( ESCORT.name() )

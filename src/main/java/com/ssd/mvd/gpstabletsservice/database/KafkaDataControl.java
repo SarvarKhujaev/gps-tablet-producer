@@ -16,6 +16,8 @@ import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.apache.kafka.clients.admin.AdminClient;
 
 import org.jetbrains.annotations.NotNull;
+import lombok.Data;
+
 import java.util.logging.Logger;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -23,6 +25,7 @@ import java.util.Properties;
 import java.util.HashMap;
 import java.util.Map;
 
+@Data
 public class KafkaDataControl {
     private final AdminClient client;
     private final KafkaTemplate< String, String > kafkaTemplate;
@@ -56,33 +59,38 @@ public class KafkaDataControl {
 
     private Properties setProperties () {
         Properties properties = new Properties();
-        properties.put( AdminClientConfig.CLIENT_ID_CONFIG, this.ID );
-        properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.PATH );
+        properties.put( AdminClientConfig.CLIENT_ID_CONFIG, this.getID() );
+        properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.getPATH() );
         return properties; }
 
     public void getNewTopic ( String imei ) {
-        this.client.createTopics( Collections.singletonList( TopicBuilder.name( imei ).partitions(5 ).replicas(3 ).build() ) );
+        this.getClient()
+                .createTopics( Collections.singletonList( TopicBuilder
+                        .name( imei )
+                        .partitions(5 )
+                        .replicas(3 )
+                        .build() ) );
         this.logger.info( "Topic: " + imei + " was created" ); }
 
     public static KafkaDataControl getInstance () { return instance != null ? instance : ( instance = new KafkaDataControl() ); }
 
     private KafkaTemplate< String, String > kafkaTemplate () {
         Map< String, Object > map = new HashMap<>();
-        map.put( ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.PATH );
+        map.put( ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.getPATH() );
         map.put( ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class );
         map.put( ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class );
         return new KafkaTemplate<>( new DefaultKafkaProducerFactory<>( map ) ); }
 
     private KafkaDataControl () {
         this.kafkaTemplate = this.kafkaTemplate();
-        this.logger.info( "KafkaDataControl was created" );
+        this.getLogger().info( "KafkaDataControl was created" );
         this.client = KafkaAdminClient.create( this.setProperties() );
-        this.getNewTopic( this.carTotalData );
-        this.getNewTopic( this.notification );
-        this.getNewTopic( this.activeTask ); }
+        this.getNewTopic( this.getCarTotalData() );
+        this.getNewTopic( this.getNotification() );
+        this.getNewTopic( this.getActiveTask() ); }
 
-    public String writeToKafka ( String card ) {
-        this.kafkaTemplate.send( this.activeTask, card ).addCallback( new ListenableFutureCallback<>() {
+    public void writeToKafka ( String card ) {
+        this.getKafkaTemplate().send( this.getActiveTask(), card ).addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: "
                     + LocalDateTime.now() ); }
@@ -90,11 +98,10 @@ public class KafkaDataControl {
             @Override
             public void onSuccess( SendResult< String, String > result ) { logger.info("Kafka got ActiveTask: "
                     + " with offset: "
-                    + result.getRecordMetadata().offset() ); }
-        } ); return card; }
+                    + result.getRecordMetadata().offset() ); } } ); }
 
     public CarTotalData writeToKafka ( CarTotalData card ) {
-        this.kafkaTemplate.send( this.carTotalData, SerDes.getSerDes().serialize( card ) )
+        this.getKafkaTemplate().send( this.getCarTotalData(), SerDes.getSerDes().serialize( card ) )
                 .addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
@@ -106,7 +113,8 @@ public class KafkaDataControl {
         } ); return card; }
 
     public void writeToKafka ( Notification notification ) {
-        this.kafkaTemplate.send( this.notification, SerDes.getSerDes().serialize( notification ) ).addCallback( new ListenableFutureCallback<>() {
+        this.getKafkaTemplate().send( this.getNotification(), SerDes.getSerDes().serialize( notification ) )
+                .addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
 
@@ -118,8 +126,8 @@ public class KafkaDataControl {
 
     public void clear () {
         instance = null;
-        this.client.close();
-        this.kafkaTemplate.flush();
+        this.getClient().close();
+        this.getKafkaTemplate().flush();
         CassandraDataControl.getInstance().delete();
-        this.logger.info( "Kafka is closed successfully" ); }
+        this.getLogger().info( "Kafka is closed successfully" ); }
 }
