@@ -1,11 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import lombok.Data;
 import java.util.UUID;
 import java.time.Duration;
-
-import lombok.Data;
 import reactor.core.publisher.Mono;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpEntity;
@@ -13,8 +11,20 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
+
 @Data
 public class UnirestController {
+    private final String CHAT_SERVICE_DOMAIN = GpsTabletsServiceApplication
+            .context
+            .getEnvironment()
+            .getProperty( "variables.CHAT_SERVICE_DOMAIN" );
+
+    private final String CHAT_SERVICE_PREFIX = GpsTabletsServiceApplication
+            .context
+            .getEnvironment()
+            .getProperty( "variables.CHAT_SERVICE_PREFIX" );
     private static UnirestController serDes = new UnirestController();
 
     public static UnirestController getInstance () { return serDes != null ? serDes : ( serDes = new UnirestController() ); }
@@ -34,7 +44,9 @@ public class UnirestController {
                 .onErrorStop()
                 .log()
                 .subscribe( req -> restTemplate( patrulId.split( "@" )[1] )
-                        .exchange( "https://ms.ssd.uz/chat/delete-user",
+                        .exchange( this.CHAT_SERVICE_DOMAIN + "/"
+                                + this.CHAT_SERVICE_PREFIX
+                                + "/delete-user",
                                 HttpMethod.POST,
                                 new HttpEntity<>( req, null ),
                                 String.class ) );
@@ -52,7 +64,9 @@ public class UnirestController {
                 .onErrorStop()
                 .log()
                 .subscribe( req -> restTemplate( patrul.getSpecialToken() )
-                        .exchange("https://ms.ssd.uz/chat/edit-user",
+                        .exchange( this.CHAT_SERVICE_DOMAIN + "/"
+                                        + this.CHAT_SERVICE_PREFIX
+                                        + "/edit-user",
                                 HttpMethod.POST,
                                 new HttpEntity<>( req, null ),
                                 String.class ) );
@@ -68,7 +82,9 @@ public class UnirestController {
                 .onErrorStop()
                 .doOnError( throwable -> System.out.println( throwable.getMessage() ) )
                 .subscribe( req -> this.restTemplate( patrul.getSpecialToken() )
-                        .exchange( "https://ms.ssd.uz/chat/add-user",
+                        .exchange( this.CHAT_SERVICE_DOMAIN + "/"
+                                        + this.CHAT_SERVICE_PREFIX
+                                        + "/add-user",
                                 HttpMethod.POST,
                                 new HttpEntity<>( req, null ),
                                 String.class ) );

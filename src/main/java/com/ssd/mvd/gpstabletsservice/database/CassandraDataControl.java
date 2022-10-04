@@ -113,8 +113,8 @@ public final class CassandraDataControl {
             .withCodecRegistry( this.getCodecRegistry() )
             .withRetryPolicy( DefaultRetryPolicy.INSTANCE )
             .withQueryOptions( new QueryOptions()
-                    .setConsistencyLevel( ConsistencyLevel.QUORUM )
-                    .setDefaultIdempotence( true ) )
+                    .setDefaultIdempotence( true )
+                    .setConsistencyLevel( ConsistencyLevel.QUORUM ) )
             .withSocketOptions( options )
             .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
             .withPoolingOptions( new PoolingOptions()
@@ -452,18 +452,16 @@ public final class CassandraDataControl {
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< Polygon > getPolygon ( UUID uuid ) {
-        Row row = this.session.execute(
-                "Select * from "
+        Row row = this.session.execute( "SELECT * FROM "
                         + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name()
                         + " where uuid = " + uuid ).one();
         return Mono.justOrEmpty( row != null ? new Polygon( row ) : null ); }
 
     public Flux< Polygon > getAllPolygons () { return Flux.fromStream(
-            this.session.execute(
-                    "SELECT * FROM "
+            this.session.execute( "SELECT * FROM "
                     + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name() + ";"
-            ).all().stream()
-    ).map( Polygon::new ); }
+            ).all().stream() )
+            .map( Polygon::new ); }
 
     public Mono< ReqCar > getCar ( UUID uuid ) { return Mono.just(
             this.session.execute( "SELECT * FROM "
@@ -474,17 +472,21 @@ public final class CassandraDataControl {
     // checks trackers. if this tracker already exists in database, it checks usual cars and escort database
     private Boolean checkTracker ( String trackerId ) { return this.session.execute(
                 "SELECT * FROM "
-                        + "escort.trackersid where trackersId = '" + trackerId + "';" ).one() == null
+                        + CassandraTables.ESCORT.name() + "." + CassandraTables.TRACKERS_ID.name()
+                        + " where trackersId = '" + trackerId + "';" ).one() == null
                 && this.session.execute(
                 "SELECT * FROM "
-                        + "trackers.trackersid where trackersId = '" + trackerId + "';" ).one() == null; }
+                        + CassandraTables.TRACKERS.name() + "." + CassandraTables.TRACKERS_ID.name()
+                        + " where trackersId = '" + trackerId + "';" ).one() == null; }
 
     private Boolean checkCarNumber ( String carNumber ) { return this.session.execute(
                 "SELECT * FROM "
-                        + "escort.tuple_of_car where gosnumber = '" + carNumber + "';" ).one() == null
+                        + CassandraTables.ESCORT.name() + "." + CassandraTables.TUPLE_OF_CAR.name()
+                        + " where gosnumber = '" + carNumber + "';" ).one() == null
                 && this.session.execute(
                 "SELECT * FROM "
-                        + "tablets.cars where trackersId = '" + carNumber + "';" ).one() == null; }
+                        + CassandraTables.TABLETS.name() + "." + CassandraTables.CARS.name()
+                        + " where trackersId = '" + carNumber + "';" ).one() == null; }
 
     public Mono< ApiResponseModel > delete ( String gosno ) { return this.getCar( UUID.fromString( gosno ) )
                 .flatMap( reqCar -> {
@@ -1368,7 +1370,8 @@ public final class CassandraDataControl {
                     .builder()
                     .data( com.ssd.mvd.gpstabletsservice.entity.Data
                             .builder()
-                            .data( patrul ).build() )
+                            .data( patrul )
+                            .build() )
                     .status( com.ssd.mvd.gpstabletsservice.response.Status
                             .builder()
                             .message( patrul.getUuid().toString() )

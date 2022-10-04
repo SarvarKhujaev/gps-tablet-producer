@@ -84,11 +84,10 @@ public class CassandraDataControlForTasks {
         this.logger.info("Starting CassandraDataControl for tasks" ); }
 
     public List< ViolationsInformation > getViolationsInformationList ( String gosnumber ) { return this.session
-            .execute(
-                    "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "." + CassandraTables.CARTOTALDATA.name()
-                            + " WHERE gosnumber = '" + gosnumber + "';"
-            ).one().getList( "violationsInformationsList", ViolationsInformation.class ); }
+            .execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "." + CassandraTables.CARTOTALDATA.name()
+                    + " WHERE gosnumber = '" + gosnumber + "';" )
+            .one().getList( "violationsInformationsList", ViolationsInformation.class ); }
 
     public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return Mono.just(
             ApiResponseModel
@@ -104,9 +103,7 @@ public class CassandraDataControlForTasks {
                             .data( new CardDetails(
                                     SerDes
                                             .getSerDes()
-                                            .deserializeCarTotalData(
-                                                    this.session
-                                                            .execute(
+                                            .deserializeCarTotalData( this.session.execute(
                                                                     "select * FROM "
                                                                             + CassandraTables.TABLETS.name() + "."
                                                                             + CassandraTables.CARTOTALDATA.name()

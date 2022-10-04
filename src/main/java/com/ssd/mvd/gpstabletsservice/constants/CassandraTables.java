@@ -13,4 +13,8 @@ public enum CassandraTables {
     // tables for ESCORT Entity
     ESCORT,
     COUNTRIES, TUPLE_OF_CAR, TUPLE_OF_ESCORT, POINTS_ENTITY, POLYGON_FOR_ESCORT,
+
+    // tables for TRACKERS
+    TRACKERS,
+    TRACKERS_LOCATION_TABLE, TRACKERS_ID
 }

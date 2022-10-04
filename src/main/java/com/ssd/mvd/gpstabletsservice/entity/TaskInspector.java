@@ -47,11 +47,11 @@ public final class TaskInspector {
             case ACCEPTED -> patrul.getName()
                     + " ACCEPTED his task: " + patrul.getTaskId()
                     + " " + patrul.getTaskTypes()
-                    + " at " + new Date();
+                    + " at: " + new Date();
 
             case FINISHED -> patrul.getName()
                     + " completed his task "
-                    + " at " + new Date();
+                    + " at: " + new Date();
 
             default -> patrul.getName()
                     + " has been canceled from task "
@@ -108,24 +108,23 @@ public final class TaskInspector {
                 .writeToKafka(
                         CassandraDataControl
                                 .getInstance()
-                                .addValue(
-                                        Notification
-                                                .builder()
-                                                .type( CARD_102.name() )
-                                                .uuid( UUID.randomUUID() )
-                                                .status( patrul.getStatus() )
-                                                .id( card.getCardId().toString() )
-                                                .carNumber( patrul.getCarNumber() )
-                                                .taskTypes( patrul.getTaskTypes() )
-                                                .policeType( patrul.getPoliceType() )
-                                                .latitudeOfTask( card.getLatitude() )
-                                                .notificationWasCreated( new Date() )
-                                                .longitudeOfTask( card.getLongitude() )
-                                                .title( this.generateText( patrul, status ) )
-                                                .passportSeries( patrul.getPassportNumber() )
-                                                .nsfOfPatrul( patrul.getSurnameNameFatherName() )
-                                                .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                                                .build() ) );
+                                .addValue( Notification
+                                        .builder()
+                                        .type( CARD_102.name() )
+                                        .uuid( UUID.randomUUID() )
+                                        .status( patrul.getStatus() )
+                                        .id( card.getCardId().toString() )
+                                        .carNumber( patrul.getCarNumber() )
+                                        .taskTypes( patrul.getTaskTypes() )
+                                        .policeType( patrul.getPoliceType() )
+                                        .latitudeOfTask( card.getLatitude() )
+                                        .notificationWasCreated( new Date() )
+                                        .longitudeOfTask( card.getLongitude() )
+                                        .title( this.generateText( patrul, status ) )
+                                        .passportSeries( patrul.getPassportNumber() )
+                                        .nsfOfPatrul( patrul.getSurnameNameFatherName() )
+                                        .address( card.getAddress() != null ? card.getAddress() : "unknown" )
+                                        .build() ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventCar eventCar ) {
