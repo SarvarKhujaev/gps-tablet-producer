@@ -104,11 +104,7 @@ public final class CassandraDataControl {
                     .context
                     .getEnvironment()
                     .getProperty( "variables.CASSANDRA_PORT" ) ) )
-                .addContactPoints( GpsTabletsServiceApplication
-                        .context
-                        .getEnvironment()
-                        .getProperty( "variables.CASSANDRA_HOST" )
-                        .split( ", " ) )
+                .addContactPoints( "10.254.5.1, 10.254.5.2, 10.254.5.3".split( ", " ) )
             .withProtocolVersion( ProtocolVersion.V4 )
             .withCodecRegistry( this.getCodecRegistry() )
             .withRetryPolicy( DefaultRetryPolicy.INSTANCE )
@@ -176,13 +172,11 @@ public final class CassandraDataControl {
                         "status text, " +
                         "PRIMARY KEY( (uuid) ) );" );
 
-        this.session.execute(
-                "CREATE TABLE IF NOT EXISTS "
+        this.session.execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS_LOGIN_TABLE.name()
                 + " ( login text, password text, uuid uuid, PRIMARY KEY ( (login), uuid ) );" );
 
-        this.session.execute(
-                "CREATE TABLE IF NOT EXISTS "
+        this.session.execute( "CREATE TABLE IF NOT EXISTS "
                         + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS_STATUS_TABLE.name()
                         + " ( uuid uuid, " +
                         "date timestamp, " +
