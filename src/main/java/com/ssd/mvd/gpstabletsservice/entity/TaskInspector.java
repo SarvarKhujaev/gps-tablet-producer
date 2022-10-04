@@ -34,8 +34,7 @@ public final class TaskInspector {
 
     public static TaskInspector getInstance() { return taskInspector != null ? taskInspector : new TaskInspector(); }
 
-    private String generateText ( Patrul patrul, Status status ) {
-        return switch ( status ) {
+    private String generateText ( Patrul patrul, Status status ) { return switch ( status ) {
             case ATTACHED -> patrul.getName()
                     + " got new task: " + patrul.getTaskId()
                     + " " + patrul.getTaskTypes();
@@ -104,12 +103,14 @@ public final class TaskInspector {
                 .getInstance()
                 .addValue( card );
 
-        KafkaDataControl.getInstance()
+        KafkaDataControl
+                .getInstance()
                 .writeToKafka(
                         CassandraDataControl
                                 .getInstance()
                                 .addValue(
-                                        Notification.builder()
+                                        Notification
+                                                .builder()
                                                 .type( CARD_102.name() )
                                                 .uuid( UUID.randomUUID() )
                                                 .status( patrul.getStatus() )
@@ -120,10 +121,10 @@ public final class TaskInspector {
                                                 .latitudeOfTask( card.getLatitude() )
                                                 .notificationWasCreated( new Date() )
                                                 .longitudeOfTask( card.getLongitude() )
+                                                .title( this.generateText( patrul, status ) )
                                                 .passportSeries( patrul.getPassportNumber() )
                                                 .nsfOfPatrul( patrul.getSurnameNameFatherName() )
                                                 .address( card.getAddress() != null ? card.getAddress() : "unknown" )
-                                                .title( this.generateText( patrul, status ) )
                                                 .build() ) );
         return patrul; }
 

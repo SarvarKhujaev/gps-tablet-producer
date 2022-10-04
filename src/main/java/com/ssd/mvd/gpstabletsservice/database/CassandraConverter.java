@@ -73,7 +73,8 @@ public class CassandraConverter {
 
     public String convertListOfPointsToCassandra ( List< ? > pointsList ) {
         result = "[";
-        pointsList.forEach( points -> result += this.convertClassToCassandraTable( points ) + ", " );
+        ( pointsList != null ? pointsList : new ArrayList<>() )
+                .forEach( points -> result += this.convertClassToCassandraTable( points ) + ", " );
         return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
 
     public String convertMapToCassandra ( Map< String, String > listOfTasks ) {
