@@ -36,8 +36,7 @@ public class Archive {
         return this.encoder.encodeToString( bytes ); }
 
     // uses to link Card to current Patrul object, either additional Patrul in case of necessary
-    public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) {
-        return Mono.just( ApiResponseModel
+    public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) { return Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status.builder()
@@ -47,8 +46,7 @@ public class Archive {
                                 .changeTaskStatus( patrul, ATTACHED, card )
                                 .getName() ).build() ).build() ); }
 
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventCar card ) {
-        return Mono.just( ApiResponseModel
+    public Mono< ApiResponseModel > save ( Patrul patrul, EventCar card ) { return Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
@@ -60,8 +58,7 @@ public class Archive {
                         .build() )
                 .build() ); }
 
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventFace card ) {
-        return Mono.just( ApiResponseModel
+    public Mono< ApiResponseModel > save ( Patrul patrul, EventFace card ) { return Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
@@ -73,8 +70,7 @@ public class Archive {
                         .build() )
                 .build() ); }
 
-    public Mono< ApiResponseModel > save ( Patrul patrul, CarEvent card ) {
-        return Mono.just( ApiResponseModel
+    public Mono< ApiResponseModel > save ( Patrul patrul, CarEvent card ) { return Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
@@ -86,8 +82,7 @@ public class Archive {
                         .build() )
                 .build() ); }
 
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventBody card ) {
-        return Mono.just( ApiResponseModel
+    public Mono< ApiResponseModel > save ( Patrul patrul, EventBody card ) { return Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
@@ -99,8 +94,7 @@ public class Archive {
                         .build() )
                 .build() ); }
 
-    public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvent card ) {
-        return Mono.just( ApiResponseModel
+    public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvent card ) { return Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
@@ -115,8 +109,10 @@ public class Archive {
         TaskInspector
                 .getInstance()
                 .changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask );
-        return Mono.just( ApiResponseModel.builder()
-                .status( Status.builder()
+        return Mono.just( ApiResponseModel
+                .builder()
+                .status( Status
+                        .builder()
                         .message( "SelfEmployment was saved" )
                         .code( 200 )
                         .build() )

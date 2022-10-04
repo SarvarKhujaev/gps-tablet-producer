@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.Comparator;
 
@@ -10,7 +11,7 @@ import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
-import com.ssd.mvd.gpstabletsservice.response.Status;
+import com.ssd.mvd.gpstabletsservice.entity.TabletUsage;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -152,8 +153,8 @@ public class PatrulController {
                                 .builder()
                                 .message( "Successfully added to chat service" )
                                 .code( 200 )
-                                .build()
-                        ).build() ); }
+                                .build() )
+                .build() ); }
 
     @MessageMapping ( value = "getListOfPatrulsByUUID" )
     public Flux< Patrul > getListOfPatrulsByUUID ( CardRequest< ? > cardRequest ) { return Flux.fromStream(
@@ -170,4 +171,12 @@ public class PatrulController {
             .flatMap( patrul -> CassandraDataControl
                     .getInstance()
                     .getPatrulStatistics( request ) ) : Mono.empty(); }
+
+    @MessageMapping ( value = "getAllUsedTablets" )
+    public Mono< List< TabletUsage > > getAllUsedTablets (String uuid ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( UUID.fromString( uuid ) )
+            .flatMap( patrul -> CassandraDataControl
+                    .getInstance()
+                    .getAllUsedTablets( patrul ) ); }
 }

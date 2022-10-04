@@ -21,20 +21,17 @@ public class CassandraConverter {
 
     public String getALlNames ( Class object ) {
         StringBuilder result = new StringBuilder( "( " );
-        this.getFields( object )
-            .forEach( field -> result.append( field.getName() ).append( ", " ) );
+        this.getFields( object ).forEach( field -> result.append( field.getName() ).append( ", " ) );
         return result.substring( 0, result.length() - 2 ) + " )"; }
 
-    public Stream< Field > getFields ( Class object ) { return Arrays.stream(
-                    object.getDeclaredFields() )
+    public Stream< Field > getFields ( Class object ) { return Arrays.stream( object.getDeclaredFields() )
             .toList()
             .stream(); }
 
     public String convertClassToCassandra ( Class object ) {
         StringBuilder result = new StringBuilder( "( " );
         this.getFields( object )
-                .filter(
-                        field -> field.getType().equals( String.class )
+                .filter( field -> field.getType().equals( String.class )
                                 ^ field.getType().equals( Integer.class )
                                 ^ field.getType().equals( Double.class )
                                 ^ field.getType().equals( UUID.class )
@@ -68,8 +65,8 @@ public class CassandraConverter {
                         result.append( field.get( object ) instanceof String ?
                                 "'" + ( (String) field.get( object ) ).replaceAll( "'", "" ) + "'"
                                 : field.get( object ) ).append( ", " );
-                    } catch ( IllegalAccessException e ) { e.printStackTrace(); }
-                } ); return result.substring( 0, result.length() - 2 ) + "}"; }
+                    } catch ( IllegalAccessException e ) { e.printStackTrace(); } } );
+        return result.substring( 0, result.length() - 2 ) + "}"; }
 
     public String convertListOfPointsToCassandra ( List< ? > pointsList ) {
         result = "[";
@@ -83,135 +80,123 @@ public class CassandraConverter {
         return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
 
     public void registerCodecForPatrul ( String dbName, String userType ) {
-        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
-                .getCodecRegistry().register(
-                        new CodecRegistrationForPatrul (
-                                CassandraDataControl
-                                        .getInstance()
-                                        .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
-                                                        .getInstance()
-                                                        .getCluster()
-                                                        .getMetadata()
-                                                        .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), Patrul.class ) ); }
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry()
+                .register( new CodecRegistrationForPatrul ( CassandraDataControl
+                        .getInstance()
+                        .getCodecRegistry()
+                        .codecFor( CassandraDataControl
+                                .getInstance()
+                                .getCluster()
+                                .getMetadata()
+                                .getKeyspace( dbName )
+                                .getUserType( userType ) ),
+                        Patrul.class ) ); }
 
     public void registerCodecForReport ( String dbName, String userType ) {
-        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
-                .getCodecRegistry().register(
-                        new CodecRegistrationForReport (
-                                CassandraDataControl
-                                        .getInstance()
-                                        .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
-                                                        .getInstance()
-                                                        .getCluster()
-                                                        .getMetadata()
-                                                        .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), ReportForCard.class ) ); }
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry()
+                .register( new CodecRegistrationForReport ( CassandraDataControl
+                        .getInstance()
+                        .getCodecRegistry()
+                        .codecFor( CassandraDataControl
+                                .getInstance()
+                                .getCluster()
+                                .getMetadata()
+                                .getKeyspace( dbName )
+                                .getUserType( userType ) ),
+                        ReportForCard.class ) ); }
 
     public void registerCodecForPoliceType ( String dbName, String userType ) {
-        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
-                .register(
-                        new CodecRegistrationForPoliceType (
-                                CassandraDataControl
-                                        .getInstance()
-                                        .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
-                                                        .getInstance()
-                                                        .getCluster()
-                                                        .getMetadata()
-                                                        .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), PoliceType.class ) ); }
+                .register( new CodecRegistrationForPoliceType ( CassandraDataControl
+                        .getInstance()
+                        .getCodecRegistry()
+                        .codecFor( CassandraDataControl
+                                .getInstance()
+                                .getCluster()
+                                .getMetadata()
+                                .getKeyspace( dbName )
+                                .getUserType( userType ) ),
+                        PoliceType.class ) ); }
 
     public void registerCodecForCameraList ( String dbName, String userType ) {
-        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
-                .getCodecRegistry().register(
-                        new CodecRegistrationForCameraList (
-                                CassandraDataControl
-                                        .getInstance()
-                                        .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
-                                                        .getInstance()
-                                                        .getCluster()
-                                                        .getMetadata()
-                                                        .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), CameraList.class ) ); }
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry()
+                .register( new CodecRegistrationForCameraList ( CassandraDataControl
+                        .getInstance()
+                        .getCodecRegistry()
+                        .codecFor( CassandraDataControl
+                                .getInstance()
+                                .getCluster()
+                                .getMetadata()
+                                .getKeyspace( dbName )
+                                .getUserType( userType ) ),
+                                CameraList.class ) ); }
 
     public void registerCodecForPointsList ( String dbName, String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
-                .register (
-                        new CodecRegistrationForPointsList(
-                                CassandraDataControl
+                .register ( new CodecRegistrationForPointsList( CassandraDataControl
                                         .getInstance()
                                         .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
+                                        .codecFor( CassandraDataControl
                                                         .getInstance()
                                                         .getCluster()
                                                         .getMetadata()
                                                         .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), Points.class ) ); }
+                                                        .getUserType( userType ) ),
+                                Points.class ) ); }
 
     public void registerCodecForPolygonType ( String dbName, String userType ) {
-        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
-                .getCodecRegistry().register(
-                        new CodecRegistrationForPolygonType (
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry()
+                .register( new CodecRegistrationForPolygonType (
                                 CassandraDataControl
                                         .getInstance()
                                         .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
+                                        .codecFor( CassandraDataControl
                                                         .getInstance()
                                                         .getCluster()
                                                         .getMetadata()
                                                         .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), PolygonType.class ) ); }
+                                                        .getUserType( userType ) ),
+                                PolygonType.class ) ); }
 
     public void registerCodecForPolygonEntity ( String dbName, String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
-                .register (
-                        new CodecRegistrationForPolygonEntity (
-                                CassandraDataControl
+                .register ( new CodecRegistrationForPolygonEntity ( CassandraDataControl
                                         .getInstance()
                                         .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
+                                        .codecFor ( CassandraDataControl
                                                         .getInstance()
                                                         .getCluster()
                                                         .getMetadata()
                                                         .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), PolygonEntity.class ) ); }
+                                                        .getUserType( userType ) ),
+                                PolygonEntity.class ) ); }
 
     public void registerCodecForViolationsInformation ( String dbName, String userType ) {
-        CassandraDataControl.getInstance() // create a new codec for PolygonEntity.class
-                .getCodecRegistry().register(
-                        new CodecRegistrationForViolationsInformation (
-                                CassandraDataControl
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry()
+                .register( new CodecRegistrationForViolationsInformation ( CassandraDataControl
                                         .getInstance()
                                         .getCodecRegistry()
-                                        .codecFor(
-                                                CassandraDataControl
+                                        .codecFor( CassandraDataControl
                                                         .getInstance()
                                                         .getCluster()
                                                         .getMetadata()
                                                         .getKeyspace( dbName )
-                                                        .getUserType( userType )
-                                        ), ViolationsInformation.class ) ); }
+                                                        .getUserType( userType ) ),
+                                ViolationsInformation.class ) ); }
 }

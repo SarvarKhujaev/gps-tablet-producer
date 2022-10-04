@@ -19,6 +19,10 @@ public class TimeInspector {
 
     private static TimeInspector inspector = new TimeInspector();
 
+    public static TimeInspector getInspector () { return inspector != null ? inspector : ( inspector = new TimeInspector() ); }
+
+    private Date setDate () { return ( this.date = new Date() ); }
+
     // for checking current time of task ending
     public Boolean checkDate ( Instant instant ) { return TimeInspector.getInspector().getEndTimeForEvening() >= this.setDate().getHours()
             && this.date.getHours() >= TimeInspector.getInspector().getStartTimeForMorning() ?
@@ -31,9 +35,7 @@ public class TimeInspector {
                 .getTime() : 0L;
         } catch ( Exception e ) { return 0L; } }
 
-    private Date setDate () { return ( this.date = new Date() ); }
-
     public Long getTimeDifference ( Instant instant ) { return Duration.between( Instant.now(), instant ).toMinutes(); } // for comparing time difference between instance and current time
 
-    public static TimeInspector getInspector () { return inspector != null ? inspector : ( inspector = new TimeInspector() ); }
+    public Long getTimeDifferenceInSEconds ( Instant instant ) { return Duration.between( Instant.now(), instant ).toSeconds(); } // for comparing time difference between instance and current time
 }
