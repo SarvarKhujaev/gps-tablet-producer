@@ -1,14 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import lombok.Data;
 import java.util.UUID;
 import java.time.Duration;
 
+import lombok.Data;
 import reactor.core.publisher.Mono;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.client.RestTemplate;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
 @Data
@@ -66,12 +68,12 @@ public class UnirestController {
                 .onErrorStop()
                 .doOnError( throwable -> System.out.println( throwable.getMessage() ) )
                 .subscribe( req -> this.restTemplate( patrul.getSpecialToken() )
-                        .exchange("https://ms.ssd.uz/chat/add-user",
+                        .exchange( "https://ms.ssd.uz/chat/add-user",
                                 HttpMethod.POST,
                                 new HttpEntity<>( req, null ),
                                 String.class ) );
             patrul.setSpecialToken( null );
-        } catch ( Exception e ) { System.out.println( e.getMessage() ); } }
+        } catch ( HttpClientErrorException e ) { System.out.println( "Error: " + e.getMessage() ); } }
 
     @Data
     public static class ReqId { private UUID id; }

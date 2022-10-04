@@ -1,6 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.entity.Polygon;
 
@@ -17,9 +18,7 @@ public class PolygonController {
     @MessageMapping( value = "deletePolygon" )
     public Mono< ApiResponseModel > deletePolygon ( String uuid ) { return CassandraDataControl
             .getInstance()
-            .delete( CassandraDataControl
-                            .getInstance()
-                            .getPolygon(),
+            .delete( CassandraTables.POLYGON.name(),
                     "uuid",
                     uuid ); }
 
