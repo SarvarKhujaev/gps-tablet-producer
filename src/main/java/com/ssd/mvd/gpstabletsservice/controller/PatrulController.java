@@ -110,10 +110,9 @@ public class PatrulController {
             .checkToken( token ); }
 
     @MessageMapping ( value = "getPatrulDataByToken" )
-    public Mono< Status > getPatrulDataByToken ( String token ) { return CassandraDataControl
+    public Mono< ApiResponseModel > getPatrulDataByToken ( String token ) { return CassandraDataControl
             .getInstance()
-            .checkToken( token )
-            .flatMap( apiResponseModel -> Mono.just( apiResponseModel.getStatus() ) ); }
+            .checkToken( token ); }
 
     @MessageMapping ( value = "updatePatrul" )
     public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) {
