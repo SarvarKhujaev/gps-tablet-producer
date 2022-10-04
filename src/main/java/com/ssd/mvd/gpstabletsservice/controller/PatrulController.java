@@ -7,12 +7,9 @@ import java.util.Comparator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import com.ssd.mvd.gpstabletsservice.entity.Data;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
-import com.ssd.mvd.gpstabletsservice.entity.TabletUsage;
-import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
@@ -173,10 +170,22 @@ public class PatrulController {
                     .getPatrulStatistics( request ) ) : Mono.empty(); }
 
     @MessageMapping ( value = "getAllUsedTablets" )
-    public Mono< List< TabletUsage > > getAllUsedTablets (String uuid ) { return CassandraDataControl
+    public Mono< List< TabletUsage > > getAllUsedTablets ( RequestForTablets request ) { return CassandraDataControl
             .getInstance()
-            .getPatrul( UUID.fromString( uuid ) )
-            .flatMap( patrul -> CassandraDataControl
+            .getPatrul( UUID.fromString( request.getPatrulId() ) )
+            .flatMap( patrul -> request.getStartTime() != null
+                    && request.getEndTime() != null ? CassandraDataControl
                     .getInstance()
-                    .getAllUsedTablets( patrul ) ); }
+                    .getAllUsedTablets( patrul )
+                    .filter( tabletUsages -> tabletUsages
+                            .getStartedToUse()
+                            .before( request.getEndTime() )
+                            && tabletUsages
+                            .getStartedToUse()
+                            .after( request.getStartTime() ) )
+                    .collectList()
+                    : CassandraDataControl
+                    .getInstance()
+                    .getAllUsedTablets( patrul )
+                    .collectList() ); }
 }

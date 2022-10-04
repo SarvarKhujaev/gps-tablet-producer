@@ -1501,13 +1501,13 @@ public final class CassandraDataControl {
                                         .build() )
                                 .build() ) ); } ); }
 
-    public Mono< List< TabletUsage > > getAllUsedTablets (Patrul patrul ) { return Flux.fromStream(
+    public Flux< TabletUsage > getAllUsedTablets ( Patrul patrul ) { return Flux.fromStream(
             this.session.execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "." + CassandraTables.TABLETS_USAGE_TABLE.name()
-                        + " WHERE uuidOfPatrul = " + patrul.getUuid() + ";" )
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.TABLETS_USAGE_TABLE.name()
+                            + " WHERE uuidOfPatrul = " + patrul.getUuid() + ";" )
                 .all().stream() )
-                .map( TabletUsage::new )
-                .collectList(); }
+                .map( TabletUsage::new ); }
 
     public void addAllPatrulsToChatService ( String token ) { this.getPatrul()
             .subscribe( patrul -> {
