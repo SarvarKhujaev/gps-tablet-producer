@@ -88,18 +88,17 @@ public class CassandraDataControlForEscort {
         this.logger.info( "CassandraDataControlForEscort is ready" ); }
 
     public Flux< EscortTuple > getAllTupleOfEscort () { return Flux.fromStream(
-            this.session
-                    .execute(
-                    "SELECT * FROM "
-                            + CassandraTables.ESCORT.name() + "." + CassandraTables.TUPLE_OF_ESCORT.name() + ";" )
+            this.session.execute( "SELECT * FROM "
+                            + CassandraTables.ESCORT.name() + "."
+                            + CassandraTables.TUPLE_OF_ESCORT.name() + ";" )
                     .all().stream() )
             .map( EscortTuple::new ); }
 
     public Mono< EscortTuple > getAllTupleOfEscort ( String id ) {
-        Row row = this.session.execute(
-                "SELECT * FROM "
-                        + CassandraTables.ESCORT.name() + "." + CassandraTables.TUPLE_OF_ESCORT.name()
-                        + " where id = " + UUID.fromString( id ) + ";" ).one();
+        Row row = this.session.execute( "SELECT * FROM "
+                + CassandraTables.ESCORT.name() + "."
+                + CassandraTables.TUPLE_OF_ESCORT.name()
+                + " where id = " + UUID.fromString( id ) + ";" ).one();
         return Mono.justOrEmpty( row != null ? new EscortTuple( row ) : null ); }
 
     public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) { return this.getAllTupleOfEscort( id )
@@ -168,13 +167,15 @@ public class CassandraDataControlForEscort {
                 .subscribe( escortTuple1 -> {
                     if ( escortTuple1.getUuidOfPolygon() != null ) this.session.execute (
                             "UPDATE "
-                                    + CassandraTables.ESCORT.name() + "." + CassandraTables.POLYGON_FOR_ESCORT.name()
+                                    + CassandraTables.ESCORT.name() + "."
+                                    + CassandraTables.POLYGON_FOR_ESCORT.name()
                                     + " SET uuidOfEscort = " + null
                                     + " WHERE uuid = " + escortTuple1.getUuidOfPolygon() + ";" ); } );
 
         this.linkPatrulWithEscortCar( escortTuple );
         return this.session.execute( "INSERT INTO "
-                        + CassandraTables.ESCORT.name() + "." + CassandraTables.TUPLE_OF_ESCORT.name()
+                        + CassandraTables.ESCORT.name() + "."
+                        + CassandraTables.TUPLE_OF_ESCORT.name()
                         + "( id," +
                         " countries," +
                         " uuidOfPolygon," +
@@ -310,7 +311,8 @@ public class CassandraDataControlForEscort {
     public Mono< PolygonForEscort > getAllPolygonForEscort ( String id ) {
         Row row = this.session.execute(
                 "SELECT * FROM "
-                        + CassandraTables.ESCORT.name() + "." + CassandraTables.POLYGON_FOR_ESCORT.name()
+                        + CassandraTables.ESCORT.name() + "."
+                        + CassandraTables.POLYGON_FOR_ESCORT.name()
                         + " where uuid = " + UUID.fromString( id ) + ";" ).one();
         return Mono.justOrEmpty( row != null ? new PolygonForEscort( row ) : null ); }
 
@@ -324,7 +326,8 @@ public class CassandraDataControlForEscort {
                                     .message( id + " was removed successfully" )
                                     .build() )
                             .success( this.session.execute( "DELETE FROM "
-                                            + CassandraTables.ESCORT.name() + "." + CassandraTables.POLYGON_FOR_ESCORT.name()
+                                            + CassandraTables.ESCORT.name() + "."
+                                    + CassandraTables.POLYGON_FOR_ESCORT.name()
                                             + " where uuid = " + UUID.fromString( id ) + ";"
                             ).wasApplied() )
                             .build() )
@@ -340,7 +343,7 @@ public class CassandraDataControlForEscort {
 
     public Mono< ApiResponseModel > update ( PolygonForEscort polygon ) { return this.session.execute(
             "INSERT INTO "
-                    + CassandraTables.ESCORT.name() + '.' + CassandraTables.POLYGON_FOR_ESCORT.name()
+                    + CassandraTables.ESCORT.name() + "." + CassandraTables.POLYGON_FOR_ESCORT.name()
                     + "(uuid, " +
                     "uuidOfEscort, " +
                     "name, " +
@@ -389,9 +392,9 @@ public class CassandraDataControlForEscort {
     public Flux< PolygonForEscort > getAllPolygonForEscort () { return Flux.fromStream(
             this.session.execute( "SELECT * FROM "
                     + CassandraTables.ESCORT.name() + "."
-                    + CassandraTables.POLYGON_FOR_ESCORT.name() + ";"
-            ).all().stream()
-    ).map( PolygonForEscort::new ); }
+                    + CassandraTables.POLYGON_FOR_ESCORT.name() + ";" )
+                    .all().stream() )
+            .map( PolygonForEscort::new ); }
 
     public Mono< ApiResponseModel > update ( TupleOfCar tupleOfCar ) { return this.session.execute(
             "INSERT INTO "
@@ -411,20 +414,26 @@ public class CassandraDataControlForEscort {
 
                     + tupleOfCar.getLatitude() + ", "
                     + tupleOfCar.getLongitude() + ", " +
-                    tupleOfCar.getAverageFuelConsumption() + ") "
-            ).wasApplied() ? Mono.just (
-                    ApiResponseModel.builder()
+                    tupleOfCar.getAverageFuelConsumption() + ");" )
+            .wasApplied() ? Mono.just (
+                    ApiResponseModel
+                            .builder()
                             .success( true )
-                            .status( Status.builder()
+                            .status( Status
+                                    .builder()
                                     .message( "Car" + tupleOfCar.getGosNumber() + " was updated successfully" )
                                     .code( 200 )
-                                    .build() ).build() )
-                    : Mono.just( ApiResponseModel.builder()
+                                    .build() )
+                            .build() )
+                    : Mono.just( ApiResponseModel
+                    .builder()
                     .success( false )
-                    .status( Status.builder()
+                    .status( Status
+                            .builder()
                             .code( 201 )
                             .message( "This car does not exists" )
-                            .build() ).build() ); }
+                            .build() )
+            .build() ); }
 
     public Mono< TupleTotalData > getTupleTotalData ( String uuid ) {
         TupleTotalData tupleTotalData = new TupleTotalData();
@@ -466,10 +475,9 @@ public class CassandraDataControlForEscort {
                 .build() ); }
 
     public Mono< Country > getAllCountries ( String countryName ) {
-        Row row = this.session.execute(
-                "SELECT * FROM "
-                        + CassandraTables.ESCORT.name() + "." + CassandraTables.COUNTRIES.name()
-                        + " WHERE countryNameEn = '" + countryName + "';" ).one();
+        Row row = this.session.execute( "SELECT * FROM "
+                + CassandraTables.ESCORT.name() + "." + CassandraTables.COUNTRIES.name()
+                + " WHERE countryNameEn = '" + countryName + "';" ).one();
         return Mono.justOrEmpty( row != null ? new Country( row ) : null ); }
 
     public Mono< ApiResponseModel > addValue ( Country country ) { return this.session.execute(
@@ -483,8 +491,8 @@ public class CassandraDataControlForEscort {
                         + country.getCountryNameUz().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
                         + country.getCountryNameRu().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
                         + country.getSymbol().toUpperCase( Locale.ROOT ).replaceAll( "'", "" )
-                        + "') IF NOT EXISTS;"
-        ).wasApplied() ? Mono.just( ApiResponseModel
+                        + "') IF NOT EXISTS;" )
+            .wasApplied() ? Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
@@ -509,8 +517,8 @@ public class CassandraDataControlForEscort {
                         "countryNameRu = '" + country.getCountryNameRu().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', " +
                         "symbol = '" + country.getSymbol().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) +
                         "' WHERE countryNameEN = '" + country.getCountryNameEn().toUpperCase( Locale.ROOT ).replaceAll( "'", "" )
-                        + "' IF EXISTS;"
-        ).wasApplied() ? Mono.just( ApiResponseModel
+                        + "' IF EXISTS;" )
+            .wasApplied() ? Mono.just( ApiResponseModel
                 .builder()
                 .success( true )
                 .status( Status
@@ -529,9 +537,8 @@ public class CassandraDataControlForEscort {
                 .build() ); }
 
     public Flux< Country > getAllCountries () { return Flux.fromStream (
-                this.session.execute(
-                        "SELECT * FROM "
-                                + CassandraTables.ESCORT.name() + "." + CassandraTables.COUNTRIES.name() + ";"
-                ).all().stream()
-        ).map( Country::new ); }
+                this.session.execute( "SELECT * FROM "
+                        + CassandraTables.ESCORT.name() + "." + CassandraTables.COUNTRIES.name() + ";" )
+                        .all().stream() )
+            .map( Country::new ); }
 }
