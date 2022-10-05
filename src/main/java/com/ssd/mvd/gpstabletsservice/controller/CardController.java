@@ -15,6 +15,7 @@ import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.entity.Data;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -150,6 +151,26 @@ public class CardController {
                 .flatMap( patrul -> TaskInspector
                         .getInstance()
                         .removePatrulFromTask( patrul ) ); }
+
+    @MessageMapping ( value = "getListOfPatrulTasks" )
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( Request request ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( CassandraDataControl.getInstance().decode( request.getData() ) )
+            .flatMap( patrul -> patrul.getListOfTasks().keySet().size() > 0 ? TaskInspector
+                    .getInstance()
+                    .getListOfPatrulTasks(
+                            patrul, (Integer) request.getObject(),
+                            (Integer) request.getSubject() )
+            : Mono.just( ApiResponseModel
+                    .builder()
+                    .success( false )
+                    .status( Status
+                            .builder()
+                            .message( "You have not completed any task, so try to fix this problem please" )
+                            .code( 200 )
+                            .build() )
+                    .data( Data.builder().build() )
+                    .build() ) ); }
 
     @MessageMapping ( value = "addNewPatrulsToTask" )
     public Mono< ApiResponseModel > addNewPatrulsToTask ( CardRequest< ? > request ) {
@@ -305,23 +326,4 @@ public class CardController {
                                         .code( 200 )
                                         .build() )
                                 .build() ); } ); }; }
-
-    @MessageMapping ( value = "getListOfPatrulTasks" )
-    public Mono< ApiResponseModel > getListOfPatrulTasks ( Request request ) { return CassandraDataControl
-            .getInstance()
-            .getPatrul( CassandraDataControl.getInstance().decode( request.getData() ) )
-            .flatMap( patrul -> {
-                if ( patrul.getListOfTasks().keySet().size() > 0 ) return TaskInspector
-                        .getInstance()
-                        .getListOfPatrulTasks( patrul, (Integer) request.getObject(), (Integer) request.getSubject() );
-
-                else return Mono.just( ApiResponseModel
-                        .builder()
-                        .success( false )
-                        .status( Status
-                                .builder()
-                                .message( "You have not completed any task, so try to fix this problem please" )
-                                .code( 201 )
-                                .build() )
-                        .build() ); } ); }
 }
