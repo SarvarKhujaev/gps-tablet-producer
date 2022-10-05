@@ -1517,7 +1517,8 @@ public final class CassandraDataControl {
                         .addUser( patrul ); } ); }
 
     public UUID decode ( String token ) { return UUID.fromString(
-            new String( Base64.getDecoder()
+            new String( Base64
+                    .getDecoder()
                     .decode( token ) )
                     .split( "@" )[ 0 ] ); }
 
