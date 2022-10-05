@@ -184,12 +184,11 @@ public final class CassandraDataControl {
 
         this.logger.info( "Cassandra is ready" ); }
 
-    public Flux< PoliceType > getAllPoliceTypes () { return Flux.fromStream( this.session.execute(
-                                "SELECT * FROM "
-                                        + CassandraTables.TABLETS.name() + "." + CassandraTables.POLICE_TYPE.name() + " ;"
-                        ).all().stream()
-                ).map( PoliceType::new )
-                .doOnError( throwable -> this.delete() ); }
+    public Flux< PoliceType > getAllPoliceTypes () { return Flux.fromStream( this.session.execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "." + CassandraTables.POLICE_TYPE.name() + ";" )
+                    .all().stream() )
+            .map( PoliceType::new )
+            .doOnError( throwable -> this.delete() ); }
 
     public Mono< ApiResponseModel > update ( PoliceType policeType ) {
         this.getPatrul()
@@ -332,7 +331,7 @@ public final class CassandraDataControl {
     public Mono< PolygonType > getAllPolygonType ( UUID uuid ) { return Mono.just(
                 this.session.execute( "SELECT * FROM "
                         + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON_TYPE.name()
-                                + " WHERE uuid = " + uuid + ";" ).one() )
+                        + " WHERE uuid = " + uuid + ";" ).one() )
             .map( PolygonType::new )
                 .doOnError( throwable -> {
                     this.delete();
@@ -345,32 +344,33 @@ public final class CassandraDataControl {
             .map( PolygonType::new ); }
 
     public Mono< ApiResponseModel > addValue ( Polygon polygon ) { return this.session.execute( "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name()
-                        + CassandraConverter
-                                .getInstance()
-                                .getALlNames( Polygon.class ) +
-                        " VALUES ("
-                        + polygon.getUuid() + ", "
-                        + polygon.getOrgan() + ", "
+                    + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name()
+                    + CassandraConverter
+                    .getInstance()
+                    .getALlNames( Polygon.class ) +
+                    " VALUES ("
+                    + polygon.getUuid() + ", "
+                    + polygon.getOrgan() + ", "
 
-                        + polygon.getRegionId() + ", "
-                        + polygon.getMahallaId() + ", "
-                        + polygon.getDistrictId() + ", '"
+                    + polygon.getRegionId() + ", "
+                    + polygon.getMahallaId() + ", "
+                    + polygon.getDistrictId() + ", '"
 
-                        + polygon.getName() + "', '"
-                        + polygon.getColor() + "', " +
+                    + polygon.getName() + "', '"
+                    + polygon.getColor() + "', " +
 
-                        CassandraConverter
-                                .getInstance()
-                                .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
+                    CassandraConverter
+                            .getInstance()
+                            .convertClassToCassandraTable ( polygon.getPolygonType() ) + ", " +
 
-                        CassandraConverter
-                                .getInstance()
-                                .convertListToCassandra( polygon.getPatrulList() ) + ", " +
+                    CassandraConverter
+                            .getInstance()
+                            .convertListToCassandra( polygon.getPatrulList() ) + ", " +
 
-                        CassandraConverter
-                                .getInstance()
-                                .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
+                    CassandraConverter
+                            .getInstance()
+                            .convertListOfPointsToCassandra( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
+
                 .wasApplied() ? Mono.just( ApiResponseModel
                         .builder()
                         .success( true )
@@ -447,25 +447,23 @@ public final class CassandraDataControl {
 
     public Flux< Polygon > getAllPolygons () { return Flux.fromStream(
             this.session.execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name() + ";"
-            ).all().stream() )
+                    + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name() + ";" )
+                    .all().stream() )
             .map( Polygon::new ); }
 
     public Mono< ReqCar > getCar ( UUID uuid ) { return Mono.just(
             this.session.execute( "SELECT * FROM "
                     + CassandraTables.TABLETS.name() + "." + CassandraTables.CARS.name()
-                    + " WHERE uuid = " + uuid + ";" ).one()
-    ).map( ReqCar::new ); }
+                    + " WHERE uuid = " + uuid + ";" ).one() )
+            .map( ReqCar::new ); }
 
     // checks trackers. if this tracker already exists in database, it checks usual cars and escort database
-    private Boolean checkTracker ( String trackerId ) { return this.session.execute(
-                "SELECT * FROM "
-                        + CassandraTables.ESCORT.name() + "." + CassandraTables.TRACKERS_ID.name()
-                        + " where trackersId = '" + trackerId + "';" ).one() == null
-                && this.session.execute(
-                "SELECT * FROM "
-                        + CassandraTables.TRACKERS.name() + "." + CassandraTables.TRACKERS_ID.name()
-                        + " where trackersId = '" + trackerId + "';" ).one() == null; }
+    private Boolean checkTracker ( String trackerId ) { return this.session.execute( "SELECT * FROM "
+            + CassandraTables.ESCORT.name() + "." + CassandraTables.TRACKERS_ID.name()
+            + " where trackersId = '" + trackerId + "';" ).one() == null
+            && this.session.execute( "SELECT * FROM "
+            + CassandraTables.TRACKERS.name() + "." + CassandraTables.TRACKERS_ID.name()
+            + " where trackersId = '" + trackerId + "';" ).one() == null; }
 
     private Boolean checkCarNumber ( String carNumber ) { return this.session.execute(
                 "SELECT * FROM "
@@ -1523,9 +1521,6 @@ public final class CassandraDataControl {
                     .split( "@" )[ 0 ] ); }
 
     public void delete () {
-        this.session.close();
-        this.cluster.close();
         cassandraDataControl = null;
-        KafkaDataControl.getInstance().clear();
         this.logger.info( "Cassandra is closed!!!" ); }
 }
