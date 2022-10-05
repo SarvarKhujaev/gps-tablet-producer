@@ -13,6 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>GPS-Tablets-Service</name>
     <description>GPS-Tablets-Service</description>
+
     <developers>
         <developer>
             <name>Sarvar Khujaev</name>
