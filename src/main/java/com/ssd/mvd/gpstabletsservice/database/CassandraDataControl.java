@@ -1537,8 +1537,8 @@ public final class CassandraDataControl {
                     .split( "@" )[ 0 ] ); }
 
     public void delete () {
-        this.session.close();
-        this.cluster.close();
+        this.getSession().close();
+        this.getCluster().close();
         cassandraDataControl = null;
         this.logger.info( "Cassandra is closed!!!" ); }
 }
