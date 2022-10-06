@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
+import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
@@ -137,6 +138,48 @@ public class PatrulController {
         return CassandraDataControl
                 .getInstance()
                 .deletePatrul( UUID.fromString( passportNumber.split( "@" )[0] ) ); }
+
+    @MessageMapping ( value = "getAllPatrulTasks" ) // for front end
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( String uuid ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( UUID.fromString( uuid ) )
+            .flatMap( patrul -> patrul.getListOfTasks().keySet().size() > 0 ?
+                    TaskInspector
+                            .getInstance()
+                            .getListOfPatrulTasks( patrul,
+                                    0,
+                                    patrul.getListOfTasks().keySet().size() * 2 )
+                    : Mono.just( ApiResponseModel
+                    .builder()
+                    .success( false )
+                    .status( Status
+                            .builder()
+                            .message( "You have not completed any task, so try to fix this problem please" )
+                            .code( 200 )
+                            .build() )
+                    .data( Data.builder().build() )
+                    .build() ) ); }
+
+    @MessageMapping ( value = "getListOfPatrulTasks" )
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( Request request ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( CassandraDataControl.getInstance().decode( request.getData() ) )
+            .flatMap( patrul -> patrul.getListOfTasks().keySet().size() > 0 ?
+                    TaskInspector
+                    .getInstance()
+                    .getListOfPatrulTasks(
+                            patrul, (Integer) request.getObject(),
+                            (Integer) request.getSubject() )
+                    : Mono.just( ApiResponseModel
+                    .builder()
+                    .success( false )
+                    .status( Status
+                            .builder()
+                            .message( "You have not completed any task, so try to fix this problem please" )
+                            .code( 200 )
+                            .build() )
+                    .data( Data.builder().build() )
+                    .build() ) ); }
 
     @MessageMapping ( value = "addAllPatrulsToChatService" )
     public Mono< ApiResponseModel > addAllPatrulsToChatService ( String token ) {
