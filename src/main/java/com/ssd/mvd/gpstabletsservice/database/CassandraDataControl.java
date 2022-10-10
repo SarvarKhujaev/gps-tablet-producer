@@ -193,13 +193,13 @@ public final class CassandraDataControl {
             .doOnError( throwable -> this.delete() ); }
 
     public Mono< ApiResponseModel > update ( PoliceType policeType ) {
-//        this.getPatrul()
-//                .filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) )
-//                .subscribe( patrul -> this.session.executeAsync(
-//                        "UPDATE "
-//                                + CassandraTables.TABLETS.name() + "."
-//                                + CassandraTables.PATRULS.name()
-//                        + " SET policeType = '" + policeType.getPoliceType() + "';" ) );
+        this.getPatrul()
+                .filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) )
+                .subscribe( patrul -> this.session.executeAsync(
+                        "UPDATE "
+                                + CassandraTables.TABLETS.name() + "."
+                                + CassandraTables.PATRULS.name()
+                        + " SET policeType = '" + policeType.getPoliceType() + "';" ) );
         return this.session.execute( "UPDATE "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.POLICE_TYPE.name()
