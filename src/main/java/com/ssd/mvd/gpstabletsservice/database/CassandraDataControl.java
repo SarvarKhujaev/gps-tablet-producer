@@ -184,35 +184,37 @@ public final class CassandraDataControl {
 
         this.logger.info( "Cassandra is ready" ); }
 
-    public Flux< PoliceType > getAllPoliceTypes () { return Flux.fromStream( this.session.execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.POLICE_TYPE.name() + ";" )
+    public Flux< PoliceType > getAllPoliceTypes () { return Flux.fromStream( this.session.execute(
+            "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.POLICE_TYPE.name() + ";" )
                     .all().stream() )
             .map( PoliceType::new )
             .doOnError( throwable -> this.delete() ); }
 
     public Mono< ApiResponseModel > update ( PoliceType policeType ) {
-        this.getPatrul()
-                .filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) )
-                .subscribe( patrul -> this.session.executeAsync(
-                        "UPDATE "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name()
-                        + " SET policeType = '" + policeType.getPoliceType() + "';" ) );
-        return this.session
-                .execute( "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.POLICE_TYPE.name() +
-                        CassandraConverter
-                                .getInstance()
-                                .getALlNames( PoliceType.class ) +
-                        " VALUES("
-                        + policeType.getUuid() + ", '"
-                        + policeType.getPoliceType() + "' );" )
+//        this.getPatrul()
+//                .filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) )
+//                .subscribe( patrul -> this.session.executeAsync(
+//                        "UPDATE "
+//                                + CassandraTables.TABLETS.name() + "."
+//                                + CassandraTables.PATRULS.name()
+//                        + " SET policeType = '" + policeType.getPoliceType() + "';" ) );
+        return this.session.execute( "UPDATE "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.POLICE_TYPE.name()
+                        + " SET policeType = '" + policeType.getPoliceType() + "', "
+                        + "icon = '" + policeType.getIcon() + "'"
+                        + " WHERE uuid = " + policeType.getUuid() + " IF EXISTS;" )
                 .wasApplied() ? Mono.just( ApiResponseModel
                             .builder()
-                            .status( com.ssd.mvd.gpstabletsservice.response.Status.builder()
-                                            .message( "PoliceType was updated successfully" )
-                                            .code( 200 )
-                                            .build()
-                            ).build() ) : Mono.just( ApiResponseModel.builder()
+                            .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                    .builder()
+                                    .message( "PoliceType was updated successfully" )
+                                    .code( 200 )
+                                    .build()
+                            ).build() ) : Mono.just( ApiResponseModel
+                            .builder()
                             .status( com.ssd.mvd.gpstabletsservice.response.Status
                                     .builder()
                                     .message( "This PoliceType has already been applied" )
@@ -225,31 +227,31 @@ public final class CassandraDataControl {
                 .filter( policeType1 -> policeType1.getPoliceType().equals( policeType.getPoliceType() ) )
                 .count()
                 .flatMap( aBoolean1 -> aBoolean1 == 0 ?
-                        this.session
-                                .execute( "INSERT INTO "
-                                        + CassandraTables.TABLETS.name() + "." + CassandraTables.POLICE_TYPE.name() +
+                        this.session.execute( "INSERT INTO "
+                                        + CassandraTables.TABLETS.name() + "."
+                                        + CassandraTables.POLICE_TYPE.name() +
                                         CassandraConverter
                                                 .getInstance()
                                                 .getALlNames( PoliceType.class ) +
                                         " VALUES("
                                         + policeType.getUuid() + ", '"
-                                        + policeType.getPoliceType()
-                                        + "' );" )
+                                        + policeType.getIcon() + "', '"
+                                        + policeType.getPoliceType() + "' );" )
                                 .wasApplied() ? Mono.just( ApiResponseModel
                                 .builder()
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status
                                         .builder()
                                         .message( "PoliceType was saved successfully" )
                                         .code( 200 )
-                                        .build()
-                                ).build() ) : Mono.just( ApiResponseModel
+                                        .build() )
+                                .build() ) : Mono.just( ApiResponseModel
                                 .builder()
                                 .status( com.ssd.mvd.gpstabletsservice.response.Status
                                         .builder()
                                         .message( "This PoliceType has already been applied" )
                                         .code( 201 )
-                                        .build()
-                                ).build() ) :
+                                        .build() )
+                                .build() ) :
                         Mono.just( ApiResponseModel
                                 .builder()
                                 .success( false )
@@ -271,9 +273,10 @@ public final class CassandraDataControl {
                 this.delete();
                 this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
-    public Mono< ApiResponseModel > addValue ( AtlasLustra atlasLustra, Boolean check ) { return this.session
-            .execute( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.LUSTRA.name() +
+    public Mono< ApiResponseModel > addValue ( AtlasLustra atlasLustra, Boolean check ) { return this.session.execute(
+            "INSERT INTO "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.LUSTRA.name() +
                     CassandraConverter
                             .getInstance()
                             .getALlNames( AtlasLustra.class ) +
@@ -346,8 +349,10 @@ public final class CassandraDataControl {
                         .all().stream() )
             .map( PolygonType::new ); }
 
-    public Mono< ApiResponseModel > addValue ( Polygon polygon ) { return this.session.execute( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name()
+    public Mono< ApiResponseModel > addValue ( Polygon polygon ) { return this.session.execute(
+            "INSERT INTO "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.POLYGON.name()
                     + CassandraConverter
                     .getInstance()
                     .getALlNames( Polygon.class ) +
@@ -394,8 +399,10 @@ public final class CassandraDataControl {
                             this.delete();
                             this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
-    public Mono< ApiResponseModel > update ( Polygon polygon ) { return this.session.execute( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "." + CassandraTables.POLYGON.name() +
+    public Mono< ApiResponseModel > update ( Polygon polygon ) { return this.session.execute(
+            "INSERT INTO "
+            + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.POLYGON.name() +
             CassandraConverter
                     .getInstance()
                     .getALlNames( Polygon.class ) +
@@ -513,20 +520,23 @@ public final class CassandraDataControl {
                                             .build() ).build() );
                     if ( !reqCar.getPatrulPassportSeries().equals( reqCar1.getPatrulPassportSeries() ) ) {
                         this.session.execute ( "UPDATE "
-                                + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name()
+                                + CassandraTables.TABLETS.name() + "."
+                                + CassandraTables.PATRULS.name()
                                 + " SET carnumber = '" + reqCar.getGosNumber() + "', "
-                                + "cartype = '" + reqCar.getVehicleType() + "' where uuid = " + this.getPatrul(
-                                        reqCar1.getPatrulPassportSeries() )
+                                + "cartype = '" + reqCar.getVehicleType()
+                                + "' where uuid = " + this.getPatrul( reqCar1.getPatrulPassportSeries() )
                                 .getUUID( "uuid" ) + ";" );
 
                         this.session.execute ( "UPDATE "
-                                + CassandraTables.TABLETS.name() + "." + CassandraTables.PATRULS.name()
+                                + CassandraTables.TABLETS.name() + "."
+                                + CassandraTables.PATRULS.name()
                                 + " SET carnumber = '" + null + "', "
-                                + "cartype = '" + null + "' where uuid = " + this.getPatrul(
-                                        reqCar1.getPatrulPassportSeries() )
+                                + "cartype = '" + null + "' where uuid = "
+                                + this.getPatrul( reqCar1.getPatrulPassportSeries() )
                                 .getUUID( "uuid" ) + ";" ); }
                     return this.session.execute( "INSERT INTO "
-                            + CassandraTables.TABLETS.name() + "." + CassandraTables.CARS.name() +
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.CARS.name() +
                             CassandraConverter
                                     .getInstance()
                                     .getALlNames( ReqCar.class ) +
