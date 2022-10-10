@@ -184,8 +184,8 @@ public final class CassandraDataControl {
 
         this.logger.info( "Cassandra is ready" ); }
 
-    public Flux< PoliceType > getAllPoliceTypes () { return Flux.fromStream( this.session.execute(
-            "SELECT * FROM "
+    public Flux< PoliceType > getAllPoliceTypes () { return Flux.fromStream(
+            this.session.execute( "SELECT * FROM "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.POLICE_TYPE.name() + ";" )
                     .all().stream() )
