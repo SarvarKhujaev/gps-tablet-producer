@@ -1,7 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import lombok.Data;
 import java.util.*;
+import lombok.Data;
 import reactor.core.publisher.Flux;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
@@ -188,31 +188,31 @@ public class CardDetails {
 
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() ).subscribe( details -> {
             switch ( details ) {
-                case DETAILS -> Archive.getAchieve().getDetailsList().forEach( s -> {
+                case DETAILS -> Archive.getArchive().getDetailsList().forEach( s -> {
                     switch ( s ) {
-                        case  "ID" -> this.getDetails().get( Details.DETAILS )
+                        case "ID" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getCardId() ) );
-                        case  "ФАБУЛА" -> this.getDetails().get( Details.DETAILS )
+                        case "ФАБУЛА" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getFabula() ) );
-                        case  "ШИРОТА" -> this.getDetails().get( Details.DETAILS )
+                        case "ШИРОТА" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getLongitude() ) );
-                        case  "ДОЛГОТА" -> this.getDetails().get( Details.DETAILS )
+                        case "ДОЛГОТА" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getLatitude() ) );
-                        case  "ВИД ПРОИСШЕСТВИЯ" -> this.getDetails().get( Details.DETAILS )
+                        case "ВИД ПРОИСШЕСТВИЯ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, "102 Task" ) );
-                        case  "КОНЕЦ СОБЫТИЯ" -> this.getDetails().get( Details.DETAILS )
+                        case "КОНЕЦ СОБЫТИЯ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getEventEnd() ) );
-                        case  "НАЧАЛО СОБЫТИЯ" -> this.getDetails().get( Details.DETAILS )
+                        case "НАЧАЛО СОБЫТИЯ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getEventStart() ) );
-                        case  "ДАТА И ВРЕМЯ" -> this.getDetails().get( Details.DETAILS )
+                        case "ДАТА И ВРЕМЯ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getCreated_date() ) );
-                        case  "КОЛ.СТВО ПОШИБЩИХ" -> this.getDetails().get( Details.DETAILS )
+                        case "КОЛ.СТВО ПОШИБЩИХ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getDeadQuantity() ) );
-                        case  "КОЛ.СТВО ПОСТРАДАВШИХ" -> this.getDetails().get( Details.DETAILS )
+                        case "КОЛ.СТВО ПОСТРАДАВШИХ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getVictimHumans().size() ) );
-                        case  "ПОДРАЗДЕЛЕНИЕ" -> this.getDetails().get( Details.DETAILS )
+                        case "ПОДРАЗДЕЛЕНИЕ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, patrul.getPoliceType() ) );
-                        case  "Ф.И.О" -> this.getDetails().get( Details.DETAILS )
+                        case "Ф.И.О" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getEventHuman().getFirstName() + " "
                                         + card.getEventHuman().getLastName() + " "
                                         + card.getEventHuman().getMiddleName() ) ); } } );

@@ -1,20 +1,21 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-import com.ssd.mvd.gpstabletsservice.entity.Polygon;
-import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
-import com.ssd.mvd.gpstabletsservice.entity.ScheduleForPolygonPatrul;
-
-import com.ssd.mvd.gpstabletsservice.response.Status;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+import com.ssd.mvd.gpstabletsservice.entity.Polygon;
+import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.entity.ScheduleForPolygonPatrul;
+
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 
 @RestController
 public class PolygonForPatrulController { // SAM - 76
@@ -36,19 +37,18 @@ public class PolygonForPatrulController { // SAM - 76
 
     @MessageMapping ( value = "addPatrulToPolygon" )
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
-        if ( scheduleForPolygonPatrul.getPatrulUUIDs() == null
-                || scheduleForPolygonPatrul.getPatrulUUIDs().size() == 0 )
-            return Mono.just( ApiResponseModel
-                            .builder()
-                            .success( false )
-                            .status( Status
-                                    .builder()
-                                    .code( 201 )
-                                    .message( "Wrong params" )
-                                    .build() ).build() );
-        return CassandraDataControl
-            .getInstance()
-            .addPatrulToPolygon( scheduleForPolygonPatrul ); }
+        return scheduleForPolygonPatrul.getPatrulUUIDs() == null
+                || scheduleForPolygonPatrul.getPatrulUUIDs().size() == 0
+                ? Archive
+                .getArchive()
+                .getFunction()
+                .apply( Map.of(
+                        "message", "Wrong params",
+                        "success", false,
+                        "code", 201 ) )
+                : CassandraDataControl
+                .getInstance()
+                .addPatrulToPolygon( scheduleForPolygonPatrul ); }
 
     @MessageMapping ( value = "addPolygonForPatrul" )
     public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) { return CassandraDataControl

@@ -9,7 +9,6 @@ import com.ssd.mvd.gpstabletsservice.database.*;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.UUID;
 
@@ -33,6 +32,6 @@ public class SelfEmploymentController {
             .getInstance()
             .getPatrul( selfEmploymentTask.getPatruls().keySet().iterator().next() )
             .flatMap( patrul -> Archive
-                    .getAchieve()
+                    .getArchive()
                     .save( selfEmploymentTask, patrul ) ); }
 }

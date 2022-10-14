@@ -12,15 +12,15 @@ import java.util.UUID;
 
 @RestController
 public class EscortController {
-    @MessageMapping ( value = "addNewEscort" )
-    public Flux< ApiResponseModel > addNewTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
-            .getInstance()
-            .addValue( escortTuple ); }
-
     @MessageMapping ( value = "getAllEscort" )
     public Flux< EscortTuple > getAllTupleOfPatrul () { return CassandraDataControlForEscort
             .getInstance()
             .getAllTupleOfEscort(); }
+
+    @MessageMapping ( value = "getTupleTotalData" )
+    public Mono< TupleTotalData > getTupleTotalData ( String uuid ) { return CassandraDataControlForEscort
+            .getInstance()
+            .getTupleTotalData( uuid ); }
 
     @MessageMapping ( value = "getCurrentEscort" )
     public Mono< EscortTuple > getCurrentTupleOfPatrul ( String id ) { return CassandraDataControlForEscort
@@ -32,16 +32,6 @@ public class EscortController {
             .getInstance()
             .deleteTupleOfPatrul( id ); }
 
-    @MessageMapping ( value = "updateEscort" )
-    public Mono< ApiResponseModel > updateTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
-            .getInstance()
-            .update( escortTuple ); }
-
-    @MessageMapping ( value = "getTupleTotalData" )
-    public Mono< TupleTotalData > getTupleTotalData ( String uuid ) { return CassandraDataControlForEscort
-            .getInstance()
-            .getTupleTotalData( uuid ); }
-
     @MessageMapping ( value = "removeEscortCarFromEscort" )
     public Mono< ApiResponseModel > removeEscortCarFromEscort ( UUID uuid ) { return CassandraDataControlForEscort
             .getInstance()
@@ -49,27 +39,37 @@ public class EscortController {
             .flatMap( tupleOfCar -> {
                 CassandraDataControlForEscort
                         .getInstance()
-                                .getAllTupleOfEscort( tupleOfCar.getUuidOfEscort().toString() )
-                                        .subscribe( escortTuple -> {
-                                            escortTuple.getTupleOfCarsList().remove( tupleOfCar.getUuid() );
-                                            escortTuple.getPatrulList().remove( tupleOfCar.getUuidOfPatrul() );
-                                            CassandraDataControlForEscort
-                                                    .getInstance()
-                                                    .update( escortTuple )
-                                                    .subscribe(); } );
+                        .getAllTupleOfEscort( tupleOfCar.getUuidOfEscort().toString() )
+                        .subscribe( escortTuple -> {
+                            escortTuple.getTupleOfCarsList().remove( tupleOfCar.getUuid() );
+                            escortTuple.getPatrulList().remove( tupleOfCar.getUuidOfPatrul() );
+                            CassandraDataControlForEscort
+                                    .getInstance()
+                                    .update( escortTuple )
+                                    .subscribe(); } );
                 CassandraDataControl
                         .getInstance()
-                                .getPatrul( tupleOfCar.getUuidOfPatrul() )
-                                        .subscribe( patrul -> {
-                                            patrul.setUuidOfEscort( null );
-                                            patrul.setUuidForEscortCar( null );
-                                            CassandraDataControl
-                                                    .getInstance()
-                                                    .update( patrul )
-                                                    .subscribe(); } );
+                        .getPatrul( tupleOfCar.getUuidOfPatrul() )
+                        .subscribe( patrul -> {
+                            patrul.setUuidOfEscort( null );
+                            patrul.setUuidForEscortCar( null );
+                            CassandraDataControl
+                                    .getInstance()
+                                    .update( patrul )
+                                    .subscribe(); } );
                 tupleOfCar.setUuidOfEscort( null );
                 tupleOfCar.setUuidOfPatrul( null );
                 return CassandraDataControlForEscort
                         .getInstance()
                         .update( tupleOfCar ); } ); }
+
+    @MessageMapping ( value = "addNewEscort" )
+    public Flux< ApiResponseModel > addNewTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
+            .getInstance()
+            .addValue( escortTuple ); }
+
+    @MessageMapping ( value = "updateEscort" )
+    public Mono< ApiResponseModel > updateTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
+            .getInstance()
+            .update( escortTuple ); }
 }
