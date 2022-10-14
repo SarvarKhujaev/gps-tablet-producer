@@ -1,6 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.Comparator;
 
@@ -8,9 +9,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
-import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
+import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
@@ -149,16 +150,13 @@ public class PatrulController {
                             .getListOfPatrulTasks( patrul,
                                     0,
                                     patrul.getListOfTasks().keySet().size() * 2 )
-                    : Mono.just( ApiResponseModel
-                    .builder()
-                    .success( false )
-                    .status( Status
-                            .builder()
-                            .message( "You have not completed any task, so try to fix this problem please" )
-                            .code( 200 )
-                            .build() )
-                    .data( Data.builder().build() )
-                    .build() ) ); }
+                    : Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of(
+                            "message", "You have not completed any task, so try to fix this problem please",
+                            "success", false,
+                            "code", 201 ) ) ); }
 
     @MessageMapping ( value = "getListOfPatrulTasks" )
     public Mono< ApiResponseModel > getListOfPatrulTasks ( Request request ) { return CassandraDataControl
@@ -170,31 +168,24 @@ public class PatrulController {
                     .getListOfPatrulTasks(
                             patrul, (Integer) request.getObject(),
                             (Integer) request.getSubject() )
-                    : Mono.just( ApiResponseModel
-                    .builder()
-                    .success( false )
-                    .status( Status
-                            .builder()
-                            .message( "You have not completed any task, so try to fix this problem please" )
-                            .code( 200 )
-                            .build() )
-                    .data( Data.builder().build() )
-                    .build() ) ); }
+                    : Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of(
+                            "message", "You have not completed any task, so try to fix this problem please",
+                            "success", false,
+                            "code", 201 ) ) ); }
 
     @MessageMapping ( value = "addAllPatrulsToChatService" )
     public Mono< ApiResponseModel > addAllPatrulsToChatService ( String token ) {
         CassandraDataControl
             .getInstance()
             .addAllPatrulsToChatService( token );
-        return Mono.just( ApiResponseModel
-                .builder()
-                .success( true )
-                .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                .builder()
-                                .message( "Successfully added to chat service" )
-                                .code( 200 )
-                                .build() )
-                .build() ); }
+        return Archive
+                .getArchive()
+                .getFunction()
+                .apply( Map.of(
+                        "message", "Successfully added to chat service" ) ); }
 
     @MessageMapping ( value = "getListOfPatrulsByUUID" )
     public Flux< Patrul > getListOfPatrulsByUUID ( CardRequest< ? > cardRequest ) { return Flux.fromStream(

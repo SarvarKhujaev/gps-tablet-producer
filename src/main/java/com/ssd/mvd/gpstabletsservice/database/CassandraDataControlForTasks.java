@@ -3,6 +3,7 @@ package com.ssd.mvd.gpstabletsservice.database;
 import lombok.Data;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -29,6 +30,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEv
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
+import static com.ssd.mvd.gpstabletsservice.constants.Status.LOGOUT;
+
 @Data
 public class CassandraDataControlForTasks {
     private final Session session = CassandraDataControl.getInstance().getSession();
@@ -42,110 +45,120 @@ public class CassandraDataControlForTasks {
 
     private CassandraDataControlForTasks () {
         this.session.execute( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.CARTOTALDATA.name()
-                        + "( gosnumber text PRIMARY KEY, " +
-                        "cameraImage text, " +
-                        "violationsInformationsList list< frozen <" +
-                        CassandraTables.VIOLATION_LIST_TYPE.name() + "> >, " +
-                        "object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.CARTOTALDATA.name()
+                + "( gosnumber text PRIMARY KEY, "
+                + "cameraImage text, "
+                + "violationsInformationsList list< frozen <"
+                + CassandraTables.VIOLATION_LIST_TYPE.name() + "> >, "
+                + "object text );" );
 
         this.session.execute( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTBODY.name()
-                        + "( id text PRIMARY KEY, object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.EVENTBODY.name()
+                + "( id text PRIMARY KEY, object text );" );
 
         this.session.execute( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTFACE.name()
-                        + "( id text PRIMARY KEY, object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.EVENTFACE.name()
+                + "( id text PRIMARY KEY, object text );" );
 
         this.session.execute( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTCAR.name()
-                        + "( id text PRIMARY KEY, object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.EVENTCAR.name()
+                + "( id text PRIMARY KEY, object text );" );
 
         this.session.execute( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.FACECAR.name()
-                        + "( id text PRIMARY KEY, object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.FACECAR.name()
+                + "( id text PRIMARY KEY, object text );" );
 
         this.session.execute ( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.SELFEMPLOYMENT.name()
-                        + "( id uuid PRIMARY KEY, object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.SELFEMPLOYMENT.name()
+                + "( id uuid PRIMARY KEY, object text );" );
 
         this.session.execute ( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.FACEPERSON.name()
-                        + "( id text PRIMARY KEY, object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.FACEPERSON.name()
+                + "( id text PRIMARY KEY, object text );" );
 
         this.session.execute ( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + TaskTypes.CARD_102
-                        + "( id text PRIMARY KEY, object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + TaskTypes.CARD_102
+                + "( id text PRIMARY KEY, object text );" );
 
         this.session.execute ( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.ACTIVE_TASK.name()
-                        + "( id text PRIMARY KEY, object text );" );
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.ACTIVE_TASK.name()
+                + "( id text PRIMARY KEY, object text );" );
 
         this.logger.info("Starting CassandraDataControl for tasks" ); }
 
     public List< ViolationsInformation > getViolationsInformationList ( String gosnumber ) { return this.session
             .execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.CARTOTALDATA.name()
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.CARTOTALDATA.name()
                     + " WHERE gosnumber = '" + gosnumber + "';" )
-            .one().getList( "violationsInformationsList", ViolationsInformation.class ); }
+            .one()
+            .getList( "violationsInformationsList", ViolationsInformation.class ); }
 
-    public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return Mono.just(
-            ApiResponseModel
-                    .builder()
-                    .success( true )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+    public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return Archive
+            .getArchive()
+            .getFunction()
+            .apply( Map.of( "message", "Warning car details",
+                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
                             .builder()
-                            .message( "Warning car details" )
-                            .code( 200 )
-                            .build() )
-                    .data( com.ssd.mvd.gpstabletsservice.entity.Data
-                            .builder()
-                            .data( new CardDetails(
-                                    SerDes
-                                            .getSerDes()
-                                            .deserializeCarTotalData( this.session.execute(
-                                                                    "select * FROM "
-                                                                            + CassandraTables.TABLETS.name() + "."
-                                                                            + CassandraTables.CARTOTALDATA.name()
-                                                                            + " WHERE gosnumber = '" + gosnumber + "';"
-                                                            ).one().getString( "object" ) ) ) )
-                            .build() )
-                    .build() ); }
+                            .data( new CardDetails( SerDes
+                                    .getSerDes()
+                                    .deserializeCarTotalData(
+                                            this.session.execute( "SELECT * FROM "
+                                                            + CassandraTables.TABLETS.name() + "."
+                                                            + CassandraTables.CARTOTALDATA.name()
+                                                            + " WHERE gosnumber = '" + gosnumber + "';" )
+                                                    .one().getString( "object" ) ) ) )
+                            .build() ) ); }
 
     public Mono< SelfEmploymentTask > getSelfEmploymentTask ( UUID id ) { return Mono.just(
-                    this.session.execute(
-                            "select * from "
-                                    + CassandraTables.TABLETS.name() + "." + CassandraTables.SELFEMPLOYMENT.name()
-                                    + " where id = " + id + ";"
-                    ).one() )
-            .map( row -> SerDes.getSerDes()
+            this.session.execute( "SELECT * FROM "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.SELFEMPLOYMENT.name()
+                                    + " where id = " + id + ";" ).one() )
+            .map( row -> SerDes
+                    .getSerDes()
                     .deserializeSelfEmploymentTask( row.getString( "object" ) ) ); }
 
     public Mono< FaceEvent > getFaceEvents ( String id ) { return Mono.justOrEmpty(
             SerDes.getSerDes().deserializeFaceEvents(
                     this.session.execute( "SELECT * FROM "
-                                    + CassandraTables.TABLETS.name() + "." + CassandraTables.FACEPERSON.name()
-                                    + " where id = '" + id + "';"
-                    ).one().getString( "object" ) ) ); }
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.FACEPERSON.name()
+                                    + " where id = '" + id + "';" )
+                            .one().getString( "object" ) ) ); }
 
     public Mono< EventBody > getEventBody ( String id ) { return Mono.justOrEmpty(
-            SerDes.getSerDes().deserializeEventBody( this.session.execute(
-                    "select * from "
-                            + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTBODY.name()
-                            + " where id = '" + id + "';"
-            ).one().getString( "object" ) ) ); }
+            SerDes
+                    .getSerDes()
+                    .deserializeEventBody( this.session.execute( "SELECT * FROM "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.EVENTBODY.name()
+                            + " where id = '" + id + "';" )
+                            .one().getString( "object" ) ) ); }
 
     public Mono< EventFace > getEventFace ( String id ) { return Mono.just(
-            SerDes.getSerDes().deserializeEventFace(
-                    this.session.execute( "SELECT * FROM "
-                                    + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTFACE.name()
-                                    + " where id = '" + id + "';"
-                    ).one().getString( "object" ) ) ); }
+            SerDes
+                    .getSerDes()
+                    .deserializeEventFace( this.session.execute( "SELECT * FROM "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.EVENTFACE.name()
+                            + " where id = '" + id + "';" )
+                            .one().getString( "object" ) ) ); }
 
     public Mono< CarEvent > getCarEvents ( String id ) {
         Row row = this.session.execute( "SELECT * FROM "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.FACECAR.name()
-                        + " where id = '" + id + "';" ).one();
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.FACECAR.name()
+                + " where id = '" + id + "';" ).one();
         return row != null ? Mono.just( SerDes
                 .getSerDes()
                 .deserializeCarEvents( row.getString( "object" ) ) )
@@ -153,16 +166,19 @@ public class CassandraDataControlForTasks {
 
     public Mono< EventCar > getEventCar ( String id ) {
         Row row = this.session.execute( "SELECT * FROM "
-                        + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTCAR.name()
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.EVENTCAR.name()
                         + " where id = '" + id + "';" ).one();
         return row != null ? Mono.just(
-            SerDes.getSerDes().deserializeEventCar(
+                SerDes
+                    .getSerDes()
+                    .deserializeEventCar(
                     row.getString( "object" ) ) ) : Mono.empty(); }
 
     public Flux< CarTotalData > getAllCarTotalData () { return Flux.fromStream(
-                    this.session.execute(
-                                    "SELECT * FROM "
-                                            + CassandraTables.TABLETS.name() + "." + CassandraTables.CARTOTALDATA.name() + ";" )
+                    this.session.execute( "SELECT * FROM "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.CARTOTALDATA.name() + ";" )
                             .all().stream() )
             .map( row -> SerDes
                     .getSerDes()
@@ -170,7 +186,8 @@ public class CassandraDataControlForTasks {
 
     public Mono< Card > getCard102 ( String id ) {
         Row row = this.session.execute( "SELECT * FROM "
-                        + CassandraTables.TABLETS.name() + "." + TaskTypes.CARD_102
+                + CassandraTables.TABLETS.name() + "."
+                + TaskTypes.CARD_102
                         + " where id = '" + id + "';" ).one();
         return row != null ? Mono.just( SerDes
                     .getSerDes()
@@ -178,28 +195,31 @@ public class CassandraDataControlForTasks {
                     row.getString( "object" ) ) ) : Mono.empty(); }
 
     public Flux< ActiveTask > getActiveTasks () { return Flux.fromStream(
-                    this.session.execute(
-                                    "SELECT * FROM "
-                                            + CassandraTables.TABLETS.name() + "." + CassandraTables.ACTIVE_TASK.name() + ";" )
+                    this.session.execute( "SELECT * FROM "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.ACTIVE_TASK.name() + ";" )
                             .all().stream() )
             .map( row -> SerDes
                     .getSerDes()
                     .deserializeActiveTask( row.getString( "object" ) ) ); }
 
     public void remove ( String id ) { this.session.execute( "DELETE FROM "
-            + CassandraTables.TABLETS.name() + "." + CassandraTables.ACTIVE_TASK.name()
+            + CassandraTables.TABLETS.name() + "."
+            + CassandraTables.ACTIVE_TASK.name()
             + " WHERE id = '" + id + "';" ); }
 
     public void addValue ( Card card ) { this.session
             .executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS.name() + "." + TaskTypes.CARD_102
+                + CassandraTables.TABLETS.name() + "."
+                    + TaskTypes.CARD_102
                 + "(id, object) VALUES ('"
                 + card.getCardId() + "', '"
                 + SerDes.getSerDes().serialize( card ) + "');" ); }
 
     public Boolean addValue ( EventCar eventCar ) { return this.session
             .executeAsync( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTCAR.name()
+            + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.EVENTCAR.name()
             + "( id, camera, matched, date, confidence, object ) VALUES('"
             + eventCar.getId() + "', "
             + eventCar.getCamera() + ", "
@@ -210,7 +230,8 @@ public class CassandraDataControlForTasks {
 
     public Boolean addValue ( EventFace eventFace ) { return this.session
             .executeAsync( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTFACE.name()
+            + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.EVENTFACE.name()
             + "( id, camera, matched, date, confidence, object ) VALUES('"
             + eventFace.getId() + "', "
             + eventFace.getCamera() + ", "
@@ -221,7 +242,8 @@ public class CassandraDataControlForTasks {
 
     public Boolean addValue ( EventBody eventBody ) { return this.session
             .executeAsync( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "." + CassandraTables.EVENTBODY.name()
+            + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.EVENTBODY.name()
             + "( id, camera, matched, date, confidence, object ) VALUES('"
             + eventBody.getId() + "', "
             + eventBody.getCamera() + ", "
@@ -232,7 +254,8 @@ public class CassandraDataControlForTasks {
 
     public Boolean addValue ( CarTotalData carTotalData ) { return this.session
             .execute( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.CARTOTALDATA.name()
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.CARTOTALDATA.name()
                     + "( gosnumber, cameraImage, violationsInformationsList, object ) VALUES('"
                     + carTotalData.getGosNumber() + "', '"
                     + carTotalData.getCameraImage() + "', "
@@ -245,7 +268,8 @@ public class CassandraDataControlForTasks {
 
     public ResultSetFuture addValue ( CarEvent carEvents ) { return this.session
             .executeAsync( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.FACECAR.name()
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.FACECAR.name()
                     + "(id, object) VALUES ('"
                     + carEvents.getId() + "', '"
                     + SerDes.getSerDes().serialize( carEvents ) + "');" ); }
@@ -253,21 +277,24 @@ public class CassandraDataControlForTasks {
     public ResultSetFuture addValue ( FaceEvent faceEvents ) {
         if ( faceEvents.getCreated_date() == null ) faceEvents.setCreated_date( new Date().toString() );
         return this.session.executeAsync( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "." + CassandraTables.FACEPERSON.name()
+            + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.FACEPERSON.name()
             + "(id, object) VALUES ('"
             + faceEvents.getId() + "', '"
             + SerDes.getSerDes().serialize( faceEvents ) + "');" ); }
 
     public void addValue ( String id, ActiveTask activeTask ) { this.session
             .executeAsync( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.ACTIVE_TASK.name()
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.ACTIVE_TASK.name()
                     + "(id, object) VALUES ('"
                     + id + "', '"
                     + SerDes.getSerDes().serialize( activeTask ) + "');" ); }
 
     public Boolean addValue ( SelfEmploymentTask selfEmploymentTask ) { return this.session
             .executeAsync( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "." + CassandraTables.SELFEMPLOYMENT.name() +
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.SELFEMPLOYMENT.name() +
                     " ( id, object ) VALUES("
                     + selfEmploymentTask.getUuid() + ", '"
                     + SerDes.getSerDes().serialize( selfEmploymentTask )

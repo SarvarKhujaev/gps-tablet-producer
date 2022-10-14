@@ -3,6 +3,8 @@ package com.ssd.mvd.gpstabletsservice.controller;
 import lombok.Data;
 import java.util.UUID;
 import java.time.Duration;
+
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;
@@ -15,6 +17,7 @@ import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 
 @Data
+@Slf4j
 public class UnirestController {
     private final String CHAT_SERVICE_DOMAIN = GpsTabletsServiceApplication
             .context
@@ -40,9 +43,9 @@ public class UnirestController {
                 .map( req -> {
                     req.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
                     return req; } )
-                .doOnError( throwable -> System.out.println( throwable.getMessage() ) )
+                .onErrorContinue( (throwable, o) -> log.error( "Error in addUser of UnirestController: "
+                        + throwable.getMessage() + " : " + o ) )
                 .onErrorStop()
-                .log()
                 .subscribe( req -> restTemplate( patrulId.split( "@" )[1] )
                         .exchange( this.CHAT_SERVICE_DOMAIN + "/"
                                 + this.CHAT_SERVICE_PREFIX
@@ -60,9 +63,9 @@ public class UnirestController {
                     req.setId( patrul.getUuid() );
                     req.setRole( Role.USER );
                     return req; } )
-                .doOnError( throwable -> System.out.println( throwable.getMessage() ) )
+                .onErrorContinue( (throwable, o) -> log.error( "Error in addUser of UnirestController: "
+                        + throwable.getMessage() + " : " + o ) )
                 .onErrorStop()
-                .log()
                 .subscribe( req -> restTemplate( patrul.getSpecialToken() )
                         .exchange( this.CHAT_SERVICE_DOMAIN + "/"
                                         + this.CHAT_SERVICE_PREFIX
@@ -79,8 +82,9 @@ public class UnirestController {
                         req.setId( patrul.getUuid() );
                         req.setRole( Role.USER );
                         return req; } )
+                .onErrorContinue( (throwable, o) -> log.error( "Error in addUser of UnirestController: "
+                + throwable.getMessage() + " : " + o ) )
                 .onErrorStop()
-                .doOnError( throwable -> System.out.println( throwable.getMessage() ) )
                 .subscribe( req -> this.restTemplate( patrul.getSpecialToken() )
                         .exchange( this.CHAT_SERVICE_DOMAIN + "/"
                                         + this.CHAT_SERVICE_PREFIX

@@ -5,11 +5,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.response.Status;
+import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.entity.ReqCar;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -45,12 +47,10 @@ public class CarController {
         try { return CassandraDataControl
                     .getInstance()
                     .delete( gosno );
-        } catch ( Exception e ) { return Mono.just(
-                ApiResponseModel.builder()
-                        .success( false )
-                        .status(
-                                Status.builder()
-                                        .code( 201 )
-                                        .message( "Wrong Car params" )
-                                        .build() ) .build() ); } }
+        } catch ( Exception e ) { return Archive
+                .getArchive()
+                .getFunction()
+                .apply( Map.of(
+                        "message", "Wrong Car params",
+                        "code", 201 ) ); } }
 }

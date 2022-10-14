@@ -12,7 +12,6 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
@@ -24,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -34,6 +34,14 @@ public class CardController {
             .getInstance()
             .getActiveTasks()
             .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
+
+    @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
+    public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
+            .getInstance()
+            .getPatrul( CassandraDataControl.getInstance().decode( token ) )
+            .flatMap( patrul -> TaskInspector
+                    .getInstance()
+                    .getCurrentActiveTask( patrul ) ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
@@ -51,7 +59,7 @@ public class CardController {
                             .getInstance()
                             .getPatrul( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getAchieve()
+                            .flatMap( patrul1 -> Archive.getArchive()
                                     .save( patrul1, card ) ) ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
@@ -61,7 +69,7 @@ public class CardController {
                             .getInstance()
                             .getPatrul( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getAchieve()
+                            .flatMap( patrul1 -> Archive.getArchive()
                                     .save( patrul1, eventFace ) ) ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
@@ -71,7 +79,7 @@ public class CardController {
                             .getInstance()
                             .getPatrul( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, facePerson ) ) ); }
+                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, facePerson ) ) ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
             CarEvent carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
@@ -80,7 +88,7 @@ public class CardController {
                             .getInstance()
                             .getPatrul( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, carEvents ) ) ); }
+                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, carEvents ) ) ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
             EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
@@ -89,7 +97,7 @@ public class CardController {
                             .getInstance()
                             .getPatrul( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getAchieve()
+                            .flatMap( patrul1 -> Archive.getArchive()
                                     .save( patrul1, eventBody ) ) ); }
 
         else { EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
@@ -98,31 +106,19 @@ public class CardController {
                             .getInstance()
                             .getPatrul( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getAchieve().save( patrul1, eventCar ) ) ); } }
-
-    @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
-    public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
-            .getInstance()
-            .getPatrul( CassandraDataControl.getInstance().decode( token ) )
-            .flatMap( patrul -> TaskInspector
-                    .getInstance()
-                    .getCurrentActiveTask( patrul ) ); }
+                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, eventCar ) ) ); } }
 
     @MessageMapping ( value = "addNewWarningCar" )
     public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) {
-        return Mono.just(
-                ApiResponseModel.builder()
-                        .success( CassandraDataControlForTasks
+        return Archive
+                .getArchive()
+                .getFunction()
+                .apply( Map.of( "message", "Car was saved successfully",
+                        "success", CassandraDataControlForTasks
                                 .getInstance()
-                                .addValue(
-                                        KafkaDataControl
-                                                .getInstance()
-                                                .writeToKafka( carTotalData ) ) )
-                        .status( Status.builder()
-                                .message( "Car was saved successfully" )
-                                .code( 200 )
-                                .build() )
-                        .build() ); }
+                                .addValue( KafkaDataControl
+                                        .getInstance()
+                                        .writeToKafka( carTotalData ) ) ) ); }
 
     @MessageMapping ( value = "getViolationsInformationList" )
     public Mono< List< ViolationsInformation > > getViolationsInformationList ( String gosnumber ) { return Mono.just(
@@ -164,16 +160,14 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
-                        return Mono.just( ApiResponseModel
-                                .builder()
-                                        .success( true )
-                                        .status( Status
-                                                .builder()
-                                                .message( request.getCard() + " has got new patrul" )
-                                                .code( 200 )
-                                                .build() )
-                                .build() ); } );
+                                                .changeTaskStatus( patrul,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                        card ) ) );
+                        return Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", request.getCard()
+                                        + " has got new patrul" ) ); } );
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
@@ -186,14 +180,14 @@ public class CardController {
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
-                                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, card ) ) );
-                        return Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( Status.builder()
-                                        .message( request.getCard() + " has got new patrul" )
-                                        .code( 200 )
-                                        .build() )
-                                .build() ); } );
+                                                .changeTaskStatus( patrul,
+                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                        card ) ) );
+                        return Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", request.getCard()
+                                        + " has got new patrul" ) ); } );
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
@@ -209,13 +203,11 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( Status.builder()
-                                        .message( request.getCard() + " has got new patrul" )
-                                        .code( 200 )
-                                        .build() )
-                                .build() ); } );
+                        return Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", request.getCard()
+                                        + " has got new patrul" ) ); } );
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
@@ -231,13 +223,11 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( Status.builder()
-                                        .message( request.getCard() + " has got new patrul" )
-                                        .code( 200 )
-                                        .build() )
-                                .build() ); } );
+                        return Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", request.getCard()
+                                        + " has got new patrul" ) ); } );
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
@@ -253,13 +243,11 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( Status.builder()
-                                        .message( request.getCard() + " has got new patrul" )
-                                        .code( 200 )
-                                        .build() )
-                                .build() ); } );
+                        return Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", request.getCard()
+                                        + " has got new patrul" ) ); } );
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
@@ -275,13 +263,11 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( Status.builder()
-                                        .message( request.getCard() + " has got new patrul" )
-                                        .code( 200 )
-                                        .build() )
-                                .build() ); } );
+                        return Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", request.getCard()
+                                        + " has got new patrul" ) ); } );
 
             default -> CassandraDataControlForTasks
                     .getInstance()
@@ -297,11 +283,9 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Mono.just( ApiResponseModel.builder()
-                                .success( true )
-                                .status( Status.builder()
-                                        .message( request.getCard() + " has got new patrul" )
-                                        .code( 200 )
-                                        .build() )
-                                .build() ); } ); }; }
+                        return Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", request.getCard()
+                                        + " has got new patrul" ) ); } ); }; }
 }
