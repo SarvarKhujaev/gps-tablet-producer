@@ -3,7 +3,6 @@ package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 import lombok.Data;
 import java.util.Map;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
@@ -37,7 +36,6 @@ public class ActiveTask {
     private Status status;
     private Status patrulStatus;
 
-    private List< String > images;
     private Map< UUID, Patrul > patrulList;
 
     public ActiveTask ( Card card ) {

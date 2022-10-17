@@ -1,9 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import lombok.Data;
 import java.util.UUID;
 import java.time.Duration;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
