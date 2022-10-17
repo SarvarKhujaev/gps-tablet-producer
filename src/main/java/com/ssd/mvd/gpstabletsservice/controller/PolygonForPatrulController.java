@@ -1,9 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -17,23 +18,39 @@ import com.ssd.mvd.gpstabletsservice.entity.ScheduleForPolygonPatrul;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 
+@Slf4j
 @RestController
 public class PolygonForPatrulController { // SAM - 76
 
     @MessageMapping( value = "listOfPoligonsForPatrul" )
     public Flux< Polygon > listOfPoligonsForPatrul () { return CassandraDataControl
             .getInstance()
-            .getAllPolygonForPatrul(); }
+            .getGetAllPolygonForPatrul()
+            .get()
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "deletePolygonForPatrul" )
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return CassandraDataControl
             .getInstance()
-            .deletePolygonForPatrul( uuid ); }
+            .deletePolygonForPatrul( uuid )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "updatePolygonForPatrul" )
     public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
-            .updatePolygonForPatrul( polygon ); }
+            .updatePolygonForPatrul( polygon )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "addPatrulToPolygon" )
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
@@ -48,23 +65,37 @@ public class PolygonForPatrulController { // SAM - 76
                         "code", 201 ) )
                 : CassandraDataControl
                 .getInstance()
-                .addPatrulToPolygon( scheduleForPolygonPatrul ); }
+                .addPatrulToPolygon( scheduleForPolygonPatrul )
+                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                        error.getMessage(), object ) ) )
+                .onErrorReturn( Archive
+                        .getArchive()
+                        .getErrorResponse()
+                        .get() ); }
 
     @MessageMapping ( value = "addPolygonForPatrul" )
     public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
-            .addPolygonForPatrul( polygon ); }
+            .addPolygonForPatrul( polygon )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "getPatrulsForPolygon" )
     public Mono< List< Patrul > > getPatrulsForPolygon ( String uuid ) {
         List< Patrul > patrulList = new ArrayList<>();
         CassandraDataControl
-            .getInstance()
-            .getPolygonForPatrul( uuid )
-            .map( Polygon::getPatrulList )
-            .subscribe( uuids -> uuids.forEach( uuid1 -> CassandraDataControl
-                    .getInstance()
-                    .getPatrul( uuid1 )
-                    .subscribe( patrulList::add ) ) );
+                .getInstance()
+                .getGetPolygonForPatrul()
+                .apply( uuid )
+                .map( Polygon::getPatrulList )
+                .subscribe( uuids -> uuids.forEach( uuid1 -> CassandraDataControl
+                        .getInstance()
+                        .getGetPatrulByUUID()
+                        .apply( uuid1 )
+                        .subscribe( patrulList::add ) ) );
         return Mono.just( patrulList ); }
 }

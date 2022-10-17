@@ -141,7 +141,8 @@ public class CassandraDataControlForEscort {
     private void linkPatrulWithEscortCar ( EscortTuple escortTuple ) {
         for ( i = 0; i < escortTuple.getPatrulList().size(); i++ ) CassandraDataControl
                 .getInstance()
-                .getPatrul( escortTuple.getPatrulList().get( i ) )
+                .getGetPatrulByUUID()
+                .apply( escortTuple.getPatrulList().get( i ) )
                 .subscribe( patrul -> {
                     patrul.setUuidOfEscort( escortTuple.getUuid() );
                     patrul.setUuidForEscortCar( escortTuple.getTupleOfCarsList().get( i ) );
@@ -427,7 +428,8 @@ public class CassandraDataControlForEscort {
 
                     escortTuple.getPatrulList().forEach( uuid1 -> CassandraDataControl
                             .getInstance()
-                            .getPatrul( uuid1 )
+                            .getGetPatrulByUUID()
+                            .apply( uuid1 )
                             .subscribe( patrul -> tupleTotalData.getPatrulList().add( patrul ) ) );
 
                     escortTuple.getTupleOfCarsList().forEach( uuid1 -> CassandraDataControlForEscort

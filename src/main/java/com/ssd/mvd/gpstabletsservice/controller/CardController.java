@@ -17,31 +17,43 @@ import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.Map;
 
+@Slf4j
 @RestController
 public class CardController {
 
     @MessageMapping ( value = "getListOfCards" )
     public Flux< ActiveTask > getListOfCards () { return CassandraDataControlForTasks
             .getInstance()
-            .getActiveTasks()
-            .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
+            .getGetActiveTasks()
+            .get()
+            .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
             .getInstance()
-            .getPatrul( CassandraDataControl.getInstance().decode( token ) )
+            .getGetPatrulByUUID()
+            .apply( CassandraDataControl.getInstance().decode( token ) )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
-                    .getCurrentActiveTask( patrul ) ); }
+                    .getCurrentActiveTask( patrul ) )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
@@ -57,56 +69,98 @@ public class CardController {
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
-                            .getPatrul( s ) )
+                            .getGetPatrulByUUID()
+                            .apply( s ) )
                     .flatMap( patrul -> patrul
                             .flatMap( patrul1 -> Archive.getArchive()
-                                    .save( patrul1, card ) ) ); }
+                                    .save( patrul1, card ) ) )
+                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                            error.getMessage(), object ) ) )
+                    .onErrorReturn( Archive
+                            .getArchive()
+                            .getErrorResponse()
+                            .get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
             EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
-                            .getPatrul( s ) )
+                            .getGetPatrulByUUID()
+                            .apply( s ) )
                     .flatMap( patrul -> patrul
                             .flatMap( patrul1 -> Archive.getArchive()
-                                    .save( patrul1, eventFace ) ) ); }
+                                    .save( patrul1, eventFace ) ) )
+                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                            error.getMessage(), object ) ) )
+                    .onErrorReturn( Archive
+                            .getArchive()
+                            .getErrorResponse()
+                            .get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
             FaceEvent facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
-                            .getPatrul( s ) )
+                            .getGetPatrulByUUID()
+                            .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, facePerson ) ) ); }
+                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, facePerson ) ) )
+                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                            error.getMessage(), object ) ) )
+                    .onErrorReturn( Archive
+                            .getArchive()
+                            .getErrorResponse()
+                            .get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
             CarEvent carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
-                            .getPatrul( s ) )
+                            .getGetPatrulByUUID()
+                            .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, carEvents ) ) ); }
+                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, carEvents ) ) )
+                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                            error.getMessage(), object ) ) )
+                    .onErrorReturn( Archive
+                            .getArchive()
+                            .getErrorResponse()
+                            .get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
             EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
-                            .getPatrul( s ) )
+                            .getGetPatrulByUUID()
+                            .apply( s ) )
                     .flatMap( patrul -> patrul
                             .flatMap( patrul1 -> Archive.getArchive()
-                                    .save( patrul1, eventBody ) ) ); }
+                                    .save( patrul1, eventBody ) ) )
+                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                            error.getMessage(), object ) ) )
+                    .onErrorReturn( Archive
+                            .getArchive()
+                            .getErrorResponse()
+                            .get() ); }
 
         else { EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
-                            .getPatrul( s ) )
+                            .getGetPatrulByUUID()
+                            .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, eventCar ) ) ); } }
+                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, eventCar ) ) )
+                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                            error.getMessage(), object ) ) )
+                    .onErrorReturn( Archive
+                            .getArchive()
+                            .getErrorResponse()
+                            .get() ); } }
 
     @MessageMapping ( value = "addNewWarningCar" )
     public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) {
@@ -118,45 +172,73 @@ public class CardController {
                                 .getInstance()
                                 .addValue( KafkaDataControl
                                         .getInstance()
-                                        .writeToKafka( carTotalData ) ) ) ); }
+                                        .writeToKafka( carTotalData ) ) ) )
+                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                        error.getMessage(), object ) ) )
+                .onErrorReturn( Archive
+                        .getArchive()
+                        .getErrorResponse()
+                        .get() ); }
 
     @MessageMapping ( value = "getViolationsInformationList" )
     public Mono< List< ViolationsInformation > > getViolationsInformationList ( String gosnumber ) { return Mono.just(
             CassandraDataControlForTasks
                     .getInstance()
-                    .getViolationsInformationList( gosnumber ) ); }
+                    .getGetViolationsInformationList()
+                    .apply( gosnumber ) )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "getWarningCarDetails" )
     public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return CassandraDataControlForTasks
             .getInstance()
-            .getWarningCarDetails( gosnumber ); }
+            .getGetWarningCarDetails()
+            .apply( gosnumber )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "getAllCarTotalData" )
     public Flux< CarTotalData > getAllCarTotalData () { return CassandraDataControlForTasks
             .getInstance()
-            .getAllCarTotalData(); }
+            .getGetAllCarTotalData()
+            .get()
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "removePatrulFromTask" )
     public Mono< ApiResponseModel > removePatrulFromTask ( UUID uuid ) {
         return CassandraDataControl
                 .getInstance()
-                .getPatrul( uuid )
+                .getGetPatrulByUUID()
+                .apply( uuid )
                 .filter( patrul -> patrul.getTaskTypes().compareTo( TaskTypes.FREE ) != 0 )
                 .flatMap( patrul -> TaskInspector
                         .getInstance()
-                        .removePatrulFromTask( patrul ) ); }
+                        .removePatrulFromTask( patrul ) )
+                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                        error.getMessage(), object ) ) )
+                .onErrorReturn( Archive
+                        .getArchive()
+                        .getErrorResponse()
+                        .get() ); }
 
     @MessageMapping ( value = "addNewPatrulsToTask" )
     public Mono< ApiResponseModel > addNewPatrulsToTask ( CardRequest< ? > request ) {
         return switch ( request.getTaskType() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
-                    .getCard102( request.getCard().toString() )
+                    .getGetCard102()
+                    .apply( request.getCard().toString() )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
-                                        .getPatrul( uuid ) )
+                                        .getGetPatrulByUUID()
+                                        .apply( uuid ) )
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
@@ -171,12 +253,14 @@ public class CardController {
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
-                    .getEventFace( request.getCard().toString() )
+                    .getGetEventFace()
+                    .apply( request.getCard().toString() )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
-                                        .getPatrul( uuid ) )
+                                        .getGetPatrulByUUID()
+                                        .apply( uuid ) )
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
@@ -191,12 +275,14 @@ public class CardController {
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getEventCar( request.getCard().toString() )
+                    .getGetEventCar()
+                    .apply( request.getCard().toString() )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
-                                        .getPatrul( uuid ) )
+                                        .getGetPatrulByUUID()
+                                        .apply( uuid ) )
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
@@ -211,12 +297,14 @@ public class CardController {
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
-                    .getEventBody( request.getCard().toString() )
+                    .getGetEventBody()
+                    .apply( request.getCard().toString() )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
-                                        .getPatrul( uuid ) )
+                                        .getGetPatrulByUUID()
+                                        .apply( uuid ) )
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
@@ -231,12 +319,14 @@ public class CardController {
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getCarEvents( request.getCard().toString() )
+                    .getGetCarEvents()
+                    .apply( request.getCard().toString() )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
-                                        .getPatrul( uuid ) )
+                                        .getGetPatrulByUUID()
+                                        .apply( uuid ) )
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
@@ -251,12 +341,14 @@ public class CardController {
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
-                    .getFaceEvents( request.getCard().toString() )
+                    .getGetFaceEvents()
+                    .apply( request.getCard().toString() )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
-                                        .getPatrul( uuid ) )
+                                        .getGetPatrulByUUID()
+                                        .apply( uuid ) )
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()
@@ -271,12 +363,14 @@ public class CardController {
 
             default -> CassandraDataControlForTasks
                     .getInstance()
-                    .getSelfEmploymentTask( UUID.fromString( request.getCard().toString() ) )
+                    .getGetSelfEmploymentTask()
+                    .apply( UUID.fromString( request.getCard().toString() ) )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .map( uuid -> CassandraDataControl
                                         .getInstance()
-                                        .getPatrul( uuid ) )
+                                        .getGetPatrulByUUID()
+                                        .apply( uuid ) )
                                 .subscribe( patrulMono -> patrulMono
                                         .subscribe( patrul -> TaskInspector
                                                 .getInstance()

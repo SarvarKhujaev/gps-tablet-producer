@@ -21,8 +21,8 @@ public class AtlasLustra {
 
     public AtlasLustra( Row row ) {
         this.setUuid( row.getUUID("uuid") );
-        this.setLustraName( row.getString("name" ) );
-        this.setCarGosNumber( row.getString("car_number") );
+        this.setLustraName( row.getString("lustraName" ) );
+        this.setCarGosNumber( row.getString("carGosNumber") );
         this.setCameraLists( row.getList( "cameraLists", CameraList.class ) ); }
 
     public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
