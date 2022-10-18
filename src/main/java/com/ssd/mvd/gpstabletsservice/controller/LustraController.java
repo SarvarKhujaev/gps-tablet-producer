@@ -60,7 +60,8 @@ public class LustraController {
     @MessageMapping( value = "allLustra" ) // the list of all created camera
     public Flux< AtlasLustra > getAllLustra () { return CassandraDataControl
             .getInstance()
-            .getAllLustra()
+            .getGetAllLustra()
+            .get()
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 }
