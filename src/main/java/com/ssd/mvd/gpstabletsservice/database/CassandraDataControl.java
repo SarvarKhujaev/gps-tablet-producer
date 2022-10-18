@@ -262,17 +262,18 @@ public final class CassandraDataControl {
                                 "code", 201 ) ) )
                 .doOnError( throwable -> this.delete() ); }
 
-    public Flux< AtlasLustra > getAllLustra () { return Flux.fromStream(
-            this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.LUSTRA.name() + " ;" )
-                    .all().stream() )
+    private final Supplier< Flux< AtlasLustra > > getAllLustra = () -> Flux.fromStream(
+                    this.getSession().execute( "SELECT * FROM "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.LUSTRA.name() + " ;" )
+                            .all().stream() )
             .map( AtlasLustra::new )
             .doOnError( throwable -> {
                 this.delete();
-                this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
+                this.logger.info(  "ERROR: " + throwable.getMessage() ); } );
 
-    public Mono< ApiResponseModel > addValue ( AtlasLustra atlasLustra, Boolean check ) { return this.session.execute(
+    public Mono< ApiResponseModel > addValue ( AtlasLustra atlasLustra, Boolean check ) { return this.getSession()
+            .execute(
             "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.LUSTRA.name() +
@@ -1123,7 +1124,10 @@ public final class CassandraDataControl {
                     "success", false,
                     "code", 201 ) ); }
 
-    public Mono< ApiResponseModel > delete ( String table, String param, String id ) { this.getSession().execute (
+    public Mono< ApiResponseModel > delete ( String table,
+                                             String param,
+                                             String id ) {
+        this.getSession().execute (
             "DELETE FROM "
                     + CassandraTables.TABLETS.name() + "." + table
                     + " WHERE " + param + " = " + UUID.fromString( id ) + ";" );
