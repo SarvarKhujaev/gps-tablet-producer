@@ -76,7 +76,7 @@ public final class CassandraDataControl {
                 .registerCodecForViolationsInformation( CassandraTables.TABLETS.name(), CassandraTables.VIOLATION_LIST_TYPE.name() ); }
 
     private void createType ( String typeName, Class object ) {
-        this.session.execute( "CREATE TYPE IF NOT EXISTS "
+        this.getSession().execute( "CREATE TYPE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + typeName +
                 CassandraConverter
@@ -84,7 +84,7 @@ public final class CassandraDataControl {
                         .convertClassToCassandra( object ) + " );" ); }
 
     private void createTable ( String tableName, Class object, String prefix ) {
-        this.session.execute( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                         + CassandraTables.TABLETS.name() + "." + tableName +
                         CassandraConverter
                                 .getInstance()
@@ -97,12 +97,13 @@ public final class CassandraDataControl {
 //        options.setReuseAddress( true );
         options.setTcpNoDelay( true );
         options.setKeepAlive( true );
-        ( this.session = ( this.cluster = Cluster.builder()
-            .withClusterName( "GpsTablet" )
-            .withPort( Integer.parseInt( GpsTabletsServiceApplication
-                    .context
-                    .getEnvironment()
-                    .getProperty( "variables.CASSANDRA_PORT" ) ) )
+        ( this.session = ( this.cluster = Cluster
+                .builder()
+                .withClusterName( "GpsTablet" )
+                .withPort( Integer.parseInt( GpsTabletsServiceApplication
+                        .context
+                        .getEnvironment()
+                        .getProperty( "variables.CASSANDRA_PORT" ) ) )
                 .addContactPoints( "10.254.5.1, 10.254.5.2, 10.254.5.3".split( ", " ) )
             .withProtocolVersion( ProtocolVersion.V4 )
             .withCodecRegistry( this.getCodecRegistry() )
@@ -111,28 +112,35 @@ public final class CassandraDataControl {
                     .setDefaultIdempotence( true )
                     .setConsistencyLevel( ConsistencyLevel.QUORUM ) )
             .withSocketOptions( options )
-            .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
+            .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy
+                    .builder()
+                    .build() ) )
             .withPoolingOptions( new PoolingOptions()
-                    .setCoreConnectionsPerHost( HostDistance.REMOTE, Integer.parseInt( GpsTabletsServiceApplication
+                    .setCoreConnectionsPerHost( HostDistance.REMOTE,
+                            Integer.parseInt( GpsTabletsServiceApplication
                             .context
                             .getEnvironment()
                             .getProperty( "variables.CASSANDRA_CORE_CONN_REMOTE" ) ) )
-                    .setCoreConnectionsPerHost( HostDistance.LOCAL, Integer.parseInt( GpsTabletsServiceApplication
+                    .setCoreConnectionsPerHost( HostDistance.LOCAL,
+                            Integer.parseInt( GpsTabletsServiceApplication
                             .context
                             .getEnvironment()
                             .getProperty( "variables.CASSANDRA_CORE_CONN_LOCAL" ) ) )
-                    .setMaxConnectionsPerHost( HostDistance.REMOTE, Integer.parseInt( GpsTabletsServiceApplication
+                    .setMaxConnectionsPerHost( HostDistance.REMOTE,
+                            Integer.parseInt( GpsTabletsServiceApplication
                             .context
                             .getEnvironment()
                             .getProperty( "variables.CASSANDRA_MAX_CONN_REMOTE" ) ) )
-                    .setMaxConnectionsPerHost( HostDistance.LOCAL, Integer.parseInt( GpsTabletsServiceApplication
+                    .setMaxConnectionsPerHost( HostDistance.LOCAL,
+                            Integer.parseInt( GpsTabletsServiceApplication
                             .context
                             .getEnvironment()
                             .getProperty( "variables.CASSANDRA_MAX_CONN_LOCAL" ) ) )
                     .setMaxRequestsPerConnection( HostDistance.REMOTE, 256 )
                     .setMaxRequestsPerConnection( HostDistance.LOCAL, 256 )
                     .setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
-                .execute( "CREATE KEYSPACE IF NOT EXISTS " + CassandraTables.TABLETS.name() +
+                .execute( "CREATE KEYSPACE IF NOT EXISTS "
+                        + CassandraTables.TABLETS.name() +
                         " WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy'," +
                         "'datacenter1':3 } AND DURABLE_WRITES = false;" );
 
