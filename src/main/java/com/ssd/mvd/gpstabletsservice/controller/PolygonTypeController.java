@@ -43,7 +43,8 @@ public class PolygonTypeController {
     @MessageMapping ( value = "getCurrentPolygonType" )
     public Mono< PolygonType > getCurrentPolygonType ( UUID uuid ) { return CassandraDataControl
             .getInstance()
-            .getAllPolygonType( uuid )
+            .getGetAllPolygonTypeByUUID()
+            .apply( uuid )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
@@ -63,7 +64,8 @@ public class PolygonTypeController {
     @MessageMapping ( value = "getAllPolygonTypes" )
     public Flux< PolygonType > getAllPolygonTypes () { return CassandraDataControl
             .getInstance()
-            .getAllPolygonType()
+            .getGetAllPolygonType()
+            .get()
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 }

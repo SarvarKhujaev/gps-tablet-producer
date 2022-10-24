@@ -49,7 +49,10 @@ public class CarDetails {
 
         if ( carEvent.getCreated_date() != null
                 && !carEvent.getCreated_date().equals( "null" ) )
-            this.setTime( ( this.date = TimeInspector.getInspector().convertTimeToLong( carEvent.getCreated_date() ) ) );
+            this.setTime( ( this.date = TimeInspector
+                    .getInspector()
+                    .getConvertTimeToLong()
+                    .apply( carEvent.getCreated_date() ) ) );
 
         this.setIp( carEvent.getDataInfo() != null
                 && carEvent.getDataInfo().getData() != null ?

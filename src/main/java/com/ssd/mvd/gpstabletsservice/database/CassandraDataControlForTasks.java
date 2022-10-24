@@ -23,7 +23,9 @@ import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
+import com.ssd.mvd.gpstabletsservice.task.card.TaskTimingStatistics;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
@@ -131,7 +133,7 @@ public class CassandraDataControlForTasks {
                     .deserializeSelfEmploymentTask( row.getString( "object" ) ) );
 
     private final Function< String, Mono< FaceEvent > > getFaceEvents = id -> Mono.justOrEmpty(
-            SerDes.getSerDes().deserializeFaceEvents(
+            SerDes.getSerDes().deserializeFaceEvents (
                     this.getSession().execute( "SELECT * FROM "
                                     + CassandraTables.TABLETS.name() + "."
                                     + CassandraTables.FACEPERSON.name()
@@ -141,7 +143,8 @@ public class CassandraDataControlForTasks {
     private final Function< String, Mono< EventBody > > getEventBody = id -> Mono.justOrEmpty(
             SerDes
                     .getSerDes()
-                    .deserializeEventBody( this.getSession().execute( "SELECT * FROM "
+                    .deserializeEventBody( this.getSession()
+                            .execute( "SELECT * FROM "
                                     + CassandraTables.TABLETS.name() + "."
                                     + CassandraTables.EVENTBODY.name()
                                     + " where id = '" + id + "';" )
@@ -157,6 +160,7 @@ public class CassandraDataControlForTasks {
                             .one().getString( "object" ) ) );
 
     private final Function< String, Mono< CarEvent > > getCarEvents = id -> {
+        System.out.println( "Task: " + id );
         Row row = this.getSession().execute( "SELECT * FROM "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.FACECAR.name()
@@ -302,4 +306,20 @@ public class CassandraDataControlForTasks {
                     + selfEmploymentTask.getUuid() + ", '"
                     + SerDes.getSerDes().serialize( selfEmploymentTask )
                     + "');" ).isDone(); }
+
+    private final Function< TaskTimingRequest, Flux< TaskTimingStatistics > > getTaskTimingStatistics = request -> Flux.fromStream(
+            this.getSession().execute( "SELECT * FROM "
+                            + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.TASK_TIMING_TABLE.name() + ";" )
+                            .all().stream() )
+            .filter( row -> request.getEndDate() == null
+                    || request.getStartDate() == null
+                    || row.getTimestamp( "dateofcoming" )
+                    .after( request.getStartDate() )
+                    && row.getTimestamp( "dateofcoming")
+                    .before(request.getEndDate() ) )
+            .filter( row -> request.getTaskType() == null
+                    || TaskTypes.valueOf( row.getString("tasktypes" ) )
+                    .compareTo( request.getTaskType() ) == 0 )
+            .map( TaskTimingStatistics::new );
 }

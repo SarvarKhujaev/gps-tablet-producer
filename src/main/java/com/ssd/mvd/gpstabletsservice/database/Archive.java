@@ -2,11 +2,10 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import lombok.Data;
 import java.security.SecureRandom;
-import java.util.function.Supplier;
-
 import reactor.core.publisher.Mono;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
@@ -50,6 +49,18 @@ public class Archive {
                     .build() )
             .success( false )
             .build();
+
+    // возвращает сообзение о слишком большой задержке прихода в точку назначения
+    private final Supplier< Mono< ApiResponseModel > > errorResponseForLateComing = () -> Mono.just(
+            ApiResponseModel
+                    .builder() // in case of wrong login
+                    .status( Status
+                            .builder()
+                            .message( "You were removed from task, due to fac that u r late for more then 24 hours" )
+                            .code( 201 )
+                            .build() )
+                    .success( false )
+                    .build() );
 
     private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID",
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",

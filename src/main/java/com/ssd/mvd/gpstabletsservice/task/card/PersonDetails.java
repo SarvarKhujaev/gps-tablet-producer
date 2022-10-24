@@ -69,7 +69,10 @@ public class PersonDetails {
         this.setConfidence( faceEvent.getConfidence() );
         if ( faceEvent.getCreated_date() != null
         && !faceEvent.getCreated_date().equals( "null" ) )
-            this.setTime( TimeInspector.getInspector().convertTimeToLong( faceEvent.getCreated_date() ) );
+            this.setTime( TimeInspector
+                    .getInspector()
+                    .getConvertTimeToLong()
+                    .apply( faceEvent.getCreated_date() ) );
         this.setIp( faceEvent.getDataInfo() != null
                 && faceEvent.getDataInfo().getData() != null ?
                 faceEvent.getDataInfo().getData().getIp() : null );
