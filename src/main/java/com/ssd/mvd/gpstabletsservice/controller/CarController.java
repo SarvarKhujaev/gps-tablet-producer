@@ -19,19 +19,22 @@ public class CarController {
     @MessageMapping( value = "carList" ) // the list of all cars
     public Flux< ReqCar > getAllCars () { return CassandraDataControl
             .getInstance()
-            .getCar()
+            .getGetCar()
+            .get()
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "getCurrentCar" )
     public Mono< ReqCar > getCurrentCar ( String gosno ) { return CassandraDataControl
             .getInstance()
-            .getCar( UUID.fromString( gosno ) ); }
+            .getGetCarByUUID()
+            .apply( UUID.fromString( gosno ) ); }
 
     @MessageMapping( value = "searchByGosnoCar" )
     public Flux< ReqCar > searchByGosno ( String gosno ) { return CassandraDataControl
             .getInstance()
-            .getCar()
+            .getGetCar()
+            .get()
             .filter( reqCar -> reqCar.getGosNumber().equals( gosno ) ); }
 
     @MessageMapping( value = "addCar" )

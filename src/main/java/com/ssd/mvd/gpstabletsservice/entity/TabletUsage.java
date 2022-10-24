@@ -1,9 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
+import com.datastax.driver.core.Row;
 import java.util.Date;
 import java.util.UUID;
-
-import com.datastax.driver.core.Row;
 import lombok.Data;
 
 @Data

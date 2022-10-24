@@ -7,7 +7,9 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
+import com.ssd.mvd.gpstabletsservice.task.card.TaskTimingStatisticsList;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
+import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
@@ -47,7 +49,8 @@ public class CardController {
             .apply( CassandraDataControl.getInstance().decode( token ) )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
-                    .getCurrentActiveTask( patrul ) )
+                    .getGetCurrentActiveTask()
+                    .apply( patrul ) )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -189,18 +192,6 @@ public class CardController {
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
-    @MessageMapping ( value = "getWarningCarDetails" )
-    public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return CassandraDataControlForTasks
-            .getInstance()
-            .getGetWarningCarDetails()
-            .apply( gosnumber )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
-
     @MessageMapping ( value = "getAllCarTotalData" )
     public Flux< CarTotalData > getAllCarTotalData () { return CassandraDataControlForTasks
             .getInstance()
@@ -218,13 +209,26 @@ public class CardController {
                 .filter( patrul -> patrul.getTaskTypes().compareTo( TaskTypes.FREE ) != 0 )
                 .flatMap( patrul -> TaskInspector
                         .getInstance()
-                        .removePatrulFromTask( patrul ) )
+                        .getRemovePatrulFromTask()
+                        .apply( patrul ) )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) )
                 .onErrorReturn( Archive
                         .getArchive()
                         .getErrorResponse()
                         .get() ); }
+
+    @MessageMapping ( value = "getWarningCarDetails" )
+    public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return CassandraDataControlForTasks
+            .getInstance()
+            .getGetWarningCarDetails()
+            .apply( gosnumber )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "addNewPatrulsToTask" )
     public Mono< ApiResponseModel > addNewPatrulsToTask ( CardRequest< ? > request ) {
@@ -382,4 +386,22 @@ public class CardController {
                                 .getFunction()
                                 .apply( Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } ); }; }
+
+    @MessageMapping ( value = "getTaskTimingStatistics" )
+    public Mono< TaskTimingStatisticsList > getTaskTimingStatistics ( TaskTimingRequest request ) {
+        TaskTimingStatisticsList taskTimingStatisticsList = new TaskTimingStatisticsList();
+        return CassandraDataControlForTasks
+                .getInstance()
+                .getGetTaskTimingStatistics()
+                .apply( request )
+                .collectList()
+                .map( taskTimingStatistics -> {
+                    taskTimingStatistics.forEach( taskTimingStatistics1 -> {
+                        switch ( taskTimingStatistics1.getStatus() ) {
+                            case LATE -> taskTimingStatisticsList.getListLate().add( taskTimingStatistics1 );
+                            case IN_TIME -> taskTimingStatisticsList.getListInTime().add( taskTimingStatistics1 );
+                            default -> taskTimingStatisticsList.getListDidNotArrived().add( taskTimingStatistics1 ); } } );
+                    return taskTimingStatisticsList; } )
+                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                        error.getMessage(), object ) ) ); }
 }

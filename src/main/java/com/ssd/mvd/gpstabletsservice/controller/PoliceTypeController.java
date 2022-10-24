@@ -19,7 +19,8 @@ public class PoliceTypeController {
     @MessageMapping ( value = "getPoliceTypeList" )
     public Flux< PoliceType > getPoliceTypeList () { return CassandraDataControl
             .getInstance()
-            .getAllPoliceTypes()
+            .getGetAllPoliceTypes()
+            .get()
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 

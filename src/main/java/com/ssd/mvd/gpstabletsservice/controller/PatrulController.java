@@ -31,7 +31,8 @@ public class PatrulController {
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( String token ) { return CassandraDataControl
             .getInstance()
-            .arrived( token )
+            .getArrived()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -42,7 +43,8 @@ public class PatrulController {
     @MessageMapping ( value = "ACCEPTED" )
     public Mono< ApiResponseModel > accepted ( String token ) { return CassandraDataControl
             .getInstance()
-            .accepted( token )
+            .getAccepted()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -53,7 +55,8 @@ public class PatrulController {
     @MessageMapping ( value = "SET_IN_PAUSE" )
     public Mono< ApiResponseModel > setInPause ( String token ) { return CassandraDataControl
             .getInstance()
-            .setInPause( token )
+            .getSetInPause()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -64,7 +67,8 @@ public class PatrulController {
     @MessageMapping ( value = "START_TO_WORK" )
     public Mono< ApiResponseModel > starToWork ( String token ) { return CassandraDataControl
             .getInstance()
-            .startToWork( token )
+            .getStartToWork()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -75,7 +79,8 @@ public class PatrulController {
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector
             .getInstance()
-            .getTaskDetails( SerDes
+            .getGetTaskDetails()
+            .apply( SerDes
                     .getSerDes()
                     .deserialize( data.getData() ) )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
@@ -88,7 +93,8 @@ public class PatrulController {
     @MessageMapping ( value = "LOGOUT" ) // used to Log out from current Account
     public Mono< ApiResponseModel > patrulLogout ( String token ) { return CassandraDataControl
             .getInstance()
-            .logout( token )
+            .getLogout()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -99,7 +105,8 @@ public class PatrulController {
     @MessageMapping ( value = "RETURNED_TO_WORK" )
     public Mono< ApiResponseModel > setInActive ( String token ) { return CassandraDataControl
             .getInstance()
-            .backToWork( token )
+            .getBackToWork()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -110,7 +117,8 @@ public class PatrulController {
     @MessageMapping ( value = "STOP_TO_WORK" )
     public Mono< ApiResponseModel > finishWorkOfPatrul ( String token ) { return CassandraDataControl
             .getInstance()
-            .stopToWork( token )
+            .getStartToWork()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -121,7 +129,8 @@ public class PatrulController {
     @MessageMapping ( value = "LOGIN" ) // for checking login data of Patrul with his Login and password
     public Mono< ApiResponseModel > patrulLogin ( PatrulLoginRequest patrulLoginRequest ) { return CassandraDataControl
             .getInstance()
-            .login( patrulLoginRequest )
+            .getLogin()
+            .apply( patrulLoginRequest )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -178,7 +187,8 @@ public class PatrulController {
     @MessageMapping ( value = "checkToken" )
     public Mono< ApiResponseModel > checkToken ( String token ) { return CassandraDataControl
             .getInstance()
-            .checkToken( token )
+            .getCheckToken()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -189,7 +199,8 @@ public class PatrulController {
     @MessageMapping ( value = "getPatrulDataByToken" )
     public Mono< ApiResponseModel > getPatrulDataByToken ( String token ) { return CassandraDataControl
             .getInstance()
-            .checkToken( token )
+            .getCheckToken()
+            .apply( token )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -291,8 +302,9 @@ public class PatrulController {
     @MessageMapping ( value = "addAllPatrulsToChatService" )
     public Mono< ApiResponseModel > addAllPatrulsToChatService ( String token ) {
         CassandraDataControl
-            .getInstance()
-            .addAllPatrulsToChatService( token );
+                .getInstance()
+                .getAddAllPatrulsToChatService()
+                .accept( token );
         return Archive
                 .getArchive()
                 .getFunction()
@@ -317,7 +329,8 @@ public class PatrulController {
                 .apply( UUID.fromString( request.getData() ) )
                 .flatMap( patrul -> CassandraDataControl
                         .getInstance()
-                        .getPatrulStatistics( request ) )
+                        .getGetPatrulStatistics()
+                        .apply( request ) )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) )
                 : Mono.empty(); }
@@ -330,7 +343,8 @@ public class PatrulController {
             .flatMap( patrul -> request.getStartTime() != null
                     && request.getEndTime() != null ? CassandraDataControl
                     .getInstance()
-                    .getAllUsedTablets( patrul )
+                    .getGetAllUsedTablets()
+                    .apply( patrul )
                     .filter( tabletUsages -> tabletUsages
                             .getStartedToUse()
                             .before( request.getEndTime() )
@@ -340,6 +354,7 @@ public class PatrulController {
                     .collectList()
                     : CassandraDataControl
                     .getInstance()
-                    .getAllUsedTablets( patrul )
+                    .getGetAllUsedTablets()
+                    .apply( patrul )
                     .collectList() ); }
 }

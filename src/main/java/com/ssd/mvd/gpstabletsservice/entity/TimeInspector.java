@@ -1,10 +1,13 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Date;
+import java.time.Instant;
+import java.time.Duration;
+import java.text.SimpleDateFormat;
+
 import lombok.Data;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Data
 public class TimeInspector {
@@ -23,19 +26,22 @@ public class TimeInspector {
 
     private Date setDate () { return ( this.date = new Date() ); }
 
-    // for checking current time of task ending
-    public Boolean checkDate ( Instant instant ) { return TimeInspector.getInspector().getEndTimeForEvening() >= this.setDate().getHours()
-            && this.date.getHours() >= TimeInspector.getInspector().getStartTimeForMorning() ?
-            ( this.getTimeDifference( instant ) <= 10 ) : ( this.getTimeDifference( instant ) <= 7 ); }
+    private final Predicate< Instant > checkDate = instant -> this.getEndTimeForEvening() >= this.setDate().getHours()
+            && this.getDate().getHours() >= this.getStartTimeForMorning() ?
+            ( this.getGetTimeDifference()
+                    .apply( instant ) <= 10 ) : ( this.getGetTimeDifference().apply( instant ) <= 7 );
 
-    public Long convertTimeToLong ( String time ) {
+    // for checking current time of task ending
+    private final Function< String, Long > convertTimeToLong = time -> {
         try { return time != null && !time.contains( "null" ) ?
                 new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
-                .parse( time )
-                .getTime() : 0L;
-        } catch ( Exception e ) { return 0L; } }
+                        .parse( time )
+                        .getTime() : 0L;
+        } catch ( Exception e ) { return 0L; } };
 
-    public Long getTimeDifference ( Instant instant ) { return Duration.between( Instant.now(), instant ).toMinutes(); } // for comparing time difference between instance and current time
+    private final Function< Instant, Long > getTimeDifference = instant -> Math.abs( Duration.between( Instant.now(), instant ).toMinutes() );
 
-    public Long getTimeDifferenceInSEconds ( Instant instant ) { return Duration.between( Instant.now(), instant ).toSeconds(); } // for comparing time difference between instance and current time
+    private final Function< Instant, Long > getTimeDifferenceInHours = instant -> Math.abs( Duration.between( Instant.now(), instant ).toHours() );
+
+    private final Function< Instant, Long > getTimeDifferenceInSeconds = instant -> Math.abs( Duration.between( Instant.now(), instant ).toSeconds() );
 }

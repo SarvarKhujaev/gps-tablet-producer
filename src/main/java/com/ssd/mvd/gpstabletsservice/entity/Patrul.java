@@ -82,7 +82,10 @@ public class Patrul {
 
     public Boolean check () { return switch ( this.getPoliceType() ) {
             case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;
-            default -> TimeInspector.getInspector().checkDate( this.getTaskDate().toInstant() ); }; }
+            default -> TimeInspector
+                    .getInspector()
+                    .getCheckDate()
+                    .test( this.getTaskDate().toInstant() ); }; }
 
     public Patrul ( Row row ) {
         this.setTaskDate( row.getTimestamp( "taskDate" ) );

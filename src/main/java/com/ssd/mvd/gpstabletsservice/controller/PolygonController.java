@@ -56,14 +56,16 @@ public class PolygonController {
     @MessageMapping( value = "getPolygonList" )
     public Flux< Polygon > getPolygonList () { return CassandraDataControl
             .getInstance()
-            .getAllPolygons()
+            .getGetAllPolygons()
+            .get()
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "getCurrentPolygon" )
     public Mono< Polygon > getCurrentPolygon ( UUID uuid ) { return CassandraDataControl
             .getInstance()
-            .getPolygon( uuid )
+            .getGetPolygonByUUID()
+            .apply( uuid )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 }

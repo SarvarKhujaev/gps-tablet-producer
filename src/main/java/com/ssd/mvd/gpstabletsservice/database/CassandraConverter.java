@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import com.ssd.mvd.gpstabletsservice.codec.*;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.tuple.Points;
+import com.ssd.mvd.gpstabletsservice.task.card.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
@@ -169,6 +170,21 @@ public class CassandraConverter {
                                                         .getKeyspace( dbName )
                                                         .getUserType( userType ) ),
                                 PolygonType.class ) ); }
+
+    public void registerCodecForPositionInfo ( String dbName, String userType ) {
+        CassandraDataControl
+                .getInstance() // create a new codec for PolygonEntity.class
+                .getCodecRegistry()
+                .register( new CodecRegistrationForPositionInfo ( CassandraDataControl
+                        .getInstance()
+                        .getCodecRegistry()
+                        .codecFor( CassandraDataControl
+                                .getInstance()
+                                .getCluster()
+                                .getMetadata()
+                                .getKeyspace( dbName )
+                                .getUserType( userType ) ),
+                        PositionInfo.class ) ); }
 
     public void registerCodecForPolygonEntity ( String dbName, String userType ) {
         CassandraDataControl
