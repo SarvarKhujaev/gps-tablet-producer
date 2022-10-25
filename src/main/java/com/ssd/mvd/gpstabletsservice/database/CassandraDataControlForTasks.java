@@ -160,7 +160,6 @@ public class CassandraDataControlForTasks {
                             .one().getString( "object" ) ) );
 
     private final Function< String, Mono< CarEvent > > getCarEvents = id -> {
-        System.out.println( "Task: " + id );
         Row row = this.getSession().execute( "SELECT * FROM "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.FACECAR.name()
@@ -307,6 +306,29 @@ public class CassandraDataControlForTasks {
                     + SerDes.getSerDes().serialize( selfEmploymentTask )
                     + "');" ).isDone(); }
 
+    private final Consumer< TaskTimingStatistics > saveTaskTimeStatistics = taskTimingStatistics -> this.getSession()
+            .execute( "INSERT INTO " +
+                    CassandraTables.TABLETS + "." +
+                    CassandraTables.TASK_TIMING_TABLE +
+                    " ( taskId, " +
+                    "patrulUUID, " +
+                    "totalTimeConsumption, " +
+                    "dateOfComing, " +
+                    "status, " +
+                    "taskTypes, " +
+                    "inTime, " +
+                    "positionInfoList ) VALUES( '" +
+                    taskTimingStatistics.getTaskId() + "', " +
+                    taskTimingStatistics.getPatrulUUID() + ", " +
+                    Math.abs( taskTimingStatistics.getTotalTimeConsumption() ) + ", '" +
+                    taskTimingStatistics.getDateOfComing().toInstant() + "', '" +
+                    taskTimingStatistics.getStatus() + "', '" +
+                    taskTimingStatistics.getTaskTypes() + "', " +
+                    taskTimingStatistics.getInTime() + ", " +
+                    CassandraConverter
+                            .getInstance()
+                            .convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() ) + ");" );
+
     private final Function< TaskTimingRequest, Flux< TaskTimingStatistics > > getTaskTimingStatistics = request -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
@@ -319,7 +341,8 @@ public class CassandraDataControlForTasks {
                     && row.getTimestamp( "dateofcoming")
                     .before(request.getEndDate() ) )
             .filter( row -> request.getTaskType() == null
-                    || TaskTypes.valueOf( row.getString("tasktypes" ) )
-                    .compareTo( request.getTaskType() ) == 0 )
+                    || request.getTaskType().size() <= 0
+                    || request.getTaskType()
+                    .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
             .map( TaskTimingStatistics::new );
 }

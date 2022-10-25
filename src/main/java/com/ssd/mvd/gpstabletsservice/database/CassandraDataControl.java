@@ -2,7 +2,6 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
-import com.ssd.mvd.gpstabletsservice.task.card.TaskTimingStatistics;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
@@ -219,29 +218,6 @@ public final class CassandraDataControl {
                 "PRIMARY KEY( (dateOfComing), taskId ) );" );
 
         this.logger.info( "Cassandra is ready" ); }
-
-    private final Consumer< TaskTimingStatistics > saveTaskTimeStatistics = taskTimingStatistics -> this.getSession()
-            .execute( "INSERT INTO " +
-                    CassandraTables.TABLETS + "." +
-                    CassandraTables.TASK_TIMING_TABLE +
-                    " ( taskId, " +
-                    "patrulUUID, " +
-                    "totalTimeConsumption, " +
-                    "dateOfComing, " +
-                    "status, " +
-                    "taskTypes, " +
-                    "inTime, " +
-                    "positionInfoList ) VALUES( '" +
-                    taskTimingStatistics.getTaskId() + "', " +
-                    taskTimingStatistics.getPatrulUUID() + ", " +
-                    Math.abs( taskTimingStatistics.getTotalTimeConsumption() ) + ", '" +
-                    taskTimingStatistics.getDateOfComing().toInstant() + "', '" +
-                    taskTimingStatistics.getStatus() + "', '" +
-                    taskTimingStatistics.getTaskTypes() + "', " +
-                    taskTimingStatistics.getInTime() + ", " +
-                    CassandraConverter
-                            .getInstance()
-                            .convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() ) + ");" );
 
     private final Function< Request, Mono< List< PositionInfo > > > getHistory = request -> {
         try { return Flux.fromStream( this.getSession().execute( "SELECT * FROM "
