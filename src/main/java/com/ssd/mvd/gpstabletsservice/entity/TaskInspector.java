@@ -83,7 +83,7 @@ public final class TaskInspector {
                                         .getGetTimeDifference()
                                         .apply( patrul.getStartedToWorkDate().toInstant() ) );
                                 return taskInspector; } )
-                            .subscribe( taskInspector -> CassandraDataControl
+                            .subscribe( taskInspector -> CassandraDataControlForTasks
                                     .getInstance()
                                     .getSaveTaskTimeStatistics()
                                     .accept( taskInspector ) ); }
@@ -142,7 +142,7 @@ public final class TaskInspector {
                                             .build() )
                                     .subscribe( taskInspector::setPositionInfoList );
                             return taskInspector; } )
-                        .subscribe( taskInspector -> CassandraDataControl
+                        .subscribe( taskInspector -> CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
@@ -190,7 +190,7 @@ public final class TaskInspector {
                                         .getGetTimeDifference()
                                         .apply( patrul.getTaskDate().toInstant() ) );
                                 return taskInspector; } )
-                            .subscribe( taskInspector -> CassandraDataControl
+                            .subscribe( taskInspector -> CassandraDataControlForTasks
                                     .getInstance()
                                     .getSaveTaskTimeStatistics()
                                     .accept( taskInspector ) ); }
@@ -249,7 +249,7 @@ public final class TaskInspector {
                                             .build() )
                                     .subscribe( taskInspector::setPositionInfoList );
                             return taskInspector; } )
-                        .subscribe( taskInspector -> CassandraDataControl
+                        .subscribe( taskInspector -> CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
@@ -297,7 +297,7 @@ public final class TaskInspector {
                                         .getGetTimeDifference()
                                         .apply( patrul.getTaskDate().toInstant() ) );
                                 return taskInspector; } )
-                            .subscribe( taskInspector -> CassandraDataControl
+                            .subscribe( taskInspector -> CassandraDataControlForTasks
                                     .getInstance()
                                     .getSaveTaskTimeStatistics()
                                     .accept( taskInspector ) ); }
@@ -358,7 +358,7 @@ public final class TaskInspector {
                                             .build() )
                                     .subscribe( taskInspector::setPositionInfoList );
                             return taskInspector; } )
-                        .subscribe( taskInspector -> CassandraDataControl
+                        .subscribe( taskInspector -> CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
@@ -406,7 +406,7 @@ public final class TaskInspector {
                                         .getGetTimeDifference()
                                         .apply( patrul.getTaskDate().toInstant() ) );
                                 return taskInspector; } )
-                            .subscribe( taskInspector -> CassandraDataControl
+                            .subscribe( taskInspector -> CassandraDataControlForTasks
                                     .getInstance()
                                     .getSaveTaskTimeStatistics()
                                     .accept( taskInspector ) ); }
@@ -465,7 +465,7 @@ public final class TaskInspector {
                                             .build() )
                                     .subscribe( taskInspector::setPositionInfoList );
                             return taskInspector; } )
-                        .subscribe( taskInspector -> CassandraDataControl
+                        .subscribe( taskInspector -> CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
@@ -511,7 +511,7 @@ public final class TaskInspector {
                                         .getGetTimeDifference()
                                         .apply( patrul.getTaskDate().toInstant() ) );
                                 return taskInspector; } )
-                            .subscribe( taskInspector -> CassandraDataControl
+                            .subscribe( taskInspector -> CassandraDataControlForTasks
                                     .getInstance()
                                     .getSaveTaskTimeStatistics()
                                     .accept( taskInspector ) ); }
@@ -570,7 +570,7 @@ public final class TaskInspector {
                                             .build() )
                                     .subscribe( taskInspector::setPositionInfoList );
                             return taskInspector; } )
-                        .subscribe( taskInspector -> CassandraDataControl
+                        .subscribe( taskInspector -> CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
@@ -617,7 +617,7 @@ public final class TaskInspector {
                                         .getGetTimeDifference()
                                         .apply( patrul.getTaskDate().toInstant() ) );
                                 return taskInspector; } )
-                            .subscribe( taskInspector -> CassandraDataControl
+                            .subscribe( taskInspector -> CassandraDataControlForTasks
                                     .getInstance()
                                     .getSaveTaskTimeStatistics()
                                     .accept( taskInspector ) ); }
@@ -678,7 +678,7 @@ public final class TaskInspector {
                                             .build() )
                                     .subscribe( taskInspector::setPositionInfoList );
                             return taskInspector; } )
-                        .subscribe( taskInspector -> CassandraDataControl
+                        .subscribe( taskInspector -> CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
@@ -763,7 +763,7 @@ public final class TaskInspector {
                                         .getGetTimeDifference()
                                         .apply( patrul.getTaskDate().toInstant() ) );
                                 return taskInspector; } )
-                            .subscribe( taskInspector -> CassandraDataControl
+                            .subscribe( taskInspector -> CassandraDataControlForTasks
                                     .getInstance()
                                     .getSaveTaskTimeStatistics()
                                     .accept( taskInspector ) ); }
@@ -817,7 +817,7 @@ public final class TaskInspector {
                                             .build() )
                                     .subscribe( taskInspector::setPositionInfoList );
                             return taskInspector; } )
-                        .subscribe( taskInspector -> CassandraDataControl
+                        .subscribe( taskInspector -> CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
