@@ -188,7 +188,10 @@ public class CardDetails {
 
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() ).subscribe( details -> {
             switch ( details ) {
-                case DETAILS -> Archive.getArchive().getDetailsList().forEach( s -> {
+                case DETAILS -> Archive
+                        .getArchive()
+                        .getDetailsList()
+                        .forEach( s -> {
                     switch ( s ) {
                         case "ID" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getCardId() ) );
@@ -206,7 +209,7 @@ public class CardDetails {
                                 .add( new Item( s, card.getEventStart() ) );
                         case "ДАТА И ВРЕМЯ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getCreated_date() ) );
-                        case "КОЛ.СТВО ПОШИБЩИХ" -> this.getDetails().get( Details.DETAILS )
+                        case "КОЛ.СТВО ПОГИБШИХ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getDeadQuantity() ) );
                         case "КОЛ.СТВО ПОСТРАДАВШИХ" -> this.getDetails().get( Details.DETAILS )
                                 .add( new Item( s, card.getVictimHumans().size() ) );
@@ -398,7 +401,7 @@ public class CardDetails {
                 case ACCEPTED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT )
                         .add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
                 case REPORT_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Время отрпавки рапорта", selfEmploymentTask.getIncidentDate() ) );
+                        .add( new Item( "Время отправки рапорта", selfEmploymentTask.getIncidentDate() ) );
                 case ACCEPTED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
                         .add( new Item( "Принятая точка", selfEmploymentTask.getLatOfPatrul() ) );
                 case ARRIVED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )

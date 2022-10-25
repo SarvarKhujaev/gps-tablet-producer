@@ -183,8 +183,8 @@ public final class TaskInspector {
                                 taskInspector.setStatus( NOT_ARRIVED );
                                 taskInspector.setTaskId( eventCar.getId() );
                                 taskInspector.setDateOfComing( new Date() );
+                                taskInspector.setTaskTypes( FIND_FACE_CAR );
                                 taskInspector.setPatrulUUID( patrul.getUuid() );
-                                taskInspector.setTaskTypes( FIND_FACE_EVENT_CAR );
                                 taskInspector.setTotalTimeConsumption( TimeInspector
                                         .getInspector()
                                         .getGetTimeDifference()
@@ -288,10 +288,10 @@ public final class TaskInspector {
                                 taskInspector.setInTime( false );
                                 taskInspector.setTask( carEvents );
                                 taskInspector.setStatus( NOT_ARRIVED );
-                                taskInspector.setTaskId( carEvents.getId() );
+                                taskInspector.setTaskTypes( FIND_FACE_CAR );
                                 taskInspector.setDateOfComing( new Date() );
+                                taskInspector.setTaskId( carEvents.getId() );
                                 taskInspector.setPatrulUUID( patrul.getUuid() );
-                                taskInspector.setTaskTypes( FIND_FACE_EVENT_CAR );
                                 taskInspector.setTotalTimeConsumption( TimeInspector
                                         .getInspector()
                                         .getGetTimeDifference()
@@ -397,10 +397,10 @@ public final class TaskInspector {
                                 taskInspector.setInTime( false );
                                 taskInspector.setTask( eventFace );
                                 taskInspector.setStatus( NOT_ARRIVED );
-                                taskInspector.setTaskId( eventFace.getId() );
                                 taskInspector.setDateOfComing( new Date() );
+                                taskInspector.setTaskId( eventFace.getId() );
+                                taskInspector.setTaskTypes( FIND_FACE_PERSON );
                                 taskInspector.setPatrulUUID( patrul.getUuid() );
-                                taskInspector.setTaskTypes( FIND_FACE_EVENT_CAR );
                                 taskInspector.setTotalTimeConsumption( TimeInspector
                                         .getInspector()
                                         .getGetTimeDifference()
@@ -502,10 +502,10 @@ public final class TaskInspector {
                                 taskInspector.setInTime( false );
                                 taskInspector.setTask( eventBody );
                                 taskInspector.setStatus( NOT_ARRIVED );
-                                taskInspector.setTaskId( eventBody.getId() );
                                 taskInspector.setDateOfComing( new Date() );
+                                taskInspector.setTaskId( eventBody.getId() );
+                                taskInspector.setTaskTypes( FIND_FACE_PERSON );
                                 taskInspector.setPatrulUUID( patrul.getUuid() );
-                                taskInspector.setTaskTypes( FIND_FACE_EVENT_CAR );
                                 taskInspector.setTotalTimeConsumption( TimeInspector
                                         .getInspector()
                                         .getGetTimeDifference()
@@ -608,10 +608,10 @@ public final class TaskInspector {
                                 taskInspector.setInTime( false );
                                 taskInspector.setTask( faceEvent );
                                 taskInspector.setStatus( NOT_ARRIVED );
-                                taskInspector.setTaskId( faceEvent.getId() );
                                 taskInspector.setDateOfComing( new Date() );
+                                taskInspector.setTaskId( faceEvent.getId() );
+                                taskInspector.setTaskTypes( FIND_FACE_PERSON );
                                 taskInspector.setPatrulUUID( patrul.getUuid() );
-                                taskInspector.setTaskTypes( FIND_FACE_EVENT_CAR );
                                 taskInspector.setTotalTimeConsumption( TimeInspector
                                         .getInspector()
                                         .getGetTimeDifference()
@@ -755,8 +755,8 @@ public final class TaskInspector {
                                 taskInspector.setStatus( NOT_ARRIVED );
                                 taskInspector.setTask( selfEmploymentTask );
                                 taskInspector.setDateOfComing( new Date() );
+                                taskInspector.setTaskTypes( SELF_EMPLOYMENT );
                                 taskInspector.setPatrulUUID( patrul.getUuid() );
-                                taskInspector.setTaskTypes( FIND_FACE_EVENT_CAR );
                                 taskInspector.setTaskId( selfEmploymentTask.getUuid().toString() );
                                 taskInspector.setTotalTimeConsumption( TimeInspector
                                         .getInspector()

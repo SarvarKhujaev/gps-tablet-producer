@@ -1543,13 +1543,6 @@ public final class CassandraDataControl {
                         .getInstance()
                         .addUser( patrul ); } );
 
-    public Mono< Patrul > getPatrul ( String passportNumber ) {
-        return Mono.just( this.getSession().execute( "SELECT * FROM "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.PATRULS.name()
-                + " WHERE passportNumber = '" + passportNumber + "';" ).one() )
-                .map( Patrul::new ); }
-
     public UUID decode ( String token ) { return UUID.fromString(
             new String( Base64
                     .getDecoder()
