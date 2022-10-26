@@ -20,8 +20,6 @@ public class CardDetails {
 
     public CardDetails ( CarDetails carDetails ) { this.setCarDetails( carDetails ); }
 
-    public CardDetails ( PersonDetails personDetails ) { this.setPersonDetails( personDetails ); }
-
     public CardDetails ( CarTotalData carTotalData ) {
         this.getDetails().putIfAbsent( Details.TONIROVKA, new ArrayList<>() );
         this.getDetails().putIfAbsent( Details.ISHONCHNOMA, new ArrayList<>() );
@@ -174,6 +172,8 @@ public class CardDetails {
                     .getModelForCar()
                     .getInsurance()
                     .getInsuranceSerialNumber() ) ); } }
+
+    public CardDetails ( PersonDetails personDetails ) { this.setPersonDetails( personDetails ); }
 
     public CardDetails ( Card card, Patrul patrul, String language ) {
         this.getDetails().putIfAbsent( Details.DETAILS, new ArrayList<>() );

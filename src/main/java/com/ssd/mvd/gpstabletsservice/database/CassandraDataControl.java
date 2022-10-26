@@ -203,20 +203,6 @@ public final class CassandraDataControl {
                 "totalActivityTime bigint, " +
                 "PRIMARY KEY( status, uuid ) );" );
 
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS " +
-                CassandraTables.TABLETS.name() + "." +
-                CassandraTables.TASK_TIMING_TABLE.name() +
-                " ( taskId text, " +
-                "patrulUUID uuid, " +
-                "totalTimeConsumption bigint, " +
-                "dateOfComing timestamp, " +
-                "status text, " +
-                "taskTypes text, " +
-                "inTime boolean, " +
-                "positionInfoList list< frozen< " +
-                CassandraTables.POSITION_INFO.name() + " >  >, " +
-                "PRIMARY KEY( (dateOfComing), taskId ) );" );
-
         this.logger.info( "Cassandra is ready" ); }
 
     private final Function< Request, Mono< List< PositionInfo > > > getHistory = request -> {

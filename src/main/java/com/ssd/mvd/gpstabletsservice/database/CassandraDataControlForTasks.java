@@ -19,13 +19,11 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSetFuture;
 
-import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.task.card.*;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
-import com.ssd.mvd.gpstabletsservice.task.card.TaskTimingStatistics;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
@@ -48,7 +46,7 @@ public class CassandraDataControlForTasks {
             : ( cassandraDataControl = new CassandraDataControlForTasks() ); }
 
     private CassandraDataControlForTasks () {
-        this.session.execute( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.CARTOTALDATA.name()
                 + "( gosnumber text PRIMARY KEY, "
@@ -57,45 +55,63 @@ public class CassandraDataControlForTasks {
                 + CassandraTables.VIOLATION_LIST_TYPE.name() + "> >, "
                 + "object text );" );
 
-        this.session.execute( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.EVENTBODY.name()
                 + "( id text PRIMARY KEY, object text );" );
 
-        this.session.execute( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.EVENTFACE.name()
                 + "( id text PRIMARY KEY, object text );" );
 
-        this.session.execute( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.EVENTCAR.name()
                 + "( id text PRIMARY KEY, object text );" );
 
-        this.session.execute( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.FACECAR.name()
                 + "( id text PRIMARY KEY, object text );" );
 
-        this.session.execute ( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.SELFEMPLOYMENT.name()
                 + "( id uuid PRIMARY KEY, object text );" );
 
-        this.session.execute ( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.FACEPERSON.name()
                 + "( id text PRIMARY KEY, object text );" );
 
-        this.session.execute ( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + TaskTypes.CARD_102
                 + "( id text PRIMARY KEY, object text );" );
 
-        this.session.execute ( "CREATE TABLE IF NOT EXISTS "
+        this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.ACTIVE_TASK.name()
                 + "( id text PRIMARY KEY, object text );" );
+
+        this.getSession().execute( "CREATE TABLE IF NOT EXISTS " +
+                CassandraTables.TABLETS.name() + "." +
+                CassandraTables.TASK_TIMING_TABLE.name() +
+                " ( taskId text, " +
+                "patrulUUID uuid, " +
+                "totalTimeConsumption bigint, " +
+                "dateOfComing timestamp, " +
+                "status text, " +
+                "taskTypes text, " +
+                "inTime boolean, " +
+                "positionInfoList list< frozen< " +
+                CassandraTables.POSITION_INFO.name() + " >  >, " +
+                "PRIMARY KEY( (dateOfComing), taskId ) );" );
+
+        this.getSession().execute( "CREATE INDEX IF NOT EXISTS task_id_index ON "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.TASK_TIMING_TABLE.name() + "( taskId )" );
 
         this.logger.info("Starting CassandraDataControl for tasks" ); }
 
@@ -345,4 +361,55 @@ public class CassandraDataControlForTasks {
                     || request.getTaskType()
                     .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
             .map( TaskTimingStatistics::new );
+
+    public Mono< List< PositionInfo > > getPositionInfoList ( String taskId, UUID patrulUUID ) {
+        return Mono.justOrEmpty( this.getSession()
+                .execute( "SELECT positionInfoList FROM "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.TASK_TIMING_TABLE.name()
+                        + " WHERE taskid = '" + taskId + "';" )
+                .one().getList( "positionInfoList", PositionInfo.class ) ); }
+
+    private Boolean checkTable ( String id, String tableName ) {
+        return this.getSession()
+                .execute( "SELECT * FROM "
+                        + CassandraTables.TABLETS.name() + "."
+                        + tableName
+                        + " where id = '" + id + "';" ).one() != null; }
+
+    private CassandraTables findTable ( String id ) {
+        if ( this.checkTable( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
+        else if ( this.checkTable( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
+        else return CassandraTables.EVENTFACE; }
+
+    private final Function< TaskDetailsRequest, Mono< TaskDetails > > getTaskDetails = taskDetailsRequest ->
+            switch ( taskDetailsRequest.getTaskTypes() ) {
+                case CARD_102 -> this.getCard102
+                        .apply( taskDetailsRequest.getId() )
+                        .map( card -> new TaskDetails( card, taskDetailsRequest.getPatrulUUID() ) );
+
+                case FIND_FACE_CAR -> this.checkTable( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
+                        ? this.getCarEvents
+                        .apply( taskDetailsRequest.getId() )
+                        .map( carEvent -> new TaskDetails( carEvent, taskDetailsRequest.getPatrulUUID() ) )
+                        : this.getEventCar
+                        .apply( taskDetailsRequest.getId() )
+                        .map( eventCar -> new TaskDetails( eventCar, taskDetailsRequest.getPatrulUUID() ) );
+
+                case FIND_FACE_PERSON -> switch ( this.findTable( taskDetailsRequest.getId() ) ) {
+                    case FACEPERSON -> this.getFaceEvents
+                            .apply( taskDetailsRequest.getId() )
+                            .map( faceEvent -> new TaskDetails( faceEvent, taskDetailsRequest.getPatrulUUID() ) );
+
+                    case EVENTBODY -> this.getEventFace
+                            .apply( taskDetailsRequest.getId() )
+                            .map( eventFace -> new TaskDetails( eventFace, taskDetailsRequest.getPatrulUUID() ) );
+
+                    default -> this.getEventBody
+                            .apply( taskDetailsRequest.getId() )
+                            .map( eventFace -> new TaskDetails( eventFace, taskDetailsRequest.getPatrulUUID() ) ); };
+                default -> this.getSelfEmploymentTask
+                        .apply( UUID.fromString( taskDetailsRequest.getId() ) )
+                        .map( selfEmploymentTask -> new TaskDetails( selfEmploymentTask,
+                                taskDetailsRequest.getPatrulUUID() ) ); };
 }
