@@ -1,10 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.datastax.driver.core.Row;
 
 import lombok.AllArgsConstructor;
@@ -18,17 +16,38 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskTimingStatistics< T > { // показывает все таски со временем их выполнения и деталями
+public class TaskTimingStatistics { // показывает все таски со временем их выполнения и деталями
+    private String carType; // модель машины
+    private String organName;
+    private String carNumber;
+    private String fatherName;
+    private String policeType; // choosing from dictionary
+    private String phoneNumber;
+    private String dateOfBirth;
+    private String taskIdOfPatrul;
+    private String passportNumber;
+    private String patrulImageLink;
+    private String surnameNameFatherName; // Ф.И.О
+
+    private Double latitude; // the current location of the user
+    private Double longitude; // the current location of the user
+    private Double latitudeOfTask;
+    private Double longitudeOfTask;
+
+    private Status patrulStatus; // статус самого патрульного
+    private Date lastActiveDate; // shows when user was online lastly
+    private Integer batteryLevel;
+
+    // параметры самого класса
+    private Status status; // показывает пришел ли патрульный во время или нет
     private String taskId;
     private Boolean inTime;
     private UUID patrulUUID;
     private Date dateOfComing; // показывает время когда патрульный пришел в точку назначения
     private Long totalTimeConsumption; // общее время которое патрульный потратил чтобы дойти до пункта назначения
 
-    private T task;
-    private Patrul patrul;
-    private Status status; // показывает пришел ли патрульный во время или нет
     private TaskTypes taskTypes;
+    private TaskTypes taskTypesTable;
     private List< PositionInfo > positionInfoList;
 
     public TaskTimingStatistics( Row row ) {
@@ -44,47 +63,26 @@ public class TaskTimingStatistics< T > { // показывает все таск
                 .getInstance()
                 .getGetPatrulByUUID()
                 .apply( this.getPatrulUUID() )
-                .subscribe( this::setPatrul );
-        switch ( this.getTaskTypes() ) {
-            case CARD_102 -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetCard102()
-                    .apply( this.getTaskId() )
-                    .subscribe( card -> this.setTask( (T) card ) );
+                .subscribe( patrul1 -> {
+                    this.setPatrulStatus( patrul1.getStatus() );
 
-            case SELF_EMPLOYMENT -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetSelfEmploymentTask()
-                    .apply( UUID.fromString( this.getTaskId() ) )
-                    .subscribe( selfEmploymentTask -> this.setTask( (T) selfEmploymentTask ) );
+                    this.setCarType( patrul1.getCarType() );
+                    this.setCarNumber( patrul1.getCarNumber() );
+                    this.setOrganName( patrul1.getOrganName() );
+                    this.setTaskIdOfPatrul( patrul1.getTaskId() );
+                    this.setFatherName( patrul1.getFatherName() );
+                    this.setPoliceType( patrul1.getPoliceType() );
+                    this.setDateOfBirth( patrul1.getDateOfBirth() );
+                    this.setPhoneNumber( patrul1.getPhoneNumber() );
+                    this.setPassportNumber( patrul1.getPassportNumber() );
+                    this.setPatrulImageLink( patrul1.getPatrulImageLink() );
+                    this.setSurnameNameFatherName( patrul1.getSurnameNameFatherName() );
 
-            case FIND_FACE_CAR -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetCarEvents()
-                    .apply( this.getTaskId() )
-                    .subscribe( carEvent -> this.setTask( (T) carEvent ) );
+                    this.setBatteryLevel( patrul1.getBatteryLevel() );
+                    this.setLastActiveDate( patrul1.getLastActiveDate() );
 
-            case FIND_FACE_PERSON -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetFaceEvents()
-                    .apply( this.getTaskId() )
-                    .subscribe( faceEvent -> this.setTask( (T) faceEvent ) );
-
-            case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventCar()
-                    .apply( this.getTaskId() )
-                    .subscribe( eventFace -> this.setTask( (T) eventFace ) );
-
-            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventBody()
-                    .apply( this.getTaskId() )
-                    .subscribe( eventBody -> this.setTask( (T) eventBody ) );
-
-            default -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventFace()
-                    .apply( this.getTaskId() )
-                    .subscribe( eventFace -> this.setTask( (T) eventFace ) ); } }
+                    this.setLatitude( patrul1.getLatitude() );
+                    this.setLongitude( patrul1.getLongitude() );
+                    this.setLongitudeOfTask( patrul1.getLongitudeOfTask() );
+                    this.setLongitudeOfTask( patrul1.getLongitudeOfTask() ); } ); }
 }

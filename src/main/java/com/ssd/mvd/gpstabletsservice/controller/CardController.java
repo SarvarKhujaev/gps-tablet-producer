@@ -7,14 +7,12 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
-import com.ssd.mvd.gpstabletsservice.task.card.TaskTimingStatisticsList;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.task.card.Card;
+import com.ssd.mvd.gpstabletsservice.task.card.*;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -404,4 +402,10 @@ public class CardController {
                     return taskTimingStatisticsList; } )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) ); }
+
+    @MessageMapping ( value = "getDetailsOfTask" )
+    public Mono< TaskDetails > getDetailsOfTask ( TaskDetailsRequest request ) { return CassandraDataControlForTasks
+            .getInstance()
+            .getGetTaskDetails()
+            .apply( request ); }
 }
