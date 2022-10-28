@@ -272,7 +272,8 @@ public class PatrulController {
                     .apply( Map.of(
                             "message", "You have not completed any task, so try to fix this problem please",
                             "success", false,
-                            "code", 201 ) ) ); }
+                            "code", 200,
+                            "data", Data.builder().build() ) ) ); }
 
     @MessageMapping ( value = "getListOfPatrulTasks" )
     public Mono< ApiResponseModel > getListOfPatrulTasks ( Request request ) { return CassandraDataControl
