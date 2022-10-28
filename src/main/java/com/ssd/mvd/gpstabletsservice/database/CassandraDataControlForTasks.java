@@ -362,7 +362,7 @@ public class CassandraDataControlForTasks {
                     .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
             .map( TaskTimingStatistics::new );
 
-    public Mono< List< PositionInfo > > getPositionInfoList ( String taskId, UUID patrulUUID ) {
+    public Mono< List< PositionInfo > > getPositionInfoList ( String taskId ) {
         return Mono.justOrEmpty( this.getSession()
                 .execute( "SELECT positionInfoList FROM "
                         + CassandraTables.TABLETS.name() + "."

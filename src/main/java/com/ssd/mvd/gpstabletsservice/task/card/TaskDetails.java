@@ -31,7 +31,7 @@ public class TaskDetails {
             this.setDate( card.getCreated_date().toString() );
             CassandraDataControlForTasks
                     .getInstance()
-                    .getPositionInfoList( card.getCardId().toString(), patrulUUID )
+                    .getPositionInfoList( card.getCardId().toString() )
                     .subscribe( this::setPositionInfoList );
 
             card.getReportForCardList()
@@ -43,7 +43,7 @@ public class TaskDetails {
         this.setDate( carEvent.getCreated_date() );
         CassandraDataControlForTasks
                 .getInstance()
-                .getPositionInfoList( carEvent.getId(), patrulUUID )
+                .getPositionInfoList( carEvent.getId()  )
                 .subscribe( this::setPositionInfoList );
         carEvent.getReportForCardList()
                 .stream()
@@ -55,7 +55,7 @@ public class TaskDetails {
             this.setDate( eventCar.getCreated_date().toString() );
             CassandraDataControlForTasks
                     .getInstance()
-                    .getPositionInfoList( eventCar.getId(), patrulUUID )
+                    .getPositionInfoList( eventCar.getId() )
                     .subscribe( this::setPositionInfoList );
             eventCar.getReportForCardList()
                     .stream()
@@ -67,7 +67,7 @@ public class TaskDetails {
             this.setDate( eventBody.getCreated_date().toString() );
             CassandraDataControlForTasks
                     .getInstance()
-                    .getPositionInfoList( eventBody.getId(), patrulUUID )
+                    .getPositionInfoList( eventBody.getId() )
                     .subscribe( this::setPositionInfoList );
             eventBody.getReportForCardList()
                     .stream()
@@ -78,7 +78,7 @@ public class TaskDetails {
         this.setDate( eventFace.getCreated_date().toString() );
         CassandraDataControlForTasks
                 .getInstance()
-                .getPositionInfoList( eventFace.getId(), patrulUUID )
+                .getPositionInfoList( eventFace.getId() )
                 .subscribe( this::setPositionInfoList );
         eventFace.getReportForCardList()
                 .stream()
@@ -89,7 +89,7 @@ public class TaskDetails {
         this.setDate( faceEvent.getCreated_date() );
         CassandraDataControlForTasks
                 .getInstance()
-                .getPositionInfoList( faceEvent.getId(), patrulUUID )
+                .getPositionInfoList( faceEvent.getId() )
                 .subscribe( this::setPositionInfoList );
         faceEvent.getReportForCardList()
                 .stream()
@@ -102,7 +102,7 @@ public class TaskDetails {
         this.setDate( selfEmploymentTask.getIncidentDate().toString() );
         CassandraDataControlForTasks
                 .getInstance()
-                .getPositionInfoList( selfEmploymentTask.getUuid().toString(), patrulUUID )
+                .getPositionInfoList( selfEmploymentTask.getUuid().toString() )
                 .subscribe( this::setPositionInfoList );
         selfEmploymentTask.getReportForCards()
                 .stream()
