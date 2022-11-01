@@ -367,7 +367,7 @@ public class CassandraDataControlForTasks {
                     && row.getTimestamp( "dateofcoming")
                     .before(request.getEndDate() ) )
             .filter( row -> request.getTaskType() == null
-                    || request.getTaskType().size() <= 0
+                    || request.getTaskType().size() == 0
                     || request.getTaskType()
                     .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
             .map( TaskTimingStatistics::new );
@@ -430,7 +430,7 @@ public class CassandraDataControlForTasks {
                     + " WHERE patrulUUID = "
                     + patrulUUID + ";" ).one() == null;
 
-    private final Function< PatrulSos, Mono< Status > > saveSos = patrulSos -> this.getSession()
+    private final Function< PatrulSos, Mono< ApiResponseModel > > saveSos = patrulSos -> this.getSession()
             .execute( "INSERT INTO "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.SOS_TABLE.name()
@@ -443,8 +443,24 @@ public class CassandraDataControlForTasks {
                 + patrulSos.getLongitude() + ", "
                 + patrulSos.getLatitude() + ") IF NOT EXISTS;" )
                 .wasApplied()
-                ? Mono.just( Status.ACTIVE )
-            : Mono.just( Status.IN_ACTIVE )
+                ? Archive
+            .getArchive()
+            .getFunction()
+            .apply( Map.of(
+                    "message", "Sos was saved successfully",
+                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                            .builder()
+                            .data( Status.ACTIVE )
+                            .build() ) )
+            : Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of(
+                            "message", "Sos was deleted successfully",
+                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
+                                    .data( Status.IN_ACTIVE )
+                                    .build() ) )
             .map( status -> {
                 this.getSession().execute( "DELETE FROM "
                         + CassandraTables.TABLETS.name() + "."

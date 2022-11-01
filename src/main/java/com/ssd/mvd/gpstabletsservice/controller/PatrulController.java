@@ -365,7 +365,7 @@ public class PatrulController {
     // в случае возникновения какой - либо опасности, патрульный модет отправить сигнал СОС
     // метод перехватывает этот сигнал и вносит в базу и шлет оповещение на фронт
     @MessageMapping ( value = "saveSosFromPatrul" )
-    public Mono< Status > saveSosFromPatrul ( PatrulSos patrulSos ) {
+    public Mono< ApiResponseModel > saveSosFromPatrul ( PatrulSos patrulSos ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getSaveSos()
@@ -373,15 +373,31 @@ public class PatrulController {
 
     // используется планшетом чтобы проверить не отправлял ли он СОС раньше
     @MessageMapping ( value = "checkSosStatus" )
-    public Mono< Status > checkSosStatus ( String token ) {
+    public Mono< ApiResponseModel > checkSosStatus ( String token ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getCheckSosTable()
                 .test( CassandraDataControl
                         .getInstance()
                         .decode( token ) )
-                ? Mono.just( Status.IN_ACTIVE )
-                : Mono.just( Status.ACTIVE ); }
+                ? Archive
+                .getArchive()
+                .getFunction()
+                .apply( Map.of(
+                        "message", "U did not send SOS signal",
+                        "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                .builder()
+                                .data( Status.IN_ACTIVE )
+                                .build() ) )
+                : Archive
+                .getArchive()
+                .getFunction()
+                .apply( Map.of(
+                        "message", "U have SOS signal",
+                        "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                .builder()
+                                .data( Status.ACTIVE )
+                                .build() ) ); }
 
     @MessageMapping ( value = "getAllSosEntities" )
     public Flux< PatrulSos > getAllSosEntities () { return CassandraDataControlForTasks
