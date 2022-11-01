@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.Predicate;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,6 +21,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.ResultSetFuture;
 
 import com.ssd.mvd.gpstabletsservice.task.card.*;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
@@ -94,6 +96,14 @@ public class CassandraDataControlForTasks {
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.ACTIVE_TASK.name()
                 + "( id text PRIMARY KEY, object text );" );
+
+        this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.SOS_TABLE.name()
+                + CassandraConverter
+                .getInstance()
+                .convertClassToCassandra( PatrulSos.class )
+                + ", PRIMARY KEY ( patrulUUID ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS " +
                 CassandraTables.TABLETS.name() + "." +
@@ -412,4 +422,40 @@ public class CassandraDataControlForTasks {
                         .apply( UUID.fromString( taskDetailsRequest.getId() ) )
                         .map( selfEmploymentTask -> new TaskDetails( selfEmploymentTask,
                                 taskDetailsRequest.getPatrulUUID() ) ); };
+
+    private final Predicate< UUID > checkSosTable = patrulUUID -> this.getSession()
+            .execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.SOS_TABLE.name()
+                    + " WHERE patrulUUID = "
+                    + patrulUUID + ";" ).one() == null;
+
+    private final Function< PatrulSos, Mono< Status > > saveSos = patrulSos -> this.getSession()
+            .execute( "INSERT INTO "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.SOS_TABLE.name()
+                + CassandraConverter
+                .getInstance()
+                .getALlNames( PatrulSos.class )
+                + " VALUES ('"
+                + new Date().toInstant() + "', "
+                + patrulSos.getPatrulUUID() + ", "
+                + patrulSos.getLongitude() + ", "
+                + patrulSos.getLatitude() + ") IF NOT EXISTS;" )
+                .wasApplied()
+                ? Mono.just( Status.ACTIVE )
+            : Mono.just( Status.IN_ACTIVE )
+            .map( status -> {
+                this.getSession().execute( "DELETE FROM "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.SOS_TABLE.name()
+                        + " WHERE patrulUUID = " + patrulSos.getPatrulUUID() + ";" );
+                return status; } );
+
+    private final Supplier< Flux< PatrulSos > > getAllSos = () -> Flux.fromStream(
+            this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.SOS_TABLE.name() + ";" )
+                    .all().stream() )
+            .map( PatrulSos::new );
 }

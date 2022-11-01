@@ -13,11 +13,14 @@ import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.task.card.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -358,4 +361,31 @@ public class PatrulController {
                     .getGetAllUsedTablets()
                     .apply( patrul )
                     .collectList() ); }
+
+    // в случае возникновения какой - либо опасности, патрульный модет отправить сигнал СОС
+    // метод перехватывает этот сигнал и вносит в базу и шлет оповещение на фронт
+    @MessageMapping ( value = "saveSosFromPatrul" )
+    public Mono< Status > saveSosFromPatrul ( PatrulSos patrulSos ) {
+        return CassandraDataControlForTasks
+                .getInstance()
+                .getSaveSos()
+                .apply( patrulSos ); }
+
+    // используется планшетом чтобы проверить не отправлял ли он СОС раньше
+    @MessageMapping ( value = "checkSosStatus" )
+    public Mono< Status > checkSosStatus ( String token ) {
+        return CassandraDataControlForTasks
+                .getInstance()
+                .getCheckSosTable()
+                .test( CassandraDataControl
+                        .getInstance()
+                        .decode( token ) )
+                ? Mono.just( Status.IN_ACTIVE )
+                : Mono.just( Status.ACTIVE ); }
+
+    @MessageMapping ( value = "getAllSosEntities" )
+    public Flux< PatrulSos > getAllSosEntities () { return CassandraDataControlForTasks
+            .getInstance()
+            .getGetAllSos()
+            .get(); }
 }

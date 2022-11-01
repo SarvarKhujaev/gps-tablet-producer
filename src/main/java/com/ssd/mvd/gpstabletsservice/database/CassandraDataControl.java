@@ -1537,5 +1537,6 @@ public final class CassandraDataControl {
         this.getSession().close();
         this.getCluster().close();
         cassandraDataControl = null;
+        KafkaDataControl.getInstance().clear();
         this.logger.info( "Cassandra is closed!!!" ); }
 }
