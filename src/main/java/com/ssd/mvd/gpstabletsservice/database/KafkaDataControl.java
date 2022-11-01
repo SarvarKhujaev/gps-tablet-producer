@@ -32,35 +32,40 @@ public class KafkaDataControl {
     private static KafkaDataControl instance = new KafkaDataControl();
     private final Logger logger = Logger.getLogger( KafkaDataControl.class.toString() );
 
-    public final String PATH = GpsTabletsServiceApplication
+    private final String KAFKA_BROKER = GpsTabletsServiceApplication
             .context
             .getEnvironment()
             .getProperty( "variables.KAFKA_BROKER" );
 
-    public final String ID = GpsTabletsServiceApplication
+    private final String GROUP_ID_FOR_KAFKA = GpsTabletsServiceApplication
             .context
             .getEnvironment()
             .getProperty( "variables.GROUP_ID_FOR_KAFKA" );
 
-    public final String carTotalData = GpsTabletsServiceApplication
+    private final String CAR_TOTAL_DATA = GpsTabletsServiceApplication
             .context
             .getEnvironment()
             .getProperty( "variables.CAR_TOTAL_DATA" );
 
-    public final String activeTask = GpsTabletsServiceApplication
+    private final String ACTIVE_TASK = GpsTabletsServiceApplication
             .context
             .getEnvironment()
             .getProperty( "variables.ACTIVE_TASK" );
 
-    public final String notification = GpsTabletsServiceApplication
+    private final String NOTIFICATION = GpsTabletsServiceApplication
             .context
             .getEnvironment()
             .getProperty( "variables.NOTIFICATION" );
 
+    private final String SOS = GpsTabletsServiceApplication
+            .context
+            .getEnvironment()
+            .getProperty( "variables.ACTIVE_TASK" );
+
     private Properties setProperties () {
         Properties properties = new Properties();
-        properties.put( AdminClientConfig.CLIENT_ID_CONFIG, this.getID() );
-        properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.getPATH() );
+        properties.put( AdminClientConfig.CLIENT_ID_CONFIG, this.getGROUP_ID_FOR_KAFKA() );
+        properties.put( AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, this.getKAFKA_BROKER() );
         return properties; }
 
     public void getNewTopic ( String imei ) {
@@ -76,7 +81,7 @@ public class KafkaDataControl {
 
     private KafkaTemplate< String, String > kafkaTemplate () {
         Map< String, Object > map = new HashMap<>();
-        map.put( ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.getPATH() );
+        map.put( ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.getKAFKA_BROKER() );
         map.put( ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class );
         map.put( ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class );
         return new KafkaTemplate<>( new DefaultKafkaProducerFactory<>( map ) ); }
@@ -85,12 +90,12 @@ public class KafkaDataControl {
         this.kafkaTemplate = this.kafkaTemplate();
         this.getLogger().info( "KafkaDataControl was created" );
         this.client = KafkaAdminClient.create( this.setProperties() );
-        this.getNewTopic( this.getCarTotalData() );
-        this.getNewTopic( this.getNotification() );
-        this.getNewTopic( this.getActiveTask() ); }
+        this.getNewTopic( this.getCAR_TOTAL_DATA() );
+        this.getNewTopic( this.getNOTIFICATION() );
+        this.getNewTopic( this.getACTIVE_TASK() ); }
 
     public void writeToKafka ( String card ) {
-        this.getKafkaTemplate().send( this.getActiveTask(), card ).addCallback( new ListenableFutureCallback<>() {
+        this.getKafkaTemplate().send( this.getACTIVE_TASK(), card ).addCallback(new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: "
                     + LocalDateTime.now() ); }
@@ -101,7 +106,7 @@ public class KafkaDataControl {
                     + result.getRecordMetadata().offset() ); } } ); }
 
     public CarTotalData writeToKafka ( CarTotalData card ) {
-        this.getKafkaTemplate().send( this.getCarTotalData(), SerDes.getSerDes().serialize( card ) )
+        this.getKafkaTemplate().send( this.getCAR_TOTAL_DATA(), SerDes.getSerDes().serialize( card ) )
                 .addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
@@ -113,7 +118,7 @@ public class KafkaDataControl {
         } ); return card; }
 
     public void writeToKafka ( Notification notification ) {
-        this.getKafkaTemplate().send( this.getNotification(), SerDes.getSerDes().serialize( notification ) )
+        this.getKafkaTemplate().send( this.getNOTIFICATION(), SerDes.getSerDes().serialize( notification ) )
                 .addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }
