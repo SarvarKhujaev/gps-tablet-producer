@@ -22,8 +22,10 @@ public class PersonDetails {
     public PersonDetails ( EventBody eventBody ) {
         this.setIp( eventBody.getCameraIp() );
         this.setConfidence( eventBody.getConfidence() );
-        this.setDate( eventBody.getCreated_date().getTime() );
-        this.setTime( eventBody.getCreated_date().getTime() );
+        this.setDate( eventBody.getCreated_date() != null
+                ? eventBody.getCreated_date().getTime() : null );
+        this.setTime( eventBody.getCreated_date() != null
+                ? eventBody.getCreated_date().getTime() : null );
 
         this.setThumbnail( eventBody.getThumbnail() );
         this.setCameraImage( eventBody.getFullframe() );
@@ -45,8 +47,10 @@ public class PersonDetails {
     public PersonDetails ( EventFace eventFace ) {
         this.setIp( eventFace.getCameraIp() );
         this.setConfidence( eventFace.getConfidence() );
-        this.setDate( eventFace.getCreated_date().getTime() );
-        this.setTime( eventFace.getCreated_date().getTime() );
+        this.setDate( eventFace.getCreated_date() != null
+                ? eventFace.getCreated_date().getTime() : null );
+        this.setTime( eventFace.getCreated_date() != null
+                ? eventFace.getCreated_date().getTime() : null );
 
         this.setThumbnail( eventFace.getThumbnail() );
         this.setCameraImage( eventFace.getFullframe() );
@@ -67,12 +71,12 @@ public class PersonDetails {
 
     public PersonDetails ( FaceEvent faceEvent ) {
         this.setConfidence( faceEvent.getConfidence() );
-        if ( faceEvent.getCreated_date() != null
-        && !faceEvent.getCreated_date().equals( "null" ) )
-            this.setTime( TimeInspector
-                    .getInspector()
-                    .getConvertTimeToLong()
-                    .apply( faceEvent.getCreated_date() ) );
+        this.setTime( faceEvent.getCreated_date() != null
+                && !faceEvent.getCreated_date().equals( "null" )
+                ? TimeInspector
+                .getInspector()
+                .getConvertTimeToLong()
+                .apply( faceEvent.getCreated_date() ) : null );
         this.setIp( faceEvent.getDataInfo() != null
                 && faceEvent.getDataInfo().getData() != null ?
                 faceEvent.getDataInfo().getData().getIp() : null );

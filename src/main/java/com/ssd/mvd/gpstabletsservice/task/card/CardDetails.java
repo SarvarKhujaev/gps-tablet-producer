@@ -2,7 +2,9 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import java.util.*;
 import lombok.Data;
+
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.tuple.TupleOfCar;
@@ -30,6 +32,7 @@ public class CardDetails {
         if ( carTotalData.getDoverennostList() != null ) carTotalData
                 .getDoverennostList()
                 .getDoverennostsList()
+                .parallelStream()
                 .forEach( doverennost -> {
                     this.getDetails().get( Details.ISHONCHNOMA )
                             .add( new Item( "TOMONIDAN BERILGAN", doverennost.getIssuedBy() ) );
@@ -42,6 +45,7 @@ public class CardDetails {
                 .getPsychologyCard()
                 .getModelForCarList()
                 .getModelForCarList()
+                .parallelStream()
                 .forEach( modelForCar -> {
                     this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR )
                             .add( new Item( "DAVLAT RAQAM BELGISI", modelForCar.getPlateNumber() ) );
@@ -186,11 +190,15 @@ public class CardDetails {
         this.getDetails().putIfAbsent( Details.ADDITIONAL_ADDRESS_OF_Victim, new ArrayList<>() );
         this.getDetails().putIfAbsent( Details.ADDITIONAL_ADDRESS_OF_APPLICANT, new ArrayList<>() );
 
-        Flux.fromStream( Arrays.stream( Details.values() ).sorted() ).subscribe( details -> {
+        Flux.fromStream( Arrays.stream( Details.values() ).sorted() )
+                .parallel()
+                .runOn( Schedulers.parallel() )
+                .subscribe( details -> {
             switch ( details ) {
                 case DETAILS -> Archive
                         .getArchive()
                         .getDetailsList()
+                        .parallelStream()
                         .forEach( s -> {
                     switch ( s ) {
                         case "ID" -> this.getDetails().get( Details.DETAILS )
@@ -390,7 +398,10 @@ public class CardDetails {
 
     public CardDetails ( SelfEmploymentTask selfEmploymentTask, String language, Patrul patrul ) {
         this.getDetails().putIfAbsent( Details.SELF_EMPLOYMENT, new ArrayList<>() );
-        Flux.fromStream( Arrays.stream( Details.values() ).sorted() ).subscribe( details -> {
+        Flux.fromStream( Arrays.stream( Details.values() ).sorted() )
+                .parallel()
+                .runOn( Schedulers.parallel() )
+                .subscribe( details -> {
             switch ( details ) {
                 case NUMBER -> this.getDetails().get( Details.SELF_EMPLOYMENT )
                         .add( new Item( "№", selfEmploymentTask.getUuid() ) );

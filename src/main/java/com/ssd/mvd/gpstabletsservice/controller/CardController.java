@@ -62,7 +62,8 @@ public class CardController {
             Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
             CassandraDataControlForTasks
                     .getInstance()
-                    .addValue( card );
+                    .getSaveCard102()
+                    .accept( card );
 
             CassandraDataControlForTasks
                     .getInstance()
@@ -171,7 +172,8 @@ public class CardController {
                 .apply( Map.of( "message", "Car was saved successfully",
                         "success", CassandraDataControlForTasks
                                 .getInstance()
-                                .addValue( KafkaDataControl
+                                .getSaveCarTotalData()
+                                .apply( KafkaDataControl
                                         .getInstance()
                                         .writeToKafka( carTotalData ) ) ) )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
@@ -393,13 +395,21 @@ public class CardController {
                 .getGetTaskTimingStatistics()
                 .apply( request )
                 .collectList()
-                .map( taskTimingStatistics -> {
-                    taskTimingStatistics.forEach( taskTimingStatistics1 -> {
-                        switch ( taskTimingStatistics1.getStatus() ) {
-                            case LATE -> taskTimingStatisticsList.getListLate().add( taskTimingStatistics1 );
-                            case IN_TIME -> taskTimingStatisticsList.getListInTime().add( taskTimingStatistics1 );
-                            default -> taskTimingStatisticsList.getListDidNotArrived().add( taskTimingStatistics1 ); } } );
-                    return taskTimingStatisticsList; } )
+                .flatMap( taskTimingStatistics -> {
+                    taskTimingStatistics
+                            .parallelStream()
+                            .forEach( taskTimingStatistics1 -> {
+                                switch ( taskTimingStatistics1.getStatus() ) {
+                                    case LATE -> taskTimingStatisticsList
+                                            .getListLate()
+                                            .add( taskTimingStatistics1 );
+                                    case IN_TIME -> taskTimingStatisticsList
+                                            .getListInTime()
+                                            .add( taskTimingStatistics1 );
+                                    default -> taskTimingStatisticsList
+                                            .getListDidNotArrived()
+                                            .add( taskTimingStatistics1 ); } } );
+                    return Mono.just( taskTimingStatisticsList ); } )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) ); }
 

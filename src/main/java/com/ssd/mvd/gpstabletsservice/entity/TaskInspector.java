@@ -159,7 +159,8 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .addValue( card );
+                .getSaveCard102()
+                .accept( card );
 
         KafkaDataControl
                 .getInstance()
@@ -266,7 +267,8 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .addValue( eventCar );
+                .getSaveEventCar()
+                .accept( eventCar );
 
         KafkaDataControl
                 .getInstance()
@@ -366,7 +368,8 @@ public final class TaskInspector {
         if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
-                .addValue( eventFace );
+                .getSaveEventFace()
+                .accept( eventFace );
 
         CassandraDataControl
                 .getInstance()
@@ -472,7 +475,8 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .addValue( eventBody );
+                .getSaveEventBody()
+                .accept( eventBody );
 
         CassandraDataControl
                 .getInstance()
@@ -581,7 +585,8 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .addValue( carEvents );
+                .getSaveCarEvent()
+                .accept( carEvents );
 
         CassandraDataControl
                 .getInstance()
@@ -689,7 +694,8 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .addValue( faceEvent );
+                .getSaveFaceEvent()
+                .accept( faceEvent );
 
         CassandraDataControl
                 .getInstance()
@@ -833,7 +839,8 @@ public final class TaskInspector {
         if ( status.compareTo( CANCEL ) != 0 ) selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
-                .addValue( selfEmploymentTask );
+                .getSaveSelfEmploymentTask()
+                .accept( selfEmploymentTask );
 
         CassandraDataControl
                 .getInstance()
