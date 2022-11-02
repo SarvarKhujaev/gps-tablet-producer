@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.Function;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import lombok.Data;
@@ -226,8 +227,14 @@ public final class CassandraDataControl {
                     .execute("SELECT * FROM "
                                     + CassandraTables.TABLETS.name() + "."
                                     + CassandraTables.POLICE_TYPE.name() + ";" )
-                    .all().stream() )
-            .map( PoliceType::new )
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new PoliceType( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .doOnError( throwable -> this.delete() );
 
     public Mono< ApiResponseModel > update ( PoliceType policeType ) {
@@ -376,8 +383,14 @@ public final class CassandraDataControl {
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.POLYGON_TYPE.name() + ";" )
-                    .all().stream() )
-            .map( PolygonType::new );
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new PolygonType( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
     public Mono< ApiResponseModel > addValue ( Polygon polygon ) { return this.getSession().execute(
             "INSERT INTO "
@@ -478,8 +491,14 @@ public final class CassandraDataControl {
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.POLYGON.name() + ";" )
-                    .all().stream() )
-            .map( Polygon::new );
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new Polygon( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
     private final Predicate< String > checkTracker = trackerId -> this.getSession()
             .execute ( "SELECT * FROM "
@@ -505,8 +524,14 @@ public final class CassandraDataControl {
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.CARS.name() + ";" )
-                    .all().stream() )
-            .map( ReqCar::new );
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new ReqCar( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
     private final Function< UUID, Mono< ReqCar > > getCarByUUID = uuid -> Mono.just(
             this.getSession().execute( "SELECT * FROM "
@@ -658,7 +683,9 @@ public final class CassandraDataControl {
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS.name() + ";" )
-                    .all().stream() )
+                    .all()
+                    .stream()
+                    .parallel() )
             .map( Patrul::new );
 
     private final Function< UUID, Mono< Patrul > > getPatrulByUUID = uuid -> {
@@ -935,8 +962,14 @@ public final class CassandraDataControl {
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.POLYGON_FOR_PATRUl.name() + ";" )
-                    .all().stream() )
-            .map( Polygon::new );
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new Polygon( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
     private final Function< String, Mono< Polygon > > getPolygonForPatrul = id -> {
         Row row = this.getSession().execute( "SELECT * FROM "
@@ -949,6 +982,7 @@ public final class CassandraDataControl {
             .apply( id )
             .flatMap( polygon1 -> {
                 polygon1.getPatrulList()
+                        .parallelStream()
                         .forEach( uuid -> this.getSession().executeAsync( "UPDATE " +
                                 CassandraTables.TABLETS.name() + "."
                                 + CassandraTables.PATRULS.name() +
@@ -1072,12 +1106,15 @@ public final class CassandraDataControl {
             .apply( UUID.fromString( request.getData() ) )
             .flatMap( patrul -> {
                 if ( request.getSubject() == null && request.getObject() == null ) return Flux.fromStream(
-                                this.getSession()
-                                        .execute( "SELECT * FROM "
-                                                + CassandraTables.TABLETS.name() + "."
-                                                + CassandraTables.PATRULS_STATUS_TABLE.name() + ";" )
-                                        .all().stream() )
-                        .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.LOGOUT ) == 0 )
+                        this.getSession()
+                                .execute( "SELECT * FROM "
+                                        + CassandraTables.TABLETS.name() + "."
+                                        + CassandraTables.PATRULS_STATUS_TABLE.name() + ";" )
+                                .all()
+                                .stream()
+                                .parallel() )
+                        .filter( row -> Status.valueOf( row.getString( "status" ) )
+                                .compareTo( Status.LOGOUT ) == 0 )
                         .map( row -> row.getLong( "totalActivityTime" ) )
                         .collectList()
                         .map( longs -> PatrulActivityStatistics
@@ -1085,7 +1122,8 @@ public final class CassandraDataControl {
                                 .dateList( longs )
                                 .patrul( patrul )
                                 .build() );
-                else return Flux.fromStream( this.getSession().execute( "SELECT * FROM "
+                else return Flux.fromStream( this.getSession()
+                                .execute( "SELECT * FROM "
                                         + CassandraTables.TABLETS.name() + "."
                                         + CassandraTables.PATRULS_STATUS_TABLE.name()
                                         + " WHERE date >= '"
@@ -1096,7 +1134,9 @@ public final class CassandraDataControl {
                                         + SerDes
                                         .getSerDes()
                                         .convertDate( request.getSubject().toString() ).toInstant() + "';" )
-                                .all().stream() )
+                                .all()
+                                .stream()
+                                .parallel() )
                         .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.LOGOUT ) == 0 )
                         .map( row -> row.getLong( "totalActivityTime" ) )
                         .collectList()
@@ -1109,7 +1149,11 @@ public final class CassandraDataControl {
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return this.getGetPolygonForPatrul()
                 .apply( scheduleForPolygonPatrul.getUuid() )
-                .flatMap( polygon -> Flux.fromStream( scheduleForPolygonPatrul.getPatrulUUIDs().stream() )
+                .flatMap( polygon -> Flux.fromStream( scheduleForPolygonPatrul
+                                .getPatrulUUIDs()
+                                .stream() )
+                        .parallel()
+                        .runOn( Schedulers.parallel() )
                         .flatMap( uuid -> this.getGetPatrulByUUID().apply( uuid ) )
                         .flatMap( patrul -> {
                             this.getSession().executeAsync(
@@ -1119,6 +1163,8 @@ public final class CassandraDataControl {
                                             " SET inPolygon = " + true
                                             + " where uuid = " + patrul.getUuid() + ";" );
                             return Mono.just( patrul.getUuid() ); } )
+                        .sequential()
+                        .publishOn( Schedulers.single() )
                         .collectList()
                         .flatMap( uuidList -> {
                             polygon.setPatrulList( uuidList );
@@ -1128,42 +1174,48 @@ public final class CassandraDataControl {
             this.getSession().execute ( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.NOTIFICATION.name() + ";" )
-                    .all().stream() )
-            .map( Notification::new );
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new Notification( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
     public Notification addValue ( Notification notification ) { this.getSession().execute(
-                "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.NOTIFICATION.name() +
-                        CassandraConverter
-                                .getInstance()
-                                .getALlNames( Notification.class )
-                    + " VALUES ('"
-                        + notification.getId() + "', '"
-                        + notification.getType() + "', '"
-                        + notification.getTitle() + "', '"
-                        + notification.getAddress() + "', '"
-                        + notification.getCarNumber() + "', '"
-                        + notification.getPoliceType() + "', '"
-                        + notification.getNsfOfPatrul() + "', '"
-                        + notification.getPassportSeries() + "', "
+        "INSERT INTO "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.NOTIFICATION.name() +
+                CassandraConverter
+                        .getInstance()
+                        .getALlNames( Notification.class )
+            + " VALUES ('"
+                + notification.getId() + "', '"
+                + notification.getType() + "', '"
+                + notification.getTitle() + "', '"
+                + notification.getAddress() + "', '"
+                + notification.getCarNumber() + "', '"
+                + notification.getPoliceType() + "', '"
+                + notification.getNsfOfPatrul() + "', '"
+                + notification.getPassportSeries() + "', "
 
-                        + notification.getLongitudeOfTask() + ", "
-                        + notification.getLongitudeOfTask() + ", "
+                + notification.getLongitudeOfTask() + ", "
+                + notification.getLongitudeOfTask() + ", "
 
-                        + notification.getUuid() + ", '"
-                        + notification.getStatus() + "', "
-                        + false + ", '"
-                        + notification.getTaskTypes() + "', '"
-                        + notification.getNotificationWasCreated().toInstant() + "');" );
+                + notification.getUuid() + ", '"
+                + notification.getStatus() + "', "
+                + false + ", '"
+                + notification.getTaskTypes() + "', '"
+                + notification.getNotificationWasCreated().toInstant() + "');" );
         return notification; }
 
-    public Mono< ApiResponseModel > setNotificationAsRead ( UUID uuid ) { return this.getSession().execute(
-                "UPDATE "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.NOTIFICATION.name()
-                        + " SET wasRead = " + true
-                        + " WHERE uuid = " + uuid + ";" )
+    public Mono< ApiResponseModel > setNotificationAsRead ( UUID uuid ) { return this.getSession()
+            .execute( "UPDATE "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.NOTIFICATION.name()
+                    + " SET wasRead = " + true
+                    + " WHERE uuid = " + uuid + ";" )
             .wasApplied()
             ? Archive
             .getArchive()
@@ -1180,10 +1232,9 @@ public final class CassandraDataControl {
     public Mono< ApiResponseModel > delete ( String table,
                                              String param,
                                              String id ) {
-        this.getSession().execute (
-            "DELETE FROM "
-                    + CassandraTables.TABLETS.name() + "." + table
-                    + " WHERE " + param + " = " + UUID.fromString( id ) + ";" );
+        this.getSession().execute ( "DELETE FROM "
+                + CassandraTables.TABLETS.name() + "." + table
+                + " WHERE " + param + " = " + UUID.fromString( id ) + ";" );
         return Archive
                 .getArchive()
                 .getFunction()
@@ -1196,11 +1247,15 @@ public final class CassandraDataControl {
             + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p )
             * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
 
-    private final Function< Point, Flux< Patrul > > findTheClosestPatruls = point -> Flux.fromStream( this.getSession()
-                    .execute( "SELECT * FROM "
+    private final Function< Point, Flux< Patrul > > findTheClosestPatruls = point -> Flux.fromStream(
+            this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS.name() + ";" )
-                    .all().stream() )
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
             .filter( row -> Status.valueOf( row.getString( "status" ) )
                     .compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
                     && TaskTypes.valueOf( row.getString( "taskTypes" ) )
@@ -1208,6 +1263,8 @@ public final class CassandraDataControl {
                     && row.getDouble( "latitude" ) > 0
                     && row.getDouble( "longitude" ) > 0 )
             .map( Patrul::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .flatMap( patrul -> {
                 patrul.setDistance( this.calculate( point, patrul ) );
                 return Mono.just( patrul ); } );

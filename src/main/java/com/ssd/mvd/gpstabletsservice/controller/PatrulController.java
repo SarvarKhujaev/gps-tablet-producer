@@ -345,7 +345,8 @@ public class PatrulController {
             .getGetPatrulByUUID()
             .apply( UUID.fromString( request.getPatrulId() ) )
             .flatMap( patrul -> request.getStartTime() != null
-                    && request.getEndTime() != null ? CassandraDataControl
+                    && request.getEndTime() != null
+                    ? CassandraDataControl
                     .getInstance()
                     .getGetAllUsedTablets()
                     .apply( patrul )

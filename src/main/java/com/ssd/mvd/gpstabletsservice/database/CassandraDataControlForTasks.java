@@ -14,11 +14,11 @@ import java.util.function.Predicate;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.ResultSetFuture;
 
 import com.ssd.mvd.gpstabletsservice.task.card.*;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -240,52 +240,52 @@ public class CassandraDataControlForTasks {
             + CassandraTables.ACTIVE_TASK.name()
             + " WHERE id = '" + id + "';" );
 
-    public void addValue ( Card card ) { this.getSession()
+    private final Consumer< Card > saveCard102 = card -> this.getSession()
             .executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TABLETS.name() + "."
                     + TaskTypes.CARD_102
-                + "(id, object) VALUES ('"
-                + card.getCardId() + "', '"
-                + SerDes.getSerDes().serialize( card ) + "');" ); }
+                    + "(id, object) VALUES ('"
+                    + card.getCardId() + "', '"
+                    + SerDes.getSerDes().serialize( card ) + "');" );
 
-    public Boolean addValue ( EventCar eventCar ) { return this.getSession()
+    private final Consumer< EventCar > saveEventCar = eventCar -> this.getSession()
             .executeAsync( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.EVENTCAR.name()
-            + "( id, camera, matched, date, confidence, object ) VALUES('"
-            + eventCar.getId() + "', "
-            + eventCar.getCamera() + ", "
-            + eventCar.getMatched() + ", '"
-            + eventCar.getCreated_date().toInstant() + "', "
-            + eventCar.getConfidence() + ", '"
-            + SerDes.getSerDes().serialize( eventCar ) + "');" ).isDone(); }
+                    + "( id, camera, matched, date, confidence, object ) VALUES('"
+                    + eventCar.getId() + "', "
+                    + eventCar.getCamera() + ", "
+                    + eventCar.getMatched() + ", '"
+                    + eventCar.getCreated_date().toInstant() + "', "
+                    + eventCar.getConfidence() + ", '"
+                    + SerDes.getSerDes().serialize( eventCar ) + "');" );
 
-    public Boolean addValue ( EventFace eventFace ) { return this.getSession()
+    private final Consumer< EventFace > saveEventFace = eventFace -> this.getSession()
             .executeAsync( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.EVENTFACE.name()
-            + "( id, camera, matched, date, confidence, object ) VALUES('"
-            + eventFace.getId() + "', "
-            + eventFace.getCamera() + ", "
-            + eventFace.getMatched() + ", '"
-            + eventFace.getCreated_date().toInstant() + "', "
-            + eventFace.getConfidence() + ", '"
-            + SerDes.getSerDes().serialize( eventFace ) + "');" ).isDone(); }
+                    + "( id, camera, matched, date, confidence, object ) VALUES('"
+                    + eventFace.getId() + "', "
+                    + eventFace.getCamera() + ", "
+                    + eventFace.getMatched() + ", '"
+                    + eventFace.getCreated_date().toInstant() + "', "
+                    + eventFace.getConfidence() + ", '"
+                    + SerDes.getSerDes().serialize( eventFace ) + "');" );
 
-    public Boolean addValue ( EventBody eventBody ) { return this.getSession()
+    private final Consumer< EventBody > saveEventBody = eventBody -> this.getSession()
             .executeAsync( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.EVENTBODY.name()
-            + "( id, camera, matched, date, confidence, object ) VALUES('"
-            + eventBody.getId() + "', "
-            + eventBody.getCamera() + ", "
-            + eventBody.getMatched() + ", '"
-            + eventBody.getCreated_date().toInstant() + "', "
-            + eventBody.getConfidence() + ", '"
-            + SerDes.getSerDes().serialize( eventBody ) + "');" ).isDone(); }
+                    + "( id, camera, matched, date, confidence, object ) VALUES('"
+                    + eventBody.getId() + "', "
+                    + eventBody.getCamera() + ", "
+                    + eventBody.getMatched() + ", '"
+                    + eventBody.getCreated_date().toInstant() + "', "
+                    + eventBody.getConfidence() + ", '"
+                    + SerDes.getSerDes().serialize( eventBody ) + "');" );
 
-    public Boolean addValue ( CarTotalData carTotalData ) { return this.getSession()
-            .execute( "INSERT INTO "
+    private final Function< CarTotalData, Boolean > saveCarTotalData = carTotalData ->
+            this.getSession().execute( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.CARTOTALDATA.name()
                     + "( gosnumber, cameraImage, violationsInformationsList, object ) VALUES('"
@@ -295,25 +295,36 @@ public class CassandraDataControlForTasks {
                     .getInstance()
                     .convertListOfPointsToCassandra( carTotalData
                             .getViolationsList()
-                            .getViolationsInformationsList() )
-                    + ", '" + SerDes.getSerDes().serialize( carTotalData ) + "');" ).wasApplied(); }
+                            .getViolationsInformationsList() ) + ", '"
+                    + SerDes
+                            .getSerDes()
+                            .serialize( carTotalData ) + "');" )
+                    .wasApplied();
 
-    public ResultSetFuture addValue ( CarEvent carEvents ) { return this.getSession()
+    private final Consumer< CarEvent > saveCarEvent = carEvents -> this.getSession()
             .executeAsync( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.FACECAR.name()
                     + "(id, object) VALUES ('"
                     + carEvents.getId() + "', '"
-                    + SerDes.getSerDes().serialize( carEvents ) + "');" ); }
+                    + SerDes.getSerDes().serialize( carEvents ) + "');" );
 
-    public ResultSetFuture addValue ( FaceEvent faceEvents ) {
+    private final Consumer< FaceEvent > saveFaceEvent = faceEvents -> {
         if ( faceEvents.getCreated_date() == null ) faceEvents.setCreated_date( new Date().toString() );
-        return this.getSession().executeAsync( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "."
+        this.getSession().executeAsync( "INSERT INTO "
+                + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.FACEPERSON.name()
-            + "(id, object) VALUES ('"
-            + faceEvents.getId() + "', '"
-            + SerDes.getSerDes().serialize( faceEvents ) + "');" ); }
+                + "(id, object) VALUES ('"
+                + faceEvents.getId() + "', '"
+                + SerDes.getSerDes().serialize( faceEvents ) + "');" ); };
+
+    private final Consumer< SelfEmploymentTask > saveSelfEmploymentTask = selfEmploymentTask -> this.getSession()
+            .executeAsync( "INSERT INTO "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.SELFEMPLOYMENT.name() +
+                    " ( id, object ) VALUES("
+                    + selfEmploymentTask.getUuid() + ", '"
+                    + SerDes.getSerDes().serialize( selfEmploymentTask ) + "');" );
 
     public void addValue ( String id, ActiveTask activeTask ) { this.getSession()
             .executeAsync( "INSERT INTO "
@@ -322,15 +333,6 @@ public class CassandraDataControlForTasks {
                     + "(id, object) VALUES ('"
                     + id + "', '"
                     + SerDes.getSerDes().serialize( activeTask ) + "');" ); }
-
-    public Boolean addValue ( SelfEmploymentTask selfEmploymentTask ) { return this.getSession()
-            .executeAsync( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.SELFEMPLOYMENT.name() +
-                    " ( id, object ) VALUES("
-                    + selfEmploymentTask.getUuid() + ", '"
-                    + SerDes.getSerDes().serialize( selfEmploymentTask )
-                    + "');" ).isDone(); }
 
     private final Consumer< TaskTimingStatistics > saveTaskTimeStatistics = taskTimingStatistics -> this.getSession()
             .execute( "INSERT INTO " +
@@ -359,7 +361,9 @@ public class CassandraDataControlForTasks {
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.TASK_TIMING_TABLE.name() + ";" )
-                            .all().stream() )
+                    .all()
+                    .stream()
+                    .parallel() )
             .filter( row -> request.getEndDate() == null
                     || request.getStartDate() == null
                     || row.getTimestamp( "dateofcoming" )
@@ -370,8 +374,26 @@ public class CassandraDataControlForTasks {
                     || request.getTaskType().size() == 0
                     || request.getTaskType()
                     .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
-            .map( TaskTimingStatistics::new );
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new TaskTimingStatistics( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
+    private final Function< String, Flux< TaskTimingStatistics > > test = request -> Flux.fromStream(
+            this.getSession().execute( "SELECT * FROM "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.TASK_TIMING_TABLE.name() + ";" )
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new TaskTimingStatistics( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
+
+    // возвращает список точек локаций, где был патрульной пока не дашел до точки назначения
     public Mono< List< PositionInfo > > getPositionInfoList ( String taskId ) {
         return Mono.justOrEmpty( this.getSession()
                 .execute( "SELECT positionInfoList FROM "
@@ -387,6 +409,7 @@ public class CassandraDataControlForTasks {
                         + tableName
                         + " where id = '" + id + "';" ).one() != null; }
 
+    // определяет тип таска
     private CassandraTables findTable ( String id ) {
         if ( this.checkTable( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
         else if ( this.checkTable( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;

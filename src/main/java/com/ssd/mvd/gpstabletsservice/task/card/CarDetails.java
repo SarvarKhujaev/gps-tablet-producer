@@ -21,8 +21,10 @@ public class CarDetails {
     public CarDetails ( EventCar eventCar ) {
         this.setIp( eventCar.getCameraIp() );
         this.setConfidence( eventCar.getConfidence() );
-        this.setDate( eventCar.getCreated_date().getTime() );
-        this.setTime( eventCar.getCreated_date().getTime() );
+        this.setDate( eventCar.getCreated_date() != null
+                ? eventCar.getCreated_date().getTime() : null );
+        this.setTime( eventCar.getCreated_date() != null
+                ? eventCar.getCreated_date().getTime() : null );
 
         this.setThumbnail( eventCar.getThumbnail() );
         this.setCameraImage( eventCar.getFullframe() );
