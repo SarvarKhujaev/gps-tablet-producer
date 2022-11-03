@@ -718,12 +718,14 @@ public final class TaskInspector {
                 else escortTuple.getPatrulList().remove( patrul.getUuid() );
                 CassandraDataControlForEscort
                         .getInstance()
-                        .getAllTupleOfCar( patrul.getUuidForEscortCar() )
+                        .getGetCurrentTupleOfCar()
+                        .apply( patrul.getUuidForEscortCar() )
                         .subscribe( tupleOfCar -> {
                             tupleOfCar.setUuidOfPatrul( null );
                             CassandraDataControlForEscort
                                     .getInstance()
-                                    .update( tupleOfCar )
+                                    .getUpdateTupleOfcar()
+                                    .apply( tupleOfCar )
                                     .subscribe(); } );
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setUuidForEscortCar( null );
@@ -1252,7 +1254,8 @@ public final class TaskInspector {
 
             case ESCORT -> CassandraDataControlForEscort
                     .getInstance()
-                    .getAllTupleOfEscort( patrul.getTaskId() )
+                    .getGetCurrentTupleOfEscort()
+                    .apply( patrul.getTaskId() )
                     .flatMap( escortTuple -> Archive
                             .getArchive()
                             .getFunction()
@@ -1378,7 +1381,8 @@ public final class TaskInspector {
 
         case ESCORT -> CassandraDataControlForEscort
                 .getInstance()
-                .getAllTupleOfEscort( patrul.getTaskId() )
+                .getGetCurrentTupleOfEscort()
+                .apply( patrul.getTaskId() )
                 .flatMap( escortTuple -> Archive
                         .getArchive()
                         .getFunction()
@@ -1554,10 +1558,12 @@ public final class TaskInspector {
 
         case ESCORT -> CassandraDataControlForEscort
                 .getInstance()
-                .getAllTupleOfEscort( patrul.getTaskId() )
+                .getGetCurrentTupleOfEscort()
+                .apply( patrul.getTaskId() )
                 .flatMap( escortTuple -> CassandraDataControlForEscort
                         .getInstance()
-                        .getAllTupleOfCar( escortTuple.getTupleOfCarsList()
+                        .getGetCurrentTupleOfCar()
+                        .apply( escortTuple.getTupleOfCarsList()
                                 .get( escortTuple
                                         .getPatrulList()
                                         .indexOf( patrul.getUuid() ) ) )

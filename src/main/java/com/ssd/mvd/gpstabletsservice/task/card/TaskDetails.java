@@ -6,12 +6,12 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.*;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.*;
 
-import java.util.List;
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
+
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -31,11 +31,13 @@ public class TaskDetails {
             this.setDate( card.getCreated_date().toString() );
             CassandraDataControlForTasks
                     .getInstance()
-                    .getPositionInfoList( card.getCardId().toString() )
+                    .getGetPositionInfoList()
+                    .apply( card.getCardId().toString() )
                     .subscribe( this::setPositionInfoList );
 
             card.getReportForCardList()
-                    .stream()
+                    .parallelStream()
+                    .parallel()
                     .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                     .forEach( this::setReportForCardList ); } }
 
@@ -43,10 +45,12 @@ public class TaskDetails {
         this.setDate( carEvent.getCreated_date() );
         CassandraDataControlForTasks
                 .getInstance()
-                .getPositionInfoList( carEvent.getId()  )
+                .getGetPositionInfoList()
+                .apply( carEvent.getId()  )
                 .subscribe( this::setPositionInfoList );
         carEvent.getReportForCardList()
-                .stream()
+                .parallelStream()
+                .parallel()
                 .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                 .forEach( this::setReportForCardList ); }
 
@@ -55,10 +59,12 @@ public class TaskDetails {
             this.setDate( eventCar.getCreated_date().toString() );
             CassandraDataControlForTasks
                     .getInstance()
-                    .getPositionInfoList( eventCar.getId() )
+                    .getGetPositionInfoList()
+                    .apply( eventCar.getId() )
                     .subscribe( this::setPositionInfoList );
             eventCar.getReportForCardList()
-                    .stream()
+                    .parallelStream()
+                    .parallel()
                     .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                     .forEach( this::setReportForCardList ); } }
 
@@ -67,10 +73,12 @@ public class TaskDetails {
             this.setDate( eventBody.getCreated_date().toString() );
             CassandraDataControlForTasks
                     .getInstance()
-                    .getPositionInfoList( eventBody.getId() )
+                    .getGetPositionInfoList()
+                    .apply( eventBody.getId() )
                     .subscribe( this::setPositionInfoList );
             eventBody.getReportForCardList()
-                    .stream()
+                    .parallelStream()
+                    .parallel()
                     .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                     .forEach( this::setReportForCardList ); } }
 
@@ -78,10 +86,12 @@ public class TaskDetails {
         this.setDate( eventFace.getCreated_date().toString() );
         CassandraDataControlForTasks
                 .getInstance()
-                .getPositionInfoList( eventFace.getId() )
+                .getGetPositionInfoList()
+                .apply( eventFace.getId() )
                 .subscribe( this::setPositionInfoList );
         eventFace.getReportForCardList()
-                .stream()
+                .parallelStream()
+                .parallel()
                 .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                 .forEach( this::setReportForCardList ); }
 
@@ -89,10 +99,12 @@ public class TaskDetails {
         this.setDate( faceEvent.getCreated_date() );
         CassandraDataControlForTasks
                 .getInstance()
-                .getPositionInfoList( faceEvent.getId() )
+                .getGetPositionInfoList()
+                .apply( faceEvent.getId() )
                 .subscribe( this::setPositionInfoList );
         faceEvent.getReportForCardList()
-                .stream()
+                .parallelStream()
+                .parallel()
                 .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                 .forEach( this::setReportForCardList ); }
 
@@ -102,10 +114,12 @@ public class TaskDetails {
         this.setDate( selfEmploymentTask.getIncidentDate().toString() );
         CassandraDataControlForTasks
                 .getInstance()
-                .getPositionInfoList( selfEmploymentTask.getUuid().toString() )
+                .getGetPositionInfoList()
+                .apply( selfEmploymentTask.getUuid().toString() )
                 .subscribe( this::setPositionInfoList );
         selfEmploymentTask.getReportForCards()
-                .stream()
+                .parallelStream()
+                .parallel()
                 .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                 .forEach( this::setReportForCardList ); }
 }

@@ -1,37 +1,67 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+
+import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.database.Archive;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 public class PolygonForEscortController {
 
     @MessageMapping ( value = "getAllPolygonForEscort" )
     public Flux< PolygonForEscort > getAllPolygonForEscort () { return CassandraDataControlForEscort
             .getInstance()
-            .getAllPolygonForEscort(); }
+            .getGetAllPolygonForEscort()
+            .get(); }
 
     @MessageMapping ( value = "getCurrentPolygonForEscort" )
     public Mono< PolygonForEscort > getAllPolygonForEscort ( String id ) { return CassandraDataControlForEscort
             .getInstance()
-            .getAllPolygonForEscort( id ); }
+            .getGetCurrentPolygonForEscort()
+            .apply( id ); }
 
     @MessageMapping ( value = "deletePolygonForEscort" )
     public Mono< ApiResponseModel > deletePolygonForEscort ( String id ) { return CassandraDataControlForEscort
             .getInstance()
-            .deletePolygonForEscort( id ); }
+            .getDeletePolygonForEscort()
+            .apply( id )
+            .onErrorContinue( ( throwable, o ) -> log.error(
+                    "Error: " + throwable.getMessage()
+                            + " Reason: " + o ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "updatePolygonForEscort" )
     public Mono< ApiResponseModel > updatePolygonForEscort ( PolygonForEscort polygon ) { return CassandraDataControlForEscort
             .getInstance()
-            .update( polygon ); }
+            .getUpdatePolygonForEscort()
+            .apply( polygon )
+            .onErrorContinue( ( throwable, o ) -> log.error(
+                    "Error: " + throwable.getMessage()
+                            + " Reason: " + o ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "addNewPolygonForEscort" )
     public Mono< ApiResponseModel > addNewPolygonForEscort ( PolygonForEscort polygon ) { return CassandraDataControlForEscort
             .getInstance()
-            .addValue( polygon ); }
+            .getSavePolygonForEscort()
+            .apply( polygon )
+            .onErrorContinue( ( throwable, o ) -> log.error(
+                    "Error: " + throwable.getMessage()
+                            + " Reason: " + o ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 }
