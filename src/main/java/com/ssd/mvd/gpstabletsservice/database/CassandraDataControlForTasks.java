@@ -357,50 +357,56 @@ public class CassandraDataControlForTasks {
                             .getInstance()
                             .convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() ) + ");" );
 
-    private final Function< TaskTimingRequest, Flux< TaskTimingStatistics > > getTaskTimingStatistics = request -> Flux.fromStream(
-            this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.TASK_TIMING_TABLE.name() + ";" )
+    private final Function< TaskTimingRequest, Mono< TaskTimingStatisticsList > > getTaskTimingStatistics = request -> {
+        TaskTimingStatisticsList taskTimingStatisticsList = new TaskTimingStatisticsList();
+        return Flux.fromStream( this.getSession()
+                    .execute( "SELECT * FROM "
+                                + CassandraTables.TABLETS.name() + "."
+                                + CassandraTables.TASK_TIMING_TABLE.name() + ";" )
                     .all()
                     .stream()
                     .parallel() )
-            .filter( row -> request.getEndDate() == null
-                    || request.getStartDate() == null
-                    || row.getTimestamp( "dateofcoming" )
-                    .after( request.getStartDate() )
-                    && row.getTimestamp( "dateofcoming")
-                    .before(request.getEndDate() ) )
-            .filter( row -> request.getTaskType() == null
-                    || request.getTaskType().size() == 0
-                    || request.getTaskType()
-                    .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( new TaskTimingStatistics( row ) ) )
-            .sequential()
-            .publishOn( Schedulers.single() );
-
-    private final Function< String, Flux< TaskTimingStatistics > > test = request -> Flux.fromStream(
-            this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.TASK_TIMING_TABLE.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( new TaskTimingStatistics( row ) ) )
-            .sequential()
-            .publishOn( Schedulers.single() );
+                .parallel()
+                .runOn( Schedulers.parallel() )
+                .filter( row -> request.getEndDate() == null
+                        || request.getStartDate() == null
+                        || row.getTimestamp( "dateofcoming" )
+                        .after( request.getStartDate() )
+                        && row.getTimestamp( "dateofcoming")
+                        .before(request.getEndDate() ) )
+                .filter( row -> request.getTaskType() == null
+                        || request.getTaskType().size() == 0
+                        || request.getTaskType()
+                        .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
+                .flatMap( row -> Mono.just( new TaskTimingStatistics( row ) ) )
+                .sequential()
+                .publishOn( Schedulers.single() )
+                .collectList()
+                .map( taskTimingStatisticsList1 -> {
+                    taskTimingStatisticsList1
+                            .parallelStream()
+                            .parallel()
+                            .forEach( taskTimingStatistics1 -> {
+                                switch ( taskTimingStatistics1.getStatus() ) {
+                                    case LATE -> taskTimingStatisticsList
+                                            .getListLate()
+                                            .add( taskTimingStatistics1 );
+                                    case IN_TIME -> taskTimingStatisticsList
+                                            .getListInTime()
+                                            .add( taskTimingStatistics1 );
+                                    default -> taskTimingStatisticsList
+                                            .getListDidNotArrived()
+                                            .add( taskTimingStatistics1 ); } } );
+                    return taskTimingStatisticsList; } ); };
 
     // возвращает список точек локаций, где был патрульной пока не дашел до точки назначения
-    public Mono< List< PositionInfo > > getPositionInfoList ( String taskId ) {
-        return Mono.justOrEmpty( this.getSession()
-                .execute( "SELECT positionInfoList FROM "
+    private final Function< String, Mono< List< PositionInfo > > > getPositionInfoList = taskId -> Mono.justOrEmpty(
+            this.getSession()
+                    .execute( "SELECT positionInfoList FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.TASK_TIMING_TABLE.name()
                         + " WHERE taskid = '" + taskId + "';" )
-                .one().getList( "positionInfoList", PositionInfo.class ) ); }
+            .one().getList( "positionInfoList", PositionInfo.class ) );
 
     private Boolean checkTable ( String id, String tableName ) {
         return this.getSession()
@@ -495,6 +501,12 @@ public class CassandraDataControlForTasks {
             this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.SOS_TABLE.name() + ";" )
-                    .all().stream() )
-            .map( PatrulSos::new );
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new PatrulSos( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 }

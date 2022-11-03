@@ -18,7 +18,8 @@ public class CountryController {
     @MessageMapping( value = "addNewCountry" )
     public Mono< ApiResponseModel > addNewCountry (Country country ) { return CassandraDataControlForEscort
             .getInstance()
-            .addValue( country )
+            .getSaveNewCountry()
+            .apply( country )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -29,7 +30,8 @@ public class CountryController {
     @MessageMapping ( value = "updateCountry" )
     public Mono< ApiResponseModel > updateCountry ( Country country ) { return CassandraDataControlForEscort
             .getInstance()
-            .update( country )
+            .getUpdate()
+            .apply( country )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -40,21 +42,24 @@ public class CountryController {
     @MessageMapping ( value = "getAllCountries" )
     public Flux< Country > getAllCountries () { return CassandraDataControlForEscort
             .getInstance()
-            .getAllCountries()
+            .getGetAllCountries()
+            .get()
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "getCurrentCountry" )
     public Mono< Country > getCurrentCountry ( String countryName ) { return CassandraDataControlForEscort
             .getInstance()
-            .getAllCountries( countryName )
+            .getGetCurrentCountry()
+            .apply( countryName )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "deleteCountry" )
     public Mono< ApiResponseModel > deleteCountry ( String countryName ) { return CassandraDataControlForEscort
             .getInstance()
-            .deleteCountry( countryName )
+            .getDeleteCountry()
+            .apply( countryName )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive

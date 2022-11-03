@@ -19,6 +19,7 @@ import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 
@@ -326,15 +327,12 @@ public class PatrulController {
                     error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "getPatrulStatistics" )
-    public Mono< PatrulActivityStatistics > getPatrulStatistics ( Request request ) {
-        return request.getData() != null ? CassandraDataControl
+    public Mono< PatrulActivityStatistics > getPatrulStatistics ( PatrulActivityRequest request ) {
+        return request.getPatrulUUID() != null
+                ? CassandraDataControl
                 .getInstance()
-                .getGetPatrulByUUID()
-                .apply( UUID.fromString( request.getData() ) )
-                .flatMap( patrul -> CassandraDataControl
-                        .getInstance()
-                        .getGetPatrulStatistics()
-                        .apply( request ) )
+                .getGetPatrulStatistics()
+                .apply( request )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) )
                 : Mono.empty(); }
@@ -370,7 +368,14 @@ public class PatrulController {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getSaveSos()
-                .apply( patrulSos ); }
+                .apply( patrulSos )
+                .onErrorContinue( ( throwable, o ) -> log.error(
+                        "Error: " + throwable.getMessage()
+                        + " Reason: " + o ) )
+                .onErrorReturn( Archive
+                        .getArchive()
+                        .getErrorResponse()
+                        .get() ); }
 
     // используется планшетом чтобы проверить не отправлял ли он СОС раньше
     @MessageMapping ( value = "checkSosStatus" )

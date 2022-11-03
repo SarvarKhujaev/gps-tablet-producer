@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
+import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
@@ -202,7 +203,7 @@ public final class CassandraDataControl {
                 "status text, " +
                 "message text, " +
                 "totalActivityTime bigint, " +
-                "PRIMARY KEY( status, uuid ) );" );
+                "PRIMARY KEY( uuid, date, status ) );" );
 
         this.logger.info( "Cassandra is ready" ); }
 
@@ -223,10 +224,11 @@ public final class CassandraDataControl {
                 .collectList();
         } catch ( Exception e ) { return Mono.empty(); } };
 
-    private final Supplier< Flux< PoliceType > > getAllPoliceTypes = () -> Flux.fromStream( this.getSession()
+    private final Supplier< Flux< PoliceType > > getAllPoliceTypes = () -> Flux.fromStream(
+            this.getSession()
                     .execute("SELECT * FROM "
-                                    + CassandraTables.TABLETS.name() + "."
-                                    + CassandraTables.POLICE_TYPE.name() + ";" )
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.POLICE_TYPE.name() + ";" )
                     .all()
                     .stream()
                     .parallel() )
@@ -304,11 +306,17 @@ public final class CassandraDataControl {
                 .doOnError( throwable -> this.delete() ); }
 
     private final Supplier< Flux< AtlasLustra > > getAllLustra = () -> Flux.fromStream(
-                    this.getSession().execute( "SELECT * FROM "
-                                    + CassandraTables.TABLETS.name() + "."
-                                    + CassandraTables.LUSTRA.name() + " ;" )
-                            .all().stream() )
-            .map( AtlasLustra::new )
+            this.getSession().execute( "SELECT * FROM "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.LUSTRA.name() + " ;" )
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new AtlasLustra( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .doOnError( throwable -> {
                 this.delete();
                 this.logger.info(  "ERROR: " + throwable.getMessage() ); } );
@@ -370,10 +378,10 @@ public final class CassandraDataControl {
                 this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     private final Function< UUID, Mono< PolygonType > > getAllPolygonTypeByUUID = uuid -> Mono.just(
-                    this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.POLYGON_TYPE.name()
-                            + " WHERE uuid = " + uuid + ";" ).one() )
+            this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.POLYGON_TYPE.name()
+                    + " WHERE uuid = " + uuid + ";" ).one() )
             .map( PolygonType::new )
             .doOnError( throwable -> {
                 this.delete();
@@ -542,7 +550,7 @@ public final class CassandraDataControl {
 
     public Mono< ApiResponseModel > delete ( String gosno ) { return this.getGetCarByUUID()
             .apply( UUID.fromString( gosno ) )
-                .flatMap( reqCar -> {
+            .flatMap( reqCar -> {
                     if ( reqCar.getPatrulPassportSeries() == null
                     && reqCar.getPatrulPassportSeries().equals( "null" ) ) {
                         this.getSession().execute( "DELETE FROM "
@@ -686,7 +694,11 @@ public final class CassandraDataControl {
                     .all()
                     .stream()
                     .parallel() )
-            .map( Patrul::new );
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new Patrul( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
     private final Function< UUID, Mono< Patrul > > getPatrulByUUID = uuid -> {
         Row row = this.getSession().execute( "SELECT * FROM "
@@ -1101,50 +1113,37 @@ public final class CassandraDataControl {
                     this.delete();
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ) ); }
 
-    private final Function< Request, Mono< PatrulActivityStatistics > > getPatrulStatistics = request -> this
-            .getGetPatrulByUUID()
-            .apply( UUID.fromString( request.getData() ) )
-            .flatMap( patrul -> {
-                if ( request.getSubject() == null && request.getObject() == null ) return Flux.fromStream(
-                        this.getSession()
-                                .execute( "SELECT * FROM "
-                                        + CassandraTables.TABLETS.name() + "."
-                                        + CassandraTables.PATRULS_STATUS_TABLE.name() + ";" )
-                                .all()
-                                .stream()
-                                .parallel() )
-                        .filter( row -> Status.valueOf( row.getString( "status" ) )
-                                .compareTo( Status.LOGOUT ) == 0 )
-                        .map( row -> row.getLong( "totalActivityTime" ) )
-                        .collectList()
-                        .map( longs -> PatrulActivityStatistics
-                                .builder()
-                                .dateList( longs )
-                                .patrul( patrul )
-                                .build() );
-                else return Flux.fromStream( this.getSession()
-                                .execute( "SELECT * FROM "
-                                        + CassandraTables.TABLETS.name() + "."
-                                        + CassandraTables.PATRULS_STATUS_TABLE.name()
-                                        + " WHERE date >= '"
-                                        + SerDes
-                                        .getSerDes()
-                                        .convertDate( request.getObject().toString() ).toInstant()
-                                        + "' and date <= '"
-                                        + SerDes
-                                        .getSerDes()
-                                        .convertDate( request.getSubject().toString() ).toInstant() + "';" )
-                                .all()
-                                .stream()
-                                .parallel() )
-                        .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.LOGOUT ) == 0 )
-                        .map( row -> row.getLong( "totalActivityTime" ) )
-                        .collectList()
-                        .map( longs -> PatrulActivityStatistics
-                                .builder()
-                                .dateList( longs )
-                                .patrul( patrul )
-                                .build() ); } );
+    private final Function< PatrulActivityRequest, Mono< PatrulActivityStatistics > > getPatrulStatistics = request ->
+            this.getGetPatrulByUUID()
+            .apply( UUID.fromString( request.getPatrulUUID() ) )
+            .flatMap( patrul -> Flux.fromStream( this.getSession()
+                            .execute( "SELECT * FROM "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.PATRULS_STATUS_TABLE.name()
+                                    + " WHERE uuid = " + patrul.getUuid()
+                                    + ( request.getEndDate() != null
+                                    && request.getStartDate() != null
+                                    ? " AND date >= '"
+                                    + request.getStartDate().toInstant()
+                                    + "' AND date <= '"
+                                    + request.getEndDate().toInstant() + "'" : "" )
+                                    + ";" )
+                            .all()
+                            .stream()
+                            .parallel() )
+                    .parallel()
+                    .runOn( Schedulers.parallel() )
+                    .filter( row -> Status.valueOf( row.getString( "status" ) )
+                            .compareTo( Status.LOGOUT ) == 0 )
+                    .map( row -> row.getLong( "totalActivityTime" ) )
+                    .sequential()
+                    .publishOn( Schedulers.single() )
+                    .collectList()
+                    .map( longs -> PatrulActivityStatistics
+                            .builder()
+                            .dateList( longs )
+                            .patrul( patrul )
+                            .build() ) );
 
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return this.getGetPolygonForPatrul()
@@ -1262,12 +1261,12 @@ public final class CassandraDataControl {
                     .compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
                     && row.getDouble( "latitude" ) > 0
                     && row.getDouble( "longitude" ) > 0 )
-            .map( Patrul::new )
-            .sequential()
-            .publishOn( Schedulers.single() )
+            .flatMap( row -> Mono.just( new Patrul( row ) ) )
             .flatMap( patrul -> {
                 patrul.setDistance( this.calculate( point, patrul ) );
-                return Mono.just( patrul ); } );
+                return Mono.just( patrul ); } )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account

@@ -389,27 +389,10 @@ public class CardController {
 
     @MessageMapping ( value = "getTaskTimingStatistics" )
     public Mono< TaskTimingStatisticsList > getTaskTimingStatistics ( TaskTimingRequest request ) {
-        TaskTimingStatisticsList taskTimingStatisticsList = new TaskTimingStatisticsList();
         return CassandraDataControlForTasks
                 .getInstance()
                 .getGetTaskTimingStatistics()
                 .apply( request )
-                .collectList()
-                .flatMap( taskTimingStatistics -> {
-                    taskTimingStatistics
-                            .parallelStream()
-                            .forEach( taskTimingStatistics1 -> {
-                                switch ( taskTimingStatistics1.getStatus() ) {
-                                    case LATE -> taskTimingStatisticsList
-                                            .getListLate()
-                                            .add( taskTimingStatistics1 );
-                                    case IN_TIME -> taskTimingStatisticsList
-                                            .getListInTime()
-                                            .add( taskTimingStatistics1 );
-                                    default -> taskTimingStatisticsList
-                                            .getListDidNotArrived()
-                                            .add( taskTimingStatistics1 ); } } );
-                    return Mono.just( taskTimingStatisticsList ); } )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) ); }
 
