@@ -378,7 +378,7 @@ public class CassandraDataControlForTasks {
                         || row.getTimestamp( "dateofcoming" )
                         .after( request.getStartDate() )
                         && row.getTimestamp( "dateofcoming")
-                        .before(request.getEndDate() ) )
+                        .before( request.getEndDate() ) )
                 .filter( row -> request.getTaskType() == null
                         || request.getTaskType().size() == 0
                         || request.getTaskType()
