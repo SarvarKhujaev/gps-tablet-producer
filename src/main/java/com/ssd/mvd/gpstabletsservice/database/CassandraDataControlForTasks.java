@@ -481,7 +481,13 @@ public class CassandraDataControlForTasks {
             .getArchive()
             .getFunction()
             .apply( Map.of(
-                    "message", "Sos was saved successfully",
+                    "message", KafkaDataControl // sending message to Kafka
+                            .getInstance()
+                            .writeToKafka( SosMessageForTopic
+                                    .builder()
+                                    .sosStatus( true )
+                                    .patrulUUID( patrulSos.getPatrulUUID() )
+                                    .build() ),
                     "data", com.ssd.mvd.gpstabletsservice.entity.Data
                             .builder()
                             .data( Status.ACTIVE )
@@ -496,6 +502,13 @@ public class CassandraDataControlForTasks {
                                     .data( Status.IN_ACTIVE )
                                     .build() ) )
             .map( status -> {
+                KafkaDataControl // sending message to Kafka
+                        .getInstance()
+                        .writeToKafka( SosMessageForTopic
+                                .builder()
+                                .sosStatus( false )
+                                .patrulUUID( patrulSos.getPatrulUUID() )
+                                .build() );
                 this.getSession().execute( "DELETE FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.SOS_TABLE.name()

@@ -1,6 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
+import com.ssd.mvd.gpstabletsservice.task.card.SosMessageForTopic;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 
@@ -60,7 +61,7 @@ public class KafkaDataControl {
     private final String SOS = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.ACTIVE_TASK" );
+            .getProperty( "variables.SOS_TOPIC" );
 
     private Properties setProperties () {
         Properties properties = new Properties();
@@ -92,7 +93,8 @@ public class KafkaDataControl {
         this.client = KafkaAdminClient.create( this.setProperties() );
         this.getNewTopic( this.getCAR_TOTAL_DATA() );
         this.getNewTopic( this.getNOTIFICATION() );
-        this.getNewTopic( this.getACTIVE_TASK() ); }
+        this.getNewTopic( this.getACTIVE_TASK() );
+        this.getNewTopic( this.getSOS() ); }
 
     public void writeToKafka ( String card ) {
         this.getKafkaTemplate().send( this.getACTIVE_TASK(), card ).addCallback(new ListenableFutureCallback<>() {
@@ -105,8 +107,28 @@ public class KafkaDataControl {
                     + " with offset: "
                     + result.getRecordMetadata().offset() ); } } ); }
 
+    public String writeToKafka ( SosMessageForTopic sos ) {
+        this.getKafkaTemplate().send( this.getSOS(), SerDes
+                        .getSerDes()
+                        .serialize( sos ) )
+                .addCallback( new ListenableFutureCallback<>() {
+            @Override
+            public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: "
+                    + LocalDateTime.now() ); }
+
+            @Override
+            public void onSuccess( SendResult< String, String > result ) {
+                logger.info("Kafka got Sos signal from: "
+                        + sos.getPatrulUUID()
+                        + " with offset: "
+                        + result.getRecordMetadata().offset() ); } } );
+        return "Sos was saved successfully"; }
+
     public CarTotalData writeToKafka ( CarTotalData card ) {
-        this.getKafkaTemplate().send( this.getCAR_TOTAL_DATA(), SerDes.getSerDes().serialize( card ) )
+        this.getKafkaTemplate().send( this.getCAR_TOTAL_DATA(),
+                        SerDes
+                                .getSerDes()
+                                .serialize( card ) )
                 .addCallback( new ListenableFutureCallback<>() {
             @Override
             public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: " + LocalDateTime.now() ); }

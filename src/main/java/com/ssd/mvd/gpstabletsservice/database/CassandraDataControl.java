@@ -1477,8 +1477,7 @@ public final class CassandraDataControl {
                     .getFunction()
                     .apply( Map.of(
                             "message", patrul.getUuid().toString(),
-                            "success", this.login( patrul,
-                                    Status.LOGIN ),
+                            "success", this.login( patrul, Status.LOGIN ),
                             "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                     .builder()
                                     .data( patrul )
