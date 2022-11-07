@@ -83,6 +83,6 @@ public class TaskTimingStatistics { // показывает все таски с
 
                     this.setLatitude( patrul1.getLatitude() );
                     this.setLongitude( patrul1.getLongitude() );
-                    this.setLongitudeOfTask( patrul1.getLongitudeOfTask() );
+                    this.setLatitudeOfTask( patrul1.getLongitudeOfTask() );
                     this.setLongitudeOfTask( patrul1.getLongitudeOfTask() ); } ); }
 }

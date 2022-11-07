@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import java.util.logging.Logger;
 import java.util.Locale;
+import java.util.List;
 import java.util.UUID;
 import java.util.Map;
 import lombok.Data;
@@ -123,38 +124,50 @@ public class CassandraDataControlForEscort {
                 + " where id = " + UUID.fromString( id ) + ";" ).one();
         return Mono.justOrEmpty( row != null ? new EscortTuple( row ) : null ); };
 
-    private final Function< String, Mono< ApiResponseModel > > deleteTupleOfPatrul = id ->
+    private final Predicate< List< UUID > > checkUUIDList = uuids ->
+            uuids != null
+            && !uuids.isEmpty()
+            && uuids.size() > 0;
+
+    private final Function< String, Mono< ApiResponseModel > > deleteTupleOfEscort = id ->
             this.getGetCurrentTupleOfEscort()
                 .apply( id )
                 .flatMap( escortTuple -> {
-            if ( escortTuple.getPatrulList() != null
-                    && !escortTuple.getPatrulList().isEmpty()
-                    && escortTuple.getPatrulList().size() > 0 ) escortTuple.getPatrulList()
-                    .forEach( uuid -> this.getSession().execute(
-                            "UPDATE " + CassandraTables.TABLETS.name() +
-                                    "." + CassandraTables.PATRULS +
-                                    " SET uuidOfEscort = " + null
-                                    + ", uuidForEscortCar = " + null + " where uuid = " + uuid + ";" ) );
+            if ( this.checkUUIDList.test( escortTuple.getPatrulList() ) )
+                escortTuple
+                        .getPatrulList()
+                        .parallelStream()
+                        .parallel()
+                        .forEach( uuid -> this.getSession().execute(
+                                "UPDATE " + CassandraTables.TABLETS.name() +
+                                        "." + CassandraTables.PATRULS +
+                                        " SET uuidOfEscort = " + null
+                                        + ", uuidForEscortCar = " + null
+                                        + " where uuid = " + uuid + ";" ) );
 
-            if ( escortTuple.getTupleOfCarsList() != null
-                    && !escortTuple.getTupleOfCarsList().isEmpty()
-                    && escortTuple.getTupleOfCarsList().size() > 0 ) escortTuple.getTupleOfCarsList()
-                    .forEach( uuid -> this.getGetCurrentTupleOfCar()
-                            .apply( uuid )
-                            .subscribe( tupleOfCar1 -> this.getSession().execute(
-                                    "UPDATE " +
-                                            CassandraTables.ESCORT.name() + "."
-                                            + CassandraTables.TUPLE_OF_CAR.name() +
-                                            " SET uuidOfEscort = " + null
-                                            + ", uuidOfPatrul = " + null + " where uuid = " + uuid +
-                                            " and trackerid = '" + tupleOfCar1.getTrackerId() + "';" ) ) );
+            if ( this.checkUUIDList.test( escortTuple.getTupleOfCarsList() ) )
+                escortTuple
+                        .getTupleOfCarsList()
+                        .parallelStream()
+                        .parallel()
+                        .forEach( uuid -> this.getGetCurrentTupleOfCar()
+                                .apply( uuid )
+                                .subscribe( tupleOfCar1 -> this.getSession().execute(
+                                        "UPDATE " +
+                                                CassandraTables.ESCORT.name() + "."
+                                                + CassandraTables.TUPLE_OF_CAR.name() +
+                                                " SET uuidOfEscort = " + null
+                                                + ", uuidOfPatrul = " + null
+                                                + " where uuid = " + uuid +
+                                                " and trackerid = '" + tupleOfCar1.getTrackerId() + "';" ) ) );
 
             return Archive
                     .getArchive()
                     .getFunction()
                     .apply( Map.of(
                             "message", id + " was successfully deleted",
-                            "success", this.getSession().execute( "DELETE FROM "
+                            "success", this.getSession()
+                                    .execute( "DELETE FROM "
                                             + CassandraTables.ESCORT.name() + "."
                                             + CassandraTables.TUPLE_OF_ESCORT.name()
                                             + " where id = " + UUID.fromString( id ) + ";" )
@@ -163,36 +176,36 @@ public class CassandraDataControlForEscort {
     private final Consumer< EscortTuple > linkPatrulWithEscortCar = escortTuple ->
             Flux.range( 0, escortTuple.getPatrulList().size() )
                     .subscribe( integer -> CassandraDataControl
-                    .getInstance()
-                    .getGetPatrulByUUID()
-                    .apply( escortTuple.getPatrulList().get( integer ) )
-                    .subscribe( patrul -> {
-                        patrul.setUuidOfEscort( escortTuple.getUuid() );
-                        patrul.setUuidForEscortCar( escortTuple.getTupleOfCarsList().get( integer ) );
-                        CassandraDataControlForEscort
-                                .getInstance()
-                                .getGetCurrentTupleOfCar()
-                                .apply( patrul.getUuidForEscortCar() )
-                                .subscribe( tupleOfCar -> {
-                                    tupleOfCar.setUuidOfPatrul( patrul.getUuid() );
-                                    tupleOfCar.setUuidOfEscort( escortTuple.getUuid() );
-                                    CassandraDataControlForEscort
-                                            .getInstance()
-                                            .getUpdateTupleOfcar()
-                                            .apply( tupleOfCar )
-                                            .subscribe(); } );
-                        TaskInspector
-                                .getInstance()
-                                .changeTaskStatus( patrul,
-                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                        escortTuple ); } ) );
+                        .getInstance()
+                        .getGetPatrulByUUID()
+                        .apply( escortTuple.getPatrulList().get( integer ) )
+                        .subscribe( patrul -> {
+                            patrul.setUuidOfEscort( escortTuple.getUuid() );
+                            patrul.setUuidForEscortCar( escortTuple.getTupleOfCarsList().get( integer ) );
+                            CassandraDataControlForEscort
+                                    .getInstance()
+                                    .getGetCurrentTupleOfCar()
+                                    .apply( patrul.getUuidForEscortCar() )
+                                    .subscribe( tupleOfCar -> {
+                                        tupleOfCar.setUuidOfPatrul( patrul.getUuid() );
+                                        tupleOfCar.setUuidOfEscort( escortTuple.getUuid() );
+                                        CassandraDataControlForEscort
+                                                .getInstance()
+                                                .getUpdateTupleOfcar()
+                                                .apply( tupleOfCar )
+                                                .subscribe(); } );
+                            TaskInspector
+                                    .getInstance()
+                                    .changeTaskStatus( patrul,
+                                            com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                            escortTuple ); } ) );
 
     private final Function< EscortTuple, Flux< ApiResponseModel > > saveEscortTuple = escortTuple -> {
         if ( escortTuple.getUuidOfPolygon() != null )
             this.getCurrentPolygonForEscort
                     .apply( escortTuple.getUuidOfPolygon().toString() )
-                    .subscribe( polygonForEscort1 -> this.session.execute (
-                            "UPDATE "
+                    .subscribe( polygonForEscort1 -> this.getSession()
+                            .execute ( "UPDATE "
                                     + CassandraTables.ESCORT.name() + "."
                                     + CassandraTables.POLYGON_FOR_ESCORT.name()
                                     + " SET uuidOfEscort = " + escortTuple.getUuid()
@@ -333,7 +346,8 @@ public class CassandraDataControlForEscort {
                 + " where uuid = " + UUID.fromString( id ) + ";" ).one();
         return Mono.justOrEmpty( row != null ? new PolygonForEscort( row ) : null ); };
 
-    private final Function< String, Mono< ApiResponseModel > > deletePolygonForEscort = id -> this.getCurrentPolygonForEscort
+    private final Function< String, Mono< ApiResponseModel > > deletePolygonForEscort = id ->
+            this.getCurrentPolygonForEscort
             .apply( id )
             .flatMap( polygonForEscort -> polygonForEscort.getUuidOfEscort() == null
                     ? Archive
