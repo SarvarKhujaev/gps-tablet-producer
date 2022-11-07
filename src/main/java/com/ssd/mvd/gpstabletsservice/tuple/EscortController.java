@@ -36,7 +36,7 @@ public class EscortController {
     @MessageMapping ( value = "deleteEscort" )
     public Mono< ApiResponseModel > deleteTupleOfPatrul ( String id ) { return CassandraDataControlForEscort
             .getInstance()
-            .getDeleteTupleOfPatrul()
+            .getDeleteTupleOfEscort()
             .apply( id )
             .onErrorContinue( ( throwable, o ) -> log.error(
                     "Error: " + throwable.getMessage()

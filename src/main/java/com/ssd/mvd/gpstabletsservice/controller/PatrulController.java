@@ -337,6 +337,7 @@ public class PatrulController {
                         error.getMessage(), object ) ) )
                 : Mono.empty(); }
 
+    // возвращает данные обо всех использованных планшетах для каждого патрульного
     @MessageMapping ( value = "getAllUsedTablets" )
     public Mono< List< TabletUsage > > getAllUsedTablets ( RequestForTablets request ) { return CassandraDataControl
             .getInstance()

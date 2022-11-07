@@ -1572,8 +1572,14 @@ public final class CassandraDataControl {
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.TABLETS_USAGE_TABLE.name()
                             + " WHERE uuidOfPatrul = " + patrul.getUuid() + ";" )
-                    .all().stream() )
-            .map( TabletUsage::new );
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .flatMap( row -> Mono.just( new TabletUsage( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() );
 
     private final Consumer< String > addAllPatrulsToChatService = token -> this.getGetPatrul()
             .get()
