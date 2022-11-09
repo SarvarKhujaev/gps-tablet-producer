@@ -257,36 +257,24 @@ public class CassandraDataControlForTasks {
             .executeAsync( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.EVENTCAR.name()
-                    + "( id, camera, matched, date, confidence, object ) VALUES('"
-                    + eventCar.getId() + "', "
-                    + eventCar.getCamera() + ", "
-                    + eventCar.getMatched() + ", '"
-                    + eventCar.getCreated_date().toInstant() + "', "
-                    + eventCar.getConfidence() + ", '"
+                    + "( id, object ) VALUES('"
+                    + eventCar.getId() + "', '"
                     + SerDes.getSerDes().serialize( eventCar ) + "');" );
 
     private final Consumer< EventFace > saveEventFace = eventFace -> this.getSession()
             .executeAsync( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.EVENTFACE.name()
-                    + "( id, camera, matched, date, confidence, object ) VALUES('"
-                    + eventFace.getId() + "', "
-                    + eventFace.getCamera() + ", "
-                    + eventFace.getMatched() + ", '"
-                    + eventFace.getCreated_date().toInstant() + "', "
-                    + eventFace.getConfidence() + ", '"
+                    + "( id, object ) VALUES('"
+                    + eventFace.getId() + "', '"
                     + SerDes.getSerDes().serialize( eventFace ) + "');" );
 
     private final Consumer< EventBody > saveEventBody = eventBody -> this.getSession()
             .executeAsync( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.EVENTBODY.name()
-                    + "( id, camera, matched, date, confidence, object ) VALUES('"
-                    + eventBody.getId() + "', "
-                    + eventBody.getCamera() + ", "
-                    + eventBody.getMatched() + ", '"
-                    + eventBody.getCreated_date().toInstant() + "', "
-                    + eventBody.getConfidence() + ", '"
+                    + "( id, object ) VALUES('"
+                    + eventBody.getId() + "', '"
                     + SerDes.getSerDes().serialize( eventBody ) + "');" );
 
     private final Function< CarTotalData, Boolean > saveCarTotalData = carTotalData ->
