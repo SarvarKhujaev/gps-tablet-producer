@@ -361,11 +361,12 @@ public final class TaskInspector {
                         .subscribe( taskInspector -> CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
-                                .accept( taskInspector ) ); }
-        } if ( eventFace.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+                                .accept( taskInspector ) ); } }
+        if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
+        if ( eventFace.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .addValue( eventFace.getId(), new ActiveTask( eventFace ) );
-        if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
+
         CassandraDataControlForTasks
                 .getInstance()
                 .getSaveEventFace()
@@ -468,10 +469,11 @@ public final class TaskInspector {
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
-        } if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+        }
+        if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul );
+        if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .addValue( eventBody.getId(), new ActiveTask( eventBody ) );
-        if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -577,11 +579,11 @@ public final class TaskInspector {
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
-        } if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+        }
+        if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
+        if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .addValue( carEvents.getId(), new ActiveTask( carEvents ) );
-
-        if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -687,7 +689,8 @@ public final class TaskInspector {
                                 .getInstance()
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); }
-        } if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul );
+        }
+        if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul );
         if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .addValue( faceEvent.getId(), new ActiveTask( faceEvent ) );
@@ -834,11 +837,11 @@ public final class TaskInspector {
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object
                 patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
                 patrul.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() ); } }
+        if ( status.compareTo( CANCEL ) != 0 ) selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul );
         if ( selfEmploymentTask.getTaskStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .addValue( selfEmploymentTask.getUuid().toString(),
                     new ActiveTask( selfEmploymentTask ) );
-        if ( status.compareTo( CANCEL ) != 0 ) selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul );
         CassandraDataControlForTasks
                 .getInstance()
                 .getSaveSelfEmploymentTask()
