@@ -173,6 +173,7 @@ public class Notification {
         this.setStatus( patrul.getStatus() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
+        this.setNotificationWasCreated( new Date() );
         this.setPoliceType( patrul.getPoliceType() );
         this.setId( escortTuple.getUuid().toString() );
         this.setPassportSeries( patrul.getPassportNumber() );
