@@ -590,7 +590,7 @@ public final class CassandraDataControl {
                             + CassandraTables.PATRULS.name()
                             + " SET carnumber = '" + reqCar.getGosNumber() + "', "
                             + "cartype = '" + reqCar.getVehicleType()
-                            + "' where uuid = " + this.getGetPatrulRow()
+                            + "' where uuid = " + this.getGetPatrulByPassportNumber()
                             .apply( reqCar1.getPatrulPassportSeries() )
                             .getUUID( "uuid" ) + ";" );
 
@@ -599,7 +599,7 @@ public final class CassandraDataControl {
                             + CassandraTables.PATRULS.name()
                             + " SET carnumber = '" + null + "', "
                             + "cartype = '" + null + "' where uuid = "
-                            + this.getGetPatrulRow()
+                            + this.getGetPatrulByPassportNumber()
                             .apply( reqCar1.getPatrulPassportSeries() )
                             .getUUID( "uuid" ) + ";" ); }
                 return this.getSession().execute( "INSERT INTO "
@@ -707,11 +707,12 @@ public final class CassandraDataControl {
                 + " WHERE uuid = " + uuid + ";" ).one();
         return Mono.justOrEmpty( row != null ? new Patrul( row ) : null ); };
 
-    private final Function< String, Row > getPatrulRow = pasportNumber -> this.getSession().execute(
-            "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.PATRULS.name()
-                    + " WHERE passportNumber = '" + pasportNumber + "';" ).one();
+    private final Function< String, Row > getPatrulByPassportNumber = passportNumber ->
+            this.getSession().execute(
+                "SELECT * FROM "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.PATRULS.name()
+                        + " WHERE passportNumber = '" + passportNumber + "';" ).one();
 
     // обновляет время последней активности патрульного
     private final Consumer< Patrul > updatePatrulActivity = patrul -> this.getSession()
@@ -728,7 +729,7 @@ public final class CassandraDataControl {
                     + " WHERE uuid = " + patrul.getUuid() + ";" );
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
-        Row row = this.getGetPatrulRow()
+        Row row = this.getGetPatrulByPassportNumber()
                 .apply( patrul.getPassportNumber() );
         if ( row == null ) return Archive
                 .getArchive()
@@ -861,12 +862,12 @@ public final class CassandraDataControl {
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
-        if ( this.getGetPatrulRow()
+        if ( this.getGetPatrulByPassportNumber()
                 .apply( patrul.getPassportNumber() ) == null ) {
+            patrul.setStatus( FREE );
             patrul.setInPolygon( false );
+            patrul.setTaskTypes( TaskTypes.FREE );
             patrul.setListOfTasks( new HashMap<>() );
-            patrul.setStatus( com.ssd.mvd.gpstabletsservice.constants.Status.FREE );
-            patrul.setTaskTypes( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE );
             if ( patrul.getBatteryLevel() == null ) patrul.setBatteryLevel( 0 );
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
             if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
@@ -875,6 +876,13 @@ public final class CassandraDataControl {
                 patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
+            if ( this.checkLogin.apply( patrul.getLogin() ) != null ) return Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of(
+                            "message", "Patrul with this login has already been inserted, choose another one",
+                            "success", false,
+                            "code", 201 ) );
             return this.getSession().execute(
                     "INSERT INTO "
                             + CassandraTables.TABLETS.name() + "."
@@ -941,7 +949,8 @@ public final class CassandraDataControl {
                     CassandraConverter
                             .getInstance()
                             .convertMapToCassandra( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;" )
-                    .wasApplied() ? Archive
+                    .wasApplied()
+                    ? Archive
                     .getArchive()
                     .getFunction()
                     .apply( Map.of( "message", "Patrul was successfully saved" ) )
@@ -1379,12 +1388,16 @@ public final class CassandraDataControl {
                         + " AND simCardNumber = '" + row.getString( "simCardNumber" ) + "';" ))
                 .subscribe(); }
 
+    private final Function< String, Row > checkLogin = login ->
+            this.getSession().execute( "SELECT * FROM " +
+            CassandraTables.TABLETS.name() + "."
+            + CassandraTables.PATRULS_LOGIN_TABLE.name()
+            + " where login = '" + login + "';" ).one();
+
     private final Function< PatrulLoginRequest, Mono< ApiResponseModel > > login = patrulLoginRequest -> {
-        Row row = this.getSession().execute( "SELECT * FROM " +
-                CassandraTables.TABLETS.name() + "."
-                + CassandraTables.PATRULS_LOGIN_TABLE.name()
-                + " where login = '" + patrulLoginRequest.getLogin() + "';" ).one();
-        return row != null ? this.getGetPatrulByUUID()
+        Row row = this.checkLogin.apply( patrulLoginRequest.getLogin() );
+        return row != null
+                ? this.getGetPatrulByUUID()
                 .apply( row.getUUID( "uuid" ) )
                 .flatMap( patrul -> {
                     if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {

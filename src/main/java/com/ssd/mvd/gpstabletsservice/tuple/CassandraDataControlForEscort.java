@@ -527,10 +527,18 @@ public class CassandraDataControlForEscort {
                     "countryNameUz, " +
                     "countryNameRu, " +
                     "symbol ) VALUES('"
-                    + country.getCountryNameEn().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
-                    + country.getCountryNameUz().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
-                    + country.getCountryNameRu().toUpperCase( Locale.ROOT ).replaceAll( "'", "" ) + "', '"
-                    + country.getSymbol().toUpperCase( Locale.ROOT ).replaceAll( "'", "" )
+                    + country.getCountryNameEn()
+                    .toUpperCase( Locale.ROOT )
+                    .replaceAll( "'", "" ) + "', '"
+                    + country.getCountryNameUz()
+                    .toUpperCase( Locale.ROOT )
+                    .replaceAll( "'", "" ) + "', '"
+                    + country.getCountryNameRu()
+                    .toUpperCase( Locale.ROOT )
+                    .replaceAll( "'", "" ) + "', '"
+                    + country.getSymbol()
+                    .toUpperCase( Locale.ROOT )
+                    .replaceAll( "'", "" )
                     + "') IF NOT EXISTS;" )
             .wasApplied()
             ? Archive
