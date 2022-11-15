@@ -1,4 +1,4 @@
-package com.ssd.mvd.gpstabletsservice.task.card;
+package com.ssd.mvd.gpstabletsservice.task.sos_task;
 
 import com.datastax.driver.core.Row;
 import java.util.Date;
@@ -12,11 +12,12 @@ import lombok.Data;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatrulSos {
-    private Date sosWasSendDate; // созраняет время когда запрос был отправлен
+    private String address;
     private UUID patrulUUID;
+    private Date sosWasSendDate; // созраняет время когда запрос был отправлен
 
-    private Double longitude;
     private Double latitude;
+    private Double longitude;
 
     public PatrulSos ( Row row ) {
         this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
