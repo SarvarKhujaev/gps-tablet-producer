@@ -434,11 +434,11 @@ public class CassandraDataControlForTasks {
                             .apply( taskDetailsRequest.getId() )
                             .map( faceEvent -> new TaskDetails( faceEvent, taskDetailsRequest.getPatrulUUID() ) );
 
-                    case EVENTBODY -> this.getEventFace
+                    case EVENTBODY -> this.getEventBody
                             .apply( taskDetailsRequest.getId() )
-                            .map( eventFace -> new TaskDetails( eventFace, taskDetailsRequest.getPatrulUUID() ) );
+                            .map( eventBody -> new TaskDetails( eventBody, taskDetailsRequest.getPatrulUUID() ) );
 
-                    default -> this.getEventBody
+                    default -> this.getEventFace
                             .apply( taskDetailsRequest.getId() )
                             .map( eventFace -> new TaskDetails( eventFace, taskDetailsRequest.getPatrulUUID() ) ); };
                 default -> this.getSelfEmploymentTask
