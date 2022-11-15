@@ -30,8 +30,6 @@ public class SerDes {
 
     public String serialize ( Card object ) { return this.gson.toJson( object ); }
 
-    public String serialize ( Patrul patrul ) { return this.gson.toJson( patrul ); }
-
     public String serialize ( EventCar eventCar ) { return this.gson.toJson( eventCar ); }
 
     public String serialize ( CarEvent carEvent ) { return this.gson.toJson( carEvent ); }
