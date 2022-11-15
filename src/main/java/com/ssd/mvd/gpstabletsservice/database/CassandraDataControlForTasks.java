@@ -23,6 +23,7 @@ import com.datastax.driver.core.Session;
 import com.ssd.mvd.gpstabletsservice.task.card.*;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
@@ -98,13 +99,23 @@ public class CassandraDataControlForTasks {
                 + CassandraTables.ACTIVE_TASK.name()
                 + "( id text PRIMARY KEY, object text );" );
 
+        this.getSession().execute( "CREATE TYPE IF NOT EXISTS "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.PATRUL_STATUS_TYPE
+                + "( patrulUUID uuid, inTime boolean, totalTimeConsumption bigint );" );
+
         this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.SOS_TABLE.name()
-                + CassandraConverter
-                .getInstance()
-                .convertClassToCassandra( PatrulSos.class )
-                + ", PRIMARY KEY ( patrulUUID ) );" );
+                + CassandraTables.PATRUL_SOS_TABLE.name()
+                + " ( patrulUUID uuid,"
+                + " address text, "
+                + " sosWasSendDate timestamp, "
+                + " latitude double, "
+                + " longitude double, "
+                + " linkedPatrulList map< uuid, text >, "
+                + " patrulStatuses map< uuid, "
+                + CassandraTables.PATRUL_STATUS_TYPE.name() + " >, "
+                + " PRIMARY KEY ( (patrulUUID), sosWasSendDate ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS " +
                 CassandraTables.TABLETS.name() + "." +
