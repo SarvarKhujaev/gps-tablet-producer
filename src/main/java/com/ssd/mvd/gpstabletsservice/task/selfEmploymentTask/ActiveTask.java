@@ -42,9 +42,9 @@ public class ActiveTask {
         this.setLatitude( card.getLatitude() );
         this.setLongitude( card.getLongitude() );
 
+        this.setCreatedDate( new Date() );
         this.setStatus( card.getStatus() );
         this.setPatrulList( card.getPatruls() );
-        this.setCreatedDate( card.getCreated_date() );
 
         this.setAddress( card.getAddress() );
         this.setDescription( card.getFabula() );
@@ -57,8 +57,8 @@ public class ActiveTask {
 
     public ActiveTask ( Card card, Status status ) {
         this.setPatrulStatus( status );
+        this.setCreatedDate( new Date() );
         this.setStatus( card.getStatus() );
-        this.setCreatedDate( card.getCreated_date() );
 
         this.setLatitude( card.getLatitude() );
         this.setLongitude( card.getLongitude() );
@@ -74,7 +74,7 @@ public class ActiveTask {
 
     public ActiveTask ( SelfEmploymentTask card ) {
         this.setTitle( card.getTitle() );
-        this.setType( "selfEmployment" );
+        this.setCreatedDate( new Date() );
         this.setAddress( card.getAddress() );
         this.setStatus( card.getTaskStatus() );
         this.setPatrulList( card.getPatruls() );
@@ -82,77 +82,76 @@ public class ActiveTask {
         this.setLatitude( card.getLatOfAccident() );
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );
-        this.setCreatedDate( card.getIncidentDate() );
         this.setType( TaskTypes.SELF_EMPLOYMENT.name() ); }
 
     public ActiveTask ( SelfEmploymentTask card, Status status ) {
         this.setPatrulStatus( status );
         this.setTitle( card.getTitle() );
+        this.setCreatedDate( new Date() );
         this.setAddress( card.getAddress() );
         this.setStatus( card.getTaskStatus() );
         this.setTaskId( card.getUuid().toString() );
         this.setLatitude( card.getLatOfAccident() );
         this.setDescription( card.getDescription() );
         this.setLongitude( card.getLanOfAccident() );
-        this.setCreatedDate( card.getIncidentDate() );
         this.setType( TaskTypes.SELF_EMPLOYMENT.name() ); }
 
     public ActiveTask( EventFace eventFace ) {
+        this.setCreatedDate( new Date() );
         this.setTaskId( eventFace.getId() );
         this.setStatus( eventFace.getStatus() );
         this.setLatitude( eventFace.getLatitude() );
         this.setPatrulList( eventFace.getPatruls() );
         this.setLongitude( eventFace.getLongitude() );
-        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-        this.setCreatedDate( eventFace.getCreated_date() ); }
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
 
     public ActiveTask ( EventFace eventFace, Status status ) {
         this.setPatrulStatus( status );
+        this.setCreatedDate( new Date() );
         this.setTaskId( eventFace.getId() );
         this.setStatus( eventFace.getStatus() );
         this.setLatitude( eventFace.getLatitude() );
         this.setPatrulList( eventFace.getPatruls() );
         this.setLongitude( eventFace.getLongitude() );
-        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-        this.setCreatedDate( eventFace.getCreated_date() ); }
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
 
     public ActiveTask( EventBody eventBody ) {
+        this.setCreatedDate( new Date() );
         this.setTaskId( eventBody.getId() );
         this.setStatus( eventBody.getStatus() );
         this.setLatitude( eventBody.getLatitude() );
         this.setPatrulList( eventBody.getPatruls() );
         this.setLongitude( eventBody.getLongitude() );
-        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-        this.setCreatedDate( eventBody.getCreated_date() ); }
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
 
     public ActiveTask ( EventBody eventBody, Status status ) {
         this.setPatrulStatus( status );
+        this.setCreatedDate( new Date() );
         this.setTaskId( eventBody.getId() );
         this.setStatus( eventBody.getStatus() );
         this.setLatitude( eventBody.getLatitude() );
         this.setPatrulList( eventBody.getPatruls() );
         this.setLongitude( eventBody.getLongitude() );
-        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-        this.setCreatedDate( eventBody.getCreated_date() ); }
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
 
     public ActiveTask ( EventCar eventCar ) {
+        this.setCreatedDate( new Date() );
         this.setTaskId( eventCar.getId() );
         this.setStatus( eventCar.getStatus() );
         this.setLatitude( eventCar.getLatitude() );
         this.setPatrulList( eventCar.getPatruls() );
         this.setLongitude( eventCar.getLongitude() );
-        this.setType( TaskTypes.FIND_FACE_CAR.name() );
-        this.setCreatedDate( eventCar.getCreated_date() ); }
+        this.setType( TaskTypes.FIND_FACE_CAR.name() ); }
 
     public ActiveTask ( EventCar eventCar, Status status ) {
         this.setPatrulStatus( status );
+        this.setCreatedDate( new Date() );
         this.setTaskId( eventCar.getId() );
         this.setStatus( eventCar.getStatus() );
         this.setLatitude( eventCar.getLatitude() );
         this.setPatrulList( eventCar.getPatruls() );
         this.setLongitude( eventCar.getLongitude() );
-        this.setType( TaskTypes.FIND_FACE_CAR.name() );
-        this.setCreatedDate( eventCar.getCreated_date() ); }
+        this.setType( TaskTypes.FIND_FACE_CAR.name() ); }
 
     public ActiveTask ( FaceEvent faceEvents ) {
         this.setCreatedDate( new Date() );
@@ -225,6 +224,7 @@ public class ActiveTask {
     public ActiveTask( EscortTuple escortTuple, Status status ) {
         this.setPatrulStatus( status );
         this.setStatus( Status.CREATED );
+        this.setCreatedDate( new Date() );
         this.setType( TaskTypes.ESCORT.name() );
         this.setTaskId( escortTuple.getUuid().toString() ); }
 }
