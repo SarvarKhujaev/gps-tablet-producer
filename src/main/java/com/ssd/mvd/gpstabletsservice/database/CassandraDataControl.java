@@ -833,19 +833,24 @@ public final class CassandraDataControl {
                     this.delete();
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
+    // проверяет не имеет ли патрульный задание или не привязан ли он к эскорту или машине
+    private final Predicate< Patrul > checkPatrulLinks = patrul ->
+            patrul.getTaskId().equals( "null" )
+            && patrul.getUuidOfEscort() == null
+            && patrul.getUuidForPatrulCar() == null
+            && patrul.getUuidForEscortCar() == null
+            && patrul.getCarNumber().equals( "null" )
+            && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0;
+
     public Mono< ApiResponseModel > deletePatrul ( UUID uuid ) { return this.getGetPatrulByUUID()
             .apply( uuid )
             .flatMap( patrul -> {
-                if ( patrul.getTaskId().equals( "null" )
-                        && patrul.getCarNumber().equals( "null" )
-                        && patrul.getUuidOfEscort().compareTo( null ) == 0
-                        && patrul.getUuidForPatrulCar().compareTo( null ) == 0
-                        && patrul.getUuidForEscortCar().compareTo( null ) == 0
-                        && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) {
+                if ( this.checkPatrulLinks.test( patrul ) ) {
                     this.getSession().execute ( "DELETE FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.PATRULS_LOGIN_TABLE.name()
-                        + " WHERE login = '" + patrul.getLogin() + "';" );
+                        + " WHERE login = '" + patrul.getLogin()
+                        + "' AND uuid = " + patrul.getUuid() + ";" );
 
                     return this.delete( CassandraTables.PATRULS.name(),
                             "uuid",
@@ -857,9 +862,9 @@ public final class CassandraDataControl {
                         .apply( Map.of( "message", "You cannot delete this patrul",
                                 "success", false,
                                 "code", 201 ) ); } )
-                .doOnError( throwable -> {
-                    this.delete();
-                    this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
+            .doOnError( throwable -> {
+                this.logger.info(  "ERROR: " + throwable.getMessage() );
+                this.delete(); } ); }
 
     public Mono< ApiResponseModel > addValue ( Patrul patrul ) {
         if ( this.getGetPatrulByPassportNumber()
@@ -1255,6 +1260,14 @@ public final class CassandraDataControl {
             + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p )
             * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
 
+    private final Predicate< Row > checkPatrulStatus = row ->
+            Status.valueOf( row.getString( "status" ) )
+            .compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
+            && TaskTypes.valueOf( row.getString( "taskTypes" ) )
+            .compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
+            && row.getDouble( "latitude" ) > 0
+            && row.getDouble( "longitude" ) > 0;
+
     private final Function< Point, Flux< Patrul > > findTheClosestPatruls = point -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
@@ -1264,12 +1277,7 @@ public final class CassandraDataControl {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .filter( row -> Status.valueOf( row.getString( "status" ) )
-                    .compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
-                    && TaskTypes.valueOf( row.getString( "taskTypes" ) )
-                    .compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
-                    && row.getDouble( "latitude" ) > 0
-                    && row.getDouble( "longitude" ) > 0 )
+            .filter( this.checkPatrulStatus )
             .flatMap( row -> Mono.just( new Patrul( row ) ) )
             .flatMap( patrul -> {
                 patrul.setDistance( this.calculate( point, patrul ) );
@@ -1480,8 +1488,7 @@ public final class CassandraDataControl {
                                 .getFunction()
                                 .apply( Map.of(
                                         "message", "Patrul started to work",
-                                        "success", this.login( patrul,
-                                                Status.START_TO_WORK ) ) ) ); } );
+                                        "success", this.login( patrul, Status.START_TO_WORK ) ) ) ); } );
 
     private final Function< String, Mono< ApiResponseModel > > checkToken = token -> this.getGetPatrulByUUID()
             .apply( this.decode( token ) )

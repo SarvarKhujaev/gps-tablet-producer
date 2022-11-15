@@ -517,7 +517,7 @@ public class CassandraDataControlForEscort {
         return Archive
                 .getArchive()
                 .getFunction()
-                .apply( Map.of( "message", "Country: " + countryName + " was deleted" ) ); };
+                .apply( Map.of( "message", countryName + " bazadan ochirildi" ) ); };
 
     private final Function< Country, Mono< ApiResponseModel > > saveNewCountry = country -> this.getSession()
             .execute( "INSERT INTO "
@@ -544,7 +544,7 @@ public class CassandraDataControlForEscort {
             ? Archive
             .getArchive()
             .getFunction()
-            .apply( Map.of( "message", "New country was added to database" ) )
+            .apply( Map.of( "message", "Yangi davlat bazaga qoshildi" ) )
             : Archive
             .getArchive()
             .getFunction()
@@ -577,7 +577,7 @@ public class CassandraDataControlForEscort {
             ? Archive
             .getArchive()
             .getFunction()
-            .apply( Map.of( "message", country.getCountryNameEn() + " was updated successfully" ) )
+            .apply( Map.of( "message", country.getCountryNameEn() + " muvaffaqiyatli yangilandi" ) )
             : Archive
             .getArchive()
             .getFunction()
