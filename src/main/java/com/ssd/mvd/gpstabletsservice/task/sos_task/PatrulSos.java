@@ -12,11 +12,11 @@ import lombok.Data;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatrulSos {
-    private UUID patrulUUID;
     private Date sosWasSendDate; // созраняет время когда запрос был отправлен
+    private UUID patrulUUID;
 
-    private Double latitude;
     private Double longitude;
+    private Double latitude;
 
     public PatrulSos ( Row row ) {
         this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
