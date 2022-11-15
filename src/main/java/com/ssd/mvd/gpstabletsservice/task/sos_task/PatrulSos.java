@@ -12,7 +12,6 @@ import lombok.Data;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatrulSos {
-    private String address;
     private UUID patrulUUID;
     private Date sosWasSendDate; // созраняет время когда запрос был отправлен
 
