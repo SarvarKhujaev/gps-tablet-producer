@@ -54,35 +54,51 @@ public final class CassandraDataControl {
     public void register () {
         CassandraConverter
                 .getInstance()
-                .registerCodecForPatrul( CassandraTables.TABLETS.name(), CassandraTables.PATRUL_TYPE.name() );
+                .registerCodecForPatrul(
+                        CassandraTables.TABLETS.name(),
+                        CassandraTables.PATRUL_TYPE.name() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForPositionInfo( CassandraTables.TABLETS.name(), CassandraTables.POSITION_INFO.name() );
+                .registerCodecForPositionInfo(
+                        CassandraTables.TABLETS.name(),
+                        CassandraTables.POSITION_INFO.name() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForCameraList( CassandraTables.TABLETS.name(), CassandraTables.CAMERA_LIST.name() );
+                .registerCodecForCameraList(
+                        CassandraTables.TABLETS.name(),
+                        CassandraTables.CAMERA_LIST.name() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForReport( CassandraTables.TABLETS.name(), CassandraTables.REPORT_FOR_CARD.name() );
+                .registerCodecForReport(
+                        CassandraTables.TABLETS.name(),
+                        CassandraTables.REPORT_FOR_CARD.name() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForPoliceType( CassandraTables.TABLETS.name(), CassandraTables.POLICE_TYPE.name() );
+                .registerCodecForPoliceType(
+                        CassandraTables.TABLETS.name(),
+                        CassandraTables.POLICE_TYPE.name() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForPolygonType( CassandraTables.TABLETS.name(), CassandraTables.POLYGON_TYPE.name() );
+                .registerCodecForPolygonType(
+                        CassandraTables.TABLETS.name(),
+                        CassandraTables.POLYGON_TYPE.name() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForPolygonEntity( CassandraTables.TABLETS.name(), CassandraTables.POLYGON_ENTITY.name() );
+                .registerCodecForPolygonEntity(
+                        CassandraTables.TABLETS.name(),
+                        CassandraTables.POLYGON_ENTITY.name() );
 
         CassandraConverter
                 .getInstance()
-                .registerCodecForViolationsInformation( CassandraTables.TABLETS.name(), CassandraTables.VIOLATION_LIST_TYPE.name() ); }
+                .registerCodecForViolationsInformation(
+                        CassandraTables.TABLETS.name(),
+                        CassandraTables.VIOLATION_LIST_TYPE.name() ); }
 
     private void createType ( String typeName, Class object ) {
         this.getSession().execute( "CREATE TYPE IF NOT EXISTS "
@@ -875,6 +891,7 @@ public final class CassandraDataControl {
             patrul.setListOfTasks( new HashMap<>() );
             if ( patrul.getBatteryLevel() == null ) patrul.setBatteryLevel( 0 );
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
+            if ( patrul.getPassword() == null ) patrul.setPassword( patrul.getPassportNumber() );
             if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
             if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
             if ( patrul.getOrganName() != null && patrul.getOrganName().contains( "'" ) )
@@ -888,24 +905,32 @@ public final class CassandraDataControl {
                             "message", "Patrul with this login has already been inserted, choose another one",
                             "success", false,
                             "code", 201 ) );
-            return this.getSession().execute(
+            this.getSession().execute(
                     "INSERT INTO "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS_LOGIN_TABLE.name()
                             + " ( login, password, uuid ) VALUES( '"
                             + patrul.getLogin() + "', '"
                             + patrul.getPassword() + "', "
-                            + patrul.getUuid() + " ) IF NOT EXISTS;" ).wasApplied() ?
-            this.getSession().execute( "INSERT INTO "
+                            + patrul.getUuid() + " ) IF NOT EXISTS;" );
+            return this.getSession().execute( "INSERT INTO "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS.name() +
                     CassandraConverter
                             .getInstance()
                             .getALlNames( Patrul.class ) + " VALUES ('" +
-                    ( patrul.getTaskDate() != null ? patrul.getTaskDate().toInstant() : new Date().toInstant() ) + "', '" +
-                    ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : new Date().toInstant() ) + "', '" +
-                    ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : new Date().toInstant() ) + "', '" +
-                    ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : new Date().toInstant() ) + "', " +
+                    ( patrul.getTaskDate() != null
+                            ? patrul.getTaskDate().toInstant()
+                            : new Date().toInstant() ) + "', '" +
+                    ( patrul.getLastActiveDate() != null
+                            ? patrul.getLastActiveDate().toInstant()
+                            : new Date().toInstant() ) + "', '" +
+                    ( patrul.getStartedToWorkDate() != null
+                            ? patrul.getStartedToWorkDate().toInstant()
+                            : new Date().toInstant() ) + "', '" +
+                    ( patrul.getDateOfRegistration() != null
+                            ? patrul.getDateOfRegistration().toInstant()
+                            : new Date().toInstant() ) + "', " +
 
                     patrul.getDistance() + ", " +
                     patrul.getLatitude() + ", " +
@@ -922,11 +947,15 @@ public final class CassandraDataControl {
                     patrul.getRegionId() + ", " +
                     patrul.getMahallaId() + ", " +
                     patrul.getDistrictId() + ", " +
-                    patrul.getTotalActivityTime() + ", " +
+                    ( patrul.getTotalActivityTime() != null
+                            ? patrul.getTotalActivityTime() : 0 ) + ", " +
 
-                    ( patrul.getBatteryLevel() != null ? patrul.getBatteryLevel() : 0 ) + ", " +
-                    patrul.getInPolygon() + ", " +
-                    ( patrul.getTuplePermission() != null ? patrul.getTuplePermission() : false ) + ", '" +
+                    ( patrul.getBatteryLevel() != null
+                            ? patrul.getBatteryLevel() : 0 ) + ", " +
+                    ( patrul.getInPolygon() != null
+                            ? patrul.getInPolygon() : false ) + ", " +
+                    ( patrul.getTuplePermission() != null
+                            ? patrul.getTuplePermission() : false ) + ", '" +
 
                     patrul.getName() + "', '" +
                     patrul.getRank() + "', '" +
@@ -963,14 +992,7 @@ public final class CassandraDataControl {
                     .getArchive()
                     .getFunction()
                     .apply( Map.of(
-                            "message", "Patrul has already been saved. choose another one",
-                            "success", false,
-                            "code", 201 ) )
-                    : Archive
-                    .getArchive()
-                    .getFunction()
-                    .apply( Map.of(
-                            "message", "Wrong login. it has to be unique",
+                            "message", "Patrul has already been saved, choose another one",
                             "success", false,
                             "code", 201 ) );
         } else return Archive

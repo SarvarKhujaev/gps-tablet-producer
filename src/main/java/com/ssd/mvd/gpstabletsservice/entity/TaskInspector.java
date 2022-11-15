@@ -363,7 +363,8 @@ public final class TaskInspector {
                                 .getSaveTaskTimeStatistics()
                                 .accept( taskInspector ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
-        if ( eventFace.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+        if ( eventFace.getStatus().compareTo( FINISHED ) != 0 )
+            CassandraDataControlForTasks
                 .getInstance()
                 .addValue( eventFace.getId(), new ActiveTask( eventFace ) );
 

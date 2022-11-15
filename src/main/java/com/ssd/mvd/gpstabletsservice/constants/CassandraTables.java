@@ -9,7 +9,7 @@ public enum CassandraTables {
 
     // tables for Tasks
     FACECAR, EVENTCAR, EVENTFACE, EVENTBODY, FACEPERSON,
-    ACTIVE_TASK, CARTOTALDATA, SELFEMPLOYMENT, TASK_TIMING_TABLE, SOS_TABLE,
+    ACTIVE_TASK, CARTOTALDATA, SELFEMPLOYMENT, TASK_TIMING_TABLE,
 
     // tables for ESCORT Entity
     ESCORT,
@@ -22,4 +22,7 @@ public enum CassandraTables {
     // tables for TABLETS
     GPSTABLETS,
     TABLETS_LOCATION_TABLE, POSITION_INFO,
+
+    // For Sos entity
+    SOS_TABLE, STATUS_TYPE, PATRUL_STATUS_TYPE, PATRUL_SOS_TABLE, // <- после тестов удалить
 }

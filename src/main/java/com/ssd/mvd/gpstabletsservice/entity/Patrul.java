@@ -41,7 +41,7 @@ public class Patrul {
 
     private Integer batteryLevel;
     private Boolean inPolygon;
-    private Boolean tuplePermission; // показывает модноо ли патрульному участвовать в кортеже
+    private Boolean tuplePermission; // показывает можно ли патрульному участвовать в кортеже
 
     private String name;
     private String rank;
