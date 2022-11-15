@@ -99,23 +99,13 @@ public class CassandraDataControlForTasks {
                 + CassandraTables.ACTIVE_TASK.name()
                 + "( id text PRIMARY KEY, object text );" );
 
-        this.getSession().execute( "CREATE TYPE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.PATRUL_STATUS_TYPE
-                + "( patrulUUID uuid, inTime boolean, totalTimeConsumption bigint );" );
-
         this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.PATRUL_SOS_TABLE.name()
-                + " ( patrulUUID uuid,"
-                + " address text, "
-                + " sosWasSendDate timestamp, "
-                + " latitude double, "
-                + " longitude double, "
-                + " linkedPatrulList map< uuid, text >, "
-                + " patrulStatuses map< uuid, "
-                + CassandraTables.PATRUL_STATUS_TYPE.name() + " >, "
-                + " PRIMARY KEY ( (patrulUUID), sosWasSendDate ) );" );
+                + CassandraTables.SOS_TABLE.name()
+                + CassandraConverter
+                .getInstance()
+                .convertClassToCassandra( PatrulSos.class )
+                + ", PRIMARY KEY ( patrulUUID ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS " +
                 CassandraTables.TABLETS.name() + "." +
