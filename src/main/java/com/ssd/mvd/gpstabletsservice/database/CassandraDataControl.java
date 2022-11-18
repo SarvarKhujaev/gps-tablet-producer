@@ -181,8 +181,10 @@ public final class CassandraDataControl {
         this.createTable( CassandraTables.CARS.name(), ReqCar.class, ", PRIMARY KEY ( uuid ) );" );
         this.createTable( CassandraTables.POLICE_TYPE.name(), PoliceType.class, ", PRIMARY KEY ( uuid ) );" );
         this.createTable( CassandraTables.POLYGON_TYPE.name(), PolygonType.class, ", PRIMARY KEY ( uuid ) );" );
-        this.createTable( CassandraTables.TABLETS_USAGE_TABLE.name(), TabletUsage.class, ", PRIMARY KEY ( uuidOfPatrul, simCardNumber ) );" );
-        this.createTable( CassandraTables.PATRULS.name(), Patrul.class, ", status text, taskTypes text, listOfTasks map< text, text >, PRIMARY KEY ( uuid ) );" );
+        this.createTable( CassandraTables.TABLETS_USAGE_TABLE.name(),
+                TabletUsage.class, ", PRIMARY KEY ( uuidOfPatrul, simCardNumber ) );" );
+        this.createTable( CassandraTables.PATRULS.name(), Patrul.class,
+                ", status text, taskTypes text, listOfTasks map< text, text >, PRIMARY KEY ( uuid ) );" );
 
         this.createTable( CassandraTables.POLYGON.name(), Polygon.class,
                 ", polygonType frozen< " + CassandraTables.POLYGON_TYPE.name() + " >, " +
@@ -788,6 +790,7 @@ public final class CassandraDataControl {
 
                     patrul.getUuid() + ", " +
                     patrul.getOrgan() + ", " +
+                    patrul.getSos_id() + ", " +
                     patrul.getUuidOfEscort() + ", " +
                     patrul.getUuidForPatrulCar() + ", " +
                     patrul.getUuidForEscortCar() + ", " +
@@ -913,6 +916,10 @@ public final class CassandraDataControl {
                             + patrul.getLogin() + "', '"
                             + patrul.getPassword() + "', "
                             + patrul.getUuid() + " ) IF NOT EXISTS;" );
+            CassandraDataControlForTasks
+                    .getInstance()
+                    .getCreateRowInPatrulSosTable()
+                    .accept( patrul.getUuid() );
             return this.getSession().execute( "INSERT INTO "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS.name() +
@@ -940,6 +947,7 @@ public final class CassandraDataControl {
 
                     patrul.getUuid() + ", " +
                     patrul.getOrgan() + ", " +
+                    patrul.getSos_id() + ", " +
                     patrul.getUuidOfEscort() + ", " +
                     patrul.getUuidForPatrulCar() + ", " +
                     patrul.getUuidForEscortCar() + ", " +
@@ -1289,6 +1297,26 @@ public final class CassandraDataControl {
             .compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
             && row.getDouble( "latitude" ) > 0
             && row.getDouble( "longitude" ) > 0;
+
+    private final Function< Point, Flux< Patrul > > findTheClosestPatrulsForSos = point -> Flux.fromStream(
+                    this.getSession().execute( "SELECT * FROM "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.PATRULS.name() + ";" )
+                            .all()
+                            .stream()
+                            .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .filter( row -> row.getDouble( "latitude" ) > 0
+                    && row.getDouble( "longitude" ) > 0 )
+            .flatMap( row -> Mono.just( new Patrul( row ) ) )
+            .flatMap( patrul -> {
+                patrul.setDistance( this.calculate( point, patrul ) );
+                return Mono.just( patrul ); } )
+            .sequential()
+            .publishOn( Schedulers.single() )
+            .sort( Comparator.comparing( Patrul::getDistance ) )
+            .take( 5 );
 
     private final Function< Point, Flux< Patrul > > findTheClosestPatruls = point -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
