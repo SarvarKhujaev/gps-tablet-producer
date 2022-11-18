@@ -25,4 +25,5 @@ public enum CassandraTables {
 
     // For Sos entity
     SOS_TABLE, STATUS_TYPE, PATRUL_STATUS_TYPE, PATRUL_SOS_TABLE, // <- после тестов удалить
+    PATRUL_SOS_LIST, // <- хранит список всех сос сигналов которые принял патрульный
 }

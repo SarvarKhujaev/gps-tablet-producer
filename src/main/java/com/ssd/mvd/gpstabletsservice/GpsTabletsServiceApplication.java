@@ -2,8 +2,11 @@ package com.ssd.mvd.gpstabletsservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
-import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import com.ssd.mvd.gpstabletsservice.database.KafkaDataControl;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 
 @SpringBootApplication
 public class    GpsTabletsServiceApplication {
@@ -11,5 +14,7 @@ public class    GpsTabletsServiceApplication {
 
     public static void main( String[] args ) {
         context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-        CassandraDataControl.getInstance().register(); }
+        CassandraDataControl.getInstance().register();
+        CassandraDataControlForTasks.getInstance();
+        KafkaDataControl.getInstance(); }
 }

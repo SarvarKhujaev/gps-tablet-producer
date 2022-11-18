@@ -13,15 +13,12 @@ import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
-import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
-import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
-import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -361,54 +358,4 @@ public class PatrulController {
                     .getGetAllUsedTablets()
                     .apply( patrul )
                     .collectList() ); }
-
-    // в случае возникновения какой - либо опасности, патрульный модет отправить сигнал СОС
-    // метод перехватывает этот сигнал и вносит в базу и шлет оповещение на фронт
-    @MessageMapping ( value = "saveSosFromPatrul" )
-    public Mono< ApiResponseModel > saveSosFromPatrul ( PatrulSos patrulSos ) {
-        return CassandraDataControlForTasks
-                .getInstance()
-                .getSaveSos()
-                .apply( patrulSos )
-                .onErrorContinue( ( throwable, o ) -> log.error(
-                        "Error: " + throwable.getMessage()
-                        + " Reason: " + o ) )
-                .onErrorReturn( Archive
-                        .getArchive()
-                        .getErrorResponse()
-                        .get() ); }
-
-    // используется планшетом чтобы проверить не отправлял ли он СОС раньше
-    @MessageMapping ( value = "checkSosStatus" )
-    public Mono< ApiResponseModel > checkSosStatus ( String token ) {
-        return CassandraDataControlForTasks
-                .getInstance()
-                .getCheckSosTable()
-                .test( CassandraDataControl
-                        .getInstance()
-                        .decode( token ) )
-                ? Archive
-                .getArchive()
-                .getFunction()
-                .apply( Map.of(
-                        "message", "U did not send SOS signal",
-                        "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                .builder()
-                                .data( Status.IN_ACTIVE )
-                                .build() ) )
-                : Archive
-                .getArchive()
-                .getFunction()
-                .apply( Map.of(
-                        "message", "U have SOS signal",
-                        "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                .builder()
-                                .data( Status.ACTIVE )
-                                .build() ) ); }
-
-    @MessageMapping ( value = "getAllSosEntities" )
-    public Flux< PatrulSos > getAllSosEntities () { return CassandraDataControlForTasks
-            .getInstance()
-            .getGetAllSos()
-            .get(); }
 }

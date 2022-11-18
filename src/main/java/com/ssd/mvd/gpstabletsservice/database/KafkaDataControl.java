@@ -1,10 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
-import com.ssd.mvd.gpstabletsservice.task.card.SosMessageForTopic;
+import com.ssd.mvd.gpstabletsservice.task.sos_task.SosNotification;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 
+import com.ssd.mvd.gpstabletsservice.task.sos_task.SosNotificationForAndroid;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.config.TopicBuilder;
@@ -19,6 +20,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.jetbrains.annotations.NotNull;
 import lombok.Data;
 
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -63,6 +65,11 @@ public class KafkaDataControl {
             .getEnvironment()
             .getProperty( "variables.SOS_TOPIC" );
 
+    private final String SOS_TOPIC_FOR_ANDROID_NOTIFICATION = GpsTabletsServiceApplication
+            .context
+            .getEnvironment()
+            .getProperty( "variables.SOS_TOPIC_FOR_ANDROID_NOTIFICATION" );
+
     private Properties setProperties () {
         Properties properties = new Properties();
         properties.put( AdminClientConfig.CLIENT_ID_CONFIG, this.getGROUP_ID_FOR_KAFKA() );
@@ -91,6 +98,7 @@ public class KafkaDataControl {
         this.kafkaTemplate = this.kafkaTemplate();
         this.getLogger().info( "KafkaDataControl was created" );
         this.client = KafkaAdminClient.create( this.setProperties() );
+        this.getNewTopic( this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION() );
         this.getNewTopic( this.getCAR_TOTAL_DATA() );
         this.getNewTopic( this.getNOTIFICATION() );
         this.getNewTopic( this.getACTIVE_TASK() );
@@ -107,8 +115,27 @@ public class KafkaDataControl {
                     + " with offset: "
                     + result.getRecordMetadata().offset() ); } } ); }
 
-    public String writeToKafka ( SosMessageForTopic sos ) {
-        this.getKafkaTemplate().send( this.getSOS(), SerDes
+    private final Consumer< SosNotificationForAndroid > writeToKafkaNotificatioForAndroid =
+            sosNotificationForAndroid -> this.getKafkaTemplate().send(
+                    this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION(),
+                            SerDes
+                                .getSerDes()
+                                .serialize( sosNotificationForAndroid ) )
+                    .addCallback( new ListenableFutureCallback<>() {
+                        @Override
+                        public void onFailure( @NotNull Throwable ex ) { logger.warning("Kafka does not work since: "
+                                + LocalDateTime.now() ); }
+
+                        @Override
+                        public void onSuccess( SendResult< String, String > result ) {
+                            logger.info("Sos signal got patrul: "
+                                    + sosNotificationForAndroid.getPatrulPassportSeries()
+                                    + " with offset: "
+                                    + result.getRecordMetadata().offset() ); } } );
+
+    public String writeToKafka ( SosNotification sos ) {
+        this.getKafkaTemplate().send( this.getSOS(),
+                        SerDes
                         .getSerDes()
                         .serialize( sos ) )
                 .addCallback( new ListenableFutureCallback<>() {

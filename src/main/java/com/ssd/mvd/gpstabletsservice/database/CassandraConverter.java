@@ -80,6 +80,13 @@ public class CassandraConverter {
         listOfTasks.keySet().forEach( s -> result += "'" + s + "' : '" + listOfTasks.get( s ) + "', " );
         return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
 
+    public String convertSosMapToCassandra ( Map< UUID, String > listOfTasks ) {
+        result = "{";
+        listOfTasks
+                .keySet()
+                .forEach( s -> result += "" + s + " : '" + listOfTasks.get( s ) + "', " );
+        return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
+
     public void registerCodecForPatrul ( String dbName, String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class

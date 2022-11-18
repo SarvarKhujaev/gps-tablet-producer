@@ -30,6 +30,7 @@ public class Patrul {
 
     private UUID uuid; // own id of the patrul
     private UUID organ; // choosing from dictionary
+    private UUID sos_id; // choosing from dictionary
     private UUID uuidOfEscort; // UUID of the Escort which this car is linked to
     private UUID uuidForPatrulCar; // choosing from dictionary
     private UUID uuidForEscortCar; // choosing from dictionary
@@ -101,7 +102,10 @@ public class Patrul {
 
         this.setUuid( row.getUUID( "uuid" ) );
         this.setOrgan( row.getUUID( "organ" ) );
+        this.setSos_id( row.getUUID( "sos_id" ) );
         this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );
+        this.setUuidForPatrulCar( row.getUUID( "uuidForPatrulCar" ) );
+        this.setUuidForEscortCar( row.getUUID( "uuidForEscortCar" ) );
 
         this.setRegionId( row.getLong( "regionId" ) );
         this.setMahallaId( row.getLong( "mahallaId" ) );
@@ -152,7 +156,10 @@ public class Patrul {
 
         this.setUuid( row.getUUID( "uuid" ) );
         this.setOrgan( row.getUUID( "organ" ) );
+        this.setSos_id( row.getUUID( "sos_id" ) );
         this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );
+        this.setUuidForPatrulCar( row.getUUID( "uuidForPatrulCar" ) );
+        this.setUuidForEscortCar( row.getUUID( "uuidForEscortCar" ) );
 
         this.setRegionId( row.getLong( "regionId" ) );
         this.setMahallaId( row.getLong( "mahallaId" ) );
