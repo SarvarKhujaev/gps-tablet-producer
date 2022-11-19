@@ -5,6 +5,7 @@ import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
+import com.ssd.mvd.gpstabletsservice.response.PatrulInRadiusList;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -24,12 +25,8 @@ import com.datastax.driver.core.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
+import java.util.function.*;
 import java.util.*;
-
-import java.util.function.Predicate;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.function.Function;
 
 import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
@@ -1291,34 +1288,11 @@ public final class CassandraDataControl {
             * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
 
     private final Predicate< Row > checkPatrulStatus = row ->
-            Status.valueOf( row.getString( "status" ) )
-            .compareTo( com.ssd.mvd.gpstabletsservice.constants.Status.FREE ) == 0
-            && TaskTypes.valueOf( row.getString( "taskTypes" ) )
-            .compareTo( com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FREE ) == 0
-            && row.getDouble( "latitude" ) > 0
+            row.getDouble( "latitude" ) > 0
             && row.getDouble( "longitude" ) > 0;
 
-    private final Function< Point, Flux< Patrul > > findTheClosestPatrulsForSos = point -> Flux.fromStream(
-                    this.getSession().execute( "SELECT * FROM "
-                                    + CassandraTables.TABLETS.name() + "."
-                                    + CassandraTables.PATRULS.name() + ";" )
-                            .all()
-                            .stream()
-                            .parallel() )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .filter( row -> row.getDouble( "latitude" ) > 0
-                    && row.getDouble( "longitude" ) > 0 )
-            .flatMap( row -> Mono.just( new Patrul( row ) ) )
-            .flatMap( patrul -> {
-                patrul.setDistance( this.calculate( point, patrul ) );
-                return Mono.just( patrul ); } )
-            .sequential()
-            .publishOn( Schedulers.single() )
-            .sort( Comparator.comparing( Patrul::getDistance ) )
-            .take( 5 );
-
-    private final Function< Point, Flux< Patrul > > findTheClosestPatruls = point -> Flux.fromStream(
+    private final BiFunction< Point, Integer, Flux< Patrul > > findTheClosestPatruls = ( point, integer ) ->
+            Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS.name() + ";" )
@@ -1327,12 +1301,17 @@ public final class CassandraDataControl {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .filter( this.checkPatrulStatus )
+            .filter( row -> this.checkPatrulStatus.test( row )
+                    && ( integer == 1 ? Status.valueOf( row.getString( "status" ) )
+                    .compareTo( Status.FREE ) == 0
+                    && TaskTypes.valueOf( row.getString( "taskTypes" ) )
+                    .compareTo( TaskTypes.FREE ) == 0 : true ) )
             .flatMap( row -> Mono.just( new Patrul( row ) ) )
             .flatMap( patrul -> {
                 patrul.setDistance( this.calculate( point, patrul ) );
                 return Mono.just( patrul ); } )
             .sequential()
+            .sort( Comparator.comparing( Patrul::getDistance ) )
             .publishOn( Schedulers.single() );
 
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
@@ -1663,6 +1642,12 @@ public final class CassandraDataControl {
                     .getDecoder()
                     .decode( token ) )
                     .split( "@" )[ 0 ] ); }
+
+    private final Function< Point, Mono< PatrulInRadiusList > > getPatrulInRadiusList = point ->
+            this.getFindTheClosestPatruls()
+            .apply( point, 2 )
+            .collectList()
+            .map( PatrulInRadiusList::new );
 
     public void delete () {
         this.getSession().close();
