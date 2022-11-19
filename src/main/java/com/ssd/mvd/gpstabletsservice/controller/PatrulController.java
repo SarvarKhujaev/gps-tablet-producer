@@ -3,7 +3,6 @@ package com.ssd.mvd.gpstabletsservice.controller;
 import java.util.Map;
 import java.util.List;
 import java.util.UUID;
-import java.util.Comparator;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -16,6 +15,7 @@ import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
+import com.ssd.mvd.gpstabletsservice.response.PatrulInRadiusList;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
@@ -180,8 +180,7 @@ public class PatrulController {
         return CassandraDataControl
                 .getInstance()
                 .getFindTheClosestPatruls()
-                .apply( point )
-                .sort( Comparator.comparing( Patrul::getDistance ) )
+                .apply( point, 1 )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) ); }
 
@@ -358,4 +357,14 @@ public class PatrulController {
                     .getGetAllUsedTablets()
                     .apply( patrul )
                     .collectList() ); }
+
+    @MessageMapping ( value = "getPatrulInRadiusList" )
+    public Mono< PatrulInRadiusList > getPatrulInRadiusList ( Point point ) {
+        return CassandraDataControl
+                .getInstance()
+                .getGetPatrulInRadiusList()
+                .apply( point )
+                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                        error.getMessage(), object ) ) )
+                .onErrorReturn( new PatrulInRadiusList() ); }
 }

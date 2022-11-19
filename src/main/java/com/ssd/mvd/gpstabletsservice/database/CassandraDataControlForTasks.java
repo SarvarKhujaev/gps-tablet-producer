@@ -572,9 +572,10 @@ public class CassandraDataControlForTasks {
 
                             CassandraDataControl
                                     .getInstance()
-                                    .getFindTheClosestPatrulsForSos()
-                                    .apply( new Point( patrulSos.getLatitude(), patrulSos.getLongitude() ) )
-                                    .parallel()
+                                    .getFindTheClosestPatruls()
+                                    .apply( new Point( patrulSos.getLatitude(), patrulSos.getLongitude() ), 2 )
+                                    .take( 5 )
+                                    .parallel( 5 )
                                     .runOn( Schedulers.parallel() )
                                     .map( patrul1 -> {
                                         this.updatePatrulSosList( patrulSos.getUuid(), patrul1.getUuid(), Status.ATTACHED );
@@ -614,7 +615,7 @@ public class CassandraDataControlForTasks {
                                                     .getInstance()
                                                     .convertSosMapToCassandra( patrulSos1.getPatrulStatuses() )
                                                     + " ) IF NOT EXISTS;" ) ); }
-                        else { this.logger.info( "Second case" );
+                        else {
                             PatrulSos patrulSos1 = this.getCurrentPatrulSos.apply( patrul.getSos_id() );
                             Flux.fromStream( this.getCurrentPatrulSos.apply( patrul.getSos_id() )
                                             .getPatrulStatuses().keySet().stream() )
