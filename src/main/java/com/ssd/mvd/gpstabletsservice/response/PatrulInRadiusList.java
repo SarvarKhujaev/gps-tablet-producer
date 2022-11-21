@@ -24,7 +24,6 @@ public class PatrulInRadiusList {
     private List < Patrul > busyPatrulListInRadius = new ArrayList<>();
     private List < Patrul > busyPatrulListOutOfRadius = new ArrayList<>();
 
-    private List < Patrul > freePatrulListInRadius = new ArrayList<>(); // список патрульных которые не входят в радиус
     private List < Patrul > freePatrulListOutOfRadius = new ArrayList<>(); // список патрульных которые не входят в радиус
 
     private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
@@ -38,9 +37,7 @@ public class PatrulInRadiusList {
         this.setMaxDistance( freePatrulList.get( 4 ).getDistance() );
 
         for ( Patrul patrul : patruls ) {
-            if ( patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) {
-                if ( this.checkDistance.apply( maxDistance, patrul.getDistance() ) ) freePatrulListInRadius.add( patrul );
-                else freePatrulListOutOfRadius.add( patrul ); }
+            if ( patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) freePatrulListOutOfRadius.add( patrul );
 
             else {
                 if ( this.checkDistance.apply( maxDistance, patrul.getDistance() ) ) busyPatrulListInRadius.add( patrul );

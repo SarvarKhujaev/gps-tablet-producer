@@ -86,11 +86,11 @@ public class CassandraDataControlForEscort {
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.ESCORT.name() + "."
-                + CassandraTables.COUNTRIES.name() +
-            "( countryNameEN text PRIMARY KEY, " +
-            "countryNameUz text, " +
-            "countryNameRu text, " +
-            "symbol text );" );
+                + CassandraTables.COUNTRIES.name()
+                + CassandraConverter
+                        .getInstance()
+                        .convertClassToCassandra( Country.class )
+            + ", PRIMARY KEY ( uuid ) );" );
 
         CassandraConverter
                 .getInstance()
@@ -522,11 +522,17 @@ public class CassandraDataControlForEscort {
     private final Function< Country, Mono< ApiResponseModel > > saveNewCountry = country -> this.getSession()
             .execute( "INSERT INTO "
                     + CassandraTables.ESCORT.name() + "."
-                    + CassandraTables.COUNTRIES.name() +
-                    "( countryNameEN, " +
-                    "countryNameUz, " +
-                    "countryNameRu, " +
-                    "symbol ) VALUES('"
+                    + CassandraTables.COUNTRIES.name()
+                    + CassandraConverter
+                            .getInstance()
+                            .getALlNames( Country.class )
+                    + " VALUES("
+                    + country.getUuid() + ", '"
+                    + ( country.getFlag() != null && country.getFlag().length() > 0
+                    ? country.getFlag() : "unknown" ) + "', '"
+                    + country.getSymbol()
+                    .toUpperCase( Locale.ROOT )
+                    .replaceAll( "'", "" ) + "', '"
                     + country.getCountryNameEn()
                     .toUpperCase( Locale.ROOT )
                     .replaceAll( "'", "" ) + "', '"
@@ -534,9 +540,6 @@ public class CassandraDataControlForEscort {
                     .toUpperCase( Locale.ROOT )
                     .replaceAll( "'", "" ) + "', '"
                     + country.getCountryNameRu()
-                    .toUpperCase( Locale.ROOT )
-                    .replaceAll( "'", "" ) + "', '"
-                    + country.getSymbol()
                     .toUpperCase( Locale.ROOT )
                     .replaceAll( "'", "" )
                     + "') IF NOT EXISTS;" )
@@ -565,14 +568,17 @@ public class CassandraDataControlForEscort {
                     .toUpperCase( Locale.ROOT )
                     .replaceAll( "'", "" ) + "', " +
 
+                    "flag = '" + country.getFlag() + "', " +
+
                     "symbol = '" + country.getSymbol()
                     .toUpperCase( Locale.ROOT )
                     .replaceAll( "'", "" ) +
 
-                    "' WHERE countryNameEN = '" + country.getCountryNameEn()
-                    .toUpperCase( Locale.ROOT )
-                    .replaceAll( "'", "" )
-                    + "' IF EXISTS;" )
+                    " countryNameEn = '" + country.getCountryNameEn()
+                            .toUpperCase( Locale.ROOT )
+                            .replaceAll( "'", "" ) +
+
+                    "' WHERE uuid = " + country.getUuid() + " IF EXISTS;" )
             .wasApplied()
             ? Archive
             .getArchive()
