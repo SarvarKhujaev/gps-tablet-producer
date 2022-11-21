@@ -175,7 +175,9 @@ public class CassandraDataControlForEscort {
 
     private final Consumer< EscortTuple > linkPatrulWithEscortCar = escortTuple ->
             Flux.range( 0, escortTuple.getPatrulList().size() )
-                    .subscribe( integer -> CassandraDataControl
+                    .parallel( escortTuple.getPatrulList().size() )
+                    .runOn( Schedulers.parallel() )
+                    .map( integer -> CassandraDataControl
                         .getInstance()
                         .getGetPatrulByUUID()
                         .apply( escortTuple.getPatrulList().get( integer ) )
@@ -198,7 +200,10 @@ public class CassandraDataControlForEscort {
                                     .getInstance()
                                     .changeTaskStatus( patrul,
                                             com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                            escortTuple ); } ) );
+                                            escortTuple ); } ) )
+                    .sequential()
+                    .publishOn( Schedulers.single() )
+                    .subscribe();
 
     private final Function< EscortTuple, Flux< ApiResponseModel > > saveEscortTuple = escortTuple -> {
         if ( escortTuple.getUuidOfPolygon() != null )
@@ -506,14 +511,14 @@ public class CassandraDataControlForEscort {
         Row row = this.getSession().execute( "SELECT * FROM "
                 + CassandraTables.ESCORT.name() + "."
                 + CassandraTables.COUNTRIES.name()
-                + " WHERE countryNameEn = '" + countryName + "';" ).one();
+                + " WHERE uuid = " + UUID.fromString( countryName ) + ";" ).one();
         return Mono.justOrEmpty( row != null ? new Country( row ) : null ); };
 
     private final Function< String, Mono< ApiResponseModel > > deleteCountry = countryName -> {
         this.getSession().execute ( "DELETE FROM "
                 + CassandraTables.ESCORT.name() + "."
                 + CassandraTables.COUNTRIES.name()
-                + " where countryNameEN = '" + countryName + "';" );
+                + " where uuid = " + UUID.fromString( countryName ) + ";" );
         return Archive
                 .getArchive()
                 .getFunction()
