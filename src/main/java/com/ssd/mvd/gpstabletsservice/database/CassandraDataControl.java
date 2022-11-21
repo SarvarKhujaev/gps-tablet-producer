@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import java.util.function.*;
 import java.util.*;
 
+import reactor.core.Disposable;
 import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -730,18 +731,19 @@ public final class CassandraDataControl {
                         + " WHERE passportNumber = '" + passportNumber + "';" ).one();
 
     // обновляет время последней активности патрульного
-    private final Consumer< Patrul > updatePatrulActivity = patrul -> this.getSession()
-            .execute( "UPDATE "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.PATRULS.name()
-                    + " SET lastActiveDate = '" + new Date().toInstant() + "', "
-                    + " totalActivityTime = "
-                    + patrul.getTotalActivityTime() +
-                    TimeInspector
-                            .getInspector()
-                            .getGetTimeDifferenceInSeconds()
-                            .apply( patrul.getLastActiveDate().toInstant() )
-                    + " WHERE uuid = " + patrul.getUuid() + ";" );
+    private final Consumer< Patrul > updatePatrulActivity = patrul ->
+            Mono.just( patrul ).subscribe( patrul1 -> this.getSession()
+                    .execute( "UPDATE "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.PATRULS.name()
+                            + " SET lastActiveDate = '" + new Date().toInstant() + "', "
+                            + " totalActivityTime = "
+                            + patrul.getTotalActivityTime() +
+                            TimeInspector
+                                    .getInspector()
+                                    .getGetTimeDifferenceInSeconds()
+                                    .apply( patrul.getLastActiveDate().toInstant() )
+                            + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" ) );
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
         Row row = this.getGetPatrulByPassportNumber()
@@ -1406,7 +1408,7 @@ public final class CassandraDataControl {
                 + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one();
         return row != null ? new TabletUsage( row ) : null; };
 
-    private void updateStatus ( Patrul patrul, Status status ) {
+    private BiFunction< Patrul, Status, Disposable > updateStatus = ( patrul, status ) ->
         Mono.just( this.getSession().execute ( "SELECT * FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.TABLETS_USAGE_TABLE.name()
@@ -1423,7 +1425,7 @@ public final class CassandraDataControl {
                         .apply( row.getTimestamp( "startedToUse" ).toInstant() ) ) : "" )
                         + " WHERE uuidOfPatrul = " + patrul.getUuid()
                         + " AND simCardNumber = '" + row.getString( "simCardNumber" ) + "';" ))
-                .subscribe(); }
+                .subscribe();
 
     private final Function< String, Row > checkLogin = login ->
             this.getSession().execute( "SELECT * FROM " +
@@ -1441,7 +1443,7 @@ public final class CassandraDataControl {
                         patrul.setStartedToWorkDate( new Date() );
                         if ( !patrul.getSimCardNumber().equals( "null" )
                                 && !patrul.getSimCardNumber().equals( patrulLoginRequest.getSimCardNumber() ) )
-                            this.updateStatus( patrul, LOGOUT );
+                            this.getUpdateStatus().apply( patrul, LOGOUT );
                         patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
                         patrul.setTokenForLogin (
                                 Base64
@@ -1454,7 +1456,7 @@ public final class CassandraDataControl {
                                                         + "@" + Archive.getArchive().generateToken() )
                                                 .getBytes( StandardCharsets.UTF_8 ) ) );
                         this.update( patrul ).subscribe(); // savs all new changes in patrul object
-                        this.updatePatrulActivity.accept( patrul );
+                        this.getUpdatePatrulActivity().accept( patrul );
                         TabletUsage tabletUsage1 = this.getCheckTableUsage().apply( patrul );
                         if ( tabletUsage1 == null ) Mono.just( new TabletUsage( patrul ) )
                                 .subscribe( tabletUsage -> this.getSession().execute( "INSERT INTO "
@@ -1507,8 +1509,8 @@ public final class CassandraDataControl {
     private final Function< String, Mono< ApiResponseModel > > startToWork = token -> this.getGetPatrulByUUID()
             .apply( this.decode( token ) )
             .flatMap( patrul -> {
-                this.updatePatrulActivity.accept( patrul );
-                this.updateStatus( patrul, START_TO_WORK );
+                this.getUpdatePatrulActivity().accept( patrul );
+                this.getUpdateStatus().apply( patrul, START_TO_WORK );
                 patrul.setTotalActivityTime( 0L ); // set to 0 every day
                 patrul.setStartedToWorkDate( new Date() ); // registration of time every day
                 return this.update( patrul )
@@ -1535,8 +1537,8 @@ public final class CassandraDataControl {
     private final Function< String, Mono< ApiResponseModel > > setInPause = token -> this.getGetPatrulByUUID()
             .apply( this.decode( token ) )
             .flatMap( patrul -> {
-                this.updateStatus( patrul, SET_IN_PAUSE );
-                this.updatePatrulActivity.accept( patrul );
+                this.getUpdateStatus().apply( patrul, SET_IN_PAUSE );
+                this.getUpdatePatrulActivity().accept( patrul );
                 return Archive
                         .getArchive()
                         .getFunction()
@@ -1547,8 +1549,8 @@ public final class CassandraDataControl {
     private final Function< String, Mono< ApiResponseModel > > backToWork = token -> this.getGetPatrulByUUID()
             .apply( this.decode( token ) )
             .flatMap( patrul -> {
-                this.updatePatrulActivity.accept( patrul );
-                this.updateStatus( patrul, RETURNED_TO_WORK );
+                this.getUpdatePatrulActivity().accept( patrul );
+                this.getUpdateStatus().apply( patrul, RETURNED_TO_WORK );
                 return Archive
                         .getArchive()
                         .getFunction()
@@ -1559,8 +1561,8 @@ public final class CassandraDataControl {
     private final Function< String, Mono< ApiResponseModel > > stopToWork = token -> this.getGetPatrulByUUID()
             .apply( this.decode( token ) )
             .flatMap( patrul -> {
-                this.updateStatus( patrul, STOP_TO_WORK );
-                this.updatePatrulActivity.accept( patrul );
+                this.getUpdateStatus().apply( patrul, STOP_TO_WORK );
+                this.getUpdatePatrulActivity().accept( patrul );
                 return Archive
                         .getArchive()
                         .getFunction()
@@ -1571,8 +1573,8 @@ public final class CassandraDataControl {
     private final Function< String, Mono< ApiResponseModel > > accepted = token -> this.getGetPatrulByUUID()
             .apply( this.decode( token ) )
             .flatMap( patrul -> {
-                this.updateStatus( patrul, ACCEPTED );
-                this.updatePatrulActivity.accept( patrul );
+                this.getUpdateStatus().apply( patrul, ACCEPTED );
+                this.getUpdatePatrulActivity().accept( patrul );
                 return TaskInspector
                         .getInstance()
                         .changeTaskStatus( patrul, ACCEPTED ); } );
@@ -1584,8 +1586,8 @@ public final class CassandraDataControl {
                         .getInspector()
                         .getGetTimeDifferenceInHours()
                         .apply( patrul.getTaskDate().toInstant() ) ) >= 24 ) {
-                    this.updateStatus( patrul, CANCEL );
-                    this.updatePatrulActivity.accept( patrul );
+                    this.getUpdateStatus().apply( patrul, CANCEL );
+                    this.getUpdatePatrulActivity().accept( patrul );
                     return TaskInspector
                             .getInstance()
                             .getRemovePatrulFromTask()
@@ -1595,7 +1597,7 @@ public final class CassandraDataControl {
                                     .getErrorResponseForLateComing()
                                     .get() ); }
                 else {
-                    this.updateStatus( patrul, ARRIVED );
+                    this.getUpdateStatus().apply( patrul, ARRIVED );
                     return TaskInspector
                             .getInstance()
                             .changeTaskStatus( patrul, ARRIVED ); } } );
@@ -1605,8 +1607,8 @@ public final class CassandraDataControl {
             .flatMap( patrul -> {
                 patrul.setTokenForLogin( null );
                 patrul.setSimCardNumber( null );
-                this.updateStatus( patrul, LOGOUT );
-                this.updatePatrulActivity.accept( patrul );
+                this.getUpdateStatus().apply( patrul, LOGOUT );
+                this.getUpdatePatrulActivity().accept( patrul );
                 return this.update( patrul )
                         .flatMap( aBoolean -> Archive
                                 .getArchive()
