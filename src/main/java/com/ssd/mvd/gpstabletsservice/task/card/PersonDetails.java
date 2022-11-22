@@ -81,6 +81,8 @@ public class PersonDetails {
                 && faceEvent.getDataInfo().getData() != null ?
                 faceEvent.getDataInfo().getData().getIp() : null );
 
+        // в случае если псих портрет отсутствует то возмем отсюда
+        this.setFIO( faceEvent.getComment() );
         this.setThumbnail( faceEvent.getThumbnail() );
         this.setCameraImage( faceEvent.getFullframe() );
         this.setDossier_photo( faceEvent.getDossier_photo() );

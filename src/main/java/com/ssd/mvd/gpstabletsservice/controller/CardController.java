@@ -22,10 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -103,6 +100,8 @@ public class CardController {
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
             FaceEvent facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
+            if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
+                facePerson.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
