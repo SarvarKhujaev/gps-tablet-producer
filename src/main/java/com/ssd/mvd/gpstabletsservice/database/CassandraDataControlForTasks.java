@@ -664,7 +664,9 @@ public class CassandraDataControlForTasks {
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.PATRUL_SOS_TABLE.name()
                 + " SET patrulStatuses [" + sosRequest.getPatrulUUID() + "] = '"
-                + sosRequest.getStatus().name() + "' WHERE uuid = " + sosRequest.getSosUUID() + ";" );
+                + ( sosRequest.getStatus().compareTo( Status.CANCEL ) == 0
+                ? Status.CREATED : sosRequest.getStatus() )
+                + "' WHERE uuid = " + sosRequest.getSosUUID() + ";" );
         return Archive
                 .getArchive()
                 .getFunction()
@@ -705,6 +707,7 @@ public class CassandraDataControlForTasks {
                         .getGetPatrulByUUID()
                         .apply( patrulSos.getPatrulUUID() )
                         .map( patrul -> new SosTotalData( patrulSos,
+                                patrulSos.getPatrulStatuses().get( patrulUUID ),
                                 new SosNotificationForAndroid( patrulSos,
                                         patrul,
                                         Status.CREATED,

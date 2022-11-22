@@ -19,11 +19,14 @@ public class SosTotalData {
     private Double latitude;
     private Double longitude;
 
+    private Status patrulStatus;
     private Status status = Status.CREATED;
 
     private SosNotificationForAndroid sosNotificationForAndroid;
 
-    public SosTotalData ( PatrulSos patrulSos, SosNotificationForAndroid sosNotificationForAndroid ) {
+    public SosTotalData ( PatrulSos patrulSos,
+                          String patrulStatus,
+                          SosNotificationForAndroid sosNotificationForAndroid ) {
         this.setUuid( patrulSos.getUuid() );
         this.setPatrulUUID( patrulSos.getPatrulUUID() );
 
@@ -35,5 +38,6 @@ public class SosTotalData {
         this.setLongitude( patrulSos.getLongitude() );
 
         this.setStatus( Status.CREATED );
+        this.setPatrulStatus( Status.valueOf( patrulStatus ) );
         this.setSosNotificationForAndroid( sosNotificationForAndroid ); }
 }
