@@ -1633,11 +1633,15 @@ public final class CassandraDataControl {
 
     private final Consumer< String > addAllPatrulsToChatService = token -> this.getGetPatrul()
             .get()
-            .subscribe( patrul -> {
-                patrul.setSpecialToken( token );
-                UnirestController
-                        .getInstance()
-                        .addUser( patrul ); } );
+            .collectList()
+            .subscribe( patruls -> patruls
+                    .parallelStream()
+                    .parallel()
+                    .forEach( patrul -> {
+                        patrul.setSpecialToken( token );
+                        UnirestController
+                                .getInstance()
+                                .addUser( patrul ); } ));
 
     public UUID decode ( String token ) { return UUID.fromString(
             new String( Base64
