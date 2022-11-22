@@ -60,7 +60,7 @@ public class SosController {
 
     // возвращает список из сос сигналов которые еще не были закрыты и привязаны к данному патрульному
     @MessageMapping ( value = "getAllSosForCurrentPatrul" )
-    public Flux< PatrulSos > getAllSosForCurrentPatrul ( String token ) {
+    public Mono< ApiResponseModel > getAllSosForCurrentPatrul ( String token ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getGetAllSosForCurrentPatrul()
@@ -70,7 +70,7 @@ public class SosController {
                 .onErrorContinue( ( throwable, o ) -> log.error(
                         "Error: " + throwable.getMessage()
                                 + " Reason: " + o ) )
-                .onErrorReturn( new PatrulSos() ); }
+                .onErrorReturn( Archive.getArchive().getErrorResponse().get() ); }
 
     // в случае возникновения какой - либо опасности, патрульный модет отправить сигнал СОС
     // метод перехватывает этот сигнал и вносит в базу и шлет оповещение на фронт
