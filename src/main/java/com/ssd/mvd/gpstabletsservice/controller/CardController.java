@@ -68,6 +68,7 @@ public class CardController {
             CassandraDataControlForTasks
                     .getInstance()
                     .addValue( card.getCardId().toString(), new ActiveTask( card ) );
+
             return Flux.fromStream( request.getPatruls().stream() )
                     .map( s -> CassandraDataControl
                             .getInstance()
@@ -175,7 +176,8 @@ public class CardController {
                                 .getSaveCarTotalData()
                                 .apply( KafkaDataControl
                                         .getInstance()
-                                        .writeToKafka( carTotalData ) ) ) )
+                                        .getWriteCarTotalDataToKafka()
+                                        .apply( carTotalData ) ) ) )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) )
                 .onErrorReturn( Archive

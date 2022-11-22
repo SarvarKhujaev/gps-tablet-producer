@@ -14,22 +14,19 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 
 import com.ssd.mvd.gpstabletsservice.task.card.*;
+import com.ssd.mvd.gpstabletsservice.task.sos_task.*;
 import com.ssd.mvd.gpstabletsservice.controller.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
-import com.ssd.mvd.gpstabletsservice.task.sos_task.SosRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
-import com.ssd.mvd.gpstabletsservice.task.sos_task.SosNotification;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
-import com.ssd.mvd.gpstabletsservice.task.sos_task.SosNotificationForAndroid;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
@@ -478,7 +475,8 @@ public class CassandraDataControlForTasks {
             .apply( Map.of(
                     "message", KafkaDataControl // sending message to Kafka
                             .getInstance()
-                            .writeToKafka( SosNotification
+                            .getWriteSosNotificationToKafka()
+                            .apply( SosNotification
                                     .builder()
                                     .sosStatus( true )
                                     .patrulUUID( patrulSos.getPatrulUUID() )
@@ -499,7 +497,8 @@ public class CassandraDataControlForTasks {
             .map( status -> {
                 KafkaDataControl // sending message to Kafka
                         .getInstance()
-                        .writeToKafka( SosNotification
+                        .getWriteSosNotificationToKafka()
+                        .apply( SosNotification
                                 .builder()
                                 .sosStatus( false )
                                 .patrulUUID( patrulSos.getPatrulUUID() )
@@ -599,21 +598,21 @@ public class CassandraDataControlForTasks {
                                                     .getInstance()
                                                     .getALlNames( PatrulSos.class )
                                                     + " VALUES ("
-                                                    + patrulSos1.getUuid() + ", "
-                                                    + patrulSos1.getPatrulUUID() + ", '"
+                                                    + patrulSos.getUuid() + ", "
+                                                    + patrulSos.getPatrulUUID() + ", '"
 
-                                                    + patrulSos1.getAddress() + "', '"
+                                                    + patrulSos.getAddress() + "', '"
 
                                                     + new Date().toInstant() + "', '"
                                                     + new Date().toInstant() + "', "
 
-                                                    + patrulSos1.getLatitude() + ", "
-                                                    + patrulSos1.getLongitude() + ", '"
+                                                    + patrulSos.getLatitude() + ", "
+                                                    + patrulSos.getLongitude() + ", '"
 
                                                     + Status.CREATED.name() + "', "
                                                     + CassandraConverter
                                                     .getInstance()
-                                                    .convertSosMapToCassandra( patrulSos1.getPatrulStatuses() )
+                                                    .convertSosMapToCassandra( patrulSos.getPatrulStatuses() )
                                                     + " ) IF NOT EXISTS;" ) ); }
                         else {
                             PatrulSos patrulSos1 = this.getCurrentPatrulSos.apply( patrul.getSos_id() );
@@ -687,8 +686,8 @@ public class CassandraDataControlForTasks {
         return row != null && Status.valueOf( row.getString( "status" ) ).compareTo( Status.CREATED ) == 0; };
 
     // возвращает все сос сигналы для конкретного патрульного
-    private final Function< UUID, Flux< PatrulSos > > getAllSosForCurrentPatrul = patrulUUID ->
-            Flux.fromStream( this.getSession().execute( "SELECT * FROM "
+    private final Function< UUID, Mono< ApiResponseModel > > getAllSosForCurrentPatrul = patrulUUID -> Flux.fromStream(
+            this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRUL_SOS_LIST.name()
                             + " WHERE patruluuid = " + patrulUUID + ";" )
@@ -696,12 +695,31 @@ public class CassandraDataControlForTasks {
                     .getSet( "attachedsoslist", UUID.class )
                     .stream()
                     .parallel() )
-                    .parallel()
-                    .runOn( Schedulers.parallel() )
-                    .filter( this.checkSosWasFinished )
-                    .map( this.getCurrentPatrulSos )
-                    .sequential()
-                    .publishOn( Schedulers.single() );
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .filter( this.checkSosWasFinished )
+            .flatMap( uuid -> {
+                PatrulSos patrulSos = this.getCurrentPatrulSos.apply( uuid );
+                return CassandraDataControl
+                        .getInstance()
+                        .getGetPatrulByUUID()
+                        .apply( patrulSos.getPatrulUUID() )
+                        .map( patrul -> new SosTotalData( patrulSos,
+                                new SosNotificationForAndroid( patrulSos,
+                                        patrul,
+                                        Status.CREATED,
+                                        patrul.getPassportNumber() ) ) ); } )
+            .sequential()
+            .publishOn( Schedulers.single() )
+            .collectList()
+            .flatMap( sosTotalDataList -> Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of( "message", "Your list of sos signals",
+                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                    .builder()
+                                    .data( sosTotalDataList )
+                                    .build() ) ) );
 
     // создает список различных сос сишгалов лоя нового патрульного
     private final Consumer< UUID > createRowInPatrulSosTable = uuid -> this.getSession()

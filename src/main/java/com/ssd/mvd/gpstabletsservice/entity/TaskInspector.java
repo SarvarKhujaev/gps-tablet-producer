@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import com.ssd.mvd.gpstabletsservice.database.*;
 import com.ssd.mvd.gpstabletsservice.task.card.*;
@@ -95,7 +96,8 @@ public final class TaskInspector {
                             .accept( card.getCardId().toString() );
                     KafkaDataControl
                             .getInstance()
-                            .writeToKafka( SerDes
+                            .getWriteToKafka()
+                            .accept( SerDes
                                     .getSerDes()
                                     .serialize( new ActiveTask( card ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
@@ -164,7 +166,8 @@ public final class TaskInspector {
 
         KafkaDataControl
                 .getInstance()
-                .writeToKafka( CassandraDataControl
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
                         .addValue( new Notification( patrul, card, this.generateText( patrul, status ) ) ) );
         return patrul; }
@@ -203,7 +206,8 @@ public final class TaskInspector {
                             .accept( eventCar.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .writeToKafka( SerDes
+                            .getWriteToKafka()
+                            .accept( SerDes
                                     .getSerDes()
                                     .serialize( new ActiveTask( eventCar ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
@@ -272,7 +276,8 @@ public final class TaskInspector {
 
         KafkaDataControl
                 .getInstance()
-                .writeToKafka( CassandraDataControl
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
                         .addValue( new Notification( patrul, eventCar, this.generateText( patrul, status ) ) ) );
         return patrul; }
@@ -311,7 +316,8 @@ public final class TaskInspector {
                             .accept( eventFace.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .writeToKafka( SerDes
+                            .getWriteToKafka()
+                            .accept( SerDes
                                     .getSerDes()
                                     .serialize( new ActiveTask( eventFace ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
@@ -380,7 +386,8 @@ public final class TaskInspector {
 
         KafkaDataControl
                 .getInstance()
-                .writeToKafka( CassandraDataControl
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
                         .addValue( new Notification( patrul, eventFace, this.generateText( patrul, status ) ) ) );
         return patrul; }
@@ -419,7 +426,8 @@ public final class TaskInspector {
                             .accept( eventBody.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .writeToKafka( SerDes
+                            .getWriteToKafka()
+                            .accept( SerDes
                                     .getSerDes()
                                     .serialize( new ActiveTask( eventBody ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
@@ -488,7 +496,8 @@ public final class TaskInspector {
 
         KafkaDataControl
                 .getInstance()
-                .writeToKafka( CassandraDataControl
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
                         .addValue( new Notification( patrul, eventBody, this.generateText( patrul, status ) ) ) );
         return patrul; }
@@ -527,7 +536,8 @@ public final class TaskInspector {
                             .accept( carEvents.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .writeToKafka( SerDes
+                            .getWriteToKafka()
+                            .accept( SerDes
                                     .getSerDes()
                                     .serialize( new ActiveTask( carEvents ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
@@ -598,7 +608,8 @@ public final class TaskInspector {
 
         KafkaDataControl
                 .getInstance()
-                .writeToKafka( CassandraDataControl
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
                         .addValue( new Notification( patrul, carEvents, this.generateText( patrul, status ) ) ) );
         return patrul; }
@@ -637,7 +648,8 @@ public final class TaskInspector {
                             .accept( faceEvent.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .writeToKafka( SerDes
+                            .getWriteToKafka()
+                            .accept( SerDes
                                     .getSerDes()
                                     .serialize( new ActiveTask( faceEvent ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
@@ -708,7 +720,8 @@ public final class TaskInspector {
 
         KafkaDataControl
                 .getInstance()
-                .writeToKafka( CassandraDataControl
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
                         .addValue( new Notification( patrul, faceEvent, this.generateText( patrul, status ) ) ) );
         return patrul; }
@@ -748,7 +761,8 @@ public final class TaskInspector {
 
         KafkaDataControl
                 .getInstance()
-                .writeToKafka( CassandraDataControl
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
                         .addValue( new Notification( patrul, escortTuple, this.generateText( patrul, status ) ) ) );
         return patrul; }
@@ -789,7 +803,8 @@ public final class TaskInspector {
 
                     KafkaDataControl
                             .getInstance()
-                            .writeToKafka( SerDes
+                            .getWriteToKafka()
+                            .accept( SerDes
                                     .getSerDes()
                                     .serialize( new ActiveTask( selfEmploymentTask ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
@@ -855,7 +870,8 @@ public final class TaskInspector {
 
         KafkaDataControl
                 .getInstance()
-                .writeToKafka( CassandraDataControl
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
                         .addValue( new Notification( patrul, selfEmploymentTask, this.generateText( patrul, status ) ) ) );
         return patrul; }
@@ -864,6 +880,8 @@ public final class TaskInspector {
         return Flux.fromStream( patrul.getListOfTasks().keySet().stream() )
                 .skip( Long.valueOf( page ) * Long.valueOf( size ) )
                 .take( size )
+                .parallel( size )
+                .runOn( Schedulers.parallel() )
                 .flatMap( key -> switch ( TaskTypes.valueOf( patrul.getListOfTasks().get( key ) ) ) {
                     case CARD_102 -> CassandraDataControlForTasks
                             .getInstance()
@@ -1032,6 +1050,8 @@ public final class TaskInspector {
                                             .get( this.getReportIndex( selfEmploymentTask
                                                     .getReportForCards(), patrul.getUuid() ) ) )
                                     .build() ); } )
+                .sequential()
+                .publishOn( Schedulers.single() )
                 .collectList()
                 .flatMap( finishedTasks -> Archive
                         .getArchive()

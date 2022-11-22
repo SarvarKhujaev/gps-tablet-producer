@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.Map;
 
@@ -25,6 +26,9 @@ public class PatrulSos {
     private Double longitude;
 
     private Status status = Status.CREATED;
+
+    public Map< UUID, String > getPatrulStatuses() { return patrulStatuses != null ? patrulStatuses : new HashMap<>(); }
+
     private Map< UUID, String > patrulStatuses;
 
     public UUID getUuid () { return uuid != null ? uuid : ( uuid = UUID.randomUUID() ); }
