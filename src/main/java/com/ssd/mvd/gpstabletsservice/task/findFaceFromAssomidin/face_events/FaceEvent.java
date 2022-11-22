@@ -23,7 +23,7 @@ import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class FaceEvent {
     private String name;
-    private String comment;
+    private String comment; // Ф.И.О
     private String dossier_photo;
 
     @JsonProperty( "video_archive" )
