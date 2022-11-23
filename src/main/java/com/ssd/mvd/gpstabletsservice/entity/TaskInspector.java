@@ -704,7 +704,8 @@ public final class TaskInspector {
                                 .accept( taskInspector ) ); }
         }
         if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul );
-        if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+        if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 )
+            CassandraDataControlForTasks
                 .getInstance()
                 .addValue( faceEvent.getId(), new ActiveTask( faceEvent ) );
 
