@@ -811,6 +811,8 @@ public final class TaskInspector {
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ARRIVED -> {
+                patrul.setTaskTypes( SELF_EMPLOYMENT );
+                patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
                 PatrulStatus patrulStatus = PatrulStatus
                         .builder()
                         .patrul( patrul )
@@ -865,8 +867,8 @@ public final class TaskInspector {
 
         CassandraDataControl
                 .getInstance()
-                        .update( patrul )
-                                .subscribe();
+                .update( patrul )
+                .subscribe();
 
         KafkaDataControl
                 .getInstance()
