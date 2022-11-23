@@ -704,7 +704,8 @@ public final class TaskInspector {
                                 .accept( taskInspector ) ); }
         }
         if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul );
-        if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+        if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 )
+            CassandraDataControlForTasks
                 .getInstance()
                 .addValue( faceEvent.getId(), new ActiveTask( faceEvent ) );
 
@@ -811,6 +812,8 @@ public final class TaskInspector {
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ARRIVED -> {
+                patrul.setTaskTypes( SELF_EMPLOYMENT );
+                patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
                 PatrulStatus patrulStatus = PatrulStatus
                         .builder()
                         .patrul( patrul )
@@ -865,8 +868,8 @@ public final class TaskInspector {
 
         CassandraDataControl
                 .getInstance()
-                        .update( patrul )
-                                .subscribe();
+                .update( patrul )
+                .subscribe();
 
         KafkaDataControl
                 .getInstance()

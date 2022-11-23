@@ -747,8 +747,7 @@ public final class CassandraDataControl {
                             + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" ) );
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
-        Row row = this.getGetPatrulByPassportNumber()
-                .apply( patrul.getPassportNumber() );
+        Row row = this.getGetPatrulByPassportNumber().apply( patrul.getPassportNumber() );
         if ( row == null ) return Archive
                 .getArchive()
                 .getFunction()
