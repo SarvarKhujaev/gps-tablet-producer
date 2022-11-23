@@ -6,6 +6,7 @@ import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.response.PatrulInRadiusList;
+import com.ssd.mvd.gpstabletsservice.request.PatrulImageRequest;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -851,6 +852,23 @@ public final class CassandraDataControl {
                     this.delete();
                     this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
 
+    // обновляет фото патрульного
+    private final Function< PatrulImageRequest, Mono< ApiResponseModel > > updatePatrulImage = request ->
+            this.getSession().execute( "UPDATE "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.PATRULS.name()
+                    + " SET patrulImageLink = '" + request.getNewImage() + "'"
+                    + " WHERE uuid = " + request.getPatrulUUID() + " IF EXISTS;" )
+                    .wasApplied()
+                    ? Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of( "message", "Image was updated successfully" ) )
+                    : Mono.just( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() );
+
     // проверяет не имеет ли патрульный задание или не привязан ли он к эскорту или машине
     private final Predicate< Patrul > checkPatrulLinks = patrul ->
             patrul.getTaskId().equals( "null" )
@@ -1316,6 +1334,26 @@ public final class CassandraDataControl {
             .sort( Comparator.comparing( Patrul::getDistance ) )
             .publishOn( Schedulers.single() );
 
+    private final BiFunction< Point, UUID, Flux< Patrul > > findTheClosestPatrulsForSos = ( point, uuid ) ->
+            Flux.fromStream( this.getSession().execute( "SELECT * FROM "
+                                    + CassandraTables.TABLETS.name() + "."
+                                    + CassandraTables.PATRULS.name() + ";" )
+                            .all()
+                            .stream()
+                            .parallel() )
+                    .parallel()
+                    .runOn( Schedulers.parallel() )
+                    .filter( row -> this.checkPatrulStatus.test( row )
+                        && row.getUUID( "uuid" ).compareTo( uuid ) != 0 )
+                    .flatMap( row -> Mono.just( new Patrul( row ) ) )
+                    .flatMap( patrul -> {
+                        patrul.setDistance( this.calculate( point, patrul ) );
+                        return Mono.just( patrul ); } )
+                    .sequential()
+                    .sort( Comparator.comparing( Patrul::getDistance ) )
+                    .publishOn( Schedulers.single() )
+                    .take( 5 );
+
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account
         case LOGOUT -> this.getSession().executeAsync( "INSERT INTO "
@@ -1641,7 +1679,7 @@ public final class CassandraDataControl {
                         patrul.setSpecialToken( token );
                         UnirestController
                                 .getInstance()
-                                .addUser( patrul ); } ));
+                                .addUser( patrul ); } ) );
 
     public UUID decode ( String token ) { return UUID.fromString(
             new String( Base64
@@ -1649,6 +1687,7 @@ public final class CassandraDataControl {
                     .decode( token ) )
                     .split( "@" )[ 0 ] ); }
 
+    // возвращает список патрульных которые макс близко к камере
     private final Function< Point, Mono< PatrulInRadiusList > > getPatrulInRadiusList = point ->
             this.getFindTheClosestPatruls()
             .apply( point, 2 )

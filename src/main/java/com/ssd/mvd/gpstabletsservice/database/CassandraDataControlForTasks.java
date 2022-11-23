@@ -557,7 +557,8 @@ public class CassandraDataControlForTasks {
                         if ( Status.valueOf( apiResponseModel
                                 .getData()
                                 .getData()
-                                .toString() ).compareTo( Status.ACTIVE ) == 0 ) {
+                                .toString() )
+                                .compareTo( Status.ACTIVE ) == 0 ) {
                             //обновляем список сигналов которые отправлял патрульный
                             this.updatePatrulSosList( patrulSos.getUuid(), patrul.getUuid(), Status.CREATED );
                             // закрепояем этот сос сигнал за тем кто отправил его
@@ -571,9 +572,11 @@ public class CassandraDataControlForTasks {
 
                             CassandraDataControl
                                     .getInstance()
-                                    .getFindTheClosestPatruls()
-                                    .apply( new Point( patrulSos.getLatitude(), patrulSos.getLongitude() ), 2 )
-                                    .take( 5 )
+                                    .getFindTheClosestPatrulsForSos()
+                                    .apply( new Point(
+                                            patrulSos.getLatitude(),
+                                            patrulSos.getLongitude() ),
+                                            patrul.getUuid() )
                                     .parallel( 5 )
                                     .runOn( Schedulers.parallel() )
                                     .map( patrul1 -> {
