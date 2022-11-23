@@ -15,6 +15,7 @@ import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
+import com.ssd.mvd.gpstabletsservice.request.PatrulImageRequest;
 import com.ssd.mvd.gpstabletsservice.response.PatrulInRadiusList;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
@@ -173,6 +174,13 @@ public class PatrulController {
                         .getArchive()
                         .getErrorResponse()
                         .get() ); }
+
+    @MessageMapping ( value = "updatePatrulImage" )
+    public Mono< ApiResponseModel > updatePatrulImage ( PatrulImageRequest request ) {
+        return CassandraDataControl
+            .getInstance()
+            .getUpdatePatrulImage()
+            .apply( request ); }
 
     @MessageMapping ( value = "findTheClosestPatruls" )
     public Flux< Patrul > findTheClosestPatruls ( Point point ) {
