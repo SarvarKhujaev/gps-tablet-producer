@@ -1,6 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
@@ -8,10 +9,11 @@ import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
 import reactor.core.publisher.Mono;
+import lombok.extern.slf4j.Slf4j;
 import java.util.UUID;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -46,7 +48,12 @@ public class SelfEmploymentController {
             .apply( selfEmploymentTask.getPatruls().keySet().iterator().next() )
             .flatMap( patrul -> Archive
                     .getArchive()
-                    .save( selfEmploymentTask, patrul ) )
+                    .getFunction()
+                    .apply( Map.of( "message", selfEmploymentTask + " was linked to: "
+                            + TaskInspector
+                            .getInstance()
+                            .changeTaskStatus( patrul, ATTACHED, selfEmploymentTask )
+                            .getName() ) ) )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive

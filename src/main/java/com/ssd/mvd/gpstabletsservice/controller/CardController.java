@@ -9,6 +9,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.entity.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
@@ -17,11 +18,12 @@ import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
 @Slf4j
@@ -67,13 +69,23 @@ public class CardController {
                     .addValue( card.getCardId().toString(), new ActiveTask( card ) );
 
             return Flux.fromStream( request.getPatruls().stream() )
+                    .parallel()
+                    .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive()
-                                    .save( patrul1, card ) ) )
+                            .flatMap( patrul1 -> Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", card + " was linked to: "
+                                            + TaskInspector
+                                            .getInstance()
+                                            .changeTaskStatus( patrul1, ATTACHED, card )
+                                            .getName() ) ) ) )
+                    .sequential()
+                    .publishOn( Schedulers.single() )
                     .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                             error.getMessage(), object ) ) )
                     .onErrorReturn( Archive
@@ -81,16 +93,26 @@ public class CardController {
                             .getErrorResponse()
                             .get() ); }
 
-        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
-            EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
+        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
+            CarEvent carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
+                    .parallel()
+                    .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive()
-                                    .save( patrul1, eventFace ) ) )
+                            .flatMap( patrul1 -> Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", carEvents + " was linked to: "
+                                            + TaskInspector
+                                            .getInstance()
+                                            .changeTaskStatus( patrul1, ATTACHED, carEvents )
+                                            .getName() ) ) ) )
+                    .sequential()
+                    .publishOn( Schedulers.single() )
                     .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                             error.getMessage(), object ) ) )
                     .onErrorReturn( Archive
@@ -103,12 +125,23 @@ public class CardController {
             if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
                 facePerson.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
+                    .parallel()
+                    .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, facePerson ) ) )
+                            .flatMap( patrul1 -> Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", facePerson + " was linked to: "
+                                            + TaskInspector
+                                            .getInstance()
+                                            .changeTaskStatus( patrul1, ATTACHED, facePerson )
+                                            .getName() ) ) ) )
+                    .sequential()
+                    .publishOn( Schedulers.single() )
                     .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                             error.getMessage(), object ) ) )
                     .onErrorReturn( Archive
@@ -116,15 +149,26 @@ public class CardController {
                             .getErrorResponse()
                             .get() ); }
 
-        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
-            CarEvent carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
+        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
+            EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
+                    .parallel()
+                    .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, carEvents ) ) )
+                            .flatMap( patrul1 -> Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", eventFace + " was linked to: "
+                                            + TaskInspector
+                                            .getInstance()
+                                            .changeTaskStatus( patrul1, ATTACHED, eventFace )
+                                            .getName() ) ) ) )
+                    .sequential()
+                    .publishOn( Schedulers.single() )
                     .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                             error.getMessage(), object ) ) )
                     .onErrorReturn( Archive
@@ -135,13 +179,23 @@ public class CardController {
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
             EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
+                    .parallel()
+                    .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive()
-                                    .save( patrul1, eventBody ) ) )
+                            .flatMap( patrul1 -> Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", eventBody + " was linked to: "
+                                            + TaskInspector
+                                            .getInstance()
+                                            .changeTaskStatus( patrul1, ATTACHED, eventBody )
+                                            .getName() ) ) ) )
+                    .sequential()
+                    .publishOn( Schedulers.single() )
                     .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                             error.getMessage(), object ) ) )
                     .onErrorReturn( Archive
@@ -151,12 +205,23 @@ public class CardController {
 
         else { EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
+                    .parallel()
+                    .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive.getArchive().save( patrul1, eventCar ) ) )
+                            .flatMap( patrul1 -> Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", eventCar + " was linked to: "
+                                            + TaskInspector
+                                            .getInstance()
+                                            .changeTaskStatus( patrul1, ATTACHED, eventCar )
+                                            .getName() ) ) ) )
+                    .sequential()
+                    .publishOn( Schedulers.single() )
                     .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                             error.getMessage(), object ) ) )
                     .onErrorReturn( Archive

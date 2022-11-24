@@ -21,6 +21,9 @@ public class TaskDetails {
     private String title;
     private String fabula;
 
+    private Long timeWastedToArrive;
+    private Long totalTimeConsumption;
+
     private ReportForCard reportForCardList;
     private List< PositionInfo > positionInfoList;
 
@@ -32,8 +35,11 @@ public class TaskDetails {
             CassandraDataControlForTasks
                     .getInstance()
                     .getGetPositionInfoList()
-                    .apply( card.getCardId().toString() )
-                    .subscribe( this::setPositionInfoList );
+                    .apply( card.getCardId().toString(), patrulUUID )
+                    .subscribe( taskTotalData -> {
+                        this.setPositionInfoList( taskTotalData.getPositionInfoList() );
+                        this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
+                        this.setTotalTimeConsumption( taskTotalData.getTotalTimeConsumption() ); } );
 
             card.getReportForCardList()
                     .parallelStream()
@@ -46,8 +52,11 @@ public class TaskDetails {
         CassandraDataControlForTasks
                 .getInstance()
                 .getGetPositionInfoList()
-                .apply( carEvent.getId()  )
-                .subscribe( this::setPositionInfoList );
+                .apply( carEvent.getId(), patrulUUID )
+                .subscribe( taskTotalData -> {
+                    this.setPositionInfoList( taskTotalData.getPositionInfoList() );
+                    this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
+                    this.setTotalTimeConsumption( taskTotalData.getTotalTimeConsumption() ); } );
         carEvent.getReportForCardList()
                 .parallelStream()
                 .parallel()
@@ -60,8 +69,11 @@ public class TaskDetails {
             CassandraDataControlForTasks
                     .getInstance()
                     .getGetPositionInfoList()
-                    .apply( eventCar.getId() )
-                    .subscribe( this::setPositionInfoList );
+                    .apply( eventCar.getId(), patrulUUID )
+                    .subscribe( taskTotalData -> {
+                        this.setPositionInfoList( taskTotalData.getPositionInfoList() );
+                        this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
+                        this.setTotalTimeConsumption( taskTotalData.getTotalTimeConsumption() ); } );
             eventCar.getReportForCardList()
                     .parallelStream()
                     .parallel()
@@ -74,8 +86,11 @@ public class TaskDetails {
             CassandraDataControlForTasks
                     .getInstance()
                     .getGetPositionInfoList()
-                    .apply( eventBody.getId() )
-                    .subscribe( this::setPositionInfoList );
+                    .apply( eventBody.getId(), patrulUUID )
+                    .subscribe( taskTotalData -> {
+                        this.setPositionInfoList( taskTotalData.getPositionInfoList() );
+                        this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
+                        this.setTotalTimeConsumption( taskTotalData.getTotalTimeConsumption() ); } );
             eventBody.getReportForCardList()
                     .parallelStream()
                     .parallel()
@@ -87,8 +102,11 @@ public class TaskDetails {
         CassandraDataControlForTasks
                 .getInstance()
                 .getGetPositionInfoList()
-                .apply( eventFace.getId() )
-                .subscribe( this::setPositionInfoList );
+                .apply( eventFace.getId(), patrulUUID )
+                .subscribe( taskTotalData -> {
+                    this.setPositionInfoList( taskTotalData.getPositionInfoList() );
+                    this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
+                    this.setTotalTimeConsumption( taskTotalData.getTotalTimeConsumption() ); } );
         eventFace.getReportForCardList()
                 .parallelStream()
                 .parallel()
@@ -100,8 +118,11 @@ public class TaskDetails {
         CassandraDataControlForTasks
                 .getInstance()
                 .getGetPositionInfoList()
-                .apply( faceEvent.getId() )
-                .subscribe( this::setPositionInfoList );
+                .apply( faceEvent.getId(), patrulUUID )
+                .subscribe( taskTotalData -> {
+                    this.setPositionInfoList( taskTotalData.getPositionInfoList() );
+                    this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
+                    this.setTotalTimeConsumption( taskTotalData.getTotalTimeConsumption() ); } );
         faceEvent.getReportForCardList()
                 .parallelStream()
                 .parallel()
@@ -115,8 +136,11 @@ public class TaskDetails {
         CassandraDataControlForTasks
                 .getInstance()
                 .getGetPositionInfoList()
-                .apply( selfEmploymentTask.getUuid().toString() )
-                .subscribe( this::setPositionInfoList );
+                .apply( selfEmploymentTask.getUuid().toString(), patrulUUID )
+                .subscribe( taskTotalData -> {
+                    this.setPositionInfoList( taskTotalData.getPositionInfoList() );
+                    this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
+                    this.setTotalTimeConsumption( taskTotalData.getTotalTimeConsumption() ); } );
         selfEmploymentTask.getReportForCards()
                 .parallelStream()
                 .parallel()

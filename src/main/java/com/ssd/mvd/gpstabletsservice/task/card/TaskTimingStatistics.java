@@ -44,10 +44,11 @@ public class TaskTimingStatistics { // показывает все таски с
     private Boolean inTime;
     private UUID patrulUUID;
     private Date dateOfComing; // показывает время когда патрульный пришел в точку назначения
+
+    private Long timeWastedToArrive; // общее время которое патрульный потратил чтобы дойти до пункта назначения
     private Long totalTimeConsumption; // общее время которое патрульный потратил чтобы дойти до пункта назначения
 
     private TaskTypes taskTypes;
-    private TaskTypes taskTypesTable;
     private List< PositionInfo > positionInfoList;
 
     public TaskTimingStatistics( Row row ) {
@@ -56,6 +57,7 @@ public class TaskTimingStatistics { // показывает все таски с
         this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
         this.setDateOfComing( row.getTimestamp( "dateOfComing" ) );
         this.setStatus( Status.valueOf( row.getString( "status" ) ) );
+        this.setTimeWastedToArrive( row.getLong( "timeWastedToArrive" ) );
         this.setTotalTimeConsumption( row.getLong( "totalTimeConsumption" ) );
         this.setTaskTypes( TaskTypes.valueOf( row.getString("taskTypes" ) ) );
         this.setPositionInfoList( row.getList( "positionInfoList", PositionInfo.class ) );
