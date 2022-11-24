@@ -19,6 +19,6 @@ public class PositionInfo {
         this.setLng( row.getDouble( "longitude" ) ); }
 
     public PositionInfo( UDTValue value ) {
-        this.setLat( value.getDouble( "latitude" ) );
-        this.setLng( value.getDouble( "longitude" ) ); }
+        this.setLat( value.getDouble( "lat" ) );
+        this.setLng( value.getDouble( "lng" ) ); }
 }

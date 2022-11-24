@@ -8,17 +8,8 @@ import lombok.Data;
 import java.security.SecureRandom;
 import reactor.core.publisher.Mono;
 
-import com.ssd.mvd.gpstabletsservice.entity.*;
-import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.response.Status;
-import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
-import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
 @Data
 public class Archive {
@@ -72,54 +63,4 @@ public class Archive {
         byte[] bytes = new byte[ 24 ];
         this.secureRandom.nextBytes( bytes );
         return this.encoder.encodeToString( bytes ); }
-
-    // uses to link Card to current Patrul object, either additional Patrul in case of necessary
-    public Mono< ApiResponseModel > save ( Patrul patrul, Card card ) { return this.getFunction()
-            .apply( Map.of( "message", card + " was linked to: "
-                    + TaskInspector
-                    .getInstance()
-                    .changeTaskStatus( patrul, ATTACHED, card )
-                    .getName() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventCar eventCar ) { return this.getFunction()
-            .apply( Map.of( "message", eventCar + " was linked to: "
-                    + TaskInspector
-                    .getInstance()
-                    .changeTaskStatus( patrul, ATTACHED, eventCar )
-                    .getName() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, CarEvent carEvent ) { return this.getFunction()
-            .apply( Map.of( "message", carEvent + " was linked to: "
-                    + TaskInspector
-                    .getInstance()
-                    .changeTaskStatus( patrul, ATTACHED, carEvent )
-                    .getName() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventFace eventFace ) { return this.getFunction()
-            .apply( Map.of( "message", eventFace + " was linked to: "
-                    + TaskInspector
-                    .getInstance()
-                    .changeTaskStatus( patrul, ATTACHED, eventFace )
-                    .getName() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, EventBody eventBody ) { return this.getFunction()
-            .apply( Map.of( "message", eventBody + " was linked to: "
-                    + TaskInspector
-                    .getInstance()
-                    .changeTaskStatus( patrul, ATTACHED, eventBody )
-                    .getName() ) ); }
-
-    public Mono< ApiResponseModel > save ( Patrul patrul, FaceEvent faceEvent ) { return this.getFunction()
-            .apply( Map.of( "message", faceEvent + " was linked to: "
-                    + TaskInspector
-                    .getInstance()
-                    .changeTaskStatus( patrul, ATTACHED, faceEvent ).getName() ) ); }
-
-    public Mono< ApiResponseModel > save ( SelfEmploymentTask selfEmploymentTask, Patrul patrul ) {
-        return this.getFunction()
-                .apply( Map.of( "message", "SelfEmployment was linked to: "
-                        + TaskInspector
-                        .getInstance()
-                        .changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask )
-                        .getName() ) ); }
 }

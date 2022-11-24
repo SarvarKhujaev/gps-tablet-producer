@@ -16,7 +16,6 @@ import com.ssd.mvd.gpstabletsservice.task.card.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.controller.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
@@ -224,22 +223,27 @@ public final class CassandraDataControl {
 
         this.logger.info( "Cassandra is ready" ); }
 
-    private final Function< Request, Mono< List< PositionInfo > > > getHistory = request -> {
-        try { return Flux.fromStream( this.getSession().execute( "SELECT * FROM "
-                        + CassandraTables.GPSTABLETS.name() + "."
-                        + CassandraTables.TABLETS_LOCATION_TABLE.name()
-                        + " WHERE userId = '" + request.getAdditional()
-                        + "' AND date >= '" + SerDes
-                        .getSerDes()
-                        .convertDate( request.getObject().toString() ).toInstant()
-                        + "' AND date <= '"
-                        + SerDes
-                        .getSerDes()
-                        .convertDate( request.getSubject().toString() ).toInstant() + "';" )
-                .all().stream() )
-                .map( row -> row != null ? new PositionInfo( row ) : new PositionInfo() )
+    private final Function< PatrulActivityRequest, Mono< List< PositionInfo > > > getHistory = request -> {
+        try { return Flux.fromStream(
+                this.getSession().execute( "SELECT * FROM "
+                                + CassandraTables.GPSTABLETS.name() + "."
+                                + CassandraTables.TABLETS_LOCATION_TABLE.name()
+                                + " WHERE userId = '" + request.getPatrulUUID()
+                                + "' AND date >= '" + request.getStartDate().toInstant()
+                                + "' AND date <= '"
+                                + request.getEndDate().toInstant() + "';" )
+                        .all()
+                        .stream()
+                        .parallel() )
+                .parallel()
+                .runOn( Schedulers.parallel() )
+                .flatMap( row -> Mono.justOrEmpty( row != null ? new PositionInfo( row ) : new PositionInfo() ) )
+                .sequential()
+                .publishOn( Schedulers.single() )
                 .collectList();
-        } catch ( Exception e ) { return Mono.empty(); } };
+        } catch ( Exception e ) {
+            System.out.println( e.getMessage() );
+            return Mono.empty(); } };
 
     private final Supplier< Flux< PoliceType > > getAllPoliceTypes = () -> Flux.fromStream(
             this.getSession()
@@ -732,19 +736,35 @@ public final class CassandraDataControl {
                         + " WHERE passportNumber = '" + passportNumber + "';" ).one();
 
     // обновляет время последней активности патрульного
+    private final Consumer< Patrul > updatePatrulAfterTask = patrul ->
+            this.getSession().execute( "UPDATE "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.PATRULS.name()
+                    + " SET status = '" + patrul.getStatus() + "', "
+                    + " taskTypes = '" + patrul.getTaskTypes() + "', "
+                    + " taskId = '" + patrul.getTaskId() + "', "
+                    + " longitudeOfTask = " + patrul.getLongitudeOfTask() + ", "
+                    + " latitudeOfTask = " + patrul.getLatitudeOfTask() + ", "
+                    + " taskDate = '" + patrul.getTaskDate().toInstant() + "', "
+                    + "listOfTasks = "
+                    + CassandraConverter
+                    .getInstance()
+                    .convertMapToCassandra( patrul.getListOfTasks() )
+                    + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
+
+    // обновляет время последней активности патрульного
     private final Consumer< Patrul > updatePatrulActivity = patrul ->
-            Mono.just( patrul ).subscribe( patrul1 -> this.getSession()
-                    .execute( "UPDATE "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.PATRULS.name()
-                            + " SET lastActiveDate = '" + new Date().toInstant() + "', "
-                            + " totalActivityTime = "
-                            + patrul.getTotalActivityTime() +
-                            TimeInspector
-                                    .getInspector()
-                                    .getGetTimeDifferenceInSeconds()
-                                    .apply( patrul.getLastActiveDate().toInstant() )
-                            + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" ) );
+        this.getSession().execute( "UPDATE "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.PATRULS.name()
+                + " SET lastActiveDate = '" + new Date().toInstant() + "', "
+                + " totalActivityTime = "
+                + patrul.getTotalActivityTime() +
+                TimeInspector
+                        .getInspector()
+                        .getGetTimeDifferenceInSeconds()
+                        .apply( patrul.getLastActiveDate().toInstant() )
+                + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
         Row row = this.getGetPatrulByPassportNumber().apply( patrul.getPassportNumber() );
@@ -1310,8 +1330,7 @@ public final class CassandraDataControl {
             row.getDouble( "latitude" ) > 0
             && row.getDouble( "longitude" ) > 0;
 
-    private final BiFunction< Point, Integer, Flux< Patrul > > findTheClosestPatruls = ( point, integer ) ->
-            Flux.fromStream(
+    private final BiFunction< Point, Integer, Flux< Patrul > > findTheClosestPatruls = ( point, integer ) -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS.name() + ";" )
@@ -1619,12 +1638,12 @@ public final class CassandraDataControl {
     private final Function< String, Mono< ApiResponseModel > > arrived = token -> this.getGetPatrulByUUID()
             .apply( this.decode( token ) )
             .flatMap( patrul -> {
+                this.getUpdatePatrulActivity().accept( patrul );
                 if ( Math.abs( TimeInspector
                         .getInspector()
                         .getGetTimeDifferenceInHours()
                         .apply( patrul.getTaskDate().toInstant() ) ) >= 24 ) {
                     this.getUpdateStatus().apply( patrul, CANCEL );
-                    this.getUpdatePatrulActivity().accept( patrul );
                     return TaskInspector
                             .getInstance()
                             .getRemovePatrulFromTask()
