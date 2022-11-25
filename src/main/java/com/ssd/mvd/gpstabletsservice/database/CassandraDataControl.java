@@ -1503,14 +1503,14 @@ public final class CassandraDataControl {
                         patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
                         patrul.setTokenForLogin (
                                 Base64
-                                        .getEncoder()
-                                        .encodeToString( (
-                                                patrul.getUuid()
-                                                        + "@" + patrul.getPassportNumber()
-                                                        + "@" + patrul.getPassword()
-                                                        + "@" + patrul.getSimCardNumber()
-                                                        + "@" + Archive.getArchive().generateToken() )
-                                                .getBytes( StandardCharsets.UTF_8 ) ) );
+                                    .getEncoder()
+                                    .encodeToString( (
+                                            patrul.getUuid()
+                                                    + "@" + patrul.getPassportNumber()
+                                                    + "@" + patrul.getPassword()
+                                                    + "@" + patrul.getSimCardNumber()
+                                                    + "@" + Archive.getArchive().generateToken() )
+                                            .getBytes( StandardCharsets.UTF_8 ) ) );
                         this.update( patrul ).subscribe(); // savs all new changes in patrul object
                         this.getUpdatePatrulActivity().accept( patrul );
                         TabletUsage tabletUsage1 = this.getCheckTableUsage().apply( patrul );
