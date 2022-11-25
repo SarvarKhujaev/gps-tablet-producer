@@ -717,7 +717,7 @@ public class CassandraDataControlForTasks {
                 + CassandraTables.PATRUL_SOS_TABLE.name()
                 + " SET patrulStatuses [" + sosRequest.getPatrulUUID() + "] = '"
                 + ( sosRequest.getStatus().compareTo( Status.CANCEL ) == 0
-                ? Status.CREATED : sosRequest.getStatus() )
+                ? Status.ATTACHED : sosRequest.getStatus() )
                 + "' WHERE uuid = " + sosRequest.getSosUUID() + ";" );
         return Archive
                 .getArchive()
