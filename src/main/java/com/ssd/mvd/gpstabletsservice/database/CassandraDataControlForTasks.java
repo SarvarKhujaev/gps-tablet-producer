@@ -373,8 +373,8 @@ public class CassandraDataControlForTasks {
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.TASKS_TIMING_TABLE.name()
                     + " SET totaltimeconsumption = " + timeConsumption
-                    + " WHERE taskId = " + patrul.getTaskId()
-                    + " AND patruluuid = " + patrul.getUuid() + ";" )
+                    + " WHERE taskId = '" + patrul.getTaskId()
+                    + "' AND patruluuid = " + patrul.getUuid() + ";" )
                     .wasApplied();
 
     private final Consumer< TaskTimingStatistics > saveTaskTimeStatistics = taskTimingStatistics -> this.getSession()
