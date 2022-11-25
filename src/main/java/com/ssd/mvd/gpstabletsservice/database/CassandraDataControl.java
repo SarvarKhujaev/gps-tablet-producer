@@ -756,13 +756,13 @@ public final class CassandraDataControl {
         this.getSession().execute( "UPDATE "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.PATRULS.name()
-                + " SET lastActiveDate = '" + new Date().toInstant() + "', "
-                + " totalActivityTime = "
-                + patrul.getTotalActivityTime() +
-                TimeInspector
-                        .getInspector()
-                        .getGetTimeDifferenceInSeconds()
-                        .apply( patrul.getLastActiveDate().toInstant() )
+                + " SET lastActiveDate = '" + new Date().toInstant() + "' "
+//                + " totalActivityTime = "
+//                + patrul.getTotalActivityTime() +
+//                TimeInspector
+//                        .getInspector()
+//                        .getGetTimeDifferenceInSeconds()
+//                        .apply( patrul.getLastActiveDate().toInstant() )
                 + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
@@ -1511,7 +1511,7 @@ public final class CassandraDataControl {
                                                     + "@" + Archive.getArchive().generateToken() )
                                             .getBytes( StandardCharsets.UTF_8 ) ) );
                         this.update( patrul ).subscribe(); // savs all new changes in patrul object
-                        this.getUpdatePatrulActivity().accept( patrul );
+//                        this.getUpdatePatrulActivity().accept( patrul );
                         TabletUsage tabletUsage1 = this.getCheckTableUsage().apply( patrul );
                         if ( tabletUsage1 == null ) Mono.just( new TabletUsage( patrul ) )
                                 .subscribe( tabletUsage -> this.getSession().execute( "INSERT INTO "
