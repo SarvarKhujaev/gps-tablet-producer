@@ -29,11 +29,20 @@ public class CardDetails {
         this.getDetails().putIfAbsent( Details.TEX_PASSPORT, new ArrayList<>() );
         this.getDetails().putIfAbsent( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR, new ArrayList<>() );
 
-        if ( carTotalData.getDoverennostList() != null ) carTotalData
+        if ( carTotalData
+                .getDoverennostList() != null
+                && carTotalData
                 .getDoverennostList()
-                .getDoverennostsList()
-                .parallelStream()
-                .forEach( doverennost -> {
+                .getDoverennostsList() != null
+                && carTotalData
+                .getDoverennostList()
+                .getDoverennostsList().size() > 0 )
+            carTotalData
+                    .getDoverennostList()
+                    .getDoverennostsList()
+                    .parallelStream()
+                    .parallel()
+                    .forEach( doverennost -> {
                     this.getDetails().get( Details.ISHONCHNOMA )
                             .add( new Item( "TOMONIDAN BERILGAN", doverennost.getIssuedBy() ) );
                     this.getDetails().get( Details.ISHONCHNOMA )
@@ -41,11 +50,22 @@ public class CardDetails {
                     this.getDetails().get( Details.ISHONCHNOMA )
                             .add( new Item( "TUGASH SANASI", doverennost.getDateValid() ) ); } );
 
-        if ( carTotalData.getPsychologyCard().getModelForCarList() != null ) carTotalData
+        if ( carTotalData
+                .getPsychologyCard()
+                .getModelForCarList() != null
+                && carTotalData
+                .getPsychologyCard()
+                .getModelForCarList()
+                .getModelForCarList() != null
+                && carTotalData
+                .getPsychologyCard()
+                .getModelForCarList()
+                .getModelForCarList().size() > 0 ) carTotalData
                 .getPsychologyCard()
                 .getModelForCarList()
                 .getModelForCarList()
                 .parallelStream()
+                .parallel()
                 .forEach( modelForCar -> {
                     this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR )
                             .add( new Item( "DAVLAT RAQAM BELGISI", modelForCar.getPlateNumber() ) );
@@ -62,7 +82,11 @@ public class CardDetails {
                     this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR )
                             .add( new Item( "TURI", modelForCar.getVehicleType() ) ); } );
 
-        if ( carTotalData.getPsychologyCard().getModelForPassport() != null ) {
+        if ( carTotalData.getPsychologyCard().getModelForPassport() != null
+                && carTotalData
+                .getPsychologyCard()
+                .getModelForPassport()
+                .getDocument() != null ) {
             this.getDetails()
                     .get( Details.TEX_PASSPORT )
                     .add( new Item( "Seriya va raqam", carTotalData
