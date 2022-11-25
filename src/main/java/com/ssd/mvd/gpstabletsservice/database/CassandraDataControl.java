@@ -241,9 +241,7 @@ public final class CassandraDataControl {
                 .sequential()
                 .publishOn( Schedulers.single() )
                 .collectList();
-        } catch ( Exception e ) {
-            System.out.println( e.getMessage() );
-            return Mono.empty(); } };
+        } catch ( Exception e ) { return Mono.empty(); } };
 
     private final Supplier< Flux< PoliceType > > getAllPoliceTypes = () -> Flux.fromStream(
             this.getSession()
@@ -1340,10 +1338,10 @@ public final class CassandraDataControl {
             .parallel()
             .runOn( Schedulers.parallel() )
             .filter( row -> this.checkPatrulStatus.test( row )
-                    && ( integer == 1 ? Status.valueOf( row.getString( "status" ) )
+                    && ( integer != 1 || Status.valueOf( row.getString( "status" ) )
                     .compareTo( Status.FREE ) == 0
                     && TaskTypes.valueOf( row.getString( "taskTypes" ) )
-                    .compareTo( TaskTypes.FREE ) == 0 : true ) )
+                    .compareTo( TaskTypes.FREE ) == 0 ) )
             .flatMap( row -> Mono.just( new Patrul( row ) ) )
             .flatMap( patrul -> {
                 patrul.setDistance( this.calculate( point, patrul ) );
@@ -1718,4 +1716,11 @@ public final class CassandraDataControl {
         cassandraDataControl = null;
         KafkaDataControl.getInstance().clear();
         this.logger.info( "Cassandra is closed!!!" ); }
+
+    private Predicate< String > check = s -> this.getSession()
+            .execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.PATRULS_LOGIN_TABLE.name()
+                    + " WHERE login = '" + s + "';" )
+            .one() != null;
 }
