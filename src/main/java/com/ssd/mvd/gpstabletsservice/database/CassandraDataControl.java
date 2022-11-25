@@ -743,7 +743,8 @@ public final class CassandraDataControl {
                     + " taskId = '" + patrul.getTaskId() + "', "
                     + " longitudeOfTask = " + patrul.getLongitudeOfTask() + ", "
                     + " latitudeOfTask = " + patrul.getLatitudeOfTask() + ", "
-                    + " taskDate = '" + patrul.getTaskDate().toInstant() + "', "
+                    + " taskDate = '" + ( patrul.getTaskDate() != null
+                    ? patrul.getTaskDate().toInstant() : new Date().toInstant() ) + "', "
                     + "listOfTasks = "
                     + CassandraConverter
                     .getInstance()

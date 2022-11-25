@@ -95,7 +95,6 @@ public final class TaskInspector {
                                     .getSerDes()
                                     .serialize( new ActiveTask( card ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
@@ -200,7 +199,6 @@ public final class TaskInspector {
                                     .getSerDes()
                                     .serialize( new ActiveTask( eventCar ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
@@ -304,7 +302,6 @@ public final class TaskInspector {
                                     .getSerDes()
                                     .serialize( new ActiveTask( eventFace ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
@@ -410,7 +407,6 @@ public final class TaskInspector {
                                     .getSerDes()
                                     .serialize( new ActiveTask( eventBody ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
@@ -516,7 +512,6 @@ public final class TaskInspector {
                                     .getSerDes()
                                     .serialize( new ActiveTask( carEvents ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
@@ -625,7 +620,6 @@ public final class TaskInspector {
                                     .getSerDes()
                                     .serialize( new ActiveTask( faceEvent ) ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
@@ -721,7 +715,6 @@ public final class TaskInspector {
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setUuidForEscortCar( null );
                 patrul.setUuidOfEscort( null );
-                patrul.setTaskDate( null );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
