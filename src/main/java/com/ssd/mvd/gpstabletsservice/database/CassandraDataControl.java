@@ -943,8 +943,7 @@ public final class CassandraDataControl {
                             "message", "Patrul with this login has already been inserted, choose another one",
                             "success", false,
                             "code", 201 ) );
-            this.getSession().execute(
-                    "INSERT INTO "
+            this.getSession().execute( "INSERT INTO "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS_LOGIN_TABLE.name()
                             + " ( login, password, uuid ) VALUES( '"
@@ -1361,7 +1360,8 @@ public final class CassandraDataControl {
                     .parallel()
                     .runOn( Schedulers.parallel() )
                     .filter( row -> this.checkPatrulStatus.test( row )
-                        && row.getUUID( "uuid" ).compareTo( uuid ) != 0 )
+                        && row.getUUID( "uuid" ).compareTo( uuid ) != 0
+                        && row.getUUID( "uuidOfEscort" ) == null )
                     .flatMap( row -> Mono.just( new Patrul( row ) ) )
                     .flatMap( patrul -> {
                         patrul.setDistance( this.calculate( point, patrul ) );
@@ -1369,7 +1369,7 @@ public final class CassandraDataControl {
                     .sequential()
                     .sort( Comparator.comparing( Patrul::getDistance ) )
                     .publishOn( Schedulers.single() )
-                    .take( 5 );
+                    .take( 20 );
 
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account
@@ -1717,11 +1717,4 @@ public final class CassandraDataControl {
         cassandraDataControl = null;
         KafkaDataControl.getInstance().clear();
         this.logger.info( "Cassandra is closed!!!" ); }
-
-    private Predicate< String > check = s -> this.getSession()
-            .execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.PATRULS_LOGIN_TABLE.name()
-                    + " WHERE login = '" + s + "';" )
-            .one() != null;
 }
