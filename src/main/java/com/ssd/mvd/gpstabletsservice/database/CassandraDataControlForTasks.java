@@ -596,112 +596,122 @@ public class CassandraDataControlForTasks {
                                 + " SET " + param + " = " + param + " + {" + sosUUID + "}"
                                 + " WHERE patrulUUID = " + patrulUUID + ";" ) ); }
 
+    private final Consumer< PatrulSos > save = patrulSos1 -> {
+        if ( patrulSos1.getPatrulStatuses() != null
+                && patrulSos1.getPatrulStatuses().size() > 19 )
+            System.out.println( "Result: " + this.getSession().execute( "INSERT INTO "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.PATRUL_SOS_TABLE.name()
+                            + CassandraConverter
+                            .getInstance()
+                            .getALlNames( PatrulSos.class )
+                            + " VALUES ("
+                            + patrulSos1.getUuid() + ", "
+                            + patrulSos1.getPatrulUUID() + ", '"
+
+                            + patrulSos1.getAddress() + "', '"
+
+                            + new Date().toInstant() + "', '"
+                            + new Date().toInstant() + "', "
+
+                            + patrulSos1.getLatitude() + ", "
+                            + patrulSos1.getLongitude() + ", '"
+
+                            + Status.CREATED.name() + "', "
+                            + CassandraConverter
+                            .getInstance()
+                            .convertSosMapToCassandra( patrulSos1.getPatrulStatuses() ) + " ) IF NOT EXISTS;" )
+                    .wasApplied() ); };
+
     private final Function< PatrulSos, Mono< ApiResponseModel > > savePatrulSos = patrulSos ->
             CassandraDataControl
-            .getInstance()
-            .getGetPatrulByUUID()
-            .apply( patrulSos.getPatrulUUID() )
-            .flatMap( patrul -> this.getSaveSos().apply( patrulSos )
-                    .flatMap( apiResponseModel -> {
-                        if ( Status.valueOf( apiResponseModel
-                                .getData()
-                                .getData()
-                                .toString() )
-                                .compareTo( Status.ACTIVE ) == 0 ) {
-                            //обновляем список сигналов которые отправлял патрульный
-                            this.updatePatrulSosList( patrulSos.getUuid(), patrul.getUuid(), Status.CREATED );
-                            // закрепояем этот сос сигнал за тем кто отправил его
-                            this.getUpdatePatrulSos().apply( patrulSos.getUuid(), patrulSos.getPatrulUUID() );
-                            // сохраняем адрес сигнала
-                            patrulSos.setAddress( UnirestController
-                                    .getInstance()
-                                    .getGetAddressByLocation()
-                                    .apply( patrulSos.getLatitude(), patrulSos.getLongitude() )
-                                    .replaceAll( "'", "`" ) );
-
-                            CassandraDataControl
-                                    .getInstance()
-                                    .getFindTheClosestPatrulsForSos()
-                                    .apply( new Point(
-                                            patrulSos.getLatitude(),
-                                            patrulSos.getLongitude() ),
-                                            patrul.getUuid() )
-                                    .parallel( 5 )
-                                    .runOn( Schedulers.parallel() )
-                                    .map( patrul1 -> {
-                                        this.updatePatrulSosList( patrulSos.getUuid(), patrul1.getUuid(), Status.ATTACHED );
-                                        patrulSos.getPatrulStatuses().put( patrul1.getUuid(), Status.ATTACHED.name() );
-                                        KafkaDataControl
-                                                .getInstance()
-                                                .getWriteToKafkaNotificatioForAndroid()
-                                                .accept( new SosNotificationForAndroid(
-                                                        patrulSos,
-                                                        patrul,
-                                                        Status.ACTIVE,
-                                                        patrul1.getPassportNumber() ) );
-                                        return patrulSos; } )
-                                    .sequential()
-                                    .publishOn( Schedulers.single() )
-                                    .subscribe( patrulSos1 -> this.getSession()
-                                            .execute( "INSERT INTO "
-                                                    + CassandraTables.TABLETS.name() + "."
-                                                    + CassandraTables.PATRUL_SOS_TABLE.name()
-                                                    + CassandraConverter
-                                                    .getInstance()
-                                                    .getALlNames( PatrulSos.class )
-                                                    + " VALUES ("
-                                                    + patrulSos.getUuid() + ", "
-                                                    + patrulSos.getPatrulUUID() + ", '"
-
-                                                    + patrulSos.getAddress() + "', '"
-
-                                                    + new Date().toInstant() + "', '"
-                                                    + new Date().toInstant() + "', "
-
-                                                    + patrulSos.getLatitude() + ", "
-                                                    + patrulSos.getLongitude() + ", '"
-
-                                                    + Status.CREATED.name() + "', "
-                                                    + CassandraConverter
-                                                    .getInstance()
-                                                    .convertSosMapToCassandra( patrulSos.getPatrulStatuses() )
-                                                    + " ) IF NOT EXISTS;" ) ); }
-                        else {
-                            PatrulSos patrulSos1 = this.getCurrentPatrulSos.apply( patrul.getSos_id() );
-                            Flux.fromStream( this.getCurrentPatrulSos.apply( patrul.getSos_id() )
-                                            .getPatrulStatuses().keySet().stream() )
-                                    .parallel()
-                                    .runOn( Schedulers.parallel() )
-                                    .flatMap( uuid -> CassandraDataControl
+                    .getInstance()
+                    .getGetPatrulByUUID()
+                    .apply( patrulSos.getPatrulUUID() )
+                    .flatMap( patrul -> this.getSaveSos().apply( patrulSos )
+                            .flatMap( apiResponseModel -> {
+                                if ( Status.valueOf( apiResponseModel
+                                                .getData()
+                                                .getData()
+                                                .toString() )
+                                        .compareTo( Status.ACTIVE ) == 0 ) {
+                                    patrulSos.setPatrulStatuses( new HashMap<>() );
+                                    //обновляем список сигналов которые отправлял патрульный
+                                    this.updatePatrulSosList( patrulSos.getUuid(), patrul.getUuid(), Status.CREATED );
+                                    // закрепояем этот сос сигнал за тем кто отправил его
+                                    this.getUpdatePatrulSos().apply( patrulSos.getUuid(), patrulSos.getPatrulUUID() );
+                                    // сохраняем адрес сигнала
+                                    patrulSos.setAddress( UnirestController
                                             .getInstance()
-                                            .getGetPatrulByUUID()
-                                            .apply( uuid ) )
-                                    .flatMap( patrul1 -> {
-                                        KafkaDataControl
-                                                .getInstance()
-                                                .getWriteToKafkaNotificatioForAndroid()
-                                                .accept( new SosNotificationForAndroid(
-                                                        patrulSos1,
-                                                        patrul,
-                                                        Status.IN_ACTIVE,
-                                                        patrul1.getPassportNumber() ) );
-                                        return Mono.just( patrul1 ); } )
-                                    .filter( patrul1 -> patrul1.getSos_id() != null
-                                            && patrul1.getSos_id().compareTo( patrulSos1.getUuid() ) == 0 ) // обнуляем только тех патрульных которые закреплены ха этим сосом
-                                    .sequential()
-                                    .publishOn( Schedulers.single() )
-                                    .subscribe( patrul1 -> this.updatePatrulSos.apply( null, patrul1.getUuid() ) );
+                                            .getGetAddressByLocation()
+                                            .apply( patrulSos.getLatitude(), patrulSos.getLongitude() )
+                                            .replaceAll( "'", "`" ) );
 
-                            this.getUpdatePatrulSos().apply( null, patrul.getUuid() );
+                                    return CassandraDataControl
+                                            .getInstance()
+                                            .getFindTheClosestPatrulsForSos()
+                                            .apply( new Point(
+                                                            patrulSos.getLatitude(),
+                                                            patrulSos.getLongitude() ),
+                                                    patrul.getUuid() )
+                                            .parallel( 20 )
+                                            .runOn( Schedulers.parallel() )
+                                            .map( patrul1 -> {
+                                                this.updatePatrulSosList( patrulSos.getUuid(), patrul1.getUuid(), Status.ATTACHED );
+                                                patrulSos.getPatrulStatuses().put( patrul1.getUuid(), Status.ATTACHED.name() );
+                                                this.getSave().accept( patrulSos );
+                                                KafkaDataControl
+                                                        .getInstance()
+                                                        .getWriteToKafkaNotificatioForAndroid()
+                                                        .accept( new SosNotificationForAndroid(
+                                                                patrulSos,
+                                                                patrul,
+                                                                Status.ACTIVE,
+                                                                patrul1.getPassportNumber() ) );
+                                                return patrulSos; } )
+                                            .sequential()
+                                            .publishOn( Schedulers.single() )
+                                            .count()
+                                            .flatMap( value -> Mono.just( apiResponseModel ) ); }
+                                else {
+                                    PatrulSos patrulSos1 = this.getCurrentPatrulSos.apply( patrul.getSos_id() );
+                                    Flux.fromStream( this.getCurrentPatrulSos.apply( patrul.getSos_id() )
+                                                    .getPatrulStatuses()
+                                                    .keySet()
+                                                    .stream()
+                                                    .parallel() )
+                                            .parallel()
+                                            .runOn( Schedulers.parallel() )
+                                            .flatMap( uuid -> CassandraDataControl
+                                                    .getInstance()
+                                                    .getGetPatrulByUUID()
+                                                    .apply( uuid ) )
+                                            .flatMap( patrul1 -> {
+                                                KafkaDataControl
+                                                        .getInstance()
+                                                        .getWriteToKafkaNotificatioForAndroid()
+                                                        .accept( new SosNotificationForAndroid(
+                                                                patrulSos1,
+                                                                patrul,
+                                                                Status.IN_ACTIVE,
+                                                                patrul1.getPassportNumber() ) );
+                                                return Mono.just( patrul1 ); } )
+                                            .filter( patrul1 -> patrul1.getSos_id() != null
+                                                    && patrul1.getSos_id().compareTo( patrulSos1.getUuid() ) == 0 ) // обнуляем только тех патрульных которые закреплены ха этим сосом
+                                            .sequential()
+                                            .publishOn( Schedulers.single() )
+                                            .subscribe( patrul1 -> this.updatePatrulSos.apply( null, patrul1.getUuid() ) );
 
-                            // меняем статус сигнала на выолнено
-                            this.getSession().execute( "UPDATE "
-                                    + CassandraTables.TABLETS.name() + "."
-                                    + CassandraTables.PATRUL_SOS_TABLE.name()
-                                    + " SET status = '" + Status.FINISHED.name() + "',"
-                                    + " sosWasClosed = '" + new Date().toInstant() + "'"
-                                    + " WHERE uuid = " + patrulSos1.getUuid() + " IF EXISTS;" ); }
-                        return Mono.just( apiResponseModel ); } ) );
+                                    this.getUpdatePatrulSos().apply( null, patrul.getUuid() );
+
+                                    // меняем статус сигнала на выолнено
+                                    this.getSession().execute( "UPDATE "
+                                            + CassandraTables.TABLETS.name() + "."
+                                            + CassandraTables.PATRUL_SOS_TABLE.name()
+                                            + " SET status = '" + Status.FINISHED.name() + "',"
+                                            + " sosWasClosed = '" + new Date().toInstant() + "'"
+                                            + " WHERE uuid = " + patrulSos1.getUuid() + " IF EXISTS;" );
+                                    return Mono.just( apiResponseModel ); } } ) );
 
     // используется в случае когда патрульный либо принимает сигнал либо отказывается
     private final Function< SosRequest, Mono< ApiResponseModel > > updatePatrulStatusInSosTable = sosRequest -> {

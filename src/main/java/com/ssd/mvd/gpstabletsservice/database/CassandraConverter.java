@@ -14,6 +14,7 @@ import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.Violation
 
 @Data
 public class CassandraConverter {
+    private String temp;
     private String result;
 
     private final static CassandraConverter cassandraConverter = new CassandraConverter();
@@ -81,11 +82,13 @@ public class CassandraConverter {
         return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
 
     public String convertSosMapToCassandra ( Map< UUID, String > listOfTasks ) {
-        result = "{";
+        temp = "{";
         listOfTasks
                 .keySet()
-                .forEach( s -> result += "" + s + " : '" + listOfTasks.get( s ) + "', " );
-        return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
+                .forEach( key -> temp += "" + key
+                        + " : '"
+                        + listOfTasks.get( key ) + "', ");
+        return temp.length() == 1 ? temp + "}" : temp.substring( 0, temp.length() - 2 ) + "}"; }
 
     public void registerCodecForPatrul ( String dbName, String userType ) {
         CassandraDataControl
