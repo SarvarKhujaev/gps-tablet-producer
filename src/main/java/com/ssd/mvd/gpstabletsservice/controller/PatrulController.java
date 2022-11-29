@@ -34,13 +34,25 @@ public class PatrulController {
     public Mono< ApiResponseModel > arrived ( String token ) { return CassandraDataControl
             .getInstance()
             .getArrived()
-            .apply( token ); }
+            .apply( token )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "ACCEPTED" )
     public Mono< ApiResponseModel > accepted ( String token ) { return CassandraDataControl
             .getInstance()
             .getAccepted()
-            .apply( token ); }
+            .apply( token )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "SET_IN_PAUSE" )
     public Mono< ApiResponseModel > setInPause ( String token ) { return CassandraDataControl
@@ -72,7 +84,13 @@ public class PatrulController {
             .getGetTaskDetails()
             .apply( SerDes
                     .getSerDes()
-                    .deserialize( data.getData() ) ); }
+                    .deserialize( data.getData() ) )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "LOGOUT" ) // used to Log out from current Account
     public Mono< ApiResponseModel > patrulLogout ( String token ) { return CassandraDataControl
