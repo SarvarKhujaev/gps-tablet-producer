@@ -363,8 +363,8 @@ public class CassandraDataControlForTasks {
         if ( patrul.getTaskId() != null ) this.getSession().execute( "DELETE FROM "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.TASKS_TIMING_TABLE.name()
-                + " WHERE taskId = " + patrul.getTaskId()
-                + " AND patruluuid = " + patrul.getUuid() + " IF EXISTS;" ); };
+                + " WHERE taskId = '" + patrul.getTaskId()
+                + "' AND patruluuid = " + patrul.getUuid() + " IF EXISTS;" ); };
 
     // обновляет время которое патрульный полностью потратил на выполнение задания
     // если патрульный завершил завершил то обновляем общее время выполнения

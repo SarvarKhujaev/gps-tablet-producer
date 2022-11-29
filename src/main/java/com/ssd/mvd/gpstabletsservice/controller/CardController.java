@@ -35,7 +35,9 @@ public class CardController {
             .getInstance()
             .getGetActiveTasks()
             .get()
-            .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() ); }
+            .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
@@ -45,7 +47,13 @@ public class CardController {
             .flatMap( patrul -> TaskInspector
                     .getInstance()
                     .getGetCurrentActiveTask()
-                    .apply( patrul ) ); }
+                    .apply( patrul ) )
+            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ) )
+            .onErrorReturn( Archive
+                    .getArchive()
+                    .getErrorResponse()
+                    .get() ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
@@ -233,7 +241,13 @@ public class CardController {
                                 .apply( KafkaDataControl
                                         .getInstance()
                                         .getWriteCarTotalDataToKafka()
-                                        .apply( carTotalData ) ) ) ); }
+                                        .apply( carTotalData ) ) ) )
+                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
+                        error.getMessage(), object ) ) )
+                .onErrorReturn( Archive
+                        .getArchive()
+                        .getErrorResponse()
+                        .get() ); }
 
     @MessageMapping ( value = "getViolationsInformationList" )
     public Mono< List< ViolationsInformation > > getViolationsInformationList ( String gosnumber ) { return Mono.just(
