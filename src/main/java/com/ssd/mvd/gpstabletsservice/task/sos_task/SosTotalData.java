@@ -38,6 +38,6 @@ public class SosTotalData {
         this.setLongitude( patrulSos.getLongitude() );
 
         this.setStatus( Status.CREATED );
-        this.setPatrulStatus( Status.valueOf( patrulStatus ) );
+        this.setPatrulStatus( patrulStatus != null ? Status.valueOf( patrulStatus ) : Status.ATTACHED );
         this.setSosNotificationForAndroid( sosNotificationForAndroid ); }
 }
