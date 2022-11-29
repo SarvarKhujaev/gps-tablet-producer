@@ -23,7 +23,7 @@ public class NotificationController {
             .getInstance()
             .getGetAllNotification()
             .get()
-            .sort( Comparator.comparing( Notification::getNotificationWasCreated ) )
+            .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
@@ -33,7 +33,7 @@ public class NotificationController {
             .getGetAllNotification()
             .get()
             .filter( notification -> !notification.getWasRead() )
-            .sort( Comparator.comparing( Notification::getNotificationWasCreated ) )
+            .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
