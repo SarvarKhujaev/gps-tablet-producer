@@ -20,7 +20,6 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.*;
-import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.FinishedTask;
@@ -90,10 +89,8 @@ public final class TaskInspector {
                             .accept( card.getCardId().toString() );
                     KafkaDataControl
                             .getInstance()
-                            .getWriteToKafka()
-                            .accept( SerDes
-                                    .getSerDes()
-                                    .serialize( new ActiveTask( card ) ) ); }
+                            .getWriteActiveTaskToKafka()
+                            .accept( new ActiveTask( card ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -104,44 +101,18 @@ public final class TaskInspector {
                 patrul.setLongitudeOfTask( card.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = PatrulStatus
-                        .builder()
-                        .patrul( patrul )
-                        .inTime( patrul.check() )
-                        .totalTimeConsumption( TimeInspector
-                                .getInspector()
-                                .getGetTimeDifference()
-                                .apply( patrul.getTaskDate().toInstant() ) )
-                        .build();
+                PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 card.getPatrulStatuses()
-                        .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
+                        .put( patrul.getPassportNumber(), patrulStatus );
 
-                Mono.just( new TaskTimingStatistics() )
-                        .flatMap( taskTimingStatistics -> {
-                            taskTimingStatistics.setTaskTypes( CARD_102 );
-                            taskTimingStatistics.setDateOfComing( new Date() );
-                            taskTimingStatistics.setTotalTimeConsumption( 0L );
-                            taskTimingStatistics.setPatrulUUID( patrul.getUuid() );
-                            taskTimingStatistics.setInTime( patrulStatus.getInTime() );
-                            taskTimingStatistics.setTaskId( card.getCardId().toString() );
-                            taskTimingStatistics.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
-                            taskTimingStatistics.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() );
-                            return CassandraDataControl
-                                    .getInstance()
-                                    .getGetHistory()
-                                    .apply( PatrulActivityRequest
-                                            .builder()
-                                            .endDate( taskTimingStatistics.getDateOfComing() )
-                                            .patrulUUID( patrul.getPassportNumber() )
-                                            .startDate( patrul.getTaskDate() )
-                                            .build() )
-                                    .map( positionInfos -> {
-                                        taskTimingStatistics.setPositionInfoList( positionInfos );
-                                        return taskTimingStatistics; } ); } )
-                        .subscribe( taskInspector -> CassandraDataControlForTasks
-                                .getInstance()
-                                .getSaveTaskTimeStatistics()
-                                .accept( taskInspector ) ); } }
+                CassandraDataControlForTasks
+                        .getInstance()
+                        .getSaveTaskTimeStatistics()
+                        .accept( new TaskTimingStatistics(
+                                patrul,
+                                card.getCardId().toString(),
+                                CARD_102,
+                                patrulStatus ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) card.getPatruls().put( patrul.getUuid(), patrul );
 
         CassandraDataControl
@@ -163,8 +134,12 @@ public final class TaskInspector {
                 .getInstance()
                 .getWriteNotificationToKafka()
                 .accept( CassandraDataControl
-                        .getInstance()
-                        .addValue( new Notification( patrul, card, this.generateText( patrul, status ) ) ) );
+                            .getInstance()
+                            .getSaveNotification()
+                        .apply( new Notification(
+                                patrul,
+                                card,
+                                this.generateText( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventCar eventCar ) {
@@ -194,10 +169,8 @@ public final class TaskInspector {
                             .accept( eventCar.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .getWriteToKafka()
-                            .accept( SerDes
-                                    .getSerDes()
-                                    .serialize( new ActiveTask( eventCar ) ) ); }
+                            .getWriteActiveTaskToKafka()
+                            .accept( new ActiveTask( eventCar ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -208,44 +181,18 @@ public final class TaskInspector {
                 patrul.setLongitudeOfTask( eventCar.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = PatrulStatus
-                        .builder()
-                        .patrul( patrul )
-                        .inTime( patrul.check() )
-                        .totalTimeConsumption( TimeInspector
-                                .getInspector()
-                                .getGetTimeDifference()
-                                .apply( patrul.getTaskDate().toInstant() ) )
-                        .build();
+                PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 eventCar.getPatrulStatuses()
-                        .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
+                        .put( patrul.getPassportNumber(), patrulStatus );
 
-                Mono.just( new TaskTimingStatistics() )
-                        .flatMap( taskTimingStatistics -> {
-                            taskTimingStatistics.setTaskId( eventCar.getId() );
-                            taskTimingStatistics.setTaskTypes( FIND_FACE_CAR );
-                            taskTimingStatistics.setDateOfComing( new Date() );
-                            taskTimingStatistics.setTotalTimeConsumption( 0L );
-                            taskTimingStatistics.setPatrulUUID( patrul.getUuid() );
-                            taskTimingStatistics.setInTime( patrulStatus.getInTime() );
-                            taskTimingStatistics.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
-                            taskTimingStatistics.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() );
-                            return CassandraDataControl
-                                    .getInstance()
-                                    .getGetHistory()
-                                    .apply( PatrulActivityRequest
-                                            .builder()
-                                            .endDate( taskTimingStatistics.getDateOfComing() )
-                                            .patrulUUID( patrul.getPassportNumber() )
-                                            .startDate( patrul.getTaskDate() )
-                                            .build() )
-                                    .map( positionInfos -> {
-                                        taskTimingStatistics.setPositionInfoList( positionInfos );
-                                        return taskTimingStatistics; } ); } )
-                        .subscribe( taskInspector -> CassandraDataControlForTasks
-                                .getInstance()
-                                .getSaveTaskTimeStatistics()
-                                .accept( taskInspector ) ); } }
+                CassandraDataControlForTasks
+                        .getInstance()
+                        .getSaveTaskTimeStatistics()
+                        .accept( new TaskTimingStatistics(
+                                patrul,
+                                eventCar.getId(),
+                                FIND_FACE_EVENT_CAR,
+                                patrulStatus ) ); } }
         if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .addValue( eventCar.getId(), new ActiveTask( eventCar ) );
@@ -267,7 +214,11 @@ public final class TaskInspector {
                 .getWriteNotificationToKafka()
                 .accept( CassandraDataControl
                         .getInstance()
-                        .addValue( new Notification( patrul, eventCar, this.generateText( patrul, status ) ) ) );
+                        .getSaveNotification()
+                        .apply( new Notification(
+                                patrul,
+                                eventCar,
+                                this.generateText( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventFace eventFace ) {
@@ -297,10 +248,8 @@ public final class TaskInspector {
                             .accept( eventFace.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .getWriteToKafka()
-                            .accept( SerDes
-                                    .getSerDes()
-                                    .serialize( new ActiveTask( eventFace ) ) ); }
+                            .getWriteActiveTaskToKafka()
+                            .accept( new ActiveTask( eventFace ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -311,45 +260,19 @@ public final class TaskInspector {
                 patrul.setLongitudeOfTask( eventFace.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = PatrulStatus
-                        .builder()
-                        .patrul( patrul )
-                        .inTime( patrul.check() )
-                        .totalTimeConsumption( TimeInspector
-                                .getInspector()
-                                .getGetTimeDifference()
-                                .apply( patrul.getTaskDate().toInstant() ) )
-                        .build();
+                PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 eventFace
                         .getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                Mono.just( new TaskTimingStatistics() )
-                        .flatMap( taskTimingStatistics -> {
-                            taskTimingStatistics.setTotalTimeConsumption( 0L );
-                            taskTimingStatistics.setDateOfComing( new Date() );
-                            taskTimingStatistics.setTaskId( eventFace.getId() );
-                            taskTimingStatistics.setTaskTypes( FIND_FACE_PERSON );
-                            taskTimingStatistics.setPatrulUUID( patrul.getUuid() );
-                            taskTimingStatistics.setInTime( patrulStatus.getInTime() );
-                            taskTimingStatistics.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
-                            taskTimingStatistics.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() );
-                            return CassandraDataControl
-                                    .getInstance()
-                                    .getGetHistory()
-                                    .apply( PatrulActivityRequest
-                                            .builder()
-                                            .endDate( taskTimingStatistics.getDateOfComing() )
-                                            .patrulUUID( patrul.getPassportNumber() )
-                                            .startDate( patrul.getTaskDate() )
-                                            .build() )
-                                    .map( positionInfos -> {
-                                        taskTimingStatistics.setPositionInfoList( positionInfos );
-                                        return taskTimingStatistics; } ); } )
-                        .subscribe( taskInspector -> CassandraDataControlForTasks
-                                .getInstance()
-                                .getSaveTaskTimeStatistics()
-                                .accept( taskInspector ) ); } }
+                CassandraDataControlForTasks
+                        .getInstance()
+                        .getSaveTaskTimeStatistics()
+                        .accept( new TaskTimingStatistics(
+                                patrul,
+                                eventFace.getId(),
+                                FIND_FACE_EVENT_FACE,
+                                patrulStatus ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
         if ( eventFace.getStatus().compareTo( FINISHED ) != 0 )
             CassandraDataControlForTasks
@@ -371,7 +294,11 @@ public final class TaskInspector {
                 .getWriteNotificationToKafka()
                 .accept( CassandraDataControl
                         .getInstance()
-                        .addValue( new Notification( patrul, eventFace, this.generateText( patrul, status ) ) ) );
+                        .getSaveNotification()
+                        .apply( new Notification(
+                                patrul,
+                                eventFace,
+                                this.generateText( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventBody eventBody ) {
@@ -402,10 +329,8 @@ public final class TaskInspector {
                             .accept( eventBody.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .getWriteToKafka()
-                            .accept( SerDes
-                                    .getSerDes()
-                                    .serialize( new ActiveTask( eventBody ) ) ); }
+                            .getWriteActiveTaskToKafka()
+                            .accept( new ActiveTask( eventBody ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -416,44 +341,18 @@ public final class TaskInspector {
                 patrul.setLongitudeOfTask( eventBody.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = PatrulStatus
-                        .builder()
-                        .patrul( patrul )
-                        .inTime( patrul.check() )
-                        .totalTimeConsumption( TimeInspector
-                                .getInspector()
-                                .getGetTimeDifference()
-                                .apply( patrul.getTaskDate().toInstant() ) )
-                        .build();
+                PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 eventBody.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                Mono.just( new TaskTimingStatistics() )
-                        .flatMap( taskTimingStatistics -> {
-                            taskTimingStatistics.setTotalTimeConsumption( 0L );
-                            taskTimingStatistics.setDateOfComing( new Date() );
-                            taskTimingStatistics.setTaskId( eventBody.getId() );
-                            taskTimingStatistics.setTaskTypes( FIND_FACE_PERSON );
-                            taskTimingStatistics.setPatrulUUID( patrul.getUuid() );
-                            taskTimingStatistics.setInTime( patrulStatus.getInTime() );
-                            taskTimingStatistics.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
-                            taskTimingStatistics.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() );
-                            return CassandraDataControl
-                                    .getInstance()
-                                    .getGetHistory()
-                                    .apply( PatrulActivityRequest
-                                            .builder()
-                                            .endDate( taskTimingStatistics.getDateOfComing() )
-                                            .patrulUUID( patrul.getPassportNumber() )
-                                            .startDate( patrul.getTaskDate() )
-                                            .build() )
-                                    .map( positionInfos -> {
-                                        taskTimingStatistics.setPositionInfoList( positionInfos );
-                                        return taskTimingStatistics; } ); } )
-                        .subscribe( taskInspector -> CassandraDataControlForTasks
-                                .getInstance()
-                                .getSaveTaskTimeStatistics()
-                                .accept( taskInspector ) ); } }
+                CassandraDataControlForTasks
+                        .getInstance()
+                        .getSaveTaskTimeStatistics()
+                        .accept( new TaskTimingStatistics(
+                                patrul,
+                                eventBody.getId(),
+                                FIND_FACE_EVENT_BODY,
+                                patrulStatus ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul );
         if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
@@ -469,13 +368,16 @@ public final class TaskInspector {
                 .getUpdatePatrulAfterTask()
                 .accept( patrul );
 
-        Mono.just( new Notification( patrul, eventBody, this.generateText( patrul, status ) ) )
-                        .subscribe( notification -> KafkaDataControl
-                                .getInstance()
-                                .getWriteNotificationToKafka()
-                                .accept( CassandraDataControl
-                                        .getInstance()
-                                        .addValue( notification ) ) );
+        KafkaDataControl
+                .getInstance()
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
+                        .getInstance()
+                        .getSaveNotification()
+                        .apply( new Notification(
+                                patrul,
+                                eventBody,
+                                this.generateText( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvent carEvents ) {
@@ -507,10 +409,8 @@ public final class TaskInspector {
                             .accept( carEvents.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .getWriteToKafka()
-                            .accept( SerDes
-                                    .getSerDes()
-                                    .serialize( new ActiveTask( carEvents ) ) ); }
+                            .getWriteActiveTaskToKafka()
+                            .accept( new ActiveTask( carEvents ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -523,45 +423,18 @@ public final class TaskInspector {
                     patrul.setLongitudeOfTask( carEvents.getDataInfo().getData().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = PatrulStatus
-                        .builder()
-                        .patrul( patrul )
-                        .inTime( patrul.check() )
-                        .totalTimeConsumption( TimeInspector
-                                .getInspector()
-                                .getGetTimeDifference()
-                                .apply( patrul.getTaskDate().toInstant() ) )
-                        .build();
+                PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 carEvents.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                Mono.just( new TaskTimingStatistics() )
-                        .flatMap( taskTimingStatistics -> {
-                            taskTimingStatistics.setDateOfComing( new Date() );
-                            taskTimingStatistics.setTaskTypes( FIND_FACE_CAR );
-                            taskTimingStatistics.setTotalTimeConsumption( 0L );
-                            taskTimingStatistics.setTaskId( carEvents.getId() );
-                            taskTimingStatistics.setPatrulUUID( patrul.getUuid() );
-                            taskTimingStatistics.setInTime( patrulStatus.getInTime() );
-                            taskTimingStatistics.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
-                            taskTimingStatistics.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() );
-                            return CassandraDataControl
-                                    .getInstance()
-                                    .getGetHistory()
-                                    .apply( PatrulActivityRequest
-                                            .builder()
-                                            .endDate( taskTimingStatistics.getDateOfComing() )
-                                            .patrulUUID( patrul.getPassportNumber() )
-                                            .startDate( patrul.getTaskDate() )
-                                            .build() )
-                                    .map( positionInfos -> {
-                                        taskTimingStatistics.setPositionInfoList( positionInfos );
-                                        return taskTimingStatistics; } ); } )
-                        .subscribe( taskInspector -> CassandraDataControlForTasks
-                                .getInstance()
-                                .getSaveTaskTimeStatistics()
-                                .accept( taskInspector ) ); }
-        }
+                CassandraDataControlForTasks
+                        .getInstance()
+                        .getSaveTaskTimeStatistics()
+                        .accept( new TaskTimingStatistics(
+                                patrul,
+                                carEvents.getId(),
+                                FIND_FACE_CAR,
+                                patrulStatus ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
         if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
@@ -577,13 +450,16 @@ public final class TaskInspector {
                 .getUpdatePatrulAfterTask()
                 .accept( patrul );
 
-        Mono.just( new Notification( patrul, carEvents, this.generateText( patrul, status ) ) )
-                .subscribe( notification -> KafkaDataControl
+        KafkaDataControl
+                .getInstance()
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
-                        .getWriteNotificationToKafka()
-                        .accept( CassandraDataControl
-                                .getInstance()
-                                .addValue( notification ) ) );
+                        .getSaveNotification()
+                        .apply( new Notification(
+                                patrul,
+                                carEvents,
+                                this.generateText( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvent faceEvent ) {
@@ -615,10 +491,8 @@ public final class TaskInspector {
                             .accept( faceEvent.getId() );
                     KafkaDataControl
                             .getInstance()
-                            .getWriteToKafka()
-                            .accept( SerDes
-                                    .getSerDes()
-                                    .serialize( new ActiveTask( faceEvent ) ) ); }
+                            .getWriteActiveTaskToKafka()
+                            .accept( new ActiveTask( faceEvent ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -631,44 +505,18 @@ public final class TaskInspector {
                     patrul.setLongitudeOfTask( faceEvent.getDataInfo().getData().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = PatrulStatus
-                        .builder()
-                        .patrul( patrul )
-                        .inTime( patrul.check() )
-                        .totalTimeConsumption( TimeInspector
-                                .getInspector()
-                                .getGetTimeDifference()
-                                .apply( patrul.getTaskDate().toInstant() ) )
-                        .build();
+                PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 faceEvent.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                Mono.just( new TaskTimingStatistics() )
-                        .flatMap( taskTimingStatistics -> {
-                            taskTimingStatistics.setDateOfComing( new Date() );
-                            taskTimingStatistics.setTotalTimeConsumption( 0L );
-                            taskTimingStatistics.setTaskId( faceEvent.getId() );
-                            taskTimingStatistics.setTaskTypes( FIND_FACE_PERSON );
-                            taskTimingStatistics.setPatrulUUID( patrul.getUuid() );
-                            taskTimingStatistics.setInTime( patrulStatus.getInTime() );
-                            taskTimingStatistics.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
-                            taskTimingStatistics.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() );
-                            return CassandraDataControl
-                                    .getInstance()
-                                    .getGetHistory()
-                                    .apply( PatrulActivityRequest
-                                            .builder()
-                                            .endDate( taskTimingStatistics.getDateOfComing() )
-                                            .patrulUUID( patrul.getPassportNumber() )
-                                            .startDate( patrul.getTaskDate() )
-                                            .build() )
-                                    .map( positionInfos -> {
-                                        taskTimingStatistics.setPositionInfoList( positionInfos );
-                                        return taskTimingStatistics; } ); } )
-                        .subscribe( taskInspector -> CassandraDataControlForTasks
-                                .getInstance()
-                                .getSaveTaskTimeStatistics()
-                                .accept( taskInspector ) ); } }
+                CassandraDataControlForTasks
+                        .getInstance()
+                        .getSaveTaskTimeStatistics()
+                        .accept( new TaskTimingStatistics(
+                                patrul,
+                                faceEvent.getId(),
+                                FIND_FACE_PERSON,
+                                patrulStatus ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul );
         if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 )
             CassandraDataControlForTasks
@@ -685,13 +533,16 @@ public final class TaskInspector {
                 .getUpdatePatrulAfterTask()
                 .accept( patrul );
 
-        Mono.just( new Notification( patrul, faceEvent, this.generateText( patrul, status ) ) )
-                .subscribe( notification -> KafkaDataControl
+        KafkaDataControl
+                .getInstance()
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
-                        .getWriteNotificationToKafka()
-                        .accept( CassandraDataControl
-                                .getInstance()
-                                .addValue( notification ) ) );
+                        .getSaveNotification()
+                        .apply( new Notification(
+                                patrul,
+                                faceEvent,
+                                this.generateText( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EscortTuple escortTuple ) {
@@ -699,7 +550,7 @@ public final class TaskInspector {
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
                 if ( status.compareTo( FINISHED ) == 0 ) patrul.getListOfTasks()
-                        .putIfAbsent( patrul.getTaskId(), ESCORT.name() );
+                        .put( patrul.getTaskId(), ESCORT.name() );
                 else escortTuple.getPatrulList().remove( patrul.getUuid() );
                 CassandraDataControlForEscort
                         .getInstance()
@@ -721,18 +572,12 @@ public final class TaskInspector {
                 patrul.setTaskTypes( TaskTypes.ESCORT );
                 patrul.setTaskId( escortTuple.getUuid().toString() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); }
+
         CassandraDataControl
                 .getInstance()
                 .getUpdatePatrulAfterTask()
                 .accept( patrul );
 
-        Mono.just( new Notification( patrul, escortTuple, this.generateText( patrul, status ) ) )
-                .subscribe( notification -> KafkaDataControl
-                        .getInstance()
-                        .getWriteNotificationToKafka()
-                        .accept( CassandraDataControl
-                                .getInstance()
-                                .addValue( notification ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, SelfEmploymentTask selfEmploymentTask ) {
@@ -766,54 +611,26 @@ public final class TaskInspector {
 
                     KafkaDataControl
                             .getInstance()
-                            .getWriteToKafka()
-                            .accept( SerDes
-                                    .getSerDes()
-                                    .serialize( new ActiveTask( selfEmploymentTask ) ) ); }
+                            .getWriteActiveTaskToKafka()
+                            .accept( new ActiveTask( selfEmploymentTask ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ARRIVED -> {
                 patrul.setTaskTypes( SELF_EMPLOYMENT );
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
-                PatrulStatus patrulStatus = PatrulStatus
-                        .builder()
-                        .patrul( patrul )
-                        .inTime( patrul.check() )
-                        .totalTimeConsumption( TimeInspector
-                                .getInspector()
-                                .getGetTimeDifference()
-                                .apply( patrul.getTaskDate().toInstant() ) )
-                        .build();
+                PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 selfEmploymentTask.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                Mono.just( new TaskTimingStatistics() )
-                        .flatMap( taskTimingStatistics -> {
-                            taskTimingStatistics.setTotalTimeConsumption( 0L );
-                            taskTimingStatistics.setDateOfComing( new Date() );
-                            taskTimingStatistics.setTaskTypes( SELF_EMPLOYMENT );
-                            taskTimingStatistics.setPatrulUUID( patrul.getUuid() );
-                            taskTimingStatistics.setInTime( patrulStatus.getInTime() );
-                            taskTimingStatistics.setTaskId( selfEmploymentTask.getUuid().toString() );
-                            taskTimingStatistics.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
-                            taskTimingStatistics.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() );
-                            return CassandraDataControl
-                                    .getInstance()
-                                    .getGetHistory()
-                                    .apply( PatrulActivityRequest
-                                            .builder()
-                                            .endDate( taskTimingStatistics.getDateOfComing() )
-                                            .patrulUUID( patrul.getPassportNumber() )
-                                            .startDate( patrul.getTaskDate() )
-                                            .build() )
-                                    .map( positionInfos -> {
-                                        taskTimingStatistics.setPositionInfoList( positionInfos );
-                                        return taskTimingStatistics; } ); } )
-                        .subscribe( taskInspector -> CassandraDataControlForTasks
-                                .getInstance()
-                                .getSaveTaskTimeStatistics()
-                                .accept( taskInspector ) ); }
+                CassandraDataControlForTasks
+                        .getInstance()
+                        .getSaveTaskTimeStatistics()
+                        .accept( new TaskTimingStatistics(
+                                patrul,
+                                selfEmploymentTask.getUuid().toString(),
+                                SELF_EMPLOYMENT,
+                                patrulStatus ) ); }
             case ATTACHED, ACCEPTED -> {
                 patrul.setTaskTypes( SELF_EMPLOYMENT );
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object
@@ -835,13 +652,16 @@ public final class TaskInspector {
                 .getUpdatePatrulAfterTask()
                 .accept( patrul );
 
-        Mono.just( new Notification( patrul, selfEmploymentTask, this.generateText( patrul, status ) ) )
-                .subscribe( notification -> KafkaDataControl
+        KafkaDataControl
+                .getInstance()
+                .getWriteNotificationToKafka()
+                .accept( CassandraDataControl
                         .getInstance()
-                        .getWriteNotificationToKafka()
-                        .accept( CassandraDataControl
-                                .getInstance()
-                                .addValue( notification ) ) );
+                        .getSaveNotification()
+                        .apply( new Notification(
+                                patrul,
+                                selfEmploymentTask,
+                                this.generateText( patrul, status ) ) ) );
         return patrul; }
 
     public Mono< ApiResponseModel > getListOfPatrulTasks ( Patrul patrul, Integer page, Integer size ) {

@@ -7,7 +7,6 @@ import com.datastax.driver.core.Row;
 
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.*;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
@@ -165,19 +164,6 @@ public class Notification {
                 && faceEvent.getDataInfo().getData() != null
                 && faceEvent.getDataInfo().getData().getAddress() != null ?
                 faceEvent.getDataInfo().getData().getAddress() : "unknown" ); }
-
-    public Notification ( Patrul patrul, EscortTuple escortTuple, String text ) {
-        this.setTitle( text );
-        this.setType( ESCORT.name() );
-        this.setUuid( UUID.randomUUID() );
-        this.setStatus( patrul.getStatus() );
-        this.setCarNumber( patrul.getCarNumber() );
-        this.setTaskTypes( patrul.getTaskTypes() );
-        this.setNotificationWasCreated( new Date() );
-        this.setPoliceType( patrul.getPoliceType() );
-        this.setId( escortTuple.getUuid().toString() );
-        this.setPassportSeries( patrul.getPassportNumber() );
-        this.setNsfOfPatrul( patrul.getSurnameNameFatherName() ); }
 
     public Notification ( Patrul patrul, SelfEmploymentTask selfEmploymentTask, String text ) {
         this.setTitle( text );

@@ -1,21 +1,20 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
+import static com.ssd.mvd.gpstabletsservice.constants.Status.IN_TIME;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.LATE;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.datastax.driver.core.Row;
-
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import lombok.Data;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class TaskTimingStatistics { // показывает все таски со временем их выполнения и деталями
     private String carType; // модель машины
     private String organName;
@@ -87,4 +86,28 @@ public class TaskTimingStatistics { // показывает все таски с
                     this.setLongitude( patrul1.getLongitude() );
                     this.setLatitudeOfTask( patrul1.getLatitudeOfTask() );
                     this.setLongitudeOfTask( patrul1.getLongitudeOfTask() ); } ); }
+
+    public TaskTimingStatistics (
+            Patrul patrul,
+            String taskId,
+            TaskTypes taskTypes,
+            PatrulStatus patrulStatus ) {
+        this.setDateOfComing( new Date() );
+        CassandraDataControl
+                .getInstance()
+                .getGetHistory()
+                .apply( PatrulActivityRequest
+                        .builder()
+                        .endDate( this.getDateOfComing() )
+                        .patrulUUID( patrul.getPassportNumber() )
+                        .startDate( patrul.getTaskDate() )
+                        .build() )
+                .subscribe( this::setPositionInfoList );
+        this.setTaskId( taskId );
+        this.setTaskTypes( taskTypes );
+        this.setTotalTimeConsumption( 0L );
+        this.setPatrulUUID( patrul.getUuid() );
+        this.setInTime( patrulStatus.getInTime() );
+        this.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
+        this.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() ); }
 }
