@@ -787,7 +787,7 @@ public class CassandraDataControlForTasks {
                                     .build() ) ) );
 
     // создает список различных сос сишгалов лоя нового патрульного
-    private final Consumer< UUID > createRowInPatrulSosTable = uuid -> this.getSession()
+    private final Consumer< UUID > createRowInPatrulSosListTable = uuid -> this.getSession()
             .execute( "INSERT INTO "
             + CassandraTables.TABLETS.name() + "."
             + CassandraTables.PATRUL_SOS_LIST.name()

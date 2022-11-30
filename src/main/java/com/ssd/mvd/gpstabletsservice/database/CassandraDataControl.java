@@ -952,7 +952,7 @@ public final class CassandraDataControl {
                             + patrul.getUuid() + " ) IF NOT EXISTS;" );
             CassandraDataControlForTasks
                     .getInstance()
-                    .getCreateRowInPatrulSosTable()
+                    .getCreateRowInPatrulSosListTable()
                     .accept( patrul.getUuid() );
             return this.getSession().execute( "INSERT INTO "
                             + CassandraTables.TABLETS.name() + "."

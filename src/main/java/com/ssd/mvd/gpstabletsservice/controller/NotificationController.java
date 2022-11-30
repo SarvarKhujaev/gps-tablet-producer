@@ -47,4 +47,13 @@ public class NotificationController {
                     .getArchive()
                     .getErrorResponse()
                     .get() ); }
+
+    @MessageMapping ( value = "getUnreadNotificationQuantity" )
+    public Mono< Long > getUnreadNotificationQuantity () {
+        return CassandraDataControl
+            .getInstance()
+            .getGetAllNotification()
+            .get()
+            .filter( notification -> !notification.getWasRead() )
+            .count(); }
 }
