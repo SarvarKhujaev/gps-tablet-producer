@@ -654,7 +654,7 @@ public class CassandraDataControlForTasks {
                                                             patrulSos.getLatitude(),
                                                             patrulSos.getLongitude() ),
                                                     patrul.getUuid() )
-                                            .parallel( 20 )
+                                            .parallel( 5 )
                                             .runOn( Schedulers.parallel() )
                                             .map( patrul1 -> {
                                                 this.updatePatrulSosList( patrulSos.getUuid(), patrul1.getUuid(), Status.ATTACHED );

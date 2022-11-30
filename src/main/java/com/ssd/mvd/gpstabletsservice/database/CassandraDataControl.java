@@ -1369,7 +1369,7 @@ public final class CassandraDataControl {
                     .sequential()
                     .sort( Comparator.comparing( Patrul::getDistance ) )
                     .publishOn( Schedulers.single() )
-                    .take( 20 );
+                    .take( 5 );
 
     public Boolean login ( Patrul patrul, Status status ) { return switch ( status ) {
         // in case when Patrul wants to leave his account
