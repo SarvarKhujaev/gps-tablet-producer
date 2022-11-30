@@ -23,11 +23,12 @@ public class CardDetails {
     public CardDetails ( CarDetails carDetails ) { this.setCarDetails( carDetails ); }
 
     public CardDetails ( CarTotalData carTotalData ) {
-        this.getDetails().putIfAbsent( Details.TONIROVKA, new ArrayList<>() );
-        this.getDetails().putIfAbsent( Details.ISHONCHNOMA, new ArrayList<>() );
-        this.getDetails().putIfAbsent( Details.AVTO_SUGURTA, new ArrayList<>() );
-        this.getDetails().putIfAbsent( Details.TEX_PASSPORT, new ArrayList<>() );
-        this.getDetails().putIfAbsent( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR, new ArrayList<>() );
+        this.getDetails().clear();
+        this.getDetails().put( Details.TONIROVKA, new ArrayList<>() );
+        this.getDetails().put( Details.ISHONCHNOMA, new ArrayList<>() );
+        this.getDetails().put( Details.AVTO_SUGURTA, new ArrayList<>() );
+        this.getDetails().put( Details.TEX_PASSPORT, new ArrayList<>() );
+        this.getDetails().put( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR, new ArrayList<>() );
 
         if ( carTotalData
                 .getDoverennostList() != null
@@ -421,10 +422,9 @@ public class CardDetails {
                 .add( new Item( "Долгота локации машины", tupleOfCar.getLongitude() ) ); }
 
     public CardDetails ( SelfEmploymentTask selfEmploymentTask, String language, Patrul patrul ) {
-        this.getDetails().putIfAbsent( Details.SELF_EMPLOYMENT, new ArrayList<>() );
+        this.getDetails().clear();
+        this.getDetails().put( Details.SELF_EMPLOYMENT, new ArrayList<>() );
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() )
-                .parallel()
-                .runOn( Schedulers.parallel() )
                 .subscribe( details -> {
             switch ( details ) {
                 case NUMBER -> this.getDetails().get( Details.SELF_EMPLOYMENT )
