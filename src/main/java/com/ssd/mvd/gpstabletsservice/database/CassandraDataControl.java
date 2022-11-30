@@ -741,6 +741,8 @@ public final class CassandraDataControl {
                     + " SET status = '" + patrul.getStatus() + "', "
                     + " taskTypes = '" + patrul.getTaskTypes() + "', "
                     + " taskId = '" + patrul.getTaskId() + "', "
+                    + " uuidOfEscort = " + patrul.getUuidOfEscort() + ", "
+                    + " uuidForEscortCar = " + patrul.getUuidForEscortCar() + ", "
                     + " longitudeOfTask = " + patrul.getLongitudeOfTask() + ", "
                     + " latitudeOfTask = " + patrul.getLatitudeOfTask() + ", "
                     + " taskDate = '" + ( patrul.getTaskDate() != null
@@ -899,7 +901,7 @@ public final class CassandraDataControl {
     public Mono< ApiResponseModel > deletePatrul ( UUID uuid ) { return this.getGetPatrulByUUID()
             .apply( uuid )
             .flatMap( patrul -> {
-                if ( this.checkPatrulLinks.test( patrul ) ) {
+                if ( this.getCheckPatrulLinks().test( patrul ) ) {
                     this.getSession().execute ( "DELETE FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.PATRULS_LOGIN_TABLE.name()
@@ -1260,34 +1262,35 @@ public final class CassandraDataControl {
             .sequential()
             .publishOn( Schedulers.single() );
 
-    public Notification addValue ( Notification notification ) { this.getSession().execute(
-        "INSERT INTO "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.NOTIFICATION.name() +
-                CassandraConverter
-                        .getInstance()
-                        .getALlNames( Notification.class )
-            + " VALUES ('"
-                + notification.getId() + "', '"
-                + notification.getType() + "', '"
-                + notification.getTitle() + "', '"
-                + notification.getAddress() + "', '"
-                + notification.getCarNumber() + "', '"
-                + notification.getPoliceType() + "', '"
-                + notification.getNsfOfPatrul() + "', '"
-                + notification.getPassportSeries() + "', "
+    private final Function< Notification, Notification > saveNotification = notification -> {
+        this.getSession().execute(
+                "INSERT INTO "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.NOTIFICATION.name() +
+                        CassandraConverter
+                                .getInstance()
+                                .getALlNames( Notification.class )
+                        + " VALUES ('"
+                        + notification.getId() + "', '"
+                        + notification.getType() + "', '"
+                        + notification.getTitle() + "', '"
+                        + notification.getAddress() + "', '"
+                        + notification.getCarNumber() + "', '"
+                        + notification.getPoliceType() + "', '"
+                        + notification.getNsfOfPatrul() + "', '"
+                        + notification.getPassportSeries() + "', "
 
-                + notification.getLongitudeOfTask() + ", "
-                + notification.getLongitudeOfTask() + ", "
+                        + notification.getLongitudeOfTask() + ", "
+                        + notification.getLongitudeOfTask() + ", "
 
-                + notification.getUuid() + ", '"
-                + notification.getStatus() + "', "
-                + false + ", '"
-                + notification.getTaskTypes() + "', '"
-                + notification.getNotificationWasCreated().toInstant() + "');" );
-        return notification; }
+                        + notification.getUuid() + ", '"
+                        + notification.getStatus() + "', "
+                        + false + ", '"
+                        + notification.getTaskTypes() + "', '"
+                        + notification.getNotificationWasCreated().toInstant() + "');" );
+        return notification; };
 
-    public Mono< ApiResponseModel > setNotificationAsRead ( UUID uuid ) { return this.getSession()
+    private final Function< UUID, Mono< ApiResponseModel > > setNotificationAsRead = uuid -> this.getSession()
             .execute( "UPDATE "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.NOTIFICATION.name()
@@ -1304,7 +1307,7 @@ public final class CassandraDataControl {
             .apply( Map.of(
                     "message", "Notification " + uuid + " was not updated",
                     "success", false,
-                    "code", 201 ) ); }
+                    "code", 201 ) );
 
     public Mono< ApiResponseModel > delete ( String table,
                                              String param,
@@ -1319,10 +1322,10 @@ public final class CassandraDataControl {
 
     private static final Double p = PI / 180;
 
-    private Double calculate ( Point first, Patrul second ) { return 12742 * asin( sqrt( 0.5 -
-            cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2
+    private final BiFunction< Point, Patrul, Double > calculate = ( first, second ) ->
+            12742 * asin( sqrt( 0.5 - cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2
             + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p )
-            * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000; }
+            * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000;
 
     private final Predicate< Row > checkPatrulStatus = row ->
             row.getDouble( "latitude" ) > 0
@@ -1344,7 +1347,7 @@ public final class CassandraDataControl {
                     .compareTo( TaskTypes.FREE ) == 0 ) )
             .flatMap( row -> Mono.just( new Patrul( row ) ) )
             .flatMap( patrul -> {
-                patrul.setDistance( this.calculate( point, patrul ) );
+                patrul.setDistance( this.getCalculate().apply( point, patrul ) );
                 return Mono.just( patrul ); } )
             .sequential()
             .sort( Comparator.comparing( Patrul::getDistance ) )
@@ -1364,7 +1367,7 @@ public final class CassandraDataControl {
                         && row.getUUID( "uuidOfEscort" ) == null )
                     .flatMap( row -> Mono.just( new Patrul( row ) ) )
                     .flatMap( patrul -> {
-                        patrul.setDistance( this.calculate( point, patrul ) );
+                        patrul.setDistance( this.getCalculate().apply( point, patrul ) );
                         return Mono.just( patrul ); } )
                     .sequential()
                     .sort( Comparator.comparing( Patrul::getDistance ) )

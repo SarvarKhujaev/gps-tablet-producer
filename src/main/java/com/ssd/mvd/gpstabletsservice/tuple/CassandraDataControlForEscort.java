@@ -372,7 +372,8 @@ public class CassandraDataControlForEscort {
                             "code", 201,
                             "success", false ) ) );
 
-    private final Predicate< PolygonForEscort > checkPolygonForEscort = polygon -> this.getSession().execute( "SELECT * FROM "
+    private final Predicate< PolygonForEscort > checkPolygonForEscort = polygon ->
+            this.getSession().execute( "SELECT * FROM "
             + CassandraTables.ESCORT.name() + "."
             + CassandraTables.POLYGON_FOR_ESCORT.name()
             + " where uuid = " + polygon.getUuid() + ";" ).one() != null;

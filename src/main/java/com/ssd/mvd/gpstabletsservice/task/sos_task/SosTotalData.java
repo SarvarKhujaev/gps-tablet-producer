@@ -1,10 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.task.sos_task;
 
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import lombok.Data;
-
-import java.util.Date;
 import java.util.UUID;
+import java.util.Date;
+import lombok.Data;
 
 @Data
 public class SosTotalData {
@@ -38,6 +37,6 @@ public class SosTotalData {
         this.setLongitude( patrulSos.getLongitude() );
 
         this.setStatus( Status.CREATED );
-        this.setPatrulStatus( patrulStatus != null ? Status.valueOf( patrulStatus ) : Status.ATTACHED );
-        this.setSosNotificationForAndroid( sosNotificationForAndroid ); }
+        this.setSosNotificationForAndroid( sosNotificationForAndroid );
+        this.setPatrulStatus( patrulStatus != null ? Status.valueOf( patrulStatus ) : Status.ATTACHED ); }
 }

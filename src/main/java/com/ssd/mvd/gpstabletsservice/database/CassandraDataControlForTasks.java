@@ -367,7 +367,7 @@ public class CassandraDataControlForTasks {
                 + "' AND patruluuid = " + patrul.getUuid() + " IF EXISTS;" ); };
 
     // обновляет время которое патрульный полностью потратил на выполнение задания
-    // если патрульный завершил завершил то обновляем общее время выполнения
+    // если патрульный завершил то обновляем общее время выполнения
     private final BiFunction< Patrul, Long, Boolean > updateTotalTimeConsumption = ( patrul, timeConsumption ) ->
             this.getSession().execute( "UPDATE "
                     + CassandraTables.TABLETS.name() + "."
@@ -394,7 +394,9 @@ public class CassandraDataControlForTasks {
                     taskTimingStatistics.getPatrulUUID() + ", " +
                     Math.abs( taskTimingStatistics.getTotalTimeConsumption() ) + ", " +
                     Math.abs( taskTimingStatistics.getTimeWastedToArrive() ) + ", '" +
-                    taskTimingStatistics.getDateOfComing().toInstant() + "', '" +
+                    ( taskTimingStatistics.getDateOfComing() != null
+                            ? taskTimingStatistics.getDateOfComing().toInstant()
+                            : new Date().toInstant() ) + "', '" +
                     taskTimingStatistics.getStatus() + "', '" +
                     taskTimingStatistics.getTaskTypes() + "', " +
                     taskTimingStatistics.getInTime() + ", " +
@@ -403,47 +405,50 @@ public class CassandraDataControlForTasks {
                             .convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() )
                     + ") IF NOT EXISTS;" );
 
-    private final Function< TaskTimingRequest, Mono< TaskTimingStatisticsList > > getTaskTimingStatistics = request -> {
-        TaskTimingStatisticsList taskTimingStatisticsList = new TaskTimingStatisticsList();
-        return Flux.fromStream( this.getSession()
-                    .execute( "SELECT * FROM "
-                                + CassandraTables.TABLETS.name() + "."
-                                + CassandraTables.TASKS_TIMING_TABLE.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
-                .parallel()
-                .runOn( Schedulers.parallel() )
-                .filter( row -> request.getEndDate() == null
-                        || request.getStartDate() == null
-                        || row.getTimestamp( "dateofcoming" )
-                        .after( request.getStartDate() )
-                        && row.getTimestamp( "dateofcoming")
-                        .before( request.getEndDate() ) )
-                .filter( row -> request.getTaskType() == null
-                        || request.getTaskType().size() == 0
-                        || request.getTaskType()
-                        .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
-                .flatMap( row -> Mono.just( new TaskTimingStatistics( row ) ) )
-                .sequential()
-                .publishOn( Schedulers.single() )
-                .collectList()
-                .map( taskTimingStatisticsList1 -> {
-                    taskTimingStatisticsList1
-                            .parallelStream()
-                            .parallel()
-                            .forEach( taskTimingStatistics1 -> {
-                                switch ( taskTimingStatistics1.getStatus() ) {
-                                    case LATE -> taskTimingStatisticsList
-                                            .getListLate()
-                                            .add( taskTimingStatistics1 );
-                                    case IN_TIME -> taskTimingStatisticsList
-                                            .getListInTime()
-                                            .add( taskTimingStatistics1 );
-                                    default -> taskTimingStatisticsList
-                                            .getListDidNotArrived()
-                                            .add( taskTimingStatistics1 ); } } );
-                    return taskTimingStatisticsList; } ); };
+    private final Function< TaskTimingRequest, Mono< TaskTimingStatisticsList > > getTaskTimingStatistics = request ->
+        Flux.just( new TaskTimingStatisticsList() )
+                .flatMap( taskTimingStatisticsList ->
+                        Flux.fromStream( this.getSession()
+                                .execute( "SELECT * FROM "
+                                        + CassandraTables.TABLETS.name() + "."
+                                        + CassandraTables.TASKS_TIMING_TABLE.name() + ";" )
+                                .all()
+                                .stream()
+                                .parallel() )
+                        .parallel()
+                        .runOn( Schedulers.parallel() )
+                        .filter( row -> row.getTimestamp( "dateofcoming" ) != null )
+                        .filter( row -> request.getEndDate() == null
+                                || request.getStartDate() == null
+                                || row.getTimestamp( "dateofcoming" )
+                                .after( request.getStartDate() )
+                                && row.getTimestamp( "dateofcoming")
+                                .before( request.getEndDate() ) )
+                        .filter( row -> request.getTaskType() == null
+                                || request.getTaskType().size() == 0
+                                || request.getTaskType()
+                                .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
+                        .flatMap( row -> Mono.just( new TaskTimingStatistics( row ) ) )
+                        .sequential()
+                        .publishOn( Schedulers.single() )
+                        .collectList()
+                        .map( taskTimingStatisticsList1 -> {
+                            taskTimingStatisticsList1
+                                    .parallelStream()
+                                    .parallel()
+                                    .forEach( taskTimingStatistics1 -> {
+                                        switch ( taskTimingStatistics1.getStatus() ) {
+                                            case LATE -> taskTimingStatisticsList
+                                                    .getListLate()
+                                                    .add( taskTimingStatistics1 );
+                                            case IN_TIME -> taskTimingStatisticsList
+                                                    .getListInTime()
+                                                    .add( taskTimingStatistics1 );
+                                            default -> taskTimingStatisticsList
+                                                    .getListDidNotArrived()
+                                                    .add( taskTimingStatistics1 ); } } );
+                            return taskTimingStatisticsList; } ) )
+                .single();
 
     // возвращает список точек локаций, где был патрульной пока не дашел до точки назначения
     private final BiFunction< String, UUID, Mono< TaskTotalData > > getPositionInfoList = ( taskId, patrulUUID ) ->
@@ -456,17 +461,16 @@ public class CassandraDataControlForTasks {
                 .one() )
                 .map( TaskTotalData::new );
 
-    private Boolean checkTable ( String id, String tableName ) {
-        return this.getSession()
+    private final BiFunction< String, String, Boolean > checkTable = ( id, tableName ) -> this.getSession()
                 .execute( "SELECT * FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + tableName
-                        + " where id = '" + id + "';" ).one() != null; }
+                        + " where id = '" + id + "';" ).one() != null;
 
     // определяет тип таска
     private final Function< String, CassandraTables > findTable = id -> {
-        if ( this.checkTable( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
-        else if ( this.checkTable( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
+        if ( this.getCheckTable().apply( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
+        else if ( this.getCheckTable().apply( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
         else return CassandraTables.EVENTFACE; };
 
     private final Function< TaskDetailsRequest, Mono< TaskDetails > > getTaskDetails = taskDetailsRequest ->
@@ -475,7 +479,7 @@ public class CassandraDataControlForTasks {
                         .apply( taskDetailsRequest.getId() )
                         .map( card -> new TaskDetails( card, taskDetailsRequest.getPatrulUUID() ) );
 
-                case FIND_FACE_CAR -> this.checkTable( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
+                case FIND_FACE_CAR -> this.getCheckTable().apply( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
                         ? this.getCarEvents
                         .apply( taskDetailsRequest.getId() )
                         .map( carEvent -> new TaskDetails( carEvent, taskDetailsRequest.getPatrulUUID() ) )
@@ -572,8 +576,8 @@ public class CassandraDataControlForTasks {
             .publishOn( Schedulers.single() );
 
     // связывает патрульного с сос сигналом
-    private final BiFunction< UUID, UUID, Boolean > updatePatrulSos =
-            ( uuid, uuidOfPatrul ) -> this.getSession().execute( "UPDATE "
+    private final BiFunction< UUID, UUID, Boolean > updatePatrulSos = ( uuid, uuidOfPatrul ) ->
+            this.getSession().execute( "UPDATE "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.PATRULS.name()
                     + " SET sos_id = " + uuid
@@ -647,32 +651,29 @@ public class CassandraDataControlForTasks {
                                             .apply( patrulSos.getLatitude(), patrulSos.getLongitude() )
                                             .replaceAll( "'", "`" ) );
 
-                                    return CassandraDataControl
+                                    return KafkaDataControl
                                             .getInstance()
-                                            .getFindTheClosestPatrulsForSos()
-                                            .apply( new Point(
-                                                            patrulSos.getLatitude(),
-                                                            patrulSos.getLongitude() ),
-                                                    patrul.getUuid() )
-                                            .parallel( 20 )
-                                            .runOn( Schedulers.parallel() )
-                                            .map( patrul1 -> {
-                                                this.updatePatrulSosList( patrulSos.getUuid(), patrul1.getUuid(), Status.ATTACHED );
-                                                patrulSos.getPatrulStatuses().put( patrul1.getUuid(), Status.ATTACHED.name() );
-                                                this.getSave().accept( patrulSos );
-                                                KafkaDataControl
-                                                        .getInstance()
-                                                        .getWriteToKafkaNotificatioForAndroid()
-                                                        .accept( new SosNotificationForAndroid(
+                                            .getSave()
+                                            .apply( CassandraDataControl
+                                                    .getInstance()
+                                                    .getFindTheClosestPatrulsForSos()
+                                                    .apply( new Point(
+                                                                    patrulSos.getLatitude(),
+                                                                    patrulSos.getLongitude() ),
+                                                            patrul.getUuid() )
+                                                    .parallel( 20 )
+                                                    .runOn( Schedulers.parallel() )
+                                                    .map( patrul1 -> {
+                                                        this.updatePatrulSosList( patrulSos.getUuid(), patrul1.getUuid(), Status.ATTACHED );
+                                                        patrulSos.getPatrulStatuses().put( patrul1.getUuid(), Status.ATTACHED.name() );
+                                                        this.getSave().accept( patrulSos );
+                                                        return new SosNotificationForAndroid(
                                                                 patrulSos,
                                                                 patrul,
                                                                 Status.ACTIVE,
-                                                                patrul1.getPassportNumber() ) );
-                                                return patrulSos; } )
-                                            .sequential()
-                                            .publishOn( Schedulers.single() )
-                                            .count()
-                                            .flatMap( value -> Mono.just( apiResponseModel ) ); }
+                                                                patrul1.getPassportNumber() ); } )
+                                                    .sequential()
+                                                    .publishOn( Schedulers.single() ), apiResponseModel ); }
                                 else {
                                     PatrulSos patrulSos1 = this.getCurrentPatrulSos.apply( patrul.getSos_id() );
                                     Flux.fromStream( this.getCurrentPatrulSos.apply( patrul.getSos_id() )
@@ -700,7 +701,7 @@ public class CassandraDataControlForTasks {
                                                     && patrul1.getSos_id().compareTo( patrulSos1.getUuid() ) == 0 ) // обнуляем только тех патрульных которые закреплены ха этим сосом
                                             .sequential()
                                             .publishOn( Schedulers.single() )
-                                            .subscribe( patrul1 -> this.updatePatrulSos.apply( null, patrul1.getUuid() ) );
+                                            .subscribe( patrul1 -> this.getUpdatePatrulSos().apply( null, patrul1.getUuid() ) );
 
                                     this.getUpdatePatrulSos().apply( null, patrul.getUuid() );
 
@@ -721,7 +722,7 @@ public class CassandraDataControlForTasks {
                 sosRequest.getStatus() );
         // если патрульный подтвердил данный сигнал то связымаем его с ним
         if ( sosRequest.getStatus().compareTo( Status.ACCEPTED ) == 0 )
-            this.updatePatrulSos.apply( sosRequest.getSosUUID(), sosRequest.getPatrulUUID() );
+            this.getUpdatePatrulSos().apply( sosRequest.getSosUUID(), sosRequest.getPatrulUUID() );
         this.getSession().execute( "UPDATE "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.PATRUL_SOS_TABLE.name()
@@ -762,18 +763,18 @@ public class CassandraDataControlForTasks {
             .parallel()
             .runOn( Schedulers.parallel() )
             .filter( this.checkSosWasFinished )
-            .flatMap( uuid -> {
-                PatrulSos patrulSos = this.getCurrentPatrulSos.apply( uuid );
-                return CassandraDataControl
-                        .getInstance()
-                        .getGetPatrulByUUID()
-                        .apply( patrulSos.getPatrulUUID() )
-                        .map( patrul -> new SosTotalData( patrulSos,
-                                patrulSos.getPatrulStatuses().get( patrulUUID ),
-                                new SosNotificationForAndroid( patrulSos,
-                                        patrul,
-                                        Status.CREATED,
-                                        patrul.getPassportNumber() ) ) ); } )
+            .map( this.getCurrentPatrulSos )
+            .flatMap( patrulSos -> CassandraDataControl
+                    .getInstance()
+                    .getGetPatrulByUUID()
+                    .apply( patrulSos.getPatrulUUID() )
+                    .map( patrul -> new SosTotalData( patrulSos,
+                            patrulSos.getPatrulStatuses().get( patrulUUID ),
+                            new SosNotificationForAndroid(
+                                    patrulSos,
+                                    patrul,
+                                    Status.CREATED,
+                                    patrul.getPassportNumber() ) ) ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .collectList()
@@ -795,5 +796,5 @@ public class CassandraDataControlForTasks {
             "sentSosList, " +
             "attachedSosList, " +
             "cancelledSosList, " +
-            "acceptedSosList ) VALUES ( " + uuid + ", {}, {}, {}, {} );" );
+            "acceptedSosList ) VALUES ( " + uuid + ", {}, {}, {}, {} ) IF NOT EXISTS;" );
 }

@@ -2,7 +2,6 @@ package com.ssd.mvd.gpstabletsservice.controller;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -12,6 +11,7 @@ import com.ssd.mvd.gpstabletsservice.database.Archive;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import lombok.extern.slf4j.Slf4j;
 import java.util.Comparator;
 import java.util.UUID;
 
@@ -40,7 +40,8 @@ public class NotificationController {
     @MessageMapping ( value = "setAsRead" )
     public Mono< ApiResponseModel > setAsRead ( String id ) { return CassandraDataControl
             .getInstance()
-            .setNotificationAsRead( UUID.fromString( id ) )
+            .getSetNotificationAsRead()
+            .apply( UUID.fromString( id ) )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive

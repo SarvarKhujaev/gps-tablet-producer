@@ -83,7 +83,9 @@ public class CardDetails {
                     this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR )
                             .add( new Item( "TURI", modelForCar.getVehicleType() ) ); } );
 
-        if ( carTotalData.getPsychologyCard().getModelForPassport() != null
+        if ( carTotalData
+                .getPsychologyCard()
+                .getModelForPassport() != null
                 && carTotalData
                 .getPsychologyCard()
                 .getModelForPassport()
