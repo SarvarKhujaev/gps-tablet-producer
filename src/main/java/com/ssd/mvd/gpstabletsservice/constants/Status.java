@@ -10,7 +10,9 @@ public enum Status {
     ACCEPTED, LATE, NOT_ARRIVED, IN_TIME,
     FREE, ARRIVED, BUSY, ATTACHED, FINISHED,
 
-    SELF_EMPLOYMENT, NOTIFICATION, ACTIVE_TASK, NEW_CARS,
-
     ACTIVE, IN_ACTIVE,
+
+    OPTIONAL, // нужно обновить приложение по выбору
+    FORCE, // нужно принудительно обновить приложение
+    LAST, // последняя версия установлена
 }
