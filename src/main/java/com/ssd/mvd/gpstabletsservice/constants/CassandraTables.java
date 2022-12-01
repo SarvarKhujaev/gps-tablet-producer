@@ -24,6 +24,9 @@ public enum CassandraTables {
     TABLETS_LOCATION_TABLE, POSITION_INFO,
 
     // For Sos entity
-    SOS_TABLE, PATRUL_SOS_TABLE, // <- после тестов удалить
+    SOS_TABLE, PATRUL_SOS_TABLE,
     PATRUL_SOS_LIST, // <- хранит список всех сос сигналов которые принял патрульный
+
+    // tables for Android version control
+    ANDROID_VERSION_CONTROL_TABLE, // <- хранит последнюю версию андроид приложения
 }

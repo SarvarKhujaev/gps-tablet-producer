@@ -221,6 +221,11 @@ public final class CassandraDataControl {
                 "totalActivityTime bigint, " +
                 "PRIMARY KEY( uuid, date, status ) );" );
 
+        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.ANDROID_VERSION_CONTROL_TABLE.name()
+                + " ( id text PRIMARY KEY, version text );" );
+
         this.logger.info( "Cassandra is ready" ); }
 
     private final Function< PatrulActivityRequest, Mono< List< PositionInfo > > > getHistory = request -> {
@@ -1713,6 +1718,45 @@ public final class CassandraDataControl {
             .apply( point, 2 )
             .collectList()
             .map( PatrulInRadiusList::new );
+
+    // проверяет последнюю версию андроид приложения
+    private final Function< String, Mono< ApiResponseModel > > checkVersionForAndroid = s ->
+            this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.ANDROID_VERSION_CONTROL_TABLE.name()
+                    + " WHERE id = 'id';" )
+                    .one()
+                    .getString( "version" )
+                    .compareTo( s ) == 0
+                    ? Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of( "message", LAST ) )
+                    : Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of(
+                            "message", FORCE,
+                            "code", 201 ) );
+
+    // обновляет последнюю версию андроид приложения
+    private final Function< String, Mono< ApiResponseModel > > saveLastVersion = versionName ->
+            this.getSession().execute( "UPDATE "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.ANDROID_VERSION_CONTROL_TABLE.name()
+                            + " SET version = '" + versionName
+                            + "' WHERE id = 'id';" )
+                    .wasApplied()
+                    ? Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of( "message", "Last version was saved" ) )
+                    : Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of(
+                            "message", "Error during the saving of version",
+                            "code", 201 ) );
 
     public void delete () {
         this.getSession().close();
