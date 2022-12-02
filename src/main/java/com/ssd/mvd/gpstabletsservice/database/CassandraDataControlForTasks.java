@@ -451,10 +451,10 @@ public class CassandraDataControlForTasks {
     // возвращает список точек локаций, где был патрульной пока не дашел до точки назначения
     private final BiFunction< String, UUID, TaskTotalData > getPositionInfoList = ( taskId, patrulUUID ) ->
             new TaskTotalData( this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.TASKS_TIMING_TABLE.name()
-                            + " WHERE taskid = '" + taskId + "'"
-                            + " AND patruluuid = " + patrulUUID + ";" ).one() );
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TASKS_TIMING_TABLE.name()
+                    + " WHERE taskid = '" + taskId + "'"
+                    + " AND patruluuid = " + patrulUUID + ";" ).one() );
 
     private final BiFunction< String, String, Boolean > checkTable = ( id, tableName ) -> this.getSession()
                 .execute( "SELECT * FROM "
@@ -475,9 +475,7 @@ public class CassandraDataControlForTasks {
                         .map( card -> new TaskDetails(
                                 card,
                                 taskDetailsRequest.getPatrulUUID(),
-                                CassandraDataControlForTasks
-                                        .getInstance()
-                                        .getGetPositionInfoList()
+                                this.getGetPositionInfoList()
                                         .apply( card.getCardId().toString(),
                                                 taskDetailsRequest.getPatrulUUID() ) ) );
 
@@ -487,9 +485,7 @@ public class CassandraDataControlForTasks {
                         .map( carEvent -> new TaskDetails(
                                 carEvent,
                                 taskDetailsRequest.getPatrulUUID(),
-                                CassandraDataControlForTasks
-                                        .getInstance()
-                                        .getGetPositionInfoList()
+                                this.getGetPositionInfoList()
                                         .apply( carEvent.getId(),
                                                 taskDetailsRequest.getPatrulUUID() ) ) )
                         : this.getEventCar
@@ -497,9 +493,7 @@ public class CassandraDataControlForTasks {
                         .map( eventCar -> new TaskDetails(
                                 eventCar,
                                 taskDetailsRequest.getPatrulUUID(),
-                                CassandraDataControlForTasks
-                                        .getInstance()
-                                        .getGetPositionInfoList()
+                                this.getGetPositionInfoList()
                                         .apply( eventCar.getId(),
                                                 taskDetailsRequest.getPatrulUUID() ) ) );
 
@@ -509,9 +503,7 @@ public class CassandraDataControlForTasks {
                             .map( faceEvent -> new TaskDetails(
                                     faceEvent,
                                     taskDetailsRequest.getPatrulUUID(),
-                                    CassandraDataControlForTasks
-                                            .getInstance()
-                                            .getGetPositionInfoList()
+                                    this.getGetPositionInfoList()
                                             .apply( faceEvent.getId(),
                                                     taskDetailsRequest.getPatrulUUID() ) ) );
 
@@ -520,9 +512,7 @@ public class CassandraDataControlForTasks {
                             .map( eventBody -> new TaskDetails(
                                     eventBody,
                                     taskDetailsRequest.getPatrulUUID(),
-                                    CassandraDataControlForTasks
-                                            .getInstance()
-                                            .getGetPositionInfoList()
+                                    this.getGetPositionInfoList()
                                             .apply( eventBody.getId(),
                                                     taskDetailsRequest.getPatrulUUID() ) ) );
 
@@ -531,9 +521,7 @@ public class CassandraDataControlForTasks {
                             .map( eventFace -> new TaskDetails(
                                     eventFace,
                                     taskDetailsRequest.getPatrulUUID(),
-                                    CassandraDataControlForTasks
-                                            .getInstance()
-                                            .getGetPositionInfoList()
+                                    this.getGetPositionInfoList()
                                             .apply( eventFace.getId(),
                                                     taskDetailsRequest.getPatrulUUID() ) ) ); };
                 default -> this.getSelfEmploymentTask
@@ -541,9 +529,7 @@ public class CassandraDataControlForTasks {
                         .map( selfEmploymentTask -> new TaskDetails(
                                 selfEmploymentTask,
                                 taskDetailsRequest.getPatrulUUID(),
-                                CassandraDataControlForTasks
-                                        .getInstance()
-                                        .getGetPositionInfoList()
+                                this.getGetPositionInfoList()
                                         .apply( selfEmploymentTask.getUuid().toString(),
                                                 taskDetailsRequest.getPatrulUUID() ) ) ); };
 

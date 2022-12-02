@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import lombok.Data;
 import java.util.Map;
 import java.util.Date;
@@ -22,6 +21,7 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.*;
+import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.FinishedTask;

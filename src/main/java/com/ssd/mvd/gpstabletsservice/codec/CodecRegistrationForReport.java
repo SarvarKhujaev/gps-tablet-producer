@@ -38,8 +38,7 @@ public class CodecRegistrationForReport extends TypeCodec< ReportForCard > {
     public String format( ReportForCard value ) throws InvalidTypeException { return value == null ? "NULL" :
             innerCodec.format( toUDTValue( value ) ); }
 
-    protected ReportForCard toAddress ( UDTValue value ) { return value == null ? null :
-            new ReportForCard ( value ); }
+    protected ReportForCard toAddress ( UDTValue value ) { return value == null ? null : new ReportForCard ( value ); }
 
     protected UDTValue toUDTValue ( ReportForCard value ) { return value == null ? null :
             userType.newValue()
