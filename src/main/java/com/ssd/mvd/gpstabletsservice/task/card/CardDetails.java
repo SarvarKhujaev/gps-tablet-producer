@@ -42,7 +42,6 @@ public class CardDetails {
                     .getDoverennostList()
                     .getDoverennostsList()
                     .parallelStream()
-                    .parallel()
                     .forEach( doverennost -> {
                     this.getDetails().get( Details.ISHONCHNOMA )
                             .add( new Item( "TOMONIDAN BERILGAN", doverennost.getIssuedBy() ) );
@@ -66,7 +65,6 @@ public class CardDetails {
                 .getModelForCarList()
                 .getModelForCarList()
                 .parallelStream()
-                .parallel()
                 .forEach( modelForCar -> {
                     this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR )
                             .add( new Item( "DAVLAT RAQAM BELGISI", modelForCar.getPlateNumber() ) );

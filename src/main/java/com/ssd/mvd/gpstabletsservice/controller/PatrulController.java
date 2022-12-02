@@ -287,7 +287,10 @@ public class PatrulController {
     public Mono< ApiResponseModel > getListOfPatrulTasks ( Request request ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
-            .apply( CassandraDataControl.getInstance().decode( request.getData() ) )
+            .apply( CassandraDataControl
+                    .getInstance()
+                    .getDecode()
+                    .apply( request.getData() ) )
             .flatMap( patrul -> patrul.getListOfTasks().keySet().size() > 0 ?
                     TaskInspector
                     .getInstance()

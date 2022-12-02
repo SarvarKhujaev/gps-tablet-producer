@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,28 +39,28 @@ public final class TaskInspector {
 
     public static TaskInspector getInstance () { return taskInspector != null ? taskInspector : new TaskInspector(); }
 
-    private String generateText ( Patrul patrul, Status status ) { return switch ( status ) {
-            case ATTACHED -> patrul.getName()
-                    + " got new task: " + patrul.getTaskId()
-                    + " " + patrul.getTaskTypes();
+    private final BiFunction< Patrul, Status, String > generateText = ( patrul, status ) -> switch ( status ) {
+        case ATTACHED -> patrul.getName()
+                + " got new task: " + patrul.getTaskId()
+                + " " + patrul.getTaskTypes();
 
-            case ARRIVED -> patrul.getName()
-                    + " : " + patrul.getTaskTypes()
-                    + " arrived task location: "
-                    + " at: " + new Date();
+        case ARRIVED -> patrul.getName()
+                + " : " + patrul.getTaskTypes()
+                + " arrived task location: "
+                + " at: " + new Date();
 
-            case ACCEPTED -> patrul.getName()
-                    + " ACCEPTED his task: " + patrul.getTaskId()
-                    + " " + patrul.getTaskTypes()
-                    + " at: " + new Date();
+        case ACCEPTED -> patrul.getName()
+                + " ACCEPTED his task: " + patrul.getTaskId()
+                + " " + patrul.getTaskTypes()
+                + " at: " + new Date();
 
-            case FINISHED -> patrul.getName()
-                    + " completed his task "
-                    + " at: " + new Date();
+        case FINISHED -> patrul.getName()
+                + " completed his task "
+                + " at: " + new Date();
 
-            default -> patrul.getName()
-                    + " has been canceled from task "
-                    + " at: " + new Date(); }; }
+        default -> patrul.getName()
+                + " has been canceled from task "
+                + " at: " + new Date(); };
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, Card card ) {
         patrul.setStatus( status );
@@ -87,7 +88,7 @@ public final class TaskInspector {
                             .getInstance()
                             .getRemove()
                             .accept( card.getCardId().toString() );
-                    KafkaDataControl
+                    if ( card.getPatruls().size() != 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask( card ) ); }
@@ -139,7 +140,7 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 card,
-                                this.generateText( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventCar eventCar ) {
@@ -167,7 +168,7 @@ public final class TaskInspector {
                             .getInstance()
                             .getRemove()
                             .accept( eventCar.getId() );
-                    KafkaDataControl
+                    if ( eventCar.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask( eventCar ) ); }
@@ -218,7 +219,7 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 eventCar,
-                                this.generateText( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventFace eventFace ) {
@@ -246,7 +247,7 @@ public final class TaskInspector {
                             .getInstance()
                             .getRemove()
                             .accept( eventFace.getId() );
-                    KafkaDataControl
+                    if ( eventFace.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask( eventFace ) ); }
@@ -298,7 +299,7 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 eventFace,
-                                this.generateText( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventBody eventBody ) {
@@ -327,7 +328,7 @@ public final class TaskInspector {
                             .getInstance()
                             .getRemove()
                             .accept( eventBody.getId() );
-                    KafkaDataControl
+                    if ( eventBody.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask( eventBody ) ); }
@@ -377,7 +378,7 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 eventBody,
-                                this.generateText( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvent carEvents ) {
@@ -407,7 +408,7 @@ public final class TaskInspector {
                             .getInstance()
                             .getRemove()
                             .accept( carEvents.getId() );
-                    KafkaDataControl
+                    if ( carEvents.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask( carEvents ) ); }
@@ -459,7 +460,7 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 carEvents,
-                                this.generateText( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvent faceEvent ) {
@@ -489,7 +490,7 @@ public final class TaskInspector {
                             .getInstance()
                             .getRemove()
                             .accept( faceEvent.getId() );
-                    KafkaDataControl
+                    if ( faceEvent.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask( faceEvent ) ); }
@@ -542,7 +543,7 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 faceEvent,
-                                this.generateText( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ) ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EscortTuple escortTuple ) {
@@ -609,7 +610,7 @@ public final class TaskInspector {
                             .getRemove()
                             .accept( selfEmploymentTask.getUuid().toString() );
 
-                    KafkaDataControl
+                    if ( selfEmploymentTask.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask( selfEmploymentTask ) ); }
@@ -661,7 +662,7 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 selfEmploymentTask,
-                                this.generateText( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ) ) ) );
         return patrul; }
 
     public Mono< ApiResponseModel > getListOfPatrulTasks ( Patrul patrul, Integer page, Integer size ) {
@@ -850,247 +851,231 @@ public final class TaskInspector {
                                         .data( finishedTasks )
                                         .build() ) ) ); }
 
-    public Mono< ApiResponseModel > saveReportForTask ( Patrul patrul, ReportForCard reportForCard ) {
-        return switch ( patrul.getTaskTypes() ) {
-            case CARD_102 -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetCard102()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( card -> {
-                    card.getReportForCardList().add( reportForCard );
-                    return CassandraDataControl
-                            .getInstance()
-                            .update( TaskInspector
-                                    .getInstance()
-                                    .changeTaskStatus( patrul, Status.FINISHED, card ) )
-                            .flatMap( apiResponseModel -> Archive
-                                    .getArchive()
-                                    .getFunction()
-                                    .apply( Map.of( "message", "Report from: "
-                                            + patrul.getName() + " was saved" ) ) ); } );
-
-            case SELF_EMPLOYMENT -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetSelfEmploymentTask()
-                    .apply( UUID.fromString( patrul.getTaskId() ) )
-                    .flatMap( selfEmploymentTask -> {
-                        selfEmploymentTask.getReportForCards().add( reportForCard );
-                        return CassandraDataControl
-                                .getInstance()
-                                .update( TaskInspector
-                                        .getInstance()
-                                        .changeTaskStatus( patrul, Status.FINISHED, selfEmploymentTask ) )
-                                .flatMap( apiResponseModel -> Archive
-                                        .getArchive()
-                                        .getFunction()
-                                        .apply( Map.of( "message", "Report from: "
-                                                + patrul.getName() + " was saved" ) ) ); } );
-
-            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventBody()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( eventBody -> {
-                        eventBody.getReportForCardList().add( reportForCard );
-                        return CassandraDataControl
-                                .getInstance()
-                                .update( TaskInspector
-                                        .getInstance()
-                                        .changeTaskStatus( patrul, Status.FINISHED, eventBody ) )
-                                .flatMap( apiResponseModel -> Archive
-                                        .getArchive()
-                                        .getFunction()
-                                        .apply( Map.of( "message", "Report from: "
-                                                + patrul.getName() + " was saved" ) ) ); } );
-
-            case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventFace()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( eventFace -> {
-                        eventFace.getReportForCardList().add( reportForCard );
-                        return CassandraDataControl
-                                .getInstance()
-                                .update( TaskInspector
-                                        .getInstance()
-                                        .changeTaskStatus( patrul, Status.FINISHED, eventFace ) )
-                                .flatMap( apiResponseModel -> Archive
-                                        .getArchive()
-                                        .getFunction()
-                                        .apply( Map.of( "message", "Report from: "
-                                                + patrul.getName() + " was saved" ) ) ); } );
-
-            case FIND_FACE_CAR -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetCarEvents()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( carEvents -> {
-                        carEvents.getReportForCardList().add( reportForCard );
-                        return CassandraDataControl
-                                .getInstance()
-                                .update( TaskInspector
-                                        .getInstance()
-                                        .changeTaskStatus( patrul, Status.FINISHED, carEvents ) )
-                                .flatMap( apiResponseModel -> Archive
-                                        .getArchive()
-                                        .getFunction()
-                                        .apply( Map.of( "message", "Report from: "
-                                                + patrul.getName() + " was saved" ) ) ); } );
-
-            case FIND_FACE_PERSON -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetFaceEvents()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( faceEvents -> {
-                        faceEvents.getReportForCardList().add( reportForCard );
-                        return CassandraDataControl
-                                .getInstance()
-                                .update( TaskInspector
-                                        .getInstance()
-                                        .changeTaskStatus( patrul, Status.FINISHED, faceEvents ) )
-                                .flatMap( apiResponseModel -> Archive
-                                        .getArchive()
-                                        .getFunction()
-                                        .apply( Map.of( "message", "Report from: "
-                                                + patrul.getName() + " was saved" ) ) ); } );
-
-            case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventCar()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( eventCar -> {
-                        eventCar.getReportForCardList().add( reportForCard );
-                        return CassandraDataControl
-                                .getInstance()
-                                .update( TaskInspector
-                                        .getInstance()
-                                        .changeTaskStatus( patrul, Status.FINISHED, eventCar ) )
-                                .flatMap( apiResponseModel -> Archive
-                                        .getArchive()
-                                        .getFunction()
-                                        .apply( Map.of( "message", "Report from: "
-                                                + patrul.getName() + " was saved" ) ) ); } );
-
-            default -> Archive
-                    .getArchive()
-                    .getFunction()
-                    .apply( Map.of( "message", "U have no tasks, thus u cannot send report",
-                            "code", 201,
-                            "success", false ) ); }; }
-
     private Integer getReportIndex ( List< ReportForCard > reportForCardList, UUID uuid ) {
         for ( int i = 0; i < reportForCardList.size(); i++ ) if ( reportForCardList.get( i )
                 .getUuidOfPatrul()
                 .compareTo( uuid ) == 0 ) return i;
         return 0; }
 
-    public Mono< ApiResponseModel > changeTaskStatus ( Patrul patrul, Status status ) {
-        return switch ( patrul.getTaskTypes() ) {
-            case CARD_102 -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetCard102()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( card -> Archive
-                            .getArchive()
-                            .getFunction()
-                            .apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, card )
-                                    .getPassportNumber() + " changed his status task to: " + status,
-                                    "success", CassandraDataControl.getInstance().login( patrul, status ) ) ) );
-
-            case SELF_EMPLOYMENT -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetSelfEmploymentTask()
-                    .apply( UUID.fromString( patrul.getTaskId() ) )
-                    .flatMap( selfEmploymentTask -> Archive
-                            .getArchive()
-                            .getFunction()
-                            .apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, selfEmploymentTask )
-                                            .getPassportNumber() + " changed his status task to: " + status,
-                                    "success", CassandraDataControl.getInstance().login( patrul, status ) ) ) );
-
-            case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventCar()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( eventCar -> Archive
-                            .getArchive()
-                            .getFunction()
-                            .apply( Map.of( "message", "Patrul: "
-                                            + this.changeTaskStatus( patrul, status, eventCar )
-                                            .getPassportNumber() + " changed his status task to: " + status,
-                                    "success", CassandraDataControl
+    private final BiFunction< Patrul, ReportForCard, Mono< ApiResponseModel > > saveReportForTask = ( patrul, reportForCard ) -> switch ( patrul.getTaskTypes() ) {
+                case CARD_102 -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetCard102()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( card -> {
+                            card.getReportForCardList().add( reportForCard );
+                            return Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", "Report from: "
+                                            + TaskInspector
                                             .getInstance()
-                                            .login( patrul, status ) ) ) );
+                                            .changeTaskStatus( patrul, Status.FINISHED, card )
+                                            .getName() + " was saved" ) ); } );
 
-            case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventFace()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( eventFace -> Archive
-                            .getArchive()
-                            .getFunction()
-                            .apply( Map.of( "message", "Patrul: "
-                                            + this.changeTaskStatus( patrul, status, eventFace )
-                                            .getPassportNumber() + " changed his status task to: " + status,
-                                    "success", CassandraDataControl
+                case SELF_EMPLOYMENT -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetSelfEmploymentTask()
+                        .apply( UUID.fromString( patrul.getTaskId() ) )
+                        .flatMap( selfEmploymentTask -> {
+                            selfEmploymentTask.getReportForCards().add( reportForCard );
+                            return Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", "Report from: "
+                                            + TaskInspector
                                             .getInstance()
-                                            .login( patrul, status ) ) ) );
+                                            .changeTaskStatus( patrul, Status.FINISHED, selfEmploymentTask )
+                                            .getName() + " was saved" ) ); } );
 
-            case FIND_FACE_PERSON -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetFaceEvents()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( faceEvents -> Archive
-                            .getArchive()
-                            .getFunction()
-                            .apply( Map.of( "message", "Patrul: "
-                                            + this.changeTaskStatus( patrul, status, faceEvents )
-                                            .getPassportNumber() + " changed his status task to: " + status,
-                                    "success", CassandraDataControl
+                case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetEventBody()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( eventBody -> {
+                            eventBody.getReportForCardList().add( reportForCard );
+                            return Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", "Report from: "
+                                            + TaskInspector
                                             .getInstance()
-                                            .login( patrul, status ) ) ) );
+                                            .changeTaskStatus( patrul, Status.FINISHED, eventBody )
+                                            .getName() + " was saved" ) ); } );
 
-            case FIND_FACE_CAR -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetCarEvents()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( carEvents -> Archive
-                            .getArchive()
-                            .getFunction()
-                            .apply( Map.of( "message", "Patrul: "
-                                            + this.changeTaskStatus( patrul, status, carEvents )
-                                            .getPassportNumber() + " changed his status task to: " + status,
-                                    "success", CassandraDataControl
+                case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetEventFace()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( eventFace -> {
+                            eventFace.getReportForCardList().add( reportForCard );
+                            return Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", "Report from: "
+                                            + TaskInspector
                                             .getInstance()
-                                            .login( patrul, status ) ) ) );
+                                            .changeTaskStatus( patrul, Status.FINISHED, eventFace )
+                                            .getName() + " was saved" ) ); } );
 
-            case ESCORT -> CassandraDataControlForEscort
-                    .getInstance()
-                    .getGetCurrentTupleOfEscort()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( escortTuple -> Archive
-                            .getArchive()
-                            .getFunction()
-                            .apply( Map.of( "message", "Patrul: "
-                                            + this.changeTaskStatus( patrul, status, escortTuple )
-                                            .getPassportNumber() + " changed his status task to: " + status,
-                                    "success", CassandraDataControl
+                case FIND_FACE_CAR -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetCarEvents()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( carEvents -> {
+                            carEvents.getReportForCardList().add( reportForCard );
+                            return Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", "Report from: "
+                                            + TaskInspector
                                             .getInstance()
-                                            .login( patrul, status ) ) ) );
+                                            .changeTaskStatus( patrul, Status.FINISHED, carEvents )
+                                            .getName() + " was saved" ) ); } );
 
-            default -> CassandraDataControlForTasks
-                    .getInstance()
-                    .getGetEventBody()
-                    .apply( patrul.getTaskId() )
-                    .flatMap( eventBody -> Archive
-                            .getArchive()
-                            .getFunction()
-                            .apply( Map.of( "message", "Patrul: "
-                                            + this.changeTaskStatus( patrul, status, eventBody )
-                                            .getPassportNumber() + " changed his status task to: " + status,
-                                    "success", CassandraDataControl
+                case FIND_FACE_PERSON -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetFaceEvents()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( faceEvents -> {
+                            faceEvents.getReportForCardList().add( reportForCard );
+                            return Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", "Report from: "
+                                            + TaskInspector
                                             .getInstance()
-                                            .login( patrul, status ) ) ) ); }; }
+                                            .changeTaskStatus( patrul, Status.FINISHED, faceEvents )
+                                            .getName() + " was saved" ) ); } );
+
+                case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetEventCar()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( eventCar -> {
+                            eventCar.getReportForCardList().add( reportForCard );
+                            return Archive
+                                    .getArchive()
+                                    .getFunction()
+                                    .apply( Map.of( "message", "Report from: "
+                                            + TaskInspector
+                                            .getInstance()
+                                            .changeTaskStatus( patrul, Status.FINISHED, eventCar )
+                                            .getName() + " was saved" ) ); } );
+
+                default -> Archive
+                        .getArchive()
+                        .getFunction()
+                        .apply( Map.of( "message", "U have no tasks, thus u cannot send report",
+                                "code", 201,
+                                "success", false ) ); };
+
+    private final BiFunction< Patrul, Status, Mono< ApiResponseModel > > changeTaskStatus = ( patrul, status ) -> switch ( patrul.getTaskTypes() ) {
+                case CARD_102 -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetCard102()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( card -> Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, card )
+                                                .getPassportNumber() + " changed his status task to: " + status,
+                                        "success", CassandraDataControl.getInstance().login( patrul, status ) ) ) );
+
+                case SELF_EMPLOYMENT -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetSelfEmploymentTask()
+                        .apply( UUID.fromString( patrul.getTaskId() ) )
+                        .flatMap( selfEmploymentTask -> Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, selfEmploymentTask )
+                                                .getPassportNumber() + " changed his status task to: " + status,
+                                        "success", CassandraDataControl.getInstance().login( patrul, status ) ) ) );
+
+                case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetEventCar()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( eventCar -> Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", "Patrul: "
+                                                + this.changeTaskStatus( patrul, status, eventCar )
+                                                .getPassportNumber() + " changed his status task to: " + status,
+                                        "success", CassandraDataControl
+                                                .getInstance()
+                                                .login( patrul, status ) ) ) );
+
+                case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetEventFace()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( eventFace -> Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", "Patrul: "
+                                                + this.changeTaskStatus( patrul, status, eventFace )
+                                                .getPassportNumber() + " changed his status task to: " + status,
+                                        "success", CassandraDataControl
+                                                .getInstance()
+                                                .login( patrul, status ) ) ) );
+
+                case FIND_FACE_PERSON -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetFaceEvents()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( faceEvents -> Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", "Patrul: "
+                                                + this.changeTaskStatus( patrul, status, faceEvents )
+                                                .getPassportNumber() + " changed his status task to: " + status,
+                                        "success", CassandraDataControl
+                                                .getInstance()
+                                                .login( patrul, status ) ) ) );
+
+                case FIND_FACE_CAR -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetCarEvents()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( carEvents -> Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", "Patrul: "
+                                                + this.changeTaskStatus( patrul, status, carEvents )
+                                                .getPassportNumber() + " changed his status task to: " + status,
+                                        "success", CassandraDataControl
+                                                .getInstance()
+                                                .login( patrul, status ) ) ) );
+
+                case ESCORT -> CassandraDataControlForEscort
+                        .getInstance()
+                        .getGetCurrentTupleOfEscort()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( escortTuple -> Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", "Patrul: "
+                                                + this.changeTaskStatus( patrul, status, escortTuple )
+                                                .getPassportNumber() + " changed his status task to: " + status,
+                                        "success", CassandraDataControl
+                                                .getInstance()
+                                                .login( patrul, status ) ) ) );
+
+                default -> CassandraDataControlForTasks
+                        .getInstance()
+                        .getGetEventBody()
+                        .apply( patrul.getTaskId() )
+                        .flatMap( eventBody -> Archive
+                                .getArchive()
+                                .getFunction()
+                                .apply( Map.of( "message", "Patrul: "
+                                                + this.changeTaskStatus( patrul, status, eventBody )
+                                                .getPassportNumber() + " changed his status task to: " + status,
+                                        "success", CassandraDataControl
+                                                .getInstance()
+                                                .login( patrul, status ) ) ) ); };
 
     private final Function< Patrul, Mono< ApiResponseModel > > getCurrentActiveTask = patrul -> switch ( patrul.getTaskTypes() ) {
         case CARD_102 -> CassandraDataControlForTasks

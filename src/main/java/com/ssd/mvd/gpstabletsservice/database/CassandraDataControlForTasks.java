@@ -435,7 +435,6 @@ public class CassandraDataControlForTasks {
                         .map( taskTimingStatisticsList1 -> {
                             taskTimingStatisticsList1
                                     .parallelStream()
-                                    .parallel()
                                     .forEach( taskTimingStatistics1 -> {
                                         switch ( taskTimingStatistics1.getStatus() ) {
                                             case LATE -> taskTimingStatisticsList
@@ -675,34 +674,7 @@ public class CassandraDataControlForTasks {
                                                     .sequential()
                                                     .publishOn( Schedulers.single() ), apiResponseModel ); }
                                 else {
-                                    PatrulSos patrulSos1 = this.getCurrentPatrulSos.apply( patrul.getSos_id() );
-                                    Flux.fromStream( this.getCurrentPatrulSos.apply( patrul.getSos_id() )
-                                                    .getPatrulStatuses()
-                                                    .keySet()
-                                                    .stream()
-                                                    .parallel() )
-                                            .parallel()
-                                            .runOn( Schedulers.parallel() )
-                                            .flatMap( uuid -> CassandraDataControl
-                                                    .getInstance()
-                                                    .getGetPatrulByUUID()
-                                                    .apply( uuid ) )
-                                            .flatMap( patrul1 -> {
-                                                KafkaDataControl
-                                                        .getInstance()
-                                                        .getWriteToKafkaNotificatioForAndroid()
-                                                        .accept( new SosNotificationForAndroid(
-                                                                patrulSos1,
-                                                                patrul,
-                                                                Status.IN_ACTIVE,
-                                                                patrul1.getPassportNumber() ) );
-                                                return Mono.just( patrul1 ); } )
-                                            .filter( patrul1 -> patrul1.getSos_id() != null
-                                                    && patrul1.getSos_id().compareTo( patrulSos1.getUuid() ) == 0 ) // обнуляем только тех патрульных которые закреплены ха этим сосом
-                                            .sequential()
-                                            .publishOn( Schedulers.single() )
-                                            .subscribe( patrul1 -> this.getUpdatePatrulSos().apply( null, patrul1.getUuid() ) );
-
+                                    final PatrulSos patrulSos1 = this.getCurrentPatrulSos.apply( patrul.getSos_id() );
                                     this.getUpdatePatrulSos().apply( null, patrul.getUuid() );
 
                                     // меняем статус сигнала на выолнено
@@ -712,7 +684,30 @@ public class CassandraDataControlForTasks {
                                             + " SET status = '" + Status.FINISHED.name() + "',"
                                             + " sosWasClosed = '" + new Date().toInstant() + "'"
                                             + " WHERE uuid = " + patrulSos1.getUuid() + " IF EXISTS;" );
-                                    return Mono.just( apiResponseModel ); } } ) );
+                                    return KafkaDataControl
+                                            .getInstance()
+                                            .getSave()
+                                            .apply( Flux.fromStream( patrulSos1
+                                                            .getPatrulStatuses()
+                                                            .keySet()
+                                                            .stream()
+                                                            .parallel() )
+                                                    .parallel()
+                                                    .runOn( Schedulers.parallel() )
+                                                    .flatMap( CassandraDataControl
+                                                            .getInstance()
+                                                            .getGetPatrulByUUID() )
+                                                    .flatMap( patrul1 -> {
+                                                        if ( patrul1.getSos_id() != null
+                                                                && patrul1.getSos_id().compareTo( patrulSos1.getUuid() ) == 0 )
+                                                            this.getUpdatePatrulSos().apply( null, patrul1.getUuid() );
+                                                        return Mono.just( new SosNotificationForAndroid(
+                                                                patrulSos1,
+                                                                patrul,
+                                                                Status.IN_ACTIVE,
+                                                                patrul1.getPassportNumber() ) ); } )
+                                                    .sequential()
+                                                    .publishOn( Schedulers.single() ), apiResponseModel ); } } ) );
 
     // используется в случае когда патрульный либо принимает сигнал либо отказывается
     private final Function< SosRequest, Mono< ApiResponseModel > > updatePatrulStatusInSosTable = sosRequest -> {
