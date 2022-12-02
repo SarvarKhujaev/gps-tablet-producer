@@ -115,20 +115,6 @@ public class KafkaDataControl {
                         .subscribe();
                 return Mono.just( apiResponseModel ); };
 
-    // отправляет уведомление конкретному андроиду
-    private final Consumer< SosNotificationForAndroid > writeToKafkaNotificatioForAndroid = sosNotificationForAndroid ->
-            this.getKafkaSender()
-                    .createOutbound()
-                    .send( Mono.just( new ProducerRecord<>(
-                            this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION(),
-                            SerDes.getSerDes().serialize( sosNotificationForAndroid ) ) ) )
-                    .then()
-                    .doOnError( error -> logger.info( error.getMessage() ) )
-                    .doOnSuccess( success -> logger.info( "sosNotificationForAndroid was sent to: "
-                            + sosNotificationForAndroid.getPatrulPassportSeries()
-                            + " at: " + new Date() ) )
-                    .subscribe();
-
     // отправляет уведомление фронту
     private final Function< SosNotification, String > writeSosNotificationToKafka = sosNotification -> {
         this.getKafkaSender()
