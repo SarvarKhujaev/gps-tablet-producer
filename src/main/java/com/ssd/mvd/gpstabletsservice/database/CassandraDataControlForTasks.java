@@ -377,33 +377,32 @@ public class CassandraDataControlForTasks {
                     + "' AND patruluuid = " + patrul.getUuid() + ";" )
                     .wasApplied();
 
-    private final Consumer< TaskTimingStatistics > saveTaskTimeStatistics = taskTimingStatistics -> this.getSession()
-            .execute( "INSERT INTO " +
-                    CassandraTables.TABLETS + "." +
-                    CassandraTables.TASKS_TIMING_TABLE +
-                    " ( taskId, " +
-                    "patrulUUID, " +
-                    "totalTimeConsumption, " +
-                    "timeWastedToArrive, " +
-                    "dateOfComing, " +
-                    "status, " +
-                    "taskTypes, " +
-                    "inTime, " +
-                    "positionInfoList ) VALUES( '" +
-                    taskTimingStatistics.getTaskId() + "', " +
-                    taskTimingStatistics.getPatrulUUID() + ", " +
-                    Math.abs( taskTimingStatistics.getTotalTimeConsumption() ) + ", " +
-                    Math.abs( taskTimingStatistics.getTimeWastedToArrive() ) + ", '" +
-                    ( taskTimingStatistics.getDateOfComing() != null
-                            ? taskTimingStatistics.getDateOfComing().toInstant()
-                            : new Date().toInstant() ) + "', '" +
-                    taskTimingStatistics.getStatus() + "', '" +
-                    taskTimingStatistics.getTaskTypes() + "', " +
-                    taskTimingStatistics.getInTime() + ", " +
-                    CassandraConverter
-                            .getInstance()
-                            .convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() )
-                    + ") IF NOT EXISTS;" );
+    private final Consumer< TaskTimingStatistics > saveTaskTimeStatistics = taskTimingStatistics ->
+            this.getSession().execute( "INSERT INTO " +
+                        CassandraTables.TABLETS + "." +
+                        CassandraTables.TASKS_TIMING_TABLE +
+                        " ( taskId, " +
+                        "patrulUUID, " +
+                        "totalTimeConsumption, " +
+                        "timeWastedToArrive, " +
+                        "dateOfComing, " +
+                        "status, " +
+                        "taskTypes, " +
+                        "inTime, " +
+                        "positionInfoList ) VALUES( '" +
+                        taskTimingStatistics.getTaskId() + "', " +
+                        taskTimingStatistics.getPatrulUUID() + ", " +
+                        Math.abs( taskTimingStatistics.getTotalTimeConsumption() ) + ", " +
+                        Math.abs( taskTimingStatistics.getTimeWastedToArrive() ) + ", '" +
+                        ( taskTimingStatistics.getDateOfComing() != null
+                                ? taskTimingStatistics.getDateOfComing().toInstant()
+                                : new Date().toInstant() ) + "', '" +
+                        taskTimingStatistics.getStatus() + "', '" +
+                        taskTimingStatistics.getTaskTypes() + "', " +
+                        taskTimingStatistics.getInTime() + ", " +
+                        CassandraConverter
+                                .getInstance()
+                                .convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() ) + ");" );
 
     private final Function< TaskTimingRequest, Mono< TaskTimingStatisticsList > > getTaskTimingStatistics = request ->
         Flux.just( new TaskTimingStatisticsList() )
@@ -450,15 +449,12 @@ public class CassandraDataControlForTasks {
                 .single();
 
     // возвращает список точек локаций, где был патрульной пока не дашел до точки назначения
-    private final BiFunction< String, UUID, Mono< TaskTotalData > > getPositionInfoList = ( taskId, patrulUUID ) ->
-            Mono.justOrEmpty( this.getSession()
-                    .execute( "SELECT * FROM "
+    private final BiFunction< String, UUID, TaskTotalData > getPositionInfoList = ( taskId, patrulUUID ) ->
+            new TaskTotalData( this.getSession().execute( "SELECT * FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.TASKS_TIMING_TABLE.name()
                             + " WHERE taskid = '" + taskId + "'"
-                            + " AND patruluuid = " + patrulUUID + ";" )
-                .one() )
-                .map( TaskTotalData::new );
+                            + " AND patruluuid = " + patrulUUID + ";" ).one() );
 
     private final BiFunction< String, String, Boolean > checkTable = ( id, tableName ) -> this.getSession()
                 .execute( "SELECT * FROM "
@@ -476,32 +472,80 @@ public class CassandraDataControlForTasks {
             switch ( taskDetailsRequest.getTaskTypes() ) {
                 case CARD_102 -> this.getCard102
                         .apply( taskDetailsRequest.getId() )
-                        .map( card -> new TaskDetails( card, taskDetailsRequest.getPatrulUUID() ) );
+                        .map( card -> new TaskDetails(
+                                card,
+                                taskDetailsRequest.getPatrulUUID(),
+                                CassandraDataControlForTasks
+                                        .getInstance()
+                                        .getGetPositionInfoList()
+                                        .apply( card.getCardId().toString(),
+                                                taskDetailsRequest.getPatrulUUID() ) ) );
 
                 case FIND_FACE_CAR -> this.getCheckTable().apply( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
                         ? this.getCarEvents
                         .apply( taskDetailsRequest.getId() )
-                        .map( carEvent -> new TaskDetails( carEvent, taskDetailsRequest.getPatrulUUID() ) )
+                        .map( carEvent -> new TaskDetails(
+                                carEvent,
+                                taskDetailsRequest.getPatrulUUID(),
+                                CassandraDataControlForTasks
+                                        .getInstance()
+                                        .getGetPositionInfoList()
+                                        .apply( carEvent.getId(),
+                                                taskDetailsRequest.getPatrulUUID() ) ) )
                         : this.getEventCar
                         .apply( taskDetailsRequest.getId() )
-                        .map( eventCar -> new TaskDetails( eventCar, taskDetailsRequest.getPatrulUUID() ) );
+                        .map( eventCar -> new TaskDetails(
+                                eventCar,
+                                taskDetailsRequest.getPatrulUUID(),
+                                CassandraDataControlForTasks
+                                        .getInstance()
+                                        .getGetPositionInfoList()
+                                        .apply( eventCar.getId(),
+                                                taskDetailsRequest.getPatrulUUID() ) ) );
 
                 case FIND_FACE_PERSON -> switch ( this.getFindTable().apply( taskDetailsRequest.getId() ) ) {
                     case FACEPERSON -> this.getFaceEvents
                             .apply( taskDetailsRequest.getId() )
-                            .map( faceEvent -> new TaskDetails( faceEvent, taskDetailsRequest.getPatrulUUID() ) );
+                            .map( faceEvent -> new TaskDetails(
+                                    faceEvent,
+                                    taskDetailsRequest.getPatrulUUID(),
+                                    CassandraDataControlForTasks
+                                            .getInstance()
+                                            .getGetPositionInfoList()
+                                            .apply( faceEvent.getId(),
+                                                    taskDetailsRequest.getPatrulUUID() ) ) );
 
                     case EVENTBODY -> this.getEventBody
                             .apply( taskDetailsRequest.getId() )
-                            .map( eventBody -> new TaskDetails( eventBody, taskDetailsRequest.getPatrulUUID() ) );
+                            .map( eventBody -> new TaskDetails(
+                                    eventBody,
+                                    taskDetailsRequest.getPatrulUUID(),
+                                    CassandraDataControlForTasks
+                                            .getInstance()
+                                            .getGetPositionInfoList()
+                                            .apply( eventBody.getId(),
+                                                    taskDetailsRequest.getPatrulUUID() ) ) );
 
                     default -> this.getEventFace
                             .apply( taskDetailsRequest.getId() )
-                            .map( eventFace -> new TaskDetails( eventFace, taskDetailsRequest.getPatrulUUID() ) ); };
+                            .map( eventFace -> new TaskDetails(
+                                    eventFace,
+                                    taskDetailsRequest.getPatrulUUID(),
+                                    CassandraDataControlForTasks
+                                            .getInstance()
+                                            .getGetPositionInfoList()
+                                            .apply( eventFace.getId(),
+                                                    taskDetailsRequest.getPatrulUUID() ) ) ); };
                 default -> this.getSelfEmploymentTask
                         .apply( UUID.fromString( taskDetailsRequest.getId() ) )
-                        .map( selfEmploymentTask -> new TaskDetails( selfEmploymentTask,
-                                taskDetailsRequest.getPatrulUUID() ) ); };
+                        .map( selfEmploymentTask -> new TaskDetails(
+                                selfEmploymentTask,
+                                taskDetailsRequest.getPatrulUUID(),
+                                CassandraDataControlForTasks
+                                        .getInstance()
+                                        .getGetPositionInfoList()
+                                        .apply( selfEmploymentTask.getUuid().toString(),
+                                                taskDetailsRequest.getPatrulUUID() ) ) ); };
 
     private final Predicate< UUID > checkSosTable = patrulUUID -> this.getSession()
             .execute( "SELECT * FROM "
