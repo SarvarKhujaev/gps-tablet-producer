@@ -65,7 +65,8 @@ public class PolygonForPatrulController { // SAM - 76
                         "code", 201 ) )
                 : CassandraDataControl
                 .getInstance()
-                .addPatrulToPolygon( scheduleForPolygonPatrul )
+                .getAddPatrulToPolygon()
+                .apply( scheduleForPolygonPatrul )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) )
                 .onErrorReturn( Archive

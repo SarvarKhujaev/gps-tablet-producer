@@ -33,7 +33,8 @@ public class SelfEmploymentController {
             .apply( reportForCard.getUuidOfPatrul() )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
-                    .saveReportForTask( patrul, reportForCard ) )
+                    .getSaveReportForTask()
+                    .apply( patrul, reportForCard ) )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive

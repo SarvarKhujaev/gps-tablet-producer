@@ -43,7 +43,10 @@ public class CardController {
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
-            .apply( CassandraDataControl.getInstance().decode( token ) )
+            .apply( CassandraDataControl
+                    .getInstance()
+                    .getDecode()
+                    .apply( token ) )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
                     .getGetCurrentActiveTask()

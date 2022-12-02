@@ -38,7 +38,8 @@ public class SosController {
                 .getCheckSosTable()
                 .test( CassandraDataControl
                         .getInstance()
-                        .decode( token ) )
+                        .getDecode()
+                        .apply( token ) )
                 ? Archive
                 .getArchive()
                 .getFunction()
@@ -66,7 +67,8 @@ public class SosController {
                 .getGetAllSosForCurrentPatrul()
                 .apply( CassandraDataControl
                         .getInstance()
-                        .decode( token ) )
+                        .getDecode()
+                        .apply( token ) )
                 .onErrorContinue( ( throwable, o ) -> log.error(
                         "Error: " + throwable.getMessage()
                                 + " Reason: " + o ) )

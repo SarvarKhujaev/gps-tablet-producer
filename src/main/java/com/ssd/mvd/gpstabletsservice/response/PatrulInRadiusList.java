@@ -28,7 +28,7 @@ public class PatrulInRadiusList {
 
     private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
 
-    public PatrulInRadiusList( List< Patrul > patruls ) {
+    public PatrulInRadiusList ( List< Patrul > patruls ) {
         for ( int i = 0; i < patruls.size() && freePatrulList.size() < 5; i++ )
             if ( patruls.get( i ).getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) freePatrulList.add( patruls.get( i ) );
 
