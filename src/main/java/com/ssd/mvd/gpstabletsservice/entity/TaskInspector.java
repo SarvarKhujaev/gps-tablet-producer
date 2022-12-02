@@ -21,6 +21,7 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.*;
+import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.FinishedTask;
@@ -106,14 +107,24 @@ public final class TaskInspector {
                 card.getPatrulStatuses()
                         .put( patrul.getPassportNumber(), patrulStatus );
 
-                CassandraDataControlForTasks
+                CassandraDataControl
                         .getInstance()
-                        .getSaveTaskTimeStatistics()
-                        .accept( new TaskTimingStatistics(
-                                patrul,
-                                card.getCardId().toString(),
-                                CARD_102,
-                                patrulStatus ) ); } }
+                        .getGetHistory()
+                        .apply( PatrulActivityRequest
+                                .builder()
+                                .endDate( new Date() )
+                                .startDate( patrul.getTaskDate() )
+                                .patrulUUID( patrul.getPassportNumber() )
+                                .build() )
+                        .subscribe( positionInfos -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getSaveTaskTimeStatistics()
+                                .accept( new TaskTimingStatistics(
+                                        patrul,
+                                        card.getCardId().toString(),
+                                        FIND_FACE_PERSON,
+                                        patrulStatus,
+                                        positionInfos ) ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) card.getPatruls().put( patrul.getUuid(), patrul );
 
         CassandraDataControl
@@ -186,14 +197,24 @@ public final class TaskInspector {
                 eventCar.getPatrulStatuses()
                         .put( patrul.getPassportNumber(), patrulStatus );
 
-                CassandraDataControlForTasks
+                CassandraDataControl
                         .getInstance()
-                        .getSaveTaskTimeStatistics()
-                        .accept( new TaskTimingStatistics(
-                                patrul,
-                                eventCar.getId(),
-                                FIND_FACE_EVENT_CAR,
-                                patrulStatus ) ); } }
+                        .getGetHistory()
+                        .apply( PatrulActivityRequest
+                                .builder()
+                                .endDate( new Date() )
+                                .startDate( patrul.getTaskDate() )
+                                .patrulUUID( patrul.getPassportNumber() )
+                                .build() )
+                        .subscribe( positionInfos -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getSaveTaskTimeStatistics()
+                                .accept( new TaskTimingStatistics(
+                                        patrul,
+                                        eventCar.getId(),
+                                        FIND_FACE_PERSON,
+                                        patrulStatus,
+                                        positionInfos ) ) ); } }
         if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .addValue( eventCar.getId(), new ActiveTask( eventCar ) );
@@ -266,14 +287,24 @@ public final class TaskInspector {
                         .getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                CassandraDataControlForTasks
+                CassandraDataControl
                         .getInstance()
-                        .getSaveTaskTimeStatistics()
-                        .accept( new TaskTimingStatistics(
-                                patrul,
-                                eventFace.getId(),
-                                FIND_FACE_EVENT_FACE,
-                                patrulStatus ) ); } }
+                        .getGetHistory()
+                        .apply( PatrulActivityRequest
+                                .builder()
+                                .endDate( new Date() )
+                                .startDate( patrul.getTaskDate() )
+                                .patrulUUID( patrul.getPassportNumber() )
+                                .build() )
+                        .subscribe( positionInfos -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getSaveTaskTimeStatistics()
+                                .accept( new TaskTimingStatistics(
+                                        patrul,
+                                        eventFace.getId(),
+                                        FIND_FACE_PERSON,
+                                        patrulStatus,
+                                        positionInfos ) ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
         if ( eventFace.getStatus().compareTo( FINISHED ) != 0 )
             CassandraDataControlForTasks
@@ -346,14 +377,24 @@ public final class TaskInspector {
                 eventBody.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                CassandraDataControlForTasks
+                CassandraDataControl
                         .getInstance()
-                        .getSaveTaskTimeStatistics()
-                        .accept( new TaskTimingStatistics(
-                                patrul,
-                                eventBody.getId(),
-                                FIND_FACE_EVENT_BODY,
-                                patrulStatus ) ); } }
+                        .getGetHistory()
+                        .apply( PatrulActivityRequest
+                                .builder()
+                                .endDate( new Date() )
+                                .startDate( patrul.getTaskDate() )
+                                .patrulUUID( patrul.getPassportNumber() )
+                                .build() )
+                        .subscribe( positionInfos -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getSaveTaskTimeStatistics()
+                                .accept( new TaskTimingStatistics(
+                                        patrul,
+                                        eventBody.getId(),
+                                        FIND_FACE_PERSON,
+                                        patrulStatus,
+                                        positionInfos ) ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul );
         if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
@@ -428,14 +469,24 @@ public final class TaskInspector {
                 carEvents.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                CassandraDataControlForTasks
+                CassandraDataControl
                         .getInstance()
-                        .getSaveTaskTimeStatistics()
-                        .accept( new TaskTimingStatistics(
-                                patrul,
-                                carEvents.getId(),
-                                FIND_FACE_CAR,
-                                patrulStatus ) ); } }
+                        .getGetHistory()
+                        .apply( PatrulActivityRequest
+                                .builder()
+                                .endDate( new Date() )
+                                .startDate( patrul.getTaskDate() )
+                                .patrulUUID( patrul.getPassportNumber() )
+                                .build() )
+                        .subscribe( positionInfos -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getSaveTaskTimeStatistics()
+                                .accept( new TaskTimingStatistics(
+                                        patrul,
+                                        carEvents.getId(),
+                                        FIND_FACE_PERSON,
+                                        patrulStatus,
+                                        positionInfos ) ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
         if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
@@ -510,14 +561,24 @@ public final class TaskInspector {
                 faceEvent.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                CassandraDataControlForTasks
+                CassandraDataControl
                         .getInstance()
-                        .getSaveTaskTimeStatistics()
-                        .accept( new TaskTimingStatistics(
-                                patrul,
-                                faceEvent.getId(),
-                                FIND_FACE_PERSON,
-                                patrulStatus ) ); } }
+                        .getGetHistory()
+                        .apply( PatrulActivityRequest
+                                .builder()
+                                .endDate( new Date() )
+                                .startDate( patrul.getTaskDate() )
+                                .patrulUUID( patrul.getPassportNumber() )
+                                .build() )
+                        .subscribe( positionInfos -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getSaveTaskTimeStatistics()
+                                .accept( new TaskTimingStatistics(
+                                        patrul,
+                                        faceEvent.getId(),
+                                        FIND_FACE_PERSON,
+                                        patrulStatus,
+                                        positionInfos ) ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul );
         if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 )
             CassandraDataControlForTasks
@@ -624,14 +685,24 @@ public final class TaskInspector {
                 selfEmploymentTask.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
-                CassandraDataControlForTasks
+                CassandraDataControl
                         .getInstance()
-                        .getSaveTaskTimeStatistics()
-                        .accept( new TaskTimingStatistics(
-                                patrul,
-                                selfEmploymentTask.getUuid().toString(),
-                                SELF_EMPLOYMENT,
-                                patrulStatus ) ); }
+                        .getGetHistory()
+                        .apply( PatrulActivityRequest
+                                .builder()
+                                .endDate( new Date() )
+                                .startDate( patrul.getTaskDate() )
+                                .patrulUUID( patrul.getPassportNumber() )
+                                .build() )
+                        .subscribe( positionInfos -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getSaveTaskTimeStatistics()
+                                .accept( new TaskTimingStatistics(
+                                        patrul,
+                                        selfEmploymentTask.getUuid().toString(),
+                                        FIND_FACE_PERSON,
+                                        patrulStatus,
+                                        positionInfos ) ) ); }
             case ATTACHED, ACCEPTED -> {
                 patrul.setTaskTypes( SELF_EMPLOYMENT );
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object

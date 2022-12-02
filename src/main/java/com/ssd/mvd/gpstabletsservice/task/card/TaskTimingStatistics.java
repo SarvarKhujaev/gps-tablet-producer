@@ -2,7 +2,6 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import static com.ssd.mvd.gpstabletsservice.constants.Status.IN_TIME;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
-import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.LATE;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -91,22 +90,14 @@ public class TaskTimingStatistics { // показывает все таски с
             Patrul patrul,
             String taskId,
             TaskTypes taskTypes,
-            PatrulStatus patrulStatus ) {
-        this.setDateOfComing( new Date() );
-        CassandraDataControl
-                .getInstance()
-                .getGetHistory()
-                .apply( PatrulActivityRequest
-                        .builder()
-                        .endDate( this.getDateOfComing() )
-                        .patrulUUID( patrul.getPassportNumber() )
-                        .startDate( patrul.getTaskDate() )
-                        .build() )
-                .subscribe( this::setPositionInfoList );
+            PatrulStatus patrulStatus,
+            List< PositionInfo > positionInfo ) {
         this.setTaskId( taskId );
         this.setTaskTypes( taskTypes );
+        this.setDateOfComing( new Date() );
         this.setTotalTimeConsumption( 0L );
         this.setPatrulUUID( patrul.getUuid() );
+        this.setPositionInfoList( positionInfo );
         this.setInTime( patrulStatus.getInTime() );
         this.setStatus( patrulStatus.getInTime() ? IN_TIME : LATE );
         this.setTimeWastedToArrive( patrulStatus.getTotalTimeConsumption() ); }
