@@ -765,12 +765,12 @@ public final class CassandraDataControl {
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.PATRULS.name()
                 + " SET lastActiveDate = '" + new Date().toInstant() + "'"
-                + ", totalActivityTime = "
-                + patrul.getTotalActivityTime() +
-                TimeInspector
-                        .getInspector()
-                        .getGetTimeDifferenceInHours()
-                        .apply( patrul.getLastActiveDate().toInstant() )
+//                + ", totalActivityTime = "
+//                + patrul.getTotalActivityTime() +
+//                TimeInspector
+//                        .getInspector()
+//                        .getGetTimeDifferenceInHours()
+//                        .apply( patrul.getLastActiveDate().toInstant() )
                 + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
 
     public Mono< ApiResponseModel > update ( Patrul patrul ) {
@@ -1265,11 +1265,11 @@ public final class CassandraDataControl {
 
     private final Supplier< Flux< Notification > > getAllNotification = () -> Flux.fromStream (
             this.getSession().execute ( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.NOTIFICATION.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.NOTIFICATION.name() + ";" )
+            .all()
+            .stream()
+            .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
             .flatMap( row -> Mono.just( new Notification( row ) ) )
