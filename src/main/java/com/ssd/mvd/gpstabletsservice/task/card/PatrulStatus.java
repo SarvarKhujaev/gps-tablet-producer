@@ -15,6 +15,6 @@ public class PatrulStatus {
         this.setInTime( patrul.check() );
         this.setTotalTimeConsumption( TimeInspector
                 .getInspector()
-                .getGetTimeDifference()
+                .getGetTimeDifferenceInSeconds()
                 .apply( patrul.getTaskDate().toInstant() ) ); }
 }

@@ -74,7 +74,7 @@ public final class TaskInspector {
                             .getUpdateTotalTimeConsumption()
                                     .apply( patrul, TimeInspector
                                             .getInspector()
-                                            .getGetTimeDifference()
+                                            .getGetTimeDifferenceInSeconds()
                                             .apply( patrul.getTaskDate().toInstant() ) );
                     patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), CARD_102.name() ); }
                 else {
@@ -104,8 +104,7 @@ public final class TaskInspector {
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
                 PatrulStatus patrulStatus = new PatrulStatus( patrul );
-                card.getPatrulStatuses()
-                        .put( patrul.getPassportNumber(), patrulStatus );
+                card.getPatrulStatuses().put( patrul.getPassportNumber(), patrulStatus );
 
                 CassandraDataControl
                         .getInstance()
@@ -164,7 +163,7 @@ public final class TaskInspector {
                             .getUpdateTotalTimeConsumption()
                                     .apply( patrul, TimeInspector
                                             .getInspector()
-                                            .getGetTimeDifference()
+                                            .getGetTimeDifferenceInSeconds()
                                             .apply( patrul.getTaskDate().toInstant() ) );
                     patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_CAR.name() ); }
                 else {
@@ -253,7 +252,7 @@ public final class TaskInspector {
                             .getUpdateTotalTimeConsumption()
                             .apply( patrul, TimeInspector
                                     .getInspector()
-                                    .getGetTimeDifference()
+                                    .getGetTimeDifferenceInSeconds()
                                     .apply( patrul.getTaskDate().toInstant() ) );
                     patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_FACE.name() ); }
                 else {
@@ -343,10 +342,9 @@ public final class TaskInspector {
                             .getUpdateTotalTimeConsumption()
                             .apply( patrul, TimeInspector
                                     .getInspector()
-                                    .getGetTimeDifference()
+                                    .getGetTimeDifferenceInSeconds()
                                     .apply( patrul.getTaskDate().toInstant() ) );
-                    patrul.getListOfTasks()
-                            .putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_BODY.name() ); }
+                    patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_EVENT_BODY.name() ); }
                 else {
                     CassandraDataControlForTasks
                             .getInstance()
@@ -432,11 +430,10 @@ public final class TaskInspector {
                             .getUpdateTotalTimeConsumption()
                             .apply( patrul, TimeInspector
                                     .getInspector()
-                                    .getGetTimeDifference()
+                                    .getGetTimeDifferenceInSeconds()
                                     .apply( patrul.getTaskDate().toInstant() ) );
 
-                    patrul.getListOfTasks()
-                            .putIfAbsent( patrul.getTaskId(), FIND_FACE_CAR.name() ); }
+                    patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_CAR.name() ); }
                 else {
                     CassandraDataControlForTasks
                             .getInstance()
@@ -524,11 +521,10 @@ public final class TaskInspector {
                             .getUpdateTotalTimeConsumption()
                             .apply( patrul, TimeInspector
                                     .getInspector()
-                                    .getGetTimeDifference()
+                                    .getGetTimeDifferenceInSeconds()
                                     .apply( patrul.getTaskDate().toInstant() ) );
 
-                    patrul.getListOfTasks()
-                            .putIfAbsent( patrul.getTaskId(), FIND_FACE_PERSON.name() ); }
+                    patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), FIND_FACE_PERSON.name() ); }
                 else {
                     CassandraDataControlForTasks
                             .getInstance()
@@ -652,11 +648,10 @@ public final class TaskInspector {
                             .getUpdateTotalTimeConsumption()
                             .apply( patrul, TimeInspector
                                     .getInspector()
-                                    .getGetTimeDifference()
+                                    .getGetTimeDifferenceInSeconds()
                                     .apply( patrul.getTaskDate().toInstant() ) );
 
-                    patrul.getListOfTasks()
-                            .putIfAbsent( patrul.getTaskId(), SELF_EMPLOYMENT.name() ); }
+                    patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), SELF_EMPLOYMENT.name() ); }
                 else {
                     CassandraDataControlForTasks
                             .getInstance()
