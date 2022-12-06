@@ -542,16 +542,16 @@ public class CassandraDataControlForTasks {
 
     private final Function< PatrulSos, Mono< ApiResponseModel > > saveSos = patrulSos -> this.getSession()
             .execute( "INSERT INTO "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.SOS_TABLE.name()
-                + "( sosWasSendDate, patruluuid, longitude, latitude )"
-                + " VALUES ('"
-                + new Date().toInstant() + "', "
-                + patrulSos.getPatrulUUID() + ", "
-                + patrulSos.getLongitude() + ", "
-                + patrulSos.getLatitude() + ") IF NOT EXISTS;" )
-                .wasApplied()
-                ? Archive
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.SOS_TABLE.name()
+                    + "( sosWasSendDate, patruluuid, longitude, latitude )"
+                    + " VALUES ('"
+                    + new Date().toInstant() + "', "
+                    + patrulSos.getPatrulUUID() + ", "
+                    + patrulSos.getLongitude() + ", "
+                    + patrulSos.getLatitude() + ") IF NOT EXISTS;" )
+            .wasApplied()
+            ? Archive
             .getArchive()
             .getFunction()
             .apply( Map.of(
@@ -560,7 +560,7 @@ public class CassandraDataControlForTasks {
                             .getWriteSosNotificationToKafka()
                             .apply( SosNotification
                                     .builder()
-                                    .sosStatus( true )
+                                    .status( Status.CREATED )
                                     .patrulUUID( patrulSos.getPatrulUUID() )
                                     .build() ),
                     "data", com.ssd.mvd.gpstabletsservice.entity.Data
@@ -568,21 +568,21 @@ public class CassandraDataControlForTasks {
                             .data( Status.ACTIVE )
                             .build() ) )
             : Archive
-                    .getArchive()
-                    .getFunction()
-                    .apply( Map.of(
-                            "message", "Sos was deleted successfully",
-                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                    .builder()
-                                    .data( Status.IN_ACTIVE )
-                                    .build() ) )
+            .getArchive()
+            .getFunction()
+            .apply( Map.of(
+                    "message", "Sos was deleted successfully",
+                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                            .builder()
+                            .data( Status.IN_ACTIVE )
+                            .build() ) )
             .map( status -> {
                 KafkaDataControl // sending message to Kafka
                         .getInstance()
                         .getWriteSosNotificationToKafka()
                         .apply( SosNotification
                                 .builder()
-                                .sosStatus( false )
+                                .status( Status.CANCEL )
                                 .patrulUUID( patrulSos.getPatrulUUID() )
                                 .build() );
                 this.getSession().execute( "DELETE FROM "
@@ -746,8 +746,22 @@ public class CassandraDataControlForTasks {
                 sosRequest.getPatrulUUID(),
                 sosRequest.getStatus() );
         // если патрульный подтвердил данный сигнал то связымаем его с ним
-        if ( sosRequest.getStatus().compareTo( Status.ACCEPTED ) == 0 )
+        if ( sosRequest.getStatus().compareTo( Status.ACCEPTED ) == 0 ){
             this.getUpdatePatrulSos().apply( sosRequest.getSosUUID(), sosRequest.getPatrulUUID() );
+            // меняем статус сос сигнала на принятый
+            this.getSession().execute( "UPDATE "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.PATRUL_SOS_TABLE.name()
+                    + " SET status = '" + Status.ACCEPTED.name() + "'"
+                    + " WHERE uuid = " + sosRequest.getSosUUID() + " IF EXISTS;" );
+            KafkaDataControl
+                    .getInstance()
+                    .getWriteSosNotificationToKafka()
+                    .apply( SosNotification
+                            .builder()
+                            .patrulUUID( this.getCurrentPatrulSos.apply( sosRequest.getSosUUID() ).getPatrulUUID() )
+                            .status( Status.ACCEPTED )
+                            .build() ); }
         this.getSession().execute( "UPDATE "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.PATRUL_SOS_TABLE.name()
