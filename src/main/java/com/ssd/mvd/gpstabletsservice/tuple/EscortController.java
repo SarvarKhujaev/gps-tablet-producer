@@ -73,8 +73,7 @@ public class EscortController {
                             patrul.setUuidForEscortCar( null );
                             CassandraDataControl
                                     .getInstance()
-                                    .update( patrul )
-                                    .subscribe(); } );
+                                    .update( null, null, patrul.getUuid() ); } );
                 tupleOfCar.setUuidOfEscort( null );
                 tupleOfCar.setUuidOfPatrul( null );
                 return CassandraDataControlForEscort

@@ -46,13 +46,7 @@ public class PatrulController {
     public Mono< ApiResponseModel > accepted ( String token ) { return CassandraDataControl
             .getInstance()
             .getAccepted()
-            .apply( token )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .apply( token ); }
 
     @MessageMapping ( value = "SET_IN_PAUSE" )
     public Mono< ApiResponseModel > setInPause ( String token ) { return CassandraDataControl
