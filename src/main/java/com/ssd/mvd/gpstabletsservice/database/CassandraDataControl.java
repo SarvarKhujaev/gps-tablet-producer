@@ -763,8 +763,8 @@ public final class CassandraDataControl {
         this.getSession().execute( "UPDATE "
                 + CassandraTables.TABLETS.name() + "."
                 + CassandraTables.PATRULS.name()
-                + " SET lastActiveDate = '" + new Date().toInstant() + "' "
-                + " totalActivityTime = "
+                + " SET lastActiveDate = '" + new Date().toInstant() + "'"
+                + ", totalActivityTime = "
                 + patrul.getTotalActivityTime() +
                 TimeInspector
                         .getInspector()
