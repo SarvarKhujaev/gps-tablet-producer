@@ -34,13 +34,7 @@ public class PatrulController {
     public Mono< ApiResponseModel > arrived ( String token ) { return CassandraDataControl
             .getInstance()
             .getArrived()
-            .apply( token )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .apply( token ); }
 
     @MessageMapping ( value = "ACCEPTED" )
     public Mono< ApiResponseModel > accepted ( String token ) { return CassandraDataControl
