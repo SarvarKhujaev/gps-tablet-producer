@@ -1051,7 +1051,10 @@ public final class TaskInspector {
                                 .getFunction()
                                 .apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, card )
                                                 .getPassportNumber() + " changed his status task to: " + status,
-                                        "success", CassandraDataControl.getInstance().login( patrul, status ) ) ) );
+                                        "success", CassandraDataControl
+                                                .getInstance()
+                                                .getUpdatePatrulStatus()
+                                                .apply( patrul, status ) ) ) );
 
                 case SELF_EMPLOYMENT -> CassandraDataControlForTasks
                         .getInstance()
@@ -1062,7 +1065,10 @@ public final class TaskInspector {
                                 .getFunction()
                                 .apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, selfEmploymentTask )
                                                 .getPassportNumber() + " changed his status task to: " + status,
-                                        "success", CassandraDataControl.getInstance().login( patrul, status ) ) ) );
+                                        "success", CassandraDataControl
+                                                .getInstance()
+                                                .getUpdatePatrulStatus()
+                                                .apply( patrul, status ) ) ) );
 
                 case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                         .getInstance()
@@ -1076,7 +1082,8 @@ public final class TaskInspector {
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
-                                                .login( patrul, status ) ) ) );
+                                                .getUpdatePatrulStatus()
+                                                .apply( patrul, status ) ) ) );
 
                 case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                         .getInstance()
@@ -1090,7 +1097,8 @@ public final class TaskInspector {
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
-                                                .login( patrul, status ) ) ) );
+                                                .getUpdatePatrulStatus()
+                                                .apply( patrul, status ) ) ) );
 
                 case FIND_FACE_PERSON -> CassandraDataControlForTasks
                         .getInstance()
@@ -1104,7 +1112,8 @@ public final class TaskInspector {
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
-                                                .login( patrul, status ) ) ) );
+                                                .getUpdatePatrulStatus()
+                                                .apply( patrul, status ) ) ) );
 
                 case FIND_FACE_CAR -> CassandraDataControlForTasks
                         .getInstance()
@@ -1118,7 +1127,8 @@ public final class TaskInspector {
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
-                                                .login( patrul, status ) ) ) );
+                                                .getUpdatePatrulStatus()
+                                                .apply( patrul, status ) ) ) );
 
                 case ESCORT -> CassandraDataControlForEscort
                         .getInstance()
@@ -1132,7 +1142,8 @@ public final class TaskInspector {
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
-                                                .login( patrul, status ) ) ) );
+                                                .getUpdatePatrulStatus()
+                                                .apply( patrul, status ) ) ) );
 
                 default -> CassandraDataControlForTasks
                         .getInstance()
@@ -1146,7 +1157,8 @@ public final class TaskInspector {
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
-                                                .login( patrul, status ) ) ) ); };
+                                                .getUpdatePatrulStatus()
+                                                .apply( patrul, status ) ) ) ); };
 
     private final Function< Patrul, Mono< ApiResponseModel > > getCurrentActiveTask = patrul -> switch ( patrul.getTaskTypes() ) {
         case CARD_102 -> CassandraDataControlForTasks
