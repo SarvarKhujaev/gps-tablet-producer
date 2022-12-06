@@ -205,6 +205,7 @@ public final class CassandraDataControl {
         this.createTable ( CassandraTables.NOTIFICATION.name(), Notification.class,
                 ", taskTypes text, " +
                         "status text, " +
+                        "taskStatus text, " +
                         "PRIMARY KEY( (uuid) ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
@@ -1296,7 +1297,9 @@ public final class CassandraDataControl {
                 + notification.getLongitudeOfTask() + ", "
 
                 + notification.getUuid() + ", '"
-                + notification.getStatus() + "', "
+                + notification.getStatus() + "', '"
+                + notification.getTaskStatus() + "', "
+
                 + false + ", '"
                 + notification.getTaskTypes() + "', '"
                 + notification.getNotificationWasCreated().toInstant() + "');" );
