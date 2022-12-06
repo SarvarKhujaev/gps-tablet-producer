@@ -232,15 +232,15 @@ public final class CassandraDataControl {
     private final Function< PatrulActivityRequest, Mono< List< PositionInfo > > > getHistory = request -> {
         try { return Flux.fromStream(
                 this.getSession().execute( "SELECT * FROM "
-                                + CassandraTables.GPSTABLETS.name() + "."
-                                + CassandraTables.TABLETS_LOCATION_TABLE.name()
-                                + " WHERE userId = '" + request.getPatrulUUID()
-                                + "' AND date >= '" + request.getStartDate().toInstant()
-                                + "' AND date <= '"
-                                + request.getEndDate().toInstant() + "';" )
-                        .all()
-                        .stream()
-                        .parallel() )
+                        + CassandraTables.GPSTABLETS.name() + "."
+                        + CassandraTables.TABLETS_LOCATION_TABLE.name()
+                        + " WHERE userId = '" + request.getPatrulUUID()
+                        + "' AND date >= '" + request.getStartDate().toInstant()
+                        + "' AND date <= '"
+                        + request.getEndDate().toInstant() + "';" )
+                .all()
+                .stream()
+                .parallel() )
                 .parallel()
                 .runOn( Schedulers.parallel() )
                 .flatMap( row -> Mono.justOrEmpty( row != null ? new PositionInfo( row ) : new PositionInfo() ) )
