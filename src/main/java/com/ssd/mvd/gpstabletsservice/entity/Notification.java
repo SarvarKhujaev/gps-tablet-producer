@@ -54,7 +54,8 @@ public class Notification {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setWasRead( row.getBool( "wasRead" ) );
         this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-        this.setTaskStatus( Status.valueOf( row.getString( "taskStatus" ) ) );
+        this.setTaskStatus( row.getString( "taskStatus" ) != null
+                ? Status.valueOf( row.getString( "taskStatus" ) ) : Status.CREATED );
         this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
         this.setNotificationWasCreated( row.getTimestamp( "notificationWasCreated" ) ); }
 
