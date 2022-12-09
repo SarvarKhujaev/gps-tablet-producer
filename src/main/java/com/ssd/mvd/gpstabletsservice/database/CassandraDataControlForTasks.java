@@ -600,6 +600,7 @@ public class CassandraDataControlForTasks {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
+            .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.FINISHED ) != 0 )
             .flatMap( row -> Mono.just( new PatrulSos( row ) ) )
             .sequential()
             .publishOn( Schedulers.single() );
@@ -746,7 +747,7 @@ public class CassandraDataControlForTasks {
                 sosRequest.getPatrulUUID(),
                 sosRequest.getStatus() );
         // если патрульный подтвердил данный сигнал то связымаем его с ним
-        if ( sosRequest.getStatus().compareTo( Status.ACCEPTED ) == 0 ){
+        if ( sosRequest.getStatus().compareTo( Status.ACCEPTED ) == 0 ) {
             this.getUpdatePatrulSos().apply( sosRequest.getSosUUID(), sosRequest.getPatrulUUID() );
             // меняем статус сос сигнала на принятый
             this.getSession().execute( "UPDATE "
