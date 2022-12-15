@@ -47,7 +47,8 @@ public final class CassandraDataControl {
     private static CassandraDataControl cassandraDataControl = new CassandraDataControl();
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
 
-    public static CassandraDataControl getInstance () { return cassandraDataControl != null ? cassandraDataControl
+    public static CassandraDataControl getInstance () { return cassandraDataControl != null
+            ? cassandraDataControl
             : ( cassandraDataControl = new CassandraDataControl() ); }
 
     public void register () {
@@ -1770,7 +1771,7 @@ public final class CassandraDataControl {
                         "message", "you have to update to last version",
                         "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                 .builder()
-                                .data( new AndroidVersionUpdate( row, FORCE ) )
+                                .data( new AndroidVersionUpdate( row, OPTIONAL ) )
                                 .build() ) ); };
 
     // обновляет последнюю версию андроид приложения

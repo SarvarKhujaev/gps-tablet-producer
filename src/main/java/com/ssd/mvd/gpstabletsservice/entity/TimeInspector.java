@@ -27,8 +27,8 @@ public class TimeInspector {
     private Date setDate () { return ( this.date = new Date() ); }
 
     private final Predicate< Instant > checkDate = instant -> this.getEndTimeForEvening() >= this.setDate().getHours()
-            && this.getDate().getHours() >= this.getStartTimeForMorning() ?
-            ( this.getGetTimeDifference()
+            && this.getDate().getHours() >= this.getStartTimeForMorning()
+            ? ( this.getGetTimeDifference()
                     .apply( instant ) <= 10 ) : ( this.getGetTimeDifference().apply( instant ) <= 7 );
 
     // for checking current time of task ending
