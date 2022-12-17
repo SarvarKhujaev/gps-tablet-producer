@@ -252,21 +252,6 @@ public class CardDetails {
                                                         + card.getEventHuman().getLastName() + " "
                                                         + card.getEventHuman().getMiddleName() ) ); } } );
 
-                        case ADDRESS_OF_INCIDENT -> {
-                            if ( card.getEventAddress() != null ) {
-                                this.getDetails().get( Details.APPLICANT_DATA )
-                                        .add( new Item( "Улица", card.getEventAddress().getStreet() ) );
-                                this.getDetails().get( Details.APPLICANT_DATA )
-                                        .add( new Item( "Страна", card.getEventAddress().getSRegionId() ) );
-                                this.getDetails().get( Details.APPLICANT_DATA )
-                                        .add( new Item( "Область", card.getEventAddress().getSOblastiId() ) );
-                                this.getDetails().get( Details.APPLICANT_DATA )
-                                        .add( new Item( "Район", card.getEventAddress().getSCountriesId() ) );
-                                this.getDetails().get( Details.APPLICANT_DATA )
-                                        .add( new Item( "Махалля", card.getEventAddress().getSMahallyaId() ) );
-                                this.getDetails().get( Details.APPLICANT_DATA )
-                                        .add( new Item( "Населенныый пункт", card.getEventAddress().getSNote() ) ); } }
-
                         case APPLICANT_DATA -> {
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Телефон", card.getEventHuman() != null
@@ -302,44 +287,6 @@ public class CardDetails {
                                             + card.getEventHuman() != null
                                             ? card.getEventHuman().getMiddleName() : "unknown" ) ); }
 
-                        case ADDITIONAL_ADDRESS -> {
-                            this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                    .add( new Item( "Дом", card.getEventAddress() != null
-                                            ? card.getEventAddress().getFlat() : "unknown" ) );
-                            this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                    .add( new Item( "Адрес", card.getEventAddress() != null
-                                            ? card.getEventAddress().getStreet() : "unknown" ) );
-                            this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                    .add( new Item( "Квартира", card.getEventAddress() != null
-                                            ? card.getEventAddress().getHouse() : "unknown" ) ); }
-
-                        case ADDRESS_OF_APPLICANT -> {
-                            if ( card.getEventHuman() != null
-                                    && card.getEventHuman().getHumanAddress() != null ) {
-                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                        .add( new Item( "Улица", card.getEventHuman().getHumanAddress().getStreet() ) );
-                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                        .add( new Item( "Район", card.getEventHuman().getHumanAddress().getSRegionId() ) );
-                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                        .add( new Item( "Область", card.getEventHuman().getHumanAddress().getSOblastiId() ) );
-                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                        .add( new Item( "Страна", card.getEventHuman().getHumanAddress().getSCountriesId() ) );
-                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                        .add( new Item( "Махалля", card.getEventHuman().getHumanAddress().getSMahallyaId() ) );
-                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                        .add( new Item( "Населенныый пункт", card.getEventHuman().getHumanAddress().getSNote() ) ); } }
-
-                        case ADDITIONAL_ADDRESS_OF_APPLICANT -> {
-                            this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                    .add( new Item( "Дом", card.getEventAddress() != null
-                                            ? card.getEventAddress().getFlat() : "unknown" ) );
-                            this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                    .add( new Item( "Адрес", card.getEventAddress() != null
-                                            ? card.getEventAddress().getHouse() : "unknown" ) );
-                            this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                    .add( new Item( "Квартира", card.getEventAddress() != null
-                                            ? card.getEventAddress().getStreet() : "unknown" ) ); }
-
                         case DATA_OF_VICTIM -> {
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Телефон", card.getVictimHumans() != null
@@ -347,24 +294,39 @@ public class CardDetails {
                                             ? card.getVictimHumans().get( 0 ).getPhone() : "unknown" ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Имя", card.getVictimHumans() != null
-                                            && card.getVictimHumans().size() > 0 ?
-                                            card.getVictimHumans().get( 0 ).getFirstName() : "unknown"  ) );
+                                            && card.getVictimHumans().size() > 0
+                                            ? card.getVictimHumans()
+                                            .get( 0 )
+                                            .getFirstName()
+                                            : "unknown"  ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Отчество", card.getVictimHumans() != null
-                                            && card.getVictimHumans().size() > 0 ?
-                                            card.getVictimHumans().get( 0 ).getLastName() : "unknown"  ) );
+                                            && card.getVictimHumans().size() > 0
+                                            ? card.getVictimHumans()
+                                            .get( 0 )
+                                            .getMiddleName()
+                                            : "unknown"  ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Фамилия", card.getVictimHumans() != null
-                                            && card.getVictimHumans().size() > 0 ?
-                                            card.getVictimHumans().get( 0 ).getMiddleName() : "unknown"  ) );
+                                            && card.getVictimHumans().size() > 0
+                                            ? card.getVictimHumans()
+                                            .get( 0 )
+                                            .getLastName()
+                                            : "unknown"  ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "ID Потерпевшего", card.getVictimHumans() != null
-                                            && card.getVictimHumans().size() > 0 ?
-                                            card.getVictimHumans().get( 0 ).getVictimId() : "unknown" ) );
+                                            && card.getVictimHumans().size() > 0
+                                            ? card.getVictimHumans()
+                                            .get( 0 )
+                                            .getVictimId()
+                                            : "unknown" ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Дата рождения", card.getVictimHumans() != null
-                                            && card.getVictimHumans().size() > 0 ?
-                                            card.getVictimHumans().get( 0 ).getDateOfBirth() : "unknown" ) ); }
+                                            && card.getVictimHumans().size() > 0
+                                            ? card.getVictimHumans()
+                                            .get( 0 )
+                                            .getDateOfBirth()
+                                            : "unknown" ) ); }
 
                         case ADDRESS_OF_VICTIM -> {
                             if ( card.getEventHuman() != null
@@ -380,6 +342,48 @@ public class CardDetails {
                                 this.getDetails().get( Details.ADDRESS_OF_VICTIM )
                                         .add( new Item( "Махалля", card.getEventHuman().getHumanAddress().getSMahallyaId() ) );
                                 this.getDetails().get( Details.ADDRESS_OF_VICTIM )
+                                        .add( new Item( "Населенныый пункт", card.getEventHuman().getHumanAddress().getSNote() ) ); } }
+
+                        case ADDITIONAL_ADDRESS -> {
+                            this.getDetails().get( Details.ADDITIONAL_ADDRESS )
+                                    .add( new Item( "Дом", card.getEventAddress() != null
+                                            ? card.getEventAddress().getFlat() : "unknown" ) );
+                            this.getDetails().get( Details.ADDITIONAL_ADDRESS )
+                                    .add( new Item( "Адрес", card.getEventAddress() != null
+                                            ? card.getEventAddress().getStreet() : "unknown" ) );
+                            this.getDetails().get( Details.ADDITIONAL_ADDRESS )
+                                    .add( new Item( "Квартира", card.getEventAddress() != null
+                                            ? card.getEventAddress().getHouse() : "unknown" ) ); }
+
+                        case ADDRESS_OF_INCIDENT -> {
+                            if ( card.getEventAddress() != null ) {
+                                this.getDetails().get( Details.APPLICANT_DATA )
+                                        .add( new Item( "Улица", card.getEventAddress().getStreet() ) );
+                                this.getDetails().get( Details.APPLICANT_DATA )
+                                        .add( new Item( "Страна", card.getEventAddress().getSRegionId() ) );
+                                this.getDetails().get( Details.APPLICANT_DATA )
+                                        .add( new Item( "Область", card.getEventAddress().getSOblastiId() ) );
+                                this.getDetails().get( Details.APPLICANT_DATA )
+                                        .add( new Item( "Район", card.getEventAddress().getSCountriesId() ) );
+                                this.getDetails().get( Details.APPLICANT_DATA )
+                                        .add( new Item( "Махалля", card.getEventAddress().getSMahallyaId() ) );
+                                this.getDetails().get( Details.APPLICANT_DATA )
+                                        .add( new Item( "Населенныый пункт", card.getEventAddress().getSNote() ) ); } }
+
+                        case ADDRESS_OF_APPLICANT -> {
+                            if ( card.getEventHuman() != null
+                                    && card.getEventHuman().getHumanAddress() != null ) {
+                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
+                                        .add( new Item( "Улица", card.getEventHuman().getHumanAddress().getStreet() ) );
+                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
+                                        .add( new Item( "Район", card.getEventHuman().getHumanAddress().getSRegionId() ) );
+                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
+                                        .add( new Item( "Область", card.getEventHuman().getHumanAddress().getSOblastiId() ) );
+                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
+                                        .add( new Item( "Страна", card.getEventHuman().getHumanAddress().getSCountriesId() ) );
+                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
+                                        .add( new Item( "Махалля", card.getEventHuman().getHumanAddress().getSMahallyaId() ) );
+                                this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
                                         .add( new Item( "Населенныый пункт", card.getEventHuman().getHumanAddress().getSNote() ) ); } }
 
                         case ADDITIONAL_ADDRESS_OF_Victim -> {
@@ -401,8 +405,18 @@ public class CardDetails {
                                         .add( new Item( "Квартира", card.getVictimHumans()
                                                 .get( 0 )
                                                 .getVictimAddress()
-                                                .getStreet() ) ); } } } } );
-    }
+                                                .getStreet() ) ); } }
+
+                        case ADDITIONAL_ADDRESS_OF_APPLICANT -> {
+                            this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
+                                    .add( new Item( "Дом", card.getEventAddress() != null
+                                            ? card.getEventAddress().getFlat() : "unknown" ) );
+                            this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
+                                    .add( new Item( "Адрес", card.getEventAddress() != null
+                                            ? card.getEventAddress().getHouse() : "unknown" ) );
+                            this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
+                                    .add( new Item( "Квартира", card.getEventAddress() != null
+                                            ? card.getEventAddress().getStreet() : "unknown" ) ); } } } ); }
 
     public CardDetails ( EscortTuple escortTuple, String ru, TupleOfCar tupleOfCar ) {
         this.getDetails().putIfAbsent( Details.ESCORT, new ArrayList<>() );
