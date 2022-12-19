@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
@@ -38,4 +39,6 @@ public class CarTotalData {
     private List< String > patruls; // link to list of Patruls who is going deal with this Card
     @JsonDeserialize
     private List< ReportForCard > reportForCards;
+
+    private ErrorResponse errorResponse;
 }

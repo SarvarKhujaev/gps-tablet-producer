@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai;
 
+import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
@@ -16,4 +17,6 @@ public class Tonirovka {
     private String permissionLicense;
     private String whoGavePermission;
     private String organWhichGavePermission;
+
+    private ErrorResponse errorResponse;
 }

@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai;
 
+import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
@@ -32,5 +33,6 @@ public class ModelForCar {
 
     private Tonirovka tonirovka;
     private Insurance insurance;
+    private ErrorResponse errorResponse;
     private DoverennostList doverennostList;
 }

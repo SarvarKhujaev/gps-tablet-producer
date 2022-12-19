@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
+import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
@@ -19,4 +20,6 @@ public class Pinpp {
     private String Patronym;
     private String Cadastre;
     private String BirthDate;
+
+    private ErrorResponse errorResponse;
 }
