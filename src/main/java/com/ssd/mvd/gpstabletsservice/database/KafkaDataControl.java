@@ -7,6 +7,7 @@ import com.ssd.mvd.gpstabletsservice.task.sos_task.SosNotification;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -144,19 +145,21 @@ public class KafkaDataControl {
                 .subscribe();
         return carTotalData; };
 
-    private final Consumer< Notification > writeNotificationToKafka = notification -> this.getKafkaSender()
-            .createOutbound()
-            .send( Mono.just( new ProducerRecord<>(
-                    this.getNOTIFICATION(),
-                    SerDes
-                        .getSerDes()
-                        .serialize( notification ) ) ) )
-            .then()
-            .doOnError( error -> logger.info( error.getMessage() ) )
-            .doOnSuccess( success -> logger.info( "Kafka got notification: "
-                    + notification.getTitle()
-                    + " at: " + notification.getNotificationWasCreated() ) )
-            .subscribe();
+    private final Consumer< Notification > writeNotificationToKafka = notification -> {
+        if ( notification.getTaskStatus().compareTo( Status.ATTACHED ) != 0
+            && notification.getTaskStatus().compareTo( Status.CANCEL ) != 0 ) this.getKafkaSender()
+                .createOutbound()
+                .send( Mono.just( new ProducerRecord<>(
+                        this.getNOTIFICATION(),
+                        SerDes
+                                .getSerDes()
+                                .serialize( notification ) ) ) )
+                .then()
+                .doOnError( error -> logger.info( error.getMessage() ) )
+                .doOnSuccess( success -> logger.info( "Kafka got notification: "
+                        + notification.getTitle()
+                        + " at: " + notification.getNotificationWasCreated() ) )
+                .subscribe(); };
 
     public void clear () {
         instance = null;
