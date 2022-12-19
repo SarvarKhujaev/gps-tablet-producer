@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForAddress.ModelForAddress;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -30,4 +31,6 @@ public class PsychologyCard {
     private com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForCadastr.Data modelForCadastr;
     @JsonDeserialize
     private com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForPassport.Data modelForPassport;
+
+    private ErrorResponse errorResponse;
 }
