@@ -150,7 +150,8 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 card,
-                                this.getGenerateText().apply( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ),
+                                status ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventCar eventCar ) {
@@ -239,7 +240,8 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 eventCar,
-                                this.getGenerateText().apply( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ),
+                                status  ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventFace eventFace ) {
@@ -329,7 +331,8 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 eventFace,
-                                this.getGenerateText().apply( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ),
+                                status  ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EventBody eventBody ) {
@@ -417,7 +420,8 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 eventBody,
-                                this.getGenerateText().apply( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ),
+                                status  ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvent carEvents ) {
@@ -508,7 +512,8 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 carEvents,
-                                this.getGenerateText().apply( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ),
+                                status  ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvent faceEvent ) {
@@ -600,7 +605,8 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 faceEvent,
-                                this.getGenerateText().apply( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ),
+                                status  ) ) );
         return patrul; }
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, EscortTuple escortTuple ) {
@@ -728,7 +734,8 @@ public final class TaskInspector {
                         .apply( new Notification(
                                 patrul,
                                 selfEmploymentTask,
-                                this.getGenerateText().apply( patrul, status ) ) ) );
+                                this.getGenerateText().apply( patrul, status ),
+                                status  ) ) );
         return patrul; }
 
     public Mono< ApiResponseModel > getListOfPatrulTasks ( Patrul patrul, Integer page, Integer size ) {
