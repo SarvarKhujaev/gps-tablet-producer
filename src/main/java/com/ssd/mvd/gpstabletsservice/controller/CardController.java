@@ -39,6 +39,13 @@ public class CardController {
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
+    @MessageMapping ( value = "getActiveTaskForFront" )
+    public Mono< ActiveTask > getActiveTaskForFront ( TaskDetailsRequest taskDetailsRequest ) {
+        return CassandraDataControlForTasks
+                .getInstance()
+                .getGetActiveTask()
+                .apply( taskDetailsRequest ); }
+
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
             .getInstance()

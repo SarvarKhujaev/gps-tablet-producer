@@ -827,7 +827,7 @@ public class CassandraDataControlForTasks {
                                     .data( sosTotalDataList )
                                     .build() ) ) );
 
-    // создает список различных сос сишгалов лоя нового патрульного
+    // создает список различных сос сигналов лоя нового патрульного
     private final Consumer< UUID > createRowInPatrulSosListTable = uuid -> this.getSession()
             .execute( "INSERT INTO "
             + CassandraTables.TABLETS.name() + "."
@@ -837,4 +837,35 @@ public class CassandraDataControlForTasks {
             "attachedSosList, " +
             "cancelledSosList, " +
             "acceptedSosList ) VALUES ( " + uuid + ", {}, {}, {}, {} ) IF NOT EXISTS;" );
+
+    private final Function< TaskDetailsRequest, Mono< ActiveTask > > getActiveTask = taskDetailsRequest ->
+            switch ( taskDetailsRequest.getTaskTypes() ) {
+                case CARD_102 -> this.getCard102
+                        .apply( taskDetailsRequest.getId() )
+                        .map( ActiveTask::new );
+
+                case FIND_FACE_CAR -> this.getCheckTable().apply( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
+                        ? this.getCarEvents
+                        .apply( taskDetailsRequest.getId() )
+                        .map( ActiveTask::new )
+
+                        : this.getEventCar
+                        .apply( taskDetailsRequest.getId() )
+                        .map( ActiveTask::new );
+
+                case FIND_FACE_PERSON -> switch ( this.getFindTable().apply( taskDetailsRequest.getId() ) ) {
+                    case FACEPERSON -> this.getFaceEvents
+                            .apply( taskDetailsRequest.getId() )
+                            .map( ActiveTask::new );
+
+                    case EVENTBODY -> this.getEventBody
+                            .apply( taskDetailsRequest.getId() )
+                            .map( ActiveTask::new );
+
+                    default -> this.getEventFace
+                            .apply( taskDetailsRequest.getId() )
+                            .map( ActiveTask::new ); };
+                default -> this.getSelfEmploymentTask
+                        .apply( UUID.fromString( taskDetailsRequest.getId() ) )
+                        .map( ActiveTask::new ); };
 }
