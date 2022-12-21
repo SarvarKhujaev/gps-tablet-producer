@@ -145,9 +145,8 @@ public class KafkaDataControl {
                 .subscribe();
         return carTotalData; };
 
-    private final Consumer< Notification > writeNotificationToKafka = notification -> {
-        if ( notification.getStatus().compareTo( Status.ATTACHED ) != 0
-            && notification.getStatus().compareTo( Status.CANCEL ) != 0 ) this.getKafkaSender()
+    private final Consumer< Notification > writeNotificationToKafka = notification ->
+        this.getKafkaSender()
                 .createOutbound()
                 .send( Mono.just( new ProducerRecord<>(
                         this.getNOTIFICATION(),
@@ -159,7 +158,7 @@ public class KafkaDataControl {
                 .doOnSuccess( success -> logger.info( "Kafka got notification: "
                         + notification.getTitle()
                         + " at: " + notification.getNotificationWasCreated() ) )
-                .subscribe(); };
+                .subscribe();
 
     public void clear () {
         instance = null;
