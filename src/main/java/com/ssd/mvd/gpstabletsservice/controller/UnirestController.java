@@ -131,8 +131,8 @@ public class UnirestController {
     private final BiFunction< Double, Double, String > getAddressByLocation = ( latitude, longitude ) -> {
         try { return this.stringToArrayList(
                     Unirest.get( this.getADDRESS_LOCATION_API()
-                                + latitude + "," + longitude
-                                + "&limit=5&format=json&addressdetails=1" )
+                                    + latitude + "," + longitude
+                                    + "&limit=5&format=json&addressdetails=1" )
                             .asJson()
                             .getBody()
                             .getArray()
