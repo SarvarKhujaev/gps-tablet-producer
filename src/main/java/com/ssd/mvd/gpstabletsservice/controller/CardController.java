@@ -72,7 +72,7 @@ public class CardController {
                     .addValue( card.getCardId().toString(), new ActiveTask( card ) );
 
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel()
+                    .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
@@ -99,7 +99,7 @@ public class CardController {
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
             CarEvent carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel()
+                    .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
@@ -128,7 +128,7 @@ public class CardController {
             if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
                 facePerson.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel()
+                    .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
@@ -155,7 +155,7 @@ public class CardController {
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
             EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel()
+                    .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
@@ -182,7 +182,7 @@ public class CardController {
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
             EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel()
+                    .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()
@@ -208,7 +208,7 @@ public class CardController {
 
         else { EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel()
+                    .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
                     .map( s -> CassandraDataControl
                             .getInstance()

@@ -1221,15 +1221,15 @@ public final class CassandraDataControl {
                                     ? " AND date >= '"
                                     + request.getStartDate().toInstant()
                                     + "' AND date <= '"
-                                    + request.getEndDate().toInstant() + "'" : "" )
-                                    + ";" )
+                                    + request.getEndDate().toInstant() + "'"
+                                    : "" ) + ";" )
                             .all()
                             .stream()
                             .parallel() )
                     .parallel()
                     .runOn( Schedulers.parallel() )
-                    .filter( row -> Status.valueOf( row.getString( "status" ) )
-                            .compareTo( Status.LOGOUT ) == 0 )
+//                    .filter( row -> Status.valueOf( row.getString( "status" ) )
+//                            .compareTo( Status.LOGOUT ) == 0 )
                     .map( row -> row.getLong( "totalActivityTime" ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
