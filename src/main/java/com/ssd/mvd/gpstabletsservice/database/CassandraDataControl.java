@@ -203,11 +203,11 @@ public final class CassandraDataControl {
                         + CassandraTables.CAMERA_LIST.name()
                         + " > >, PRIMARY KEY (uuid) );" );
 
-        this.createTable ( CassandraTables.NOTIFICATION_TEST.name(), Notification.class,
+        this.createTable ( CassandraTables.NOTIFICATION.name(), Notification.class,
                 ", taskTypes text, " +
                         "status text, " +
                         "taskStatus text, " +
-                        "PRIMARY KEY( (patrulUUID), id ) );" );
+                        "PRIMARY KEY( uuid ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
@@ -1267,7 +1267,7 @@ public final class CassandraDataControl {
     private final Supplier< Flux< Notification > > getAllNotification = () -> Flux.fromStream (
             this.getSession().execute ( "SELECT * FROM "
                     + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.NOTIFICATION_TEST.name() + ";" )
+                    + CassandraTables.NOTIFICATION.name() + ";" )
             .all()
             .stream()
             .parallel() )
@@ -1280,7 +1280,7 @@ public final class CassandraDataControl {
     private final Function< Notification, Notification > saveNotification = notification -> {
         this.getSession().execute( "INSERT INTO "
                 + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.NOTIFICATION_TEST.name() +
+                + CassandraTables.NOTIFICATION.name() +
                 CassandraConverter
                         .getInstance()
                         .getALlNames( Notification.class )
@@ -1297,7 +1297,7 @@ public final class CassandraDataControl {
                 + notification.getLongitudeOfTask() + ", "
                 + notification.getLongitudeOfTask() + ", "
 
-                + notification.getPatrulUUID() + ", '"
+                + notification.getUuid() + ", '"
                 + notification.getStatus() + "', '"
                 + notification.getTaskStatus() + "', "
 
@@ -1309,7 +1309,7 @@ public final class CassandraDataControl {
     private final Function< UUID, Mono< ApiResponseModel > > setNotificationAsRead = uuid -> this.getSession()
             .execute( "UPDATE "
                     + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.NOTIFICATION_TEST.name()
+                    + CassandraTables.NOTIFICATION.name()
                     + " SET wasRead = " + true
                     + " WHERE uuid = " + uuid + ";" )
             .wasApplied()
@@ -1733,7 +1733,8 @@ public final class CassandraDataControl {
                         patrul.setSpecialToken( token );
                         UnirestController
                                 .getInstance()
-                                .addUser( patrul ); } ) );
+                                .getAddUser()
+                                .accept( patrul ); } ) );
 
     private final Function< String, UUID > decode = token -> UUID.fromString(
             new String( Base64
