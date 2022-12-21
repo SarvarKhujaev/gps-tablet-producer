@@ -30,7 +30,8 @@ public class Notification {
     private Double latitudeOfTask;
     private Double longitudeOfTask;
 
-    private UUID uuid;
+    private UUID patrulUUID;
+
     private Status status;
     private Status taskStatus;
 
@@ -51,8 +52,8 @@ public class Notification {
         this.setLatitudeOfTask( row.getDouble( "latitudeOfTask" ) );
         this.setLongitudeOfTask( row.getDouble( "longitudeOfTask" ) );
 
-        this.setUuid( row.getUUID( "uuid" ) );
         this.setWasRead( row.getBool( "wasRead" ) );
+        this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
         this.setStatus( Status.valueOf( row.getString( "status" ) ) );
         this.setTaskStatus( row.getString( "taskStatus" ) != null
                 ? Status.valueOf( row.getString( "taskStatus" ) ) : Status.CREATED );
@@ -63,7 +64,7 @@ public class Notification {
         this.setTitle( text );
         this.setStatus( status );
         this.setType( CARD_102.name() );
-        this.setUuid( UUID.randomUUID() );
+        this.setPatrulUUID( patrul.getUuid() );
         this.setTaskStatus( card.getStatus() );
         this.setId( card.getCardId().toString() );
         this.setCarNumber( patrul.getCarNumber() );
@@ -80,7 +81,7 @@ public class Notification {
         this.setTitle( text );
         this.setStatus( status );
         this.setId( eventCar.getId() );
-        this.setUuid( UUID.randomUUID() );
+        this.setPatrulUUID( patrul.getUuid() );
         this.setTaskStatus( eventCar.getStatus() );
         this.setType( FIND_FACE_EVENT_CAR.name() );
         this.setCarNumber( patrul.getCarNumber() );
@@ -97,7 +98,7 @@ public class Notification {
         this.setTitle( text );
         this.setStatus( status );
         this.setId( eventFace.getId() );
-        this.setUuid( UUID.randomUUID() );
+        this.setPatrulUUID( patrul.getUuid() );
         this.setTaskStatus( eventFace.getStatus() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
@@ -114,7 +115,7 @@ public class Notification {
         this.setTitle( text );
         this.setStatus( status );
         this.setId( eventBody.getId() );
-        this.setUuid( UUID.randomUUID() );
+        this.setPatrulUUID( patrul.getUuid() );
         this.setTaskStatus( eventBody.getStatus() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
@@ -131,8 +132,8 @@ public class Notification {
         this.setTitle( text );
         this.setStatus( status );
         this.setId( carEvents.getId() );
-        this.setUuid( UUID.randomUUID() );
         this.setType( FIND_FACE_CAR.name() );
+        this.setPatrulUUID( patrul.getUuid() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
         this.setTaskStatus( carEvents.getStatus() );
@@ -155,7 +156,7 @@ public class Notification {
         this.setTitle( text );
         this.setStatus( status );
         this.setId( faceEvent.getId() );
-        this.setUuid( UUID.randomUUID() );
+        this.setPatrulUUID( patrul.getUuid() );
         this.setType( FIND_FACE_PERSON.name() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
@@ -178,7 +179,7 @@ public class Notification {
     public Notification ( Patrul patrul, SelfEmploymentTask selfEmploymentTask, String text, Status status ) {
         this.setTitle( text );
         this.setStatus( status );
-        this.setUuid( UUID.randomUUID() );
+        this.setPatrulUUID( patrul.getUuid() );
         this.setType( SELF_EMPLOYMENT.name() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
