@@ -64,10 +64,10 @@ public class UnirestController {
                 catch ( JsonProcessingException e ) { throw new RuntimeException(e); } } } ); }
 
     public RestTemplate restTemplate ( String token ) { return new RestTemplateBuilder()
-                .setConnectTimeout( Duration.ofSeconds( 10 ) )
-                .setReadTimeout( Duration.ofSeconds( 60 ) )
-                .defaultHeader( "token", token )
-                .build(); }
+            .setConnectTimeout( Duration.ofSeconds( 10 ) )
+            .setReadTimeout( Duration.ofSeconds( 60 ) )
+            .defaultHeader( "token", token )
+            .build(); }
 
     public void deleteUser ( String patrulId ) {
         try { Mono.just( new Req() )
@@ -109,12 +109,12 @@ public class UnirestController {
     public void addUser ( Patrul patrul ) {
         try { Mono.just( new Req() )
                 .map( req -> {
-                        req.setUsername( patrul.getSurnameNameFatherName() );
-                        req.setId( patrul.getUuid() );
-                        req.setRole( Role.USER );
-                        return req; } )
+                    req.setUsername( patrul.getSurnameNameFatherName() );
+                    req.setId( patrul.getUuid() );
+                    req.setRole( Role.USER );
+                    return req; } )
                 .onErrorContinue( (throwable, o) -> log.error( "Error in addUser of UnirestController: "
-                + throwable.getMessage() + " : " + o ) )
+                        + throwable.getMessage() + " : " + o ) )
                 .onErrorStop()
                 .subscribe( req -> this.restTemplate( patrul.getSpecialToken() )
                         .exchange( this.CHAT_SERVICE_DOMAIN + "/"
