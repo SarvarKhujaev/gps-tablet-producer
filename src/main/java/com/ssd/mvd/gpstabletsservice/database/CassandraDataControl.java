@@ -203,11 +203,11 @@ public final class CassandraDataControl {
                         + CassandraTables.CAMERA_LIST.name()
                         + " > >, PRIMARY KEY (uuid) );" );
 
-        this.createTable ( CassandraTables.NOTIFICATION.name(), Notification.class,
+        this.createTable ( CassandraTables.NOTIFICATION_TEST.name(), Notification.class,
                 ", taskTypes text, " +
                         "status text, " +
                         "taskStatus text, " +
-                        "PRIMARY KEY( (uuid) ) );" );
+                        "PRIMARY KEY( (patrulUUID), id ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
@@ -1267,20 +1267,20 @@ public final class CassandraDataControl {
     private final Supplier< Flux< Notification > > getAllNotification = () -> Flux.fromStream (
             this.getSession().execute ( "SELECT * FROM "
                     + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.NOTIFICATION.name() + ";" )
+                    + CassandraTables.NOTIFICATION_TEST.name() + ";" )
             .all()
             .stream()
             .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( new Notification( row ) ) )
+            .map( Notification::new )
             .sequential()
             .publishOn( Schedulers.single() );
 
     private final Function< Notification, Notification > saveNotification = notification -> {
         this.getSession().execute( "INSERT INTO "
                 + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.NOTIFICATION.name() +
+                + CassandraTables.NOTIFICATION_TEST.name() +
                 CassandraConverter
                         .getInstance()
                         .getALlNames( Notification.class )
@@ -1297,7 +1297,7 @@ public final class CassandraDataControl {
                 + notification.getLongitudeOfTask() + ", "
                 + notification.getLongitudeOfTask() + ", "
 
-                + notification.getUuid() + ", '"
+                + notification.getPatrulUUID() + ", '"
                 + notification.getStatus() + "', '"
                 + notification.getTaskStatus() + "', "
 
@@ -1309,7 +1309,7 @@ public final class CassandraDataControl {
     private final Function< UUID, Mono< ApiResponseModel > > setNotificationAsRead = uuid -> this.getSession()
             .execute( "UPDATE "
                     + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.NOTIFICATION.name()
+                    + CassandraTables.NOTIFICATION_TEST.name()
                     + " SET wasRead = " + true
                     + " WHERE uuid = " + uuid + ";" )
             .wasApplied()
