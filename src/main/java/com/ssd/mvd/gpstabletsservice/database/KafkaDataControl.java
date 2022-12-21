@@ -146,8 +146,8 @@ public class KafkaDataControl {
         return carTotalData; };
 
     private final Consumer< Notification > writeNotificationToKafka = notification -> {
-        if ( notification.getTaskStatus().compareTo( Status.ATTACHED ) != 0
-            && notification.getTaskStatus().compareTo( Status.CANCEL ) != 0 ) this.getKafkaSender()
+        if ( notification.getStatus().compareTo( Status.ATTACHED ) != 0
+            && notification.getStatus().compareTo( Status.CANCEL ) != 0 ) this.getKafkaSender()
                 .createOutbound()
                 .send( Mono.just( new ProducerRecord<>(
                         this.getNOTIFICATION(),
