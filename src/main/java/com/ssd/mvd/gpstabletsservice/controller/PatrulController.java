@@ -151,7 +151,8 @@ public class PatrulController {
     public Mono< ApiResponseModel > addUser ( Patrul patrul ) {
         UnirestController
                 .getInstance()
-                .addUser( patrul );
+                .getAddUser()
+                .accept( patrul );
         patrul.setSpecialToken( null );
         return CassandraDataControl
                 .getInstance()
@@ -208,7 +209,8 @@ public class PatrulController {
     public Mono< ApiResponseModel > updatePatrul ( Patrul patrul ) {
         UnirestController
                 .getInstance()
-                .updateUser( patrul );
+                .getUpdateUser()
+                .accept( patrul );
         patrul.setSpecialToken( null );
         return CassandraDataControl
                 .getInstance()
@@ -234,7 +236,8 @@ public class PatrulController {
     public Mono< ApiResponseModel > deletePatrul ( String passportNumber ) {
         UnirestController
                 .getInstance()
-                .deleteUser( passportNumber );
+                .getDeleteUser()
+                .accept( passportNumber );
         return CassandraDataControl
                 .getInstance()
                 .deletePatrul( UUID.fromString( passportNumber.split( "@" )[0] ) )
