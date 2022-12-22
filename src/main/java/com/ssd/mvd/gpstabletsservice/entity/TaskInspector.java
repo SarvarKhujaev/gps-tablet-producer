@@ -120,7 +120,7 @@ public final class TaskInspector {
                                 .getSaveTaskTimeStatistics()
                                 .accept( new TaskTimingStatistics(
                                         patrul,
-                                        card.getCardId().toString(),
+                                        card.getUUID().toString(),
                                         CARD_102,
                                         patrulStatus,
                                         positionInfos ) ) ); } }
@@ -213,7 +213,7 @@ public final class TaskInspector {
                                 .getSaveTaskTimeStatistics()
                                 .accept( new TaskTimingStatistics(
                                         patrul,
-                                        eventCar.getId(),
+                                        eventCar.getUUID().toString(),
                                         FIND_FACE_EVENT_CAR,
                                         patrulStatus,
                                         positionInfos ) ) ); } }
@@ -306,7 +306,7 @@ public final class TaskInspector {
                                 .getSaveTaskTimeStatistics()
                                 .accept( new TaskTimingStatistics(
                                         patrul,
-                                        eventFace.getId(),
+                                        eventFace.getUUID().toString(),
                                         FIND_FACE_PERSON,
                                         patrulStatus,
                                         positionInfos ) ) ); } }
@@ -398,7 +398,7 @@ public final class TaskInspector {
                                 .getSaveTaskTimeStatistics()
                                 .accept( new TaskTimingStatistics(
                                         patrul,
-                                        eventBody.getId(),
+                                        eventBody.getUUID().toString(),
                                         FIND_FACE_PERSON,
                                         patrulStatus,
                                         positionInfos ) ) ); } }
@@ -492,7 +492,7 @@ public final class TaskInspector {
                                 .getSaveTaskTimeStatistics()
                                 .accept( new TaskTimingStatistics(
                                         patrul,
-                                        carEvents.getId(),
+                                        carEvents.getUUID().toString(),
                                         FIND_FACE_PERSON,
                                         patrulStatus,
                                         positionInfos ) ) ); } }
@@ -586,7 +586,7 @@ public final class TaskInspector {
                                 .getSaveTaskTimeStatistics()
                                 .accept( new TaskTimingStatistics(
                                         patrul,
-                                        faceEvent.getId(),
+                                        faceEvent.getUUID().toString(),
                                         FIND_FACE_PERSON,
                                         patrulStatus,
                                         positionInfos ) ) ); } }
