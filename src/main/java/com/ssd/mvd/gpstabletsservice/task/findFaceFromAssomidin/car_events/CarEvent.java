@@ -128,6 +128,10 @@ public class CarEvent {
     private DetectorParams detector_params;
 
     private Status status = Status.CREATED;
+
+    private UUID uuid;
+
+    public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
     @JsonDeserialize
     private CarTotalData carTotalData;
 

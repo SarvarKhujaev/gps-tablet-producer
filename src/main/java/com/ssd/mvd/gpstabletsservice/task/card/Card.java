@@ -43,6 +43,9 @@ public class Card {
     private EventHuman eventHuman;   // Aybdor inson
 
     private Status status = Status.CREATED;
+    private UUID uuid;
+
+    public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
 
     @JsonDeserialize
     private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event

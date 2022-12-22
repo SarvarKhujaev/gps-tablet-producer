@@ -130,6 +130,10 @@ public class FaceEvent {
 
     private Status status = Status.CREATED;
 
+    private UUID uuid;
+
+    public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
+
     @JsonDeserialize
     private PsychologyCard psychologyCard;
 

@@ -16,8 +16,6 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.Face
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
-import java.util.Date;
 import lombok.Data;
 
 @Data
@@ -28,6 +26,8 @@ public class SerDes {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public static SerDes getSerDes () { return serDes != null ? serDes : ( serDes = new SerDes() ); }
+
+    public <T> String test ( T object ) { return this.getGson().toJson( object ); }
 
     public String serialize ( Card object ) { return this.getGson().toJson( object ); }
 
@@ -60,8 +60,6 @@ public class SerDes {
     public CarEvent deserializeCarEvents ( String card ) { return this.getGson().fromJson( card, CarEvent.class ); }
 
     public ActiveTask deserializeActiveTask ( String value ) { return this.getGson().fromJson( value, ActiveTask.class ); }
-
-    public Date convertDate ( String value ) { return this.getObjectMapper().convertValue( value, new TypeReference<>() {} ); }
 
     public Patrul deserialize ( Object object ) { return this.getObjectMapper().convertValue( object, new TypeReference<>() {} ); }
 

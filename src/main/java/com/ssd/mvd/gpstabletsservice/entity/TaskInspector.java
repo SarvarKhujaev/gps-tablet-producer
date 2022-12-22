@@ -99,7 +99,7 @@ public final class TaskInspector {
             case ATTACHED -> {
                 patrul.setTaskTypes( CARD_102 );
                 patrul.setLatitudeOfTask( card.getLatitude() );
-                patrul.setTaskId( card.getCardId().toString() ); // saving card id into patrul object
+                patrul.setTaskId( card.getUUID().toString() ); // saving card id into patrul object
                 patrul.setLongitudeOfTask( card.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
@@ -121,7 +121,7 @@ public final class TaskInspector {
                                 .accept( new TaskTimingStatistics(
                                         patrul,
                                         card.getCardId().toString(),
-                                        FIND_FACE_PERSON,
+                                        CARD_102,
                                         patrulStatus,
                                         positionInfos ) ) ); } }
         if ( status.compareTo( CANCEL ) != 0 ) card.getPatruls().put( patrul.getUuid(), patrul );
@@ -138,8 +138,10 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .getSaveCard102()
-                .accept( card );
+                .saveTask( card.getUUID(),
+                        card.getCardId().toString(),
+                        TaskTypes.CARD_102,
+                        card );
 
         KafkaDataControl
                 .getInstance()
@@ -187,8 +189,8 @@ public final class TaskInspector {
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
-                patrul.setTaskId( eventCar.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( FIND_FACE_EVENT_CAR );
+                patrul.setTaskId( eventCar.getUUID().toString() ); // saving card id into patrul object
                 patrul.setLatitudeOfTask( eventCar.getLatitude() );
                 patrul.setLongitudeOfTask( eventCar.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
@@ -212,7 +214,7 @@ public final class TaskInspector {
                                 .accept( new TaskTimingStatistics(
                                         patrul,
                                         eventCar.getId(),
-                                        FIND_FACE_PERSON,
+                                        FIND_FACE_EVENT_CAR,
                                         patrulStatus,
                                         positionInfos ) ) ); } }
         if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
@@ -228,8 +230,10 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .getSaveEventCar()
-                .accept( eventCar );
+                .saveTask( eventCar.getUUID(),
+                        eventCar.getId(),
+                        TaskTypes.FIND_FACE_EVENT_CAR,
+                        eventCar );
 
         KafkaDataControl
                 .getInstance()
@@ -277,8 +281,8 @@ public final class TaskInspector {
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
-                patrul.setTaskId( eventFace.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( FIND_FACE_EVENT_FACE );
+                patrul.setTaskId( eventFace.getUUID().toString() ); // saving card id into patrul object
                 patrul.setLatitudeOfTask( eventFace.getLatitude() );
                 patrul.setLongitudeOfTask( eventFace.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
@@ -314,8 +318,10 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .getSaveEventFace()
-                .accept( eventFace );
+                .saveTask( eventFace.getUUID(),
+                        eventFace.getId(),
+                        TaskTypes.FIND_FACE_EVENT_FACE,
+                        eventFace );
 
         CassandraDataControl
                 .getInstance()
@@ -368,8 +374,8 @@ public final class TaskInspector {
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
-                patrul.setTaskId( eventBody.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( FIND_FACE_EVENT_BODY );
+                patrul.setTaskId( eventBody.getUUID().toString() ); // saving card id into patrul object
                 patrul.setLatitudeOfTask( eventBody.getLatitude() );
                 patrul.setLongitudeOfTask( eventBody.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
@@ -403,8 +409,10 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .getSaveEventBody()
-                .accept( eventBody );
+                .saveTask( eventBody.getUUID(),
+                        eventBody.getId(),
+                        FIND_FACE_EVENT_BODY,
+                        eventBody );
 
         CassandraDataControl
                 .getInstance()
@@ -459,7 +467,7 @@ public final class TaskInspector {
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
                 patrul.setTaskTypes( FIND_FACE_CAR );
-                patrul.setTaskId( carEvents.getId() ); // saving card id into patrul object
+                patrul.setTaskId( carEvents.getUUID().toString() ); // saving card id into patrul object
                 if ( carEvents.getDataInfo() != null
                         && carEvents.getDataInfo().getData() != null ) {
                     patrul.setLatitudeOfTask( carEvents.getDataInfo().getData().getLatitude() );
@@ -495,8 +503,10 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .getSaveCarEvent()
-                .accept( carEvents );
+                .saveTask( carEvents.getUUID(),
+                        carEvents.getId(),
+                        FIND_FACE_CAR,
+                        carEvents );
 
         CassandraDataControl
                 .getInstance()
@@ -550,8 +560,8 @@ public final class TaskInspector {
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
-                patrul.setTaskId( faceEvent.getId() ); // saving card id into patrul object
                 patrul.setTaskTypes( FIND_FACE_PERSON );
+                patrul.setTaskId( faceEvent.getUUID().toString() ); // saving card id into patrul object
                 if ( faceEvent.getDataInfo() != null
                         && faceEvent.getDataInfo().getData() != null ) {
                     patrul.setLatitudeOfTask( faceEvent.getDataInfo().getData().getLatitude() );
@@ -588,8 +598,10 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .getSaveFaceEvent()
-                .accept( faceEvent );
+                .saveTask( faceEvent.getUUID(),
+                        faceEvent.getId(),
+                        FIND_FACE_PERSON,
+                        faceEvent );
 
         CassandraDataControl
                 .getInstance()
@@ -717,8 +729,10 @@ public final class TaskInspector {
 
         CassandraDataControlForTasks
                 .getInstance()
-                .getSaveSelfEmploymentTask()
-                .accept( selfEmploymentTask );
+                .saveTask( selfEmploymentTask.getUuid(),
+                        selfEmploymentTask.getAddress(),
+                        SELF_EMPLOYMENT,
+                        selfEmploymentTask );
 
         CassandraDataControl
                 .getInstance()
