@@ -49,7 +49,7 @@ public class ActiveTask {
         this.setAddress( card.getAddress() );
         this.setDescription( card.getFabula() );
         this.setType( TaskTypes.CARD_102.name() );
-        this.setTaskId( card.getCardId().toString() );
+        this.setTaskId( card.getUUID().toString() );
 
         this.setRegion( card.getEventAddress().getSOblastiId() );
         this.setDistrict( card.getEventAddress().getSRegionId() );
@@ -66,7 +66,7 @@ public class ActiveTask {
         this.setAddress( card.getAddress() );
         this.setDescription( card.getFabula() );
         this.setType( TaskTypes.CARD_102.name() );
-        this.setTaskId( card.getCardId().toString() );
+        this.setTaskId( card.getUUID().toString() );
 
         this.setRegion( card.getEventAddress().getSOblastiId() );
         this.setDistrict( card.getEventAddress().getSRegionId() );
@@ -98,59 +98,59 @@ public class ActiveTask {
 
     public ActiveTask( EventFace eventFace ) {
         this.setCreatedDate( new Date() );
-        this.setTaskId( eventFace.getId() );
         this.setStatus( eventFace.getStatus() );
         this.setLatitude( eventFace.getLatitude() );
         this.setPatrulList( eventFace.getPatruls() );
         this.setLongitude( eventFace.getLongitude() );
+        this.setTaskId( eventFace.getUUID().toString() );
         this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
 
     public ActiveTask ( EventFace eventFace, Status status ) {
         this.setPatrulStatus( status );
         this.setCreatedDate( new Date() );
-        this.setTaskId( eventFace.getId() );
         this.setStatus( eventFace.getStatus() );
         this.setLatitude( eventFace.getLatitude() );
         this.setPatrulList( eventFace.getPatruls() );
         this.setLongitude( eventFace.getLongitude() );
+        this.setTaskId( eventFace.getUUID().toString() );
         this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
 
     public ActiveTask( EventBody eventBody ) {
         this.setCreatedDate( new Date() );
-        this.setTaskId( eventBody.getId() );
         this.setStatus( eventBody.getStatus() );
         this.setLatitude( eventBody.getLatitude() );
         this.setPatrulList( eventBody.getPatruls() );
         this.setLongitude( eventBody.getLongitude() );
+        this.setTaskId( eventBody.getUUID().toString() );
         this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
 
     public ActiveTask ( EventBody eventBody, Status status ) {
         this.setPatrulStatus( status );
         this.setCreatedDate( new Date() );
-        this.setTaskId( eventBody.getId() );
         this.setStatus( eventBody.getStatus() );
         this.setLatitude( eventBody.getLatitude() );
         this.setPatrulList( eventBody.getPatruls() );
         this.setLongitude( eventBody.getLongitude() );
+        this.setTaskId( eventBody.getUUID().toString() );
         this.setType( TaskTypes.FIND_FACE_PERSON.name() ); }
 
     public ActiveTask ( EventCar eventCar ) {
         this.setCreatedDate( new Date() );
-        this.setTaskId( eventCar.getId() );
         this.setStatus( eventCar.getStatus() );
         this.setLatitude( eventCar.getLatitude() );
         this.setPatrulList( eventCar.getPatruls() );
         this.setLongitude( eventCar.getLongitude() );
+        this.setTaskId( eventCar.getUUID().toString() );
         this.setType( TaskTypes.FIND_FACE_CAR.name() ); }
 
     public ActiveTask ( EventCar eventCar, Status status ) {
         this.setPatrulStatus( status );
         this.setCreatedDate( new Date() );
-        this.setTaskId( eventCar.getId() );
         this.setStatus( eventCar.getStatus() );
         this.setLatitude( eventCar.getLatitude() );
         this.setPatrulList( eventCar.getPatruls() );
         this.setLongitude( eventCar.getLongitude() );
+        this.setTaskId( eventCar.getUUID().toString() );
         this.setType( TaskTypes.FIND_FACE_CAR.name() ); }
 
     public ActiveTask ( FaceEvent faceEvents ) {
@@ -158,7 +158,7 @@ public class ActiveTask {
         this.setStatus( faceEvents.getStatus() );
         this.setPatrulList( faceEvents.getPatruls() );
 
-        this.setTaskId( faceEvents.getId() );
+        this.setTaskId( faceEvents.getUUID().toString() );
         this.setType( TaskTypes.FIND_FACE_PERSON.name() );
 
         if ( faceEvents.getDataInfo() != null
@@ -175,7 +175,7 @@ public class ActiveTask {
         this.setCreatedDate( new Date() );
         this.setStatus( faceEvent.getStatus() );
 
-        this.setTaskId( faceEvent.getId() );
+        this.setTaskId( faceEvent.getUUID().toString() );
         this.setType( TaskTypes.FIND_FACE_PERSON.name() );
 
         if ( faceEvent.getDataInfo() != null
@@ -192,8 +192,8 @@ public class ActiveTask {
         this.setStatus( carEvent.getStatus() );
         this.setPatrulList( carEvent.getPatruls() );
 
-        this.setTaskId( carEvent.getId() );
         this.setType( TaskTypes.FIND_FACE_CAR.name() );
+        this.setTaskId( carEvent.getUUID().toString() );
 
         if ( carEvent.getDataInfo() != null
                 && carEvent.getDataInfo().getData() != null ) {
@@ -209,8 +209,8 @@ public class ActiveTask {
         this.setCreatedDate( new Date() );
         this.setStatus( carEvent.getStatus() );
 
-        this.setTaskId( carEvent.getId() );
         this.setType( TaskTypes.FIND_FACE_CAR.name() );
+        this.setTaskId( carEvent.getUUID().toString() );
 
         if ( carEvent.getDataInfo() != null
                 && carEvent.getDataInfo().getData() != null ) {
