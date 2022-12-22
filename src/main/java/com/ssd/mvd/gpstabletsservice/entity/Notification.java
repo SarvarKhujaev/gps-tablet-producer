@@ -60,13 +60,16 @@ public class Notification {
         this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
         this.setNotificationWasCreated( row.getTimestamp( "notificationWasCreated" ) ); }
 
-    public Notification ( Patrul patrul, Card card, String text, Status status ) {
+    public Notification ( Patrul patrul,
+                          Card card,
+                          String text,
+                          Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setType( CARD_102.name() );
         this.setUuid( UUID.randomUUID() );
         this.setTaskStatus( card.getStatus() );
-        this.setId( card.getCardId().toString() );
+        this.setId( card.getUUID().toString() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
         this.setPoliceType( patrul.getPoliceType() );
@@ -77,15 +80,18 @@ public class Notification {
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
         this.setAddress( card.getAddress() != null ? card.getAddress() : "unknown" ); }
 
-    public Notification ( Patrul patrul, EventCar eventCar, String text, Status status ) {
+    public Notification ( Patrul patrul,
+                          EventCar eventCar,
+                          String text,
+                          Status status ) {
         this.setTitle( text );
         this.setStatus( status );
-        this.setId( eventCar.getId() );
         this.setUuid( UUID.randomUUID() );
         this.setTaskStatus( eventCar.getStatus() );
         this.setType( FIND_FACE_EVENT_CAR.name() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
+        this.setId( eventCar.getUUID().toString() );
         this.setPoliceType( patrul.getPoliceType() );
         this.setLatitudeOfTask( eventCar.getLatitude() );
         this.setNotificationWasCreated( new Date() );
@@ -94,15 +100,18 @@ public class Notification {
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
         this.setAddress( eventCar.getAddress() != null ? eventCar.getAddress() : "unknown" ); }
 
-    public Notification ( Patrul patrul, EventFace eventFace, String text, Status status ) {
+    public Notification ( Patrul patrul,
+                          EventFace eventFace,
+                          String text,
+                          Status status ) {
         this.setTitle( text );
         this.setStatus( status );
-        this.setId( eventFace.getId() );
         this.setUuid( UUID.randomUUID() );
-        this.setTaskStatus( eventFace.getStatus() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
+        this.setTaskStatus( eventFace.getStatus() );
         this.setType( FIND_FACE_EVENT_FACE.name() );
+        this.setId( eventFace.getUUID().toString() );
         this.setPoliceType( patrul.getPoliceType() );
         this.setNotificationWasCreated( new Date() );
         this.setLatitudeOfTask( eventFace.getLatitude() );
@@ -111,15 +120,18 @@ public class Notification {
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
         this.setAddress( eventFace.getAddress() != null ? eventFace.getAddress() : "unknown" ); }
 
-    public Notification ( Patrul patrul, EventBody eventBody, String text, Status status ) {
+    public Notification ( Patrul patrul,
+                          EventBody eventBody,
+                          String text,
+                          Status status ) {
         this.setTitle( text );
         this.setStatus( status );
-        this.setId( eventBody.getId() );
         this.setUuid( UUID.randomUUID() );
-        this.setTaskStatus( eventBody.getStatus() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
+        this.setTaskStatus( eventBody.getStatus() );
         this.setType( FIND_FACE_EVENT_BODY.name() );
+        this.setId( eventBody.getUUID().toString() );
         this.setPoliceType( patrul.getPoliceType() );
         this.setNotificationWasCreated( new Date() );
         this.setLatitudeOfTask( eventBody.getLatitude() );
@@ -128,15 +140,18 @@ public class Notification {
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
         this.setAddress( eventBody.getAddress() != null ? eventBody.getAddress() : "unknown" ); }
 
-    public Notification ( Patrul patrul, CarEvent carEvents, String text, Status status ) {
+    public Notification ( Patrul patrul,
+                          CarEvent carEvents,
+                          String text,
+                          Status status ) {
         this.setTitle( text );
         this.setStatus( status );
-        this.setId( carEvents.getId() );
         this.setUuid( UUID.randomUUID() );
         this.setType( FIND_FACE_CAR.name() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
         this.setTaskStatus( carEvents.getStatus() );
+        this.setId( carEvents.getUUID().toString() );
         this.setPoliceType( patrul.getPoliceType() );
         this.setLatitudeOfTask( carEvents.getDataInfo() != null
                 && carEvents.getDataInfo().getData() != null ?
@@ -152,15 +167,18 @@ public class Notification {
                 && carEvents.getDataInfo().getData().getAddress() != null ?
                 carEvents.getDataInfo().getData().getAddress() : "unknown" ); }
 
-    public Notification ( Patrul patrul, FaceEvent faceEvent, String text, Status status ) {
+    public Notification ( Patrul patrul,
+                          FaceEvent faceEvent,
+                          String text,
+                          Status status ) {
         this.setTitle( text );
         this.setStatus( status );
-        this.setId( faceEvent.getId() );
         this.setUuid( UUID.randomUUID() );
         this.setType( FIND_FACE_PERSON.name() );
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
         this.setTaskStatus( faceEvent.getStatus() );
+        this.setId( faceEvent.getUUID().toString() );
         this.setPoliceType( patrul.getPoliceType() );
         this.setLatitudeOfTask( faceEvent.getDataInfo() != null
                 && faceEvent.getDataInfo().getData() != null ?
@@ -176,7 +194,10 @@ public class Notification {
                 && faceEvent.getDataInfo().getData().getAddress() != null ?
                 faceEvent.getDataInfo().getData().getAddress() : "unknown" ); }
 
-    public Notification ( Patrul patrul, SelfEmploymentTask selfEmploymentTask, String text, Status status ) {
+    public Notification ( Patrul patrul,
+                          SelfEmploymentTask selfEmploymentTask,
+                          String text,
+                          Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setUuid( UUID.randomUUID() );

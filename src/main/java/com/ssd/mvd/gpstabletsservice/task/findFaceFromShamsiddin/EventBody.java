@@ -56,6 +56,10 @@ public class EventBody {
     @JsonDeserialize
     private Map< String, String > detailed_upper_clothes;
 
+    private UUID uuid;
+
+    public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
+
     @JsonDeserialize
     private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize

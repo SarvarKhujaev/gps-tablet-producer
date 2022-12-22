@@ -55,40 +55,10 @@ public class CassandraDataControlForTasks {
                 + CassandraTables.VIOLATION_LIST_TYPE.name() + "> >, "
                 + "object text );" );
 
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.EVENTBODY.name()
-                + "( id text PRIMARY KEY, object text );" );
-
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.EVENTFACE.name()
-                + "( id text PRIMARY KEY, object text );" );
-
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.EVENTCAR.name()
-                + "( id text PRIMARY KEY, object text );" );
-
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.FACECAR.name()
-                + "( id text PRIMARY KEY, object text );" );
-
         this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.SELFEMPLOYMENT.name()
-                + "( id uuid PRIMARY KEY, object text );" );
-
-        this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.FACEPERSON.name()
-                + "( id text PRIMARY KEY, object text );" );
-
-        this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + TaskTypes.CARD_102
-                + "( id text PRIMARY KEY, object text );" );
+                + CassandraTables.TASKS_STORAGE_TABLE.name()
+                + "( uuid uuid PRIMARY KEY, id text, tasktype text, object text );" );
 
         this.getSession().execute ( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS.name() + "."
@@ -157,79 +127,68 @@ public class CassandraDataControlForTasks {
                                                     .one().getString( "object" ) ) ) )
                             .build() ) );
 
+    private final Function< UUID, Row > getRow = uuid -> this.getSession().execute( "SELECT * FROM "
+            + CassandraTables.TABLETS.name() + "."
+            + CassandraTables.TASKS_STORAGE_TABLE.name()
+            + " where uuid = " + uuid + ";" ).one();
+
     private final Function< UUID, Mono< SelfEmploymentTask > > getSelfEmploymentTask = id -> {
-        Row row = this.getSession().execute( "SELECT * FROM "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.SELFEMPLOYMENT.name()
-                + " where id = " + id + ";" ).one();
-        return row != null ? Mono.just( row )
-                .map( row1 -> SerDes
+        Row row = this.getRow.apply( id );
+        return row != null
+                ? Mono.just( SerDes
                         .getSerDes()
-                        .deserializeSelfEmploymentTask( row1.getString( "object" ) ) ) : Mono.empty(); };
+                        .deserializeSelfEmploymentTask( row.getString( "object" ) ) )
+                : Mono.empty(); };
 
     private final Function< String, Mono< FaceEvent > > getFaceEvents = id -> {
-        Row row = this.getSession()
-                .execute( "SELECT * FROM "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.FACEPERSON.name()
-                        + " where id = '" + id + "';" )
-                .one();
-        return row != null ? Mono.justOrEmpty( SerDes
+        Row row = this.getRow.apply( UUID.fromString( id ) );
+        return row != null
+                ? Mono.justOrEmpty( SerDes
                 .getSerDes()
-                .deserializeFaceEvents ( row.getString( "object" ) ) ) : Mono.empty(); };
+                .deserializeFaceEvents ( row.getString( "object" ) ) )
+                : Mono.empty(); };
 
     private final Function< String, Mono< EventBody > > getEventBody = id -> {
-        Row row = this.getSession()
-                .execute( "SELECT * FROM "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.EVENTBODY.name()
-                        + " where id = '" + id + "';" )
-                .one();
-        return row != null ? Mono.justOrEmpty( SerDes
+        Row row = this.getRow.apply( UUID.fromString( id ) );
+        return row != null
+                ? Mono.justOrEmpty( SerDes
                         .getSerDes()
-                        .deserializeEventBody( row.getString( "object" ) ) ) : Mono.empty(); };
+                        .deserializeEventBody( row.getString( "object" ) ) )
+                : Mono.empty(); };
 
     private final Function< String, Mono< EventFace > > getEventFace = id -> {
-        Row row = this.getSession()
-                .execute( "SELECT * FROM "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.EVENTFACE.name()
-                        + " where id = '" + id + "';" )
-                .one();
-        return row != null ? Mono.just( SerDes
+        Row row = this.getRow.apply( UUID.fromString( id ) );
+        return row != null
+                ? Mono.just( SerDes
                     .getSerDes()
-                    .deserializeEventFace( row.getString( "object" ) ) ) : Mono.empty(); };
+                    .deserializeEventFace( row.getString( "object" ) ) )
+                : Mono.empty(); };
 
     private final Function< String, Mono< CarEvent > > getCarEvents = id -> {
-        Row row = this.getSession().execute( "SELECT * FROM "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.FACECAR.name()
-                + " where id = '" + id + "';" ).one();
-        return row != null ? Mono.just( SerDes
+        Row row = this.getRow.apply( UUID.fromString( id ) );
+        return row != null
+                ? Mono.just( SerDes
                 .getSerDes()
                 .deserializeCarEvents( row.getString( "object" ) ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< EventCar > > getEventCar = id -> {
-        Row row = this.getSession().execute( "SELECT * FROM "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.EVENTCAR.name()
-                + " where id = '" + id + "';" ).one();
-        return row != null ? Mono.just(
-                SerDes
+        Row row = this.getRow.apply( UUID.fromString( id ) );
+        return row != null
+                ? Mono.just( SerDes
                     .getSerDes()
                     .deserializeEventCar(
-                            row.getString( "object" ) ) ) : Mono.empty(); };
+                            row.getString( "object" ) ) )
+                : Mono.empty(); };
 
     private final Function< String, Mono< Card > > getCard102 = id -> {
-        Row row = this.getSession().execute( "SELECT * FROM "
-                + CassandraTables.TABLETS.name() + "."
-                + TaskTypes.CARD_102
-                + " where id = '" + id + "';" ).one();
-        return row != null ? Mono.just( SerDes
+        Row row = this.getRow.apply( UUID.fromString( id ) );
+        return row != null
+                ? Mono.just( SerDes
                 .getSerDes()
                 .deserializeCard(
-                        row.getString( "object" ) ) ) : Mono.empty(); };
+                        row.getString( "object" ) ) )
+                : Mono.empty(); };
 
     private final Supplier< Flux< CarTotalData > > getAllCarTotalData = () -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
@@ -267,44 +226,16 @@ public class CassandraDataControlForTasks {
             + CassandraTables.ACTIVE_TASK.name()
             + " WHERE id = '" + id + "';" );
 
-    private final Consumer< Card > saveCard102 = card -> {
-        if ( card.getCreated_date() == null ) card.setCreated_date( new Date() );
+    public void saveTask ( UUID uuid, String id, TaskTypes taskTypes, Object clazz ) {
         this.getSession()
-                .executeAsync( "INSERT INTO "
+                .execute( "INSERT INTO "
                         + CassandraTables.TABLETS.name() + "."
-                        + TaskTypes.CARD_102
-                        + "(id, object) VALUES ('"
-                        + card.getCardId() + "', '"
-                        + SerDes.getSerDes().serialize( card ) + "');" ); };
-
-    private final Consumer< EventCar > saveEventCar = eventCar -> {
-        if ( eventCar.getCreated_date() == null ) eventCar.setCreated_date( new Date() );
-        this.getSession()
-                .executeAsync( "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.EVENTCAR.name()
-                        + "( id, object ) VALUES('"
-                        + eventCar.getId() + "', '"
-                        + SerDes.getSerDes().serialize( eventCar ) + "');" ); };
-
-    private final Consumer< EventFace > saveEventFace = eventFace -> {
-        if ( eventFace.getCreated_date() == null ) eventFace.setCreated_date( new Date() );
-        this.getSession()
-                .executeAsync( "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.EVENTFACE.name()
-                        + "( id, object ) VALUES('"
-                        + eventFace.getId() + "', '"
-                        + SerDes.getSerDes().serialize( eventFace ) + "');" ); };
-
-    private final Consumer< EventBody > saveEventBody = eventBody -> {
-        if ( eventBody.getCreated_date() == null ) eventBody.setCreated_date( new Date() );
-        this.getSession().executeAsync( "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.EVENTBODY.name()
-                        + "( id, object ) VALUES('"
-                        + eventBody.getId() + "', '"
-                        + SerDes.getSerDes().serialize( eventBody ) + "');" ); };
+                        + CassandraTables.TASKS_STORAGE_TABLE.name()
+                        + "(uuid, id, tasktype, object) VALUES ("
+                        + uuid + ", "
+                        + id + "', '"
+                        + taskTypes + "', '"
+                        + SerDes.getSerDes().test( clazz ) + "');" ); }
 
     private final Function< CarTotalData, Boolean > saveCarTotalData = carTotalData ->
             this.getSession().execute( "INSERT INTO "
@@ -322,33 +253,6 @@ public class CassandraDataControlForTasks {
                             .getSerDes()
                             .serialize( carTotalData ) + "');" )
                     .wasApplied();
-
-    private final Consumer< CarEvent > saveCarEvent = carEvents -> {
-        if ( carEvents.getCreated_date() == null ) carEvents.setCreated_date( new Date().toString() );
-        this.getSession()
-                .executeAsync( "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.FACECAR.name()
-                        + "(id, object) VALUES ('"
-                        + carEvents.getId() + "', '"
-                        + SerDes.getSerDes().serialize( carEvents ) + "');" ); };
-
-    private final Consumer< FaceEvent > saveFaceEvent = faceEvents -> {
-        if ( faceEvents.getCreated_date() == null ) faceEvents.setCreated_date( new Date().toString() );
-        this.getSession().executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.FACEPERSON.name()
-                + "(id, object) VALUES ('"
-                + faceEvents.getId() + "', '"
-                + SerDes.getSerDes().serialize( faceEvents ) + "');" ); };
-
-    private final Consumer< SelfEmploymentTask > saveSelfEmploymentTask = selfEmploymentTask ->
-            this.getSession().executeAsync( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.SELFEMPLOYMENT.name() +
-                    " ( id, object ) VALUES("
-                    + selfEmploymentTask.getUuid() + ", '"
-                    + SerDes.getSerDes().serialize( selfEmploymentTask ) + "');" );
 
     public void addValue ( String id, ActiveTask activeTask ) { this.getSession()
             .executeAsync( "INSERT INTO "
@@ -844,27 +748,26 @@ public class CassandraDataControlForTasks {
                         .apply( taskDetailsRequest.getId() )
                         .map( ActiveTask::new );
 
-                case FIND_FACE_CAR -> this.getCheckTable().apply( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
-                        ? this.getCarEvents
-                        .apply( taskDetailsRequest.getId() )
-                        .map( ActiveTask::new )
-
-                        : this.getEventCar
+                case FIND_FACE_CAR -> this.getCarEvents
                         .apply( taskDetailsRequest.getId() )
                         .map( ActiveTask::new );
 
-                case FIND_FACE_PERSON -> switch ( this.getFindTable().apply( taskDetailsRequest.getId() ) ) {
-                    case FACEPERSON -> this.getFaceEvents
-                            .apply( taskDetailsRequest.getId() )
-                            .map( ActiveTask::new );
+                case FIND_FACE_PERSON -> this.getFaceEvents
+                        .apply( taskDetailsRequest.getId() )
+                        .map( ActiveTask::new );
 
-                    case EVENTBODY -> this.getEventBody
-                            .apply( taskDetailsRequest.getId() )
-                            .map( ActiveTask::new );
+                case FIND_FACE_EVENT_CAR -> this.getEventCar
+                        .apply( taskDetailsRequest.getId() )
+                        .map( ActiveTask::new );
 
-                    default -> this.getEventFace
-                            .apply( taskDetailsRequest.getId() )
-                            .map( ActiveTask::new ); };
+                case FIND_FACE_EVENT_BODY -> this.getEventBody
+                        .apply( taskDetailsRequest.getId() )
+                        .map( ActiveTask::new );
+
+                case FIND_FACE_EVENT_FACE -> this.getEventFace
+                        .apply( taskDetailsRequest.getId() )
+                        .map( ActiveTask::new );
+
                 default -> this.getSelfEmploymentTask
                         .apply( UUID.fromString( taskDetailsRequest.getId() ) )
                         .map( ActiveTask::new ); };

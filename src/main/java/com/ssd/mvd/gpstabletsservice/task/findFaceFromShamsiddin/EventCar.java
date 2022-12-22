@@ -58,6 +58,10 @@ public class EventCar {
     @JsonDeserialize
     private Map< String, String > license_plate_country;
 
+    private UUID uuid;
+
+    public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
+
     @JsonDeserialize
     private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize

@@ -53,6 +53,10 @@ public class EventFace {
     @JsonDeserialize
     private Map< String, String > medmask;
 
+    private UUID uuid;
+
+    public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
+
     @JsonDeserialize
     private Map< UUID, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize
