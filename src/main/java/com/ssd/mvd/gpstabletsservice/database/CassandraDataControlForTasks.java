@@ -232,7 +232,7 @@ public class CassandraDataControlForTasks {
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.TASKS_STORAGE_TABLE.name()
                         + "(uuid, id, tasktype, object) VALUES ("
-                        + uuid + ", "
+                        + uuid + ", '"
                         + id + "', '"
                         + taskTypes + "', '"
                         + SerDes.getSerDes().test( clazz ) + "');" ); }
