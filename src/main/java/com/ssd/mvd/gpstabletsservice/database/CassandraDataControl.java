@@ -252,16 +252,15 @@ public final class CassandraDataControl {
         } catch ( Exception e ) { return Mono.empty(); } };
 
     private final Supplier< Flux< PoliceType > > getAllPoliceTypes = () -> Flux.fromStream(
-            this.getSession()
-                    .execute("SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.POLICE_TYPE.name() + ";" )
+            this.getSession().execute("SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.POLICE_TYPE.name() + ";" )
                     .all()
                     .stream()
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( new PoliceType( row ) ) )
+            .map( PoliceType::new )
             .sequential()
             .publishOn( Schedulers.single() )
             .doOnError( throwable -> this.delete() );
@@ -341,7 +340,7 @@ public final class CassandraDataControl {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( new AtlasLustra( row ) ) )
+            .map( AtlasLustra::new )
             .sequential()
             .publishOn( Schedulers.single() )
             .doOnError( throwable -> {
@@ -423,7 +422,7 @@ public final class CassandraDataControl {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( new PolygonType( row ) ) )
+            .map( PolygonType::new )
             .sequential()
             .publishOn( Schedulers.single() );
 
@@ -531,7 +530,7 @@ public final class CassandraDataControl {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( new Polygon( row ) ) )
+            .map( Polygon::new )
             .sequential()
             .publishOn( Schedulers.single() );
 
@@ -723,7 +722,7 @@ public final class CassandraDataControl {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( new Patrul( row ) ) )
+            .map( Patrul::new )
             .sequential()
             .publishOn( Schedulers.single() );
 
@@ -1794,6 +1793,22 @@ public final class CassandraDataControl {
                     .apply( Map.of(
                             "message", "Error during the saving of version",
                             "code", 201 ) );
+
+    private final Supplier< Mono< ApiResponseModel > > getLastVersion = () -> Archive
+            .getArchive()
+            .getFunction()
+            .apply( Map.of(
+                    "message", "you have to update to last version",
+                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                            .builder()
+                            .data( new AndroidVersionUpdate(
+                                    this.getSession().execute( "SELECT * FROM "
+                                            + CassandraTables.TABLETS.name() + "."
+                                            + CassandraTables.ANDROID_VERSION_CONTROL_TABLE.name()
+                                            + " WHERE id = 'id';" )
+                                    .one(),
+                                    LAST ) )
+                            .build() ) );
 
     public void delete () {
         this.getSession().close();

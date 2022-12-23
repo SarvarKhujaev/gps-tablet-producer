@@ -126,7 +126,6 @@ public class CardController {
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
             FaceEvent facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
-            if ( facePerson.getCreated_date() == null ) facePerson.setCreated_date( new Date().toString() );
             if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
                 facePerson.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )

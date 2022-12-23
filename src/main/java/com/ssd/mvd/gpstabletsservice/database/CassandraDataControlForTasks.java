@@ -124,7 +124,8 @@ public class CassandraDataControlForTasks {
                                                             + CassandraTables.TABLETS.name() + "."
                                                             + CassandraTables.CARTOTALDATA.name()
                                                             + " WHERE gosnumber = '" + gosnumber + "';" )
-                                                    .one().getString( "object" ) ) ) )
+                                                    .one()
+                                                    .getString( "object" ) ) ) )
                             .build() ) );
 
     private final Function< UUID, Row > getRow = uuid -> this.getSession().execute( "SELECT * FROM "
@@ -177,8 +178,7 @@ public class CassandraDataControlForTasks {
         return row != null
                 ? Mono.just( SerDes
                     .getSerDes()
-                    .deserializeEventCar(
-                            row.getString( "object" ) ) )
+                    .deserializeEventCar( row.getString( "object" ) ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< Card > > getCard102 = id -> {
@@ -186,8 +186,7 @@ public class CassandraDataControlForTasks {
         return row != null
                 ? Mono.just( SerDes
                 .getSerDes()
-                .deserializeCard(
-                        row.getString( "object" ) ) )
+                .deserializeCard( row.getString( "object" ) ) )
                 : Mono.empty(); };
 
     private final Supplier< Flux< CarTotalData > > getAllCarTotalData = () -> Flux.fromStream(
@@ -199,9 +198,9 @@ public class CassandraDataControlForTasks {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( SerDes
+            .map( row -> SerDes
                     .getSerDes()
-                    .deserializeCarTotalData( row.getString( "object" ) ) ) )
+                    .deserializeCarTotalData( row.getString( "object" ) ) )
             .sequential()
             .publishOn( Schedulers.single() );
 
@@ -214,9 +213,9 @@ public class CassandraDataControlForTasks {
                     .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
-            .flatMap( row -> Mono.just( SerDes
+            .map( row -> SerDes
                     .getSerDes()
-                    .deserializeActiveTask( row.getString( "object" ) ) ) )
+                    .deserializeActiveTask( row.getString( "object" ) ) )
             .sequential()
             .publishOn( Schedulers.single() );
 
@@ -227,8 +226,7 @@ public class CassandraDataControlForTasks {
             + " WHERE id = '" + id + "';" );
 
     public void saveTask ( UUID uuid, String id, TaskTypes taskTypes, Object clazz ) {
-        this.getSession()
-                .execute( "INSERT INTO "
+        this.getSession().execute( "INSERT INTO "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.TASKS_STORAGE_TABLE.name()
                         + "(uuid, id, tasktype, object) VALUES ("
@@ -251,16 +249,17 @@ public class CassandraDataControlForTasks {
                             .getViolationsInformationsList() ) + ", '"
                     + SerDes
                             .getSerDes()
-                            .serialize( carTotalData ) + "');" )
+                            .test( carTotalData ) + "');" )
                     .wasApplied();
 
-    public void addValue ( String id, ActiveTask activeTask ) { this.getSession()
-            .executeAsync( "INSERT INTO "
+    private final BiFunction< String, ActiveTask, Boolean > saveActiveTask = ( id, activeTask ) ->
+            this.getSession().executeAsync( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.ACTIVE_TASK.name()
                     + "(id, object) VALUES ('"
                     + id + "', '"
-                    + SerDes.getSerDes().serialize( activeTask ) + "');" ); }
+                    + SerDes.getSerDes().test( activeTask ) + "');" )
+            .isDone();
 
     // если патрульному отменили задание то нужно удалить запись
     private final Consumer< Patrul > deleteRowFromTaskTimingTable = patrul -> {
@@ -331,7 +330,7 @@ public class CassandraDataControlForTasks {
                                 || request.getTaskType().size() == 0
                                 || request.getTaskType()
                                 .contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) ) )
-                        .flatMap( row -> Mono.just( new TaskTimingStatistics( row ) ) )
+                        .map( TaskTimingStatistics::new )
                         .sequential()
                         .publishOn( Schedulers.single() )
                         .collectList()
