@@ -29,33 +29,7 @@ public class SerDes {
 
     public <T> String test ( T object ) { return this.getGson().toJson( object ); }
 
-    public String serialize ( Card object ) { return this.getGson().toJson( object ); }
-
-    public String serialize ( EventCar eventCar ) { return this.getGson().toJson( eventCar ); }
-
-    public String serialize ( CarEvent carEvent ) { return this.getGson().toJson( carEvent ); }
-
-    public String serialize ( EventFace eventFace ) { return this.getGson().toJson( eventFace ); }
-
-    public String serialize ( EventBody eventBody ) { return this.getGson().toJson( eventBody ); }
-
-    public String serialize ( SosNotification sos ) { return this.getGson().toJson( sos ); }
-
-    public String serialize( FaceEvent faceEvents ) { return this.getGson().toJson( faceEvents ); }
-
-    public String serialize ( ActiveTask activeTask ) { return this.getGson().toJson( activeTask ); }
-
-    public String serialize ( CarTotalData carTotalData ) { return this.getGson().toJson( carTotalData ); }
-
-    public String serialize ( Notification notification ) { return this.getGson().toJson( notification ); }
-
-    public String serialize ( SelfEmploymentTask selfEmploymentTask ) { return this.getGson().toJson( selfEmploymentTask ); }
-
-    public String serialize ( SosNotificationForAndroid sosNotificationForAndroid ) { return this.getGson().toJson( sosNotificationForAndroid ); }
-
     public Card deserializeCard ( String object ) { return this.getGson().fromJson( object, Card.class ); }
-
-    public Patrul deserialize ( String object ) { return this.getGson().fromJson( object, Patrul.class ); }
 
     public CarEvent deserializeCarEvents ( String card ) { return this.getGson().fromJson( card, CarEvent.class ); }
 

@@ -87,7 +87,7 @@ public class KafkaDataControl {
             .send( Mono.just( new ProducerRecord<>( this.getACTIVE_TASK(),
                         SerDes
                             .getSerDes()
-                            .serialize( activeTask ) ) ) )
+                            .test( activeTask ) ) ) )
             .then()
             .doOnError( error -> logger.info( error.getMessage() ) )
             .doOnSuccess( success -> logger.info( "activeTask: " +
@@ -109,7 +109,9 @@ public class KafkaDataControl {
                                             + " at: " + new Date() );
                                     return new ProducerRecord<>(
                                             this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION(),
-                                            SerDes.getSerDes().serialize( sosNotificationForAndroid ) ); } ) )
+                                            SerDes
+                                                    .getSerDes()
+                                                    .test( sosNotificationForAndroid ) ); } ) )
                         .then()
                         .doOnError( error -> logger.info( error.getMessage() ) )
                         .doOnSuccess( success -> logger.info( "All notifications were sent" ) )
@@ -122,7 +124,7 @@ public class KafkaDataControl {
                 .createOutbound()
                 .send( Mono.just( new ProducerRecord<>(
                         this.getSOS_TOPIC(),
-                        SerDes.getSerDes().serialize( sosNotification ) ) ) )
+                        SerDes.getSerDes().test( sosNotification ) ) ) )
                 .then()
                 .doOnError( error -> logger.info( error.getMessage() ) )
                 .doOnSuccess( success -> logger.info( "sosNotification from: "
@@ -136,7 +138,9 @@ public class KafkaDataControl {
                 .createOutbound()
                 .send( Mono.just( new ProducerRecord<>(
                         this.getCAR_TOTAL_DATA(),
-                        SerDes.getSerDes().serialize( carTotalData ) ) ) )
+                        SerDes
+                                .getSerDes()
+                                .test( carTotalData ) ) ) )
                 .then()
                 .doOnError( error -> logger.info( error.getMessage() ) )
                 .doOnSuccess( success -> logger.info( "Kafka got carTotalData : "
@@ -152,7 +156,7 @@ public class KafkaDataControl {
                         this.getNOTIFICATION(),
                         SerDes
                                 .getSerDes()
-                                .serialize( notification ) ) ) )
+                                .test( notification ) ) ) )
                 .then()
                 .doOnError( error -> logger.info( error.getMessage() ) )
                 .doOnSuccess( success -> logger.info( "Kafka got notification: "

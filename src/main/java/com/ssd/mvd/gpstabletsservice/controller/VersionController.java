@@ -26,4 +26,11 @@ public class VersionController {
                 .getInstance()
                 .getCheckVersionForAndroid()
                 .apply( version ); }
+
+    @MessageMapping ( value = "getLastAndroidVersion" )
+    public Mono< ApiResponseModel > getLastAndroidVersio () {
+        return CassandraDataControl
+                .getInstance()
+                .getGetLastVersion()
+                .get(); }
 }
