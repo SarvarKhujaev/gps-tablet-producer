@@ -337,22 +337,22 @@ public class PatrulController {
 
     // возвращает данные обо всех использованных планшетах для каждого патрульного
     @MessageMapping ( value = "getAllUsedTablets" )
-    public Mono< List< TabletUsage > > getAllUsedTablets ( RequestForTablets request ) { return CassandraDataControl
+    public Mono< List< TabletUsage > > getAllUsedTablets ( PatrulActivityRequest request ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
-            .apply( UUID.fromString( request.getPatrulId() ) )
-            .flatMap( patrul -> request.getStartTime() != null
-                    && request.getEndTime() != null
+            .apply( UUID.fromString( request.getPatrulUUID() ) )
+            .flatMap( patrul -> request.getStartDate() != null
+                    && request.getEndDate() != null
                     ? CassandraDataControl
                     .getInstance()
                     .getGetAllUsedTablets()
                     .apply( patrul )
                     .filter( tabletUsages -> tabletUsages
                             .getStartedToUse()
-                            .before( request.getEndTime() )
+                            .before( request.getEndDate() )
                             && tabletUsages
                             .getStartedToUse()
-                            .after( request.getStartTime() ) )
+                            .after( request.getStartDate() ) )
                     .collectList()
                     : CassandraDataControl
                     .getInstance()
