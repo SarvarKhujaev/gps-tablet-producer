@@ -69,6 +69,7 @@ public class CardController {
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
         if ( request.getTaskType().compareTo( TaskTypes.CARD_102 ) == 0 ) {
             Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
+            card.setUuid( UUID.randomUUID() );
 
             if ( card.getCreated_date() == null ) card.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -98,6 +99,7 @@ public class CardController {
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
             CarEvent carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
+            carEvents.setUuid( UUID.randomUUID() );
             if ( carEvents.getCreated_date() == null ) carEvents.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
@@ -126,6 +128,7 @@ public class CardController {
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
             FaceEvent facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
+            facePerson.setUuid( UUID.randomUUID() );
             if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
                 facePerson.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -155,6 +158,7 @@ public class CardController {
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
             EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
+            eventFace.setUuid( UUID.randomUUID() );
             if ( eventFace.getCreated_date() == null ) eventFace.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
@@ -183,6 +187,7 @@ public class CardController {
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
             EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
+            eventBody.setUuid( UUID.randomUUID() );
             if ( eventBody.getCreated_date() == null ) eventBody.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
@@ -210,6 +215,7 @@ public class CardController {
                             .get() ); }
 
         else { EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
+            eventCar.setUuid( UUID.randomUUID() );
             if ( eventCar.getCreated_date() == null ) eventCar.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
