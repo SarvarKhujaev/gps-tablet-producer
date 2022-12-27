@@ -87,8 +87,8 @@ public final class TaskInspector {
                     card.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
-                            .getRemove()
-                            .accept( card.getCardId().toString() );
+                            .getDeleteActiveTask()
+                            .accept( card.getUUID().toString() );
                     if ( card.getPatruls().size() != 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
@@ -180,8 +180,8 @@ public final class TaskInspector {
                     eventCar.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
-                            .getRemove()
-                            .accept( eventCar.getId() );
+                            .getDeleteActiveTask()
+                            .accept( eventCar.getUUID().toString() );
                     if ( eventCar.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
@@ -273,8 +273,8 @@ public final class TaskInspector {
                     eventFace.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
-                            .getRemove()
-                            .accept( eventFace.getId() );
+                            .getDeleteActiveTask()
+                            .accept( eventFace.getUUID().toString() );
                     if ( eventFace.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
@@ -367,8 +367,8 @@ public final class TaskInspector {
                     eventBody.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
-                            .getRemove()
-                            .accept( eventBody.getId() );
+                            .getDeleteActiveTask()
+                            .accept( eventBody.getUUID().toString() );
                     if ( eventBody.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
@@ -460,8 +460,8 @@ public final class TaskInspector {
                     carEvents.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
-                            .getRemove()
-                            .accept( carEvents.getId() );
+                            .getDeleteActiveTask()
+                            .accept( carEvents.getUUID().toString() );
                     if ( carEvents.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
@@ -555,8 +555,8 @@ public final class TaskInspector {
                     faceEvent.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
-                            .getRemove()
-                            .accept( faceEvent.getId() );
+                            .getDeleteActiveTask()
+                            .accept( faceEvent.getUUID().toString() );
                     if ( faceEvent.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
@@ -687,7 +687,7 @@ public final class TaskInspector {
 
                     CassandraDataControlForTasks
                             .getInstance()
-                            .getRemove()
+                            .getDeleteActiveTask()
                             .accept( selfEmploymentTask.getUuid().toString() );
 
                     if ( selfEmploymentTask.getPatruls().size() > 0 ) KafkaDataControl

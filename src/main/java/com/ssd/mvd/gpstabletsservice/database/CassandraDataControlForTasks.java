@@ -219,7 +219,7 @@ public class CassandraDataControlForTasks {
             .sequential()
             .publishOn( Schedulers.single() );
 
-    private final Consumer< String > remove = id -> this.getSession()
+    private final Consumer< String > deleteActiveTask = id -> this.getSession()
             .execute( "DELETE FROM "
             + CassandraTables.TABLETS.name() + "."
             + CassandraTables.ACTIVE_TASK.name()
