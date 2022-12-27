@@ -135,8 +135,7 @@ public final class TaskInspector {
             CassandraDataControlForTasks
                     .getInstance()
                     .getSaveActiveTask()
-                    .apply( card.getCardId().toString(),
-                        new ActiveTask( card ) );
+                    .accept( new ActiveTask( card ) );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -222,7 +221,7 @@ public final class TaskInspector {
         if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .getSaveActiveTask()
-                .apply( eventCar.getId(), new ActiveTask( eventCar ) );
+                .accept( new ActiveTask( eventCar ) );
 
         if ( status.compareTo( CANCEL ) != 0 ) eventCar.getPatruls().put( patrul.getUuid(), patrul );
 
@@ -318,7 +317,7 @@ public final class TaskInspector {
             CassandraDataControlForTasks
                     .getInstance()
                     .getSaveActiveTask()
-                    .apply( eventFace.getId(), new ActiveTask( eventFace ) );
+                    .accept( new ActiveTask( eventFace ) );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -410,7 +409,7 @@ public final class TaskInspector {
         if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .getSaveActiveTask()
-                .apply( eventBody.getId(), new ActiveTask( eventBody ) );
+                .accept( new ActiveTask( eventBody ) );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -505,7 +504,7 @@ public final class TaskInspector {
         if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .getSaveActiveTask()
-                .apply( carEvents.getId(), new ActiveTask( carEvents ) );
+                .accept( new ActiveTask( carEvents ) );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -601,7 +600,7 @@ public final class TaskInspector {
             CassandraDataControlForTasks
                     .getInstance()
                     .getSaveActiveTask()
-                    .apply( faceEvent.getId(), new ActiveTask( faceEvent ) );
+                    .accept( new ActiveTask( faceEvent ) );
 
         CassandraDataControlForTasks
                 .getInstance()
@@ -732,8 +731,7 @@ public final class TaskInspector {
         if ( selfEmploymentTask.getTaskStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .getSaveActiveTask()
-                .apply( selfEmploymentTask.getUuid().toString(),
-                    new ActiveTask( selfEmploymentTask ) );
+                .accept( new ActiveTask( selfEmploymentTask ) );
 
         CassandraDataControlForTasks
                 .getInstance()

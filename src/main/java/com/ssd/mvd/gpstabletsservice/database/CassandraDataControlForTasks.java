@@ -252,14 +252,17 @@ public class CassandraDataControlForTasks {
                             .test( carTotalData ) + "');" )
                     .wasApplied();
 
-    private final BiFunction< String, ActiveTask, Boolean > saveActiveTask = ( id, activeTask ) ->
-            this.getSession().executeAsync( "INSERT INTO "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.ACTIVE_TASK.name()
-                    + "(id, object) VALUES ('"
-                    + id + "', '"
-                    + SerDes.getSerDes().test( activeTask ) + "');" )
-            .isDone();
+    private final Consumer< ActiveTask > saveActiveTask = ( activeTask ) ->
+            System.out.println( "Update active task for: "
+            + activeTask.getTaskId()
+            + " was applied: "
+            + this.getSession().execute( "INSERT INTO "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.ACTIVE_TASK.name()
+                            + "(id, object) VALUES ('"
+                            + activeTask.getTaskId() + "', '"
+                            + SerDes.getSerDes().test( activeTask ) + "');" )
+                    .wasApplied() );
 
     // если патрульному отменили задание то нужно удалить запись
     private final Consumer< Patrul > deleteRowFromTaskTimingTable = patrul -> {
