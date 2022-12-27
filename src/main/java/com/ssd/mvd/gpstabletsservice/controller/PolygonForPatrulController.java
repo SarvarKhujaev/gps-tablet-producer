@@ -44,7 +44,8 @@ public class PolygonForPatrulController { // SAM - 76
     @MessageMapping ( value = "updatePolygonForPatrul" )
     public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
-            .updatePolygonForPatrul( polygon )
+            .getUpdatePolygonForPatrul()
+            .apply( polygon )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -77,7 +78,8 @@ public class PolygonForPatrulController { // SAM - 76
     @MessageMapping ( value = "addPolygonForPatrul" )
     public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
-            .addPolygonForPatrul( polygon )
+            .getAddPolygonForPatrul()
+            .apply( polygon )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
