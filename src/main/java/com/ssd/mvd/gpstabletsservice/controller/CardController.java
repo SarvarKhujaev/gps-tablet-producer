@@ -39,13 +39,6 @@ public class CardController {
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) ); }
 
-    @MessageMapping ( value = "getActiveTaskForFront" )
-    public Mono< ActiveTask > getActiveTaskForFront ( TaskDetailsRequest taskDetailsRequest ) {
-        return CassandraDataControlForTasks
-                .getInstance()
-                .getGetActiveTask()
-                .apply( taskDetailsRequest ); }
-
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
             .getInstance()
@@ -262,6 +255,13 @@ public class CardController {
                         .getErrorResponse()
                         .get() ); }
 
+    @MessageMapping ( value = "getActiveTaskForFront" )
+    public Mono< ActiveTask > getActiveTaskForFront ( TaskDetailsRequest taskDetailsRequest ) {
+        return CassandraDataControlForTasks
+                .getInstance()
+                .getGetActiveTask()
+                .apply( taskDetailsRequest ); }
+
     @MessageMapping ( value = "getViolationsInformationList" )
     public Mono< List< ViolationsInformation > > getViolationsInformationList ( String gosnumber ) { return Mono.just(
             CassandraDataControlForTasks
@@ -308,6 +308,12 @@ public class CardController {
                     .getArchive()
                     .getErrorResponse()
                     .get() ); }
+
+    @MessageMapping ( value = "getDetailsOfTask" )
+    public Mono< TaskDetails > getDetailsOfTask ( TaskDetailsRequest request ) { return CassandraDataControlForTasks
+            .getInstance()
+            .getGetTaskDetails()
+            .apply( request ); }
 
     @MessageMapping ( value = "addNewPatrulsToTask" )
     public Mono< ApiResponseModel > addNewPatrulsToTask ( CardRequest< ? > request ) {
@@ -474,10 +480,4 @@ public class CardController {
                 .apply( request )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) ); }
-
-    @MessageMapping ( value = "getDetailsOfTask" )
-    public Mono< TaskDetails > getDetailsOfTask ( TaskDetailsRequest request ) { return CassandraDataControlForTasks
-            .getInstance()
-            .getGetTaskDetails()
-            .apply( request ); }
 }
