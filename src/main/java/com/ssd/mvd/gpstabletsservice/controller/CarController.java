@@ -62,8 +62,9 @@ public class CarController {
     @MessageMapping( value = "deleteCar" )
     public Mono< ApiResponseModel > deleteCar ( String gosno ) {
         return CassandraDataControl
-                    .getInstance()
-                    .delete( gosno )
+                .getInstance()
+                .getDeleteCar()
+                .apply( gosno )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) )
                 .onErrorReturn( Archive

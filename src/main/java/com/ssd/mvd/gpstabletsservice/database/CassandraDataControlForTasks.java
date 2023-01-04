@@ -191,8 +191,8 @@ public class CassandraDataControlForTasks {
 
     private final Supplier< Flux< CarTotalData > > getAllCarTotalData = () -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.CARTOTALDATA.name() + ";" )
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.CARTOTALDATA.name() + ";" )
                     .all()
                     .stream()
                     .parallel() )
@@ -206,8 +206,8 @@ public class CassandraDataControlForTasks {
 
     private final Supplier< Flux< ActiveTask > > getActiveTasks = () -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.ACTIVE_TASK.name() + ";" )
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.ACTIVE_TASK.name() + ";" )
                     .all()
                     .stream()
                     .parallel() )
@@ -227,13 +227,13 @@ public class CassandraDataControlForTasks {
 
     public void saveTask ( UUID uuid, String id, TaskTypes taskTypes, Object clazz ) {
         this.getSession().execute( "INSERT INTO "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.TASKS_STORAGE_TABLE.name()
-                        + "(uuid, id, tasktype, object) VALUES ("
-                        + uuid + ", '"
-                        + id + "', '"
-                        + taskTypes + "', '"
-                        + SerDes.getSerDes().test( clazz ) + "');" ); }
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.TASKS_STORAGE_TABLE.name()
+                + "(uuid, id, tasktype, object) VALUES ("
+                + uuid + ", '"
+                + id + "', '"
+                + taskTypes + "', '"
+                + SerDes.getSerDes().serialize( clazz ) + "');" ); }
 
     private final Function< CarTotalData, Boolean > saveCarTotalData = carTotalData ->
             this.getSession().execute( "INSERT INTO "
@@ -249,20 +249,16 @@ public class CassandraDataControlForTasks {
                             .getViolationsInformationsList() ) + ", '"
                     + SerDes
                             .getSerDes()
-                            .test( carTotalData ) + "');" )
+                            .serialize( carTotalData ) + "');" )
                     .wasApplied();
 
     private final Consumer< ActiveTask > saveActiveTask = ( activeTask ) ->
-            System.out.println( "Update active task for: "
-            + activeTask.getTaskId()
-            + " was applied: "
-            + this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.ACTIVE_TASK.name()
-                            + "(id, object) VALUES ('"
-                            + activeTask.getTaskId() + "', '"
-                            + SerDes.getSerDes().test( activeTask ) + "');" )
-                    .wasApplied() );
+            this.getSession().execute( "INSERT INTO "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.ACTIVE_TASK.name()
+                    + "(id, object) VALUES ('"
+                    + activeTask.getTaskId() + "', '"
+                    + SerDes.getSerDes().serialize( activeTask ) + "');" );
 
     // если патрульному отменили задание то нужно удалить запись
     private final Consumer< Patrul > deleteRowFromTaskTimingTable = patrul -> {
@@ -285,30 +281,30 @@ public class CassandraDataControlForTasks {
 
     private final Consumer< TaskTimingStatistics > saveTaskTimeStatistics = taskTimingStatistics ->
             this.getSession().execute( "INSERT INTO " +
-                        CassandraTables.TABLETS + "." +
-                        CassandraTables.TASKS_TIMING_TABLE +
-                        " ( taskId, " +
-                        "patrulUUID, " +
-                        "totalTimeConsumption, " +
-                        "timeWastedToArrive, " +
-                        "dateOfComing, " +
-                        "status, " +
-                        "taskTypes, " +
-                        "inTime, " +
-                        "positionInfoList ) VALUES( '" +
-                        taskTimingStatistics.getTaskId() + "', " +
-                        taskTimingStatistics.getPatrulUUID() + ", " +
-                        Math.abs( taskTimingStatistics.getTotalTimeConsumption() ) + ", " +
-                        Math.abs( taskTimingStatistics.getTimeWastedToArrive() ) + ", '" +
-                        ( taskTimingStatistics.getDateOfComing() != null
-                                ? taskTimingStatistics.getDateOfComing().toInstant()
-                                : new Date().toInstant() ) + "', '" +
-                        taskTimingStatistics.getStatus() + "', '" +
-                        taskTimingStatistics.getTaskTypes() + "', " +
-                        taskTimingStatistics.getInTime() + ", " +
-                        CassandraConverter
-                                .getInstance()
-                                .convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() ) + ");" );
+                    CassandraTables.TABLETS + "." +
+                    CassandraTables.TASKS_TIMING_TABLE +
+                    " ( taskId, " +
+                    "patrulUUID, " +
+                    "totalTimeConsumption, " +
+                    "timeWastedToArrive, " +
+                    "dateOfComing, " +
+                    "status, " +
+                    "taskTypes, " +
+                    "inTime, " +
+                    "positionInfoList ) VALUES( '" +
+                    taskTimingStatistics.getTaskId() + "', " +
+                    taskTimingStatistics.getPatrulUUID() + ", " +
+                    Math.abs( taskTimingStatistics.getTotalTimeConsumption() ) + ", " +
+                    Math.abs( taskTimingStatistics.getTimeWastedToArrive() ) + ", '" +
+                    ( taskTimingStatistics.getDateOfComing() != null
+                            ? taskTimingStatistics.getDateOfComing().toInstant()
+                            : new Date().toInstant() ) + "', '" +
+                    taskTimingStatistics.getStatus() + "', '" +
+                    taskTimingStatistics.getTaskTypes() + "', " +
+                    taskTimingStatistics.getInTime() + ", " +
+                    CassandraConverter
+                            .getInstance()
+                            .convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() ) + ");" );
 
     private final Function< TaskTimingRequest, Mono< TaskTimingStatisticsList > > getTaskTimingStatistics = request ->
         Flux.just( new TaskTimingStatisticsList() )
@@ -539,29 +535,28 @@ public class CassandraDataControlForTasks {
     private final Consumer< PatrulSos > save = patrulSos1 -> {
         if ( patrulSos1.getPatrulStatuses() != null
                 && patrulSos1.getPatrulStatuses().size() > 19 )
-            System.out.println( "Result: " + this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.PATRUL_SOS_TABLE.name()
-                            + CassandraConverter
-                            .getInstance()
-                            .getALlNames( PatrulSos.class )
-                            + " VALUES ("
-                            + patrulSos1.getUuid() + ", "
-                            + patrulSos1.getPatrulUUID() + ", '"
+            this.getSession().execute( "INSERT INTO "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.PATRUL_SOS_TABLE.name()
+                    + CassandraConverter
+                    .getInstance()
+                    .getALlNames( PatrulSos.class )
+                    + " VALUES ("
+                    + patrulSos1.getUuid() + ", "
+                    + patrulSos1.getPatrulUUID() + ", '"
 
-                            + patrulSos1.getAddress() + "', '"
+                    + patrulSos1.getAddress() + "', '"
 
-                            + new Date().toInstant() + "', '"
-                            + new Date().toInstant() + "', "
+                    + new Date().toInstant() + "', '"
+                    + new Date().toInstant() + "', "
 
-                            + patrulSos1.getLatitude() + ", "
-                            + patrulSos1.getLongitude() + ", '"
+                    + patrulSos1.getLatitude() + ", "
+                    + patrulSos1.getLongitude() + ", '"
 
-                            + Status.CREATED.name() + "', "
-                            + CassandraConverter
-                            .getInstance()
-                            .convertSosMapToCassandra( patrulSos1.getPatrulStatuses() ) + " ) IF NOT EXISTS;" )
-                    .wasApplied() ); };
+                    + Status.CREATED.name() + "', "
+                    + CassandraConverter
+                    .getInstance()
+                    .convertSosMapToCassandra( patrulSos1.getPatrulStatuses() ) + " ) IF NOT EXISTS;" ); };
 
     private final Function< PatrulSos, Mono< ApiResponseModel > > savePatrulSos = patrulSos ->
             CassandraDataControl
@@ -699,9 +694,9 @@ public class CassandraDataControlForTasks {
     // возвращает все сос сигналы для конкретного патрульного
     private final Function< UUID, Mono< ApiResponseModel > > getAllSosForCurrentPatrul = patrulUUID -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.PATRUL_SOS_LIST.name()
-                            + " WHERE patruluuid = " + patrulUUID + ";" )
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.PATRUL_SOS_LIST.name()
+                    + " WHERE patruluuid = " + patrulUUID + ";" )
                     .one()
                     .getSet( "attachedsoslist", UUID.class )
                     .stream()
