@@ -25,7 +25,7 @@ public class SerDes {
 
     public static SerDes getSerDes () { return serDes != null ? serDes : ( serDes = new SerDes() ); }
 
-    public <T> String test ( T object ) { return this.getGson().toJson( object ); }
+    public <T> String serialize ( T object ) { return this.getGson().toJson( object ); }
 
     public Card deserializeCard ( String object ) { return this.getGson().fromJson( object, Card.class ); }
 

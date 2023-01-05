@@ -240,7 +240,8 @@ public class PatrulController {
                 .accept( passportNumber );
         return CassandraDataControl
                 .getInstance()
-                .deletePatrul( UUID.fromString( passportNumber.split( "@" )[0] ) )
+                .getDeletePatrul()
+                .apply( UUID.fromString( passportNumber.split( "@" )[0] ) )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) )
                 .onErrorReturn( Archive

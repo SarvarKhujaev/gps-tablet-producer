@@ -19,12 +19,12 @@ import java.util.List;
 // SAM - 1011
 public class PatrulInRadiusList {
     private Double maxDistance;
-    private List< Patrul > freePatrulList = new ArrayList<>(); // максимум 5 не занятых патрульных
+    private final List< Patrul > freePatrulList = new ArrayList<>(); // максимум 5 не занятых патрульных
 
-    private List < Patrul > busyPatrulListInRadius = new ArrayList<>();
-    private List < Patrul > busyPatrulListOutOfRadius = new ArrayList<>();
+    private final List < Patrul > busyPatrulListInRadius = new ArrayList<>();
+    private final List < Patrul > busyPatrulListOutOfRadius = new ArrayList<>();
 
-    private List < Patrul > freePatrulListOutOfRadius = new ArrayList<>(); // список патрульных которые не входят в радиус
+    private final List < Patrul > freePatrulListOutOfRadius = new ArrayList<>(); // список патрульных которые не входят в радиус
 
     private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
 
