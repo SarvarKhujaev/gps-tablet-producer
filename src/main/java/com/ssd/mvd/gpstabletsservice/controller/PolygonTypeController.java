@@ -21,7 +21,8 @@ public class PolygonTypeController {
     @MessageMapping ( value = "updatePolygonType" )
     public Mono< ApiResponseModel > updatePolygonType ( PolygonType polygonType ) { return CassandraDataControl
             .getInstance()
-            .addValue( polygonType )
+            .getUpdatePolygonType()
+            .apply( polygonType )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -32,7 +33,8 @@ public class PolygonTypeController {
     @MessageMapping ( value = "addPolygonType" )
     public Mono< ApiResponseModel > addPolygonType ( PolygonType polygonType ) { return CassandraDataControl
             .getInstance()
-            .addValue( polygonType )
+            .getSavePolygonType()
+            .apply( polygonType )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive

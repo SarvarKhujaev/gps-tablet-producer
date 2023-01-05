@@ -19,7 +19,8 @@ public class LustraController {
     @MessageMapping ( value = "updateLustra" )
     public Mono< ApiResponseModel > updateLustra ( AtlasLustra atlasLustra ) { return CassandraDataControl
             .getInstance()
-            .addValue( atlasLustra, false )
+            .getSaveLustra()
+            .apply( atlasLustra, false )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -30,7 +31,8 @@ public class LustraController {
     @MessageMapping( value = "addLustra" ) // saving new AtlasLustra
     public Mono< ApiResponseModel > addLustra ( AtlasLustra atlasLustra ) { return CassandraDataControl
             .getInstance()
-            .addValue( atlasLustra, true )
+            .getSaveLustra()
+            .apply( atlasLustra, true )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
