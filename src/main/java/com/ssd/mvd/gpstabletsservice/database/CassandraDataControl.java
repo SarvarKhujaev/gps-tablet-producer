@@ -265,21 +265,22 @@ public final class CassandraDataControl {
             .publishOn( Schedulers.single() )
             .doOnError( throwable -> this.delete() );
 
-    public Mono< ApiResponseModel > update ( PoliceType policeType ) {
+    private final Function< PoliceType, Mono< ApiResponseModel > > updatePoliceType = policeType -> {
         this.getGetPatrul()
                 .get()
                 .filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) )
-                .subscribe( patrul -> this.getSession().executeAsync(
-                        "UPDATE "
-                                + CassandraTables.TABLETS.name() + "."
-                                + CassandraTables.PATRULS.name()
-                        + " SET policeType = '" + policeType.getPoliceType() + "';" ) );
-        return this.getSession().execute( "UPDATE "
+                .subscribe( patrul -> this.getSession().execute( "UPDATE "
                         + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.POLICE_TYPE.name()
-                        + " SET policeType = '" + policeType.getPoliceType() + "', "
-                        + "icon = '" + policeType.getIcon() + "'"
-                        + " WHERE uuid = " + policeType.getUuid() + " IF EXISTS;" )
+                        + CassandraTables.PATRULS.name()
+                        + " SET policeType = '" + policeType.getPoliceType() + "'"
+                        + " WHERE uuid = " + patrul.getUuid() + ";" ) );
+        return this.getSession().execute( "UPDATE "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.POLICE_TYPE.name()
+                + " SET policeType = '" + policeType.getPoliceType() + "', "
+                + "icon = '" + policeType.getIcon() + "',"
+                + "icon2 = '" + policeType.getIcon2() + "'"
+                + " WHERE uuid = " + policeType.getUuid() + " IF EXISTS;" )
                 .wasApplied()
                 ? Archive
                 .getArchive()
@@ -292,44 +293,44 @@ public final class CassandraDataControl {
                         "message", "This PoliceType has already been applied",
                         "success", false,
                         "code", 201 ) )
-                .doOnError( throwable -> this.delete() ); }
+                .doOnError( throwable -> this.delete() ); };
 
-    public Mono< ApiResponseModel > addValue ( PoliceType policeType ) { return this.getGetAllPoliceTypes()
+    private final Function< PoliceType, Mono< ApiResponseModel > > savePoliceType = policeType -> this.getGetAllPoliceTypes()
             .get()
             .filter( policeType1 -> policeType1.getPoliceType().equals( policeType.getPoliceType() ) )
             .count()
-            .flatMap( aBoolean1 -> aBoolean1 == 0 ?
+            .flatMap( aLong -> aLong == 0 ?
                     this.getSession().execute( "INSERT INTO "
-                                    + CassandraTables.TABLETS.name() + "."
-                                    + CassandraTables.POLICE_TYPE.name() +
-                                    CassandraConverter
-                                            .getInstance()
-                                            .getALlNames( PoliceType.class ) +
-                                    " VALUES("
-                                    + policeType.getUuid() + ", '"
-                                    + policeType.getIcon() + "', '"
-                                    + policeType.getPoliceType() + "' );" )
-                                .wasApplied()
-                                ? Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of(
-                                        "message", "PoliceType was saved successfully" ) )
-                                : Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of(
-                                        "message", "This PoliceType has already been applied",
-                                        "success", false,
-                                        "code", 201 ) )
-                        : Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of(
-                                "message", "This policeType name is already defined, choose another one",
-                                "success", false,
-                                "code", 201 ) ) )
-                .doOnError( throwable -> this.delete() ); }
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.POLICE_TYPE.name()
+                            + CassandraConverter
+                                    .getInstance()
+                                    .getALlNames( PoliceType.class )
+                            + " VALUES("
+                            + policeType.getUuid() + ", '"
+                            + policeType.getIcon() + "', '"
+                            + policeType.getIcon2() + "', '"
+                            + policeType.getPoliceType() + "' );" )
+                            .wasApplied()
+                            ? Archive
+                            .getArchive()
+                            .getFunction()
+                            .apply( Map.of( "message", "PoliceType was saved successfully" ) )
+                            : Archive
+                            .getArchive()
+                            .getFunction()
+                            .apply( Map.of(
+                                    "message", "This PoliceType has already been applied",
+                                    "success", false,
+                                    "code", 201 ) )
+                    : Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of(
+                            "message", "This policeType name is already defined, choose another one",
+                            "success", false,
+                            "code", 201 ) ) )
+            .doOnError( throwable -> this.delete() );
 
     private final Supplier< Flux< AtlasLustra > > getAllLustra = () -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
@@ -1348,8 +1349,8 @@ public final class CassandraDataControl {
 
     private final BiFunction< Point, Integer, Flux< Patrul > > findTheClosestPatruls = ( point, integer ) -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.PATRULS.name() + ";" )
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.PATRULS.name() + ";" )
                     .all()
                     .stream()
                     .parallel() )

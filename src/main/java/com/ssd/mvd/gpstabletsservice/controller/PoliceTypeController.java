@@ -27,7 +27,8 @@ public class PoliceTypeController {
     @MessageMapping( value = "addPoliceType" )
     public Mono< ApiResponseModel > addPoliceType ( PoliceType policeType ) { return CassandraDataControl
             .getInstance()
-            .addValue( policeType )
+            .getSavePoliceType()
+            .apply( policeType )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -38,7 +39,8 @@ public class PoliceTypeController {
     @MessageMapping ( value = "updatePoliceType" )
     public Mono< ApiResponseModel > updatePoliceType ( PoliceType policeType ) { return CassandraDataControl
             .getInstance()
-            .update( policeType )
+            .getUpdatePoliceType()
+            .apply( policeType )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive

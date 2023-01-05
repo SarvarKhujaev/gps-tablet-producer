@@ -35,7 +35,7 @@ public class CodecRegistrationForPoliceType extends TypeCodec< PoliceType > {
             null : toAddress( innerCodec.parse( value ) ); }
 
     @Override
-    public String format( PoliceType value ) throws InvalidTypeException { return value == null ? "NULL" :
+    public String format ( PoliceType value ) throws InvalidTypeException { return value == null ? "NULL" :
             innerCodec.format( toUDTValue( value ) ); }
 
     protected PoliceType toAddress ( UDTValue value ) { return value == null ? null : new PoliceType ( value ); }
@@ -43,5 +43,7 @@ public class CodecRegistrationForPoliceType extends TypeCodec< PoliceType > {
     protected UDTValue toUDTValue ( PoliceType value ) { return value == null ? null :
             userType.newValue()
                     .setUUID( "uuid", value.getUuid() )
+                    .setString( "icon", value.getIcon() )
+                    .setString( "icon2", value.getIcon2() )
                     .setString( "policeType", value.getPoliceType() ); }
 }
