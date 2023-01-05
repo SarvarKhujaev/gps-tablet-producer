@@ -348,22 +348,21 @@ public final class CassandraDataControl {
                 this.delete();
                 this.logger.info(  "ERROR: " + throwable.getMessage() ); } );
 
-    public Mono< ApiResponseModel > addValue ( AtlasLustra atlasLustra, Boolean check ) { return this.getSession()
-            .execute(
-            "INSERT INTO "
+    private final BiFunction< AtlasLustra, Boolean, Mono< ApiResponseModel > > saveLustra = ( atlasLustra, check ) ->
+            this.getSession().execute( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.LUSTRA.name() +
-                    CassandraConverter
-                            .getInstance()
-                            .getALlNames( AtlasLustra.class ) +
-                    " VALUES("
+                    + CassandraTables.LUSTRA.name()
+                    + CassandraConverter
+                    .getInstance()
+                    .getALlNames( AtlasLustra.class )
+                    + " VALUES("
                     + atlasLustra.getUUID() + ", '"
                     + atlasLustra.getLustraName() + "', '"
                     + atlasLustra.getCarGosNumber() + "', "
                     + CassandraConverter
-                        .getInstance()
-                        .convertListOfPointsToCassandra( atlasLustra.getCameraLists() )
-                    + " )"+ ( check ? " IF NOT EXISTS" : "" ) + ";" )
+                    .getInstance()
+                    .convertListOfPointsToCassandra( atlasLustra.getCameraLists() )
+                    + " )" + ( check ? " IF NOT EXISTS" : " IF EXISTS" ) + ";" )
             .wasApplied()
             ? Archive
             .getArchive()
@@ -372,37 +371,58 @@ public final class CassandraDataControl {
             : Archive
             .getArchive()
             .getFunction()
-            .apply( Map.of(
-                    "message", "This Lustra has already been applied",
+            .apply( Map.of( "message", "This Lustra has already been applied",
                     "success", false,
                     "code", 201 ) )
-            .doOnError( throwable -> this.delete() ); }
+            .doOnError( throwable -> this.delete() );
 
-    public Mono< ApiResponseModel > addValue ( PolygonType polygonType ) { return this.getSession().execute(
-            "INSERT INTO "
+    private final Function< PolygonType, Mono< ApiResponseModel > > savePolygonType = polygonType ->
+            this.getSession().execute( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.POLYGON_TYPE.name()
-            + CassandraConverter
+                    + CassandraConverter
                     .getInstance()
                     .getALlNames( PolygonType.class ) +
-            " VALUES("
-            + polygonType.getUuid() + ", '"
-            + polygonType.getName() + "') IF NOT EXISTS;" )
-            .wasApplied()
-            ? Archive
-            .getArchive()
-            .getFunction()
-            .apply( Map.of( "message", "PolygonType was saved successfully" ) )
-            : Archive
-            .getArchive()
-            .getFunction()
-            .apply( Map.of(
-                    "message", "This PolygonType has already been applied",
-                    "success", false,
-                    "code", 201 ) )
-            .doOnError( throwable -> {
-                this.delete();
-                this.logger.info(  "ERROR: " + throwable.getMessage() ); } ); }
+                    " VALUES("
+                    + polygonType.getUuid() + ", '"
+                    + polygonType.getName() + "') IF NOT EXISTS;" )
+                    .wasApplied()
+                    ? Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of( "message", "PolygonType was saved successfully" ) )
+                    : Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of( "message", "This PolygonType does not exists",
+                            "success", false,
+                            "code", 201 ) )
+                    .doOnError( throwable -> {
+                        this.delete();
+                        this.logger.info(  "ERROR: " + throwable.getMessage() ); } );
+
+    private final Function< PolygonType, Mono< ApiResponseModel > > updatePolygonType = polygonType ->
+            this.getSession().execute( "UPDATE "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.POLYGON_TYPE.name()
+                    + " SET name = '"
+                    + polygonType.getName() + "'"
+                    + " WHERE uuid = " + polygonType.getUuid()
+                    + " IF EXISTS;" )
+                    .wasApplied()
+                    ? Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of( "message", "PolygonType was updated successfully" ) )
+                    : Archive
+                    .getArchive()
+                    .getFunction()
+                    .apply( Map.of( "message", "This PolygonType does not exists",
+                            "success", false,
+                            "code", 201 ) )
+                    .doOnError( throwable -> {
+                        this.delete();
+                        this.logger.info(  "ERROR: " + throwable.getMessage() ); } );
 
     private final Function< UUID, Mono< PolygonType > > getAllPolygonTypeByUUID = uuid -> Mono.just(
             this.getSession().execute( "SELECT * FROM "
