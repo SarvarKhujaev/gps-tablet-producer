@@ -16,15 +16,18 @@ import lombok.extern.jackson.Jacksonized;
 public class PoliceType {
     private UUID uuid;
     private String icon;
+    private String icon2;
     private String policeType;
 
-    public PoliceType( Row value ) {
+    public PoliceType ( Row value ) {
         this.setUuid( value.getUUID( "uuid" ) );
         this.setIcon( value.getString( "icon" ) );
+        this.setIcon2( value.getString( "icon2" ) );
         this.setPoliceType( value.getString( "PoliceType" ) ); }
 
-    public PoliceType( UDTValue value ) {
+    public PoliceType ( UDTValue value ) {
         this.setUuid( value.getUUID( "uuid" ) );
         this.setIcon( value.getString( "icon" ) );
+        this.setIcon2( value.getString( "icon2" ) );
         this.setPoliceType( value.getString( "PoliceType" ) ); }
 }
