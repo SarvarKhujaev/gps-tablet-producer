@@ -1522,10 +1522,10 @@ public final class CassandraDataControl {
                 .subscribe();
 
     private final Function< String, Row > checkLogin = login ->
-            this.getSession().execute( "SELECT * FROM " +
-            CassandraTables.TABLETS.name() + "."
-            + CassandraTables.PATRULS_LOGIN_TABLE.name()
-            + " WHERE login = '" + login + "';" ).one();
+            this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.PATRULS_LOGIN_TABLE.name()
+                    + " WHERE login = '" + login + "';" ).one();
 
     private final Function< PatrulLoginRequest, Mono< ApiResponseModel > > login = patrulLoginRequest -> {
         Row row = this.checkLogin.apply( patrulLoginRequest.getLogin() );
@@ -1727,9 +1727,9 @@ public final class CassandraDataControl {
 
     private final Function< Patrul, Flux< TabletUsage > > getAllUsedTablets = patrul -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.TABLETS_USAGE_TABLE.name()
-                            + " WHERE uuidOfPatrul = " + patrul.getUuid() + ";" )
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TABLETS_USAGE_TABLE.name()
+                    + " WHERE uuidOfPatrul = " + patrul.getUuid() + ";" )
                     .all()
                     .stream()
                     .parallel() )
