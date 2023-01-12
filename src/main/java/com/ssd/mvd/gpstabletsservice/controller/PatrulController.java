@@ -73,8 +73,8 @@ public class PatrulController {
             .apply( SerDes
                     .getSerDes()
                     .deserialize( data.getData() ) )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) )
             .onErrorReturn( Archive
                     .getArchive()
                     .getErrorResponse()
@@ -107,10 +107,10 @@ public class PatrulController {
     @MessageMapping ( value = "STOP_TO_WORK" )
     public Mono< ApiResponseModel > finishWorkOfPatrul ( String token ) { return CassandraDataControl
             .getInstance()
-            .getStartToWork()
+            .getStopToWork()
             .apply( token )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) )
             .onErrorReturn( Archive
                     .getArchive()
                     .getErrorResponse()
@@ -182,12 +182,13 @@ public class PatrulController {
                         error.getMessage(), object ) ) ); }
 
     @MessageMapping ( value = "checkToken" )
-    public Mono< ApiResponseModel > checkToken ( String token ) { return CassandraDataControl
+    public Mono< ApiResponseModel > checkToken ( String token ) {
+        return CassandraDataControl
             .getInstance()
             .getCheckToken()
             .apply( token )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) )
             .onErrorReturn( Archive
                     .getArchive()
                     .getErrorResponse()
