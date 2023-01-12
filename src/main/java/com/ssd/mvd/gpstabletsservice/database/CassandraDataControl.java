@@ -1617,7 +1617,7 @@ public final class CassandraDataControl {
                 this.getSession().execute( "UPDATE "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.PATRULS.name()
-                        + " SET startedToWorkDate = '" + patrul.getStartedToWorkDate().toInstant() + "', "
+                        + " SET startedToWorkDate = '" + patrul.getStartedToWorkDate().toInstant() + "'"
                         + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
                 return Archive
                                 .getArchive()
@@ -1825,6 +1825,19 @@ public final class CassandraDataControl {
                                     .one(),
                                     LAST ) )
                             .build() ) );
+
+    private final Function< String, Row > getPoliceType = policeType -> this.getSession()
+            .execute( "SELECT * FROM "
+            + CassandraTables.TABLETS.name() + "."
+            + CassandraTables.POLICE_TYPE.name()
+            + " WHERE policeType = '" + policeType + "';" ).one();
+
+    public void test ( Patrul patrul ) {
+        this.getSession().execute( "UPDATE "
+                + CassandraTables.TABLETS.name() + "."
+                + CassandraTables.PATRULS.name()
+                + " SET policeType = '" + patrul.getPoliceType() + "'"
+                + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" ); }
 
     public void delete () {
         this.getSession().close();
