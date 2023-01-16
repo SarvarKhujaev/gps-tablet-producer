@@ -156,9 +156,10 @@ public class PatrulController {
         patrul.setSpecialToken( null );
         return CassandraDataControl
                 .getInstance()
-                .addValue( patrul )
-                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                        error.getMessage(), object ) ) )
+                .getSavePatrul()
+                .apply( patrul )
+                .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                        error.getMessage(), object ) )
                 .onErrorReturn( Archive
                         .getArchive()
                         .getErrorResponse()
@@ -215,7 +216,8 @@ public class PatrulController {
         patrul.setSpecialToken( null );
         return CassandraDataControl
                 .getInstance()
-                .update( patrul )
+                .getUpdatePatrul()
+                .apply( patrul )
                 .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                         error.getMessage(), object ) ) )
                 .onErrorReturn( Archive

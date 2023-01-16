@@ -34,7 +34,8 @@ public class PolygonController {
     @MessageMapping ( value = "addNewPolygon" )
     public Mono< ApiResponseModel > addNewPolygon ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
-            .addValue( polygon )
+            .getSavePolygon()
+            .apply( polygon )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
@@ -45,9 +46,10 @@ public class PolygonController {
     @MessageMapping ( value = "updatePolygon" )
     public Mono< ApiResponseModel > updatePolygon ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
-            .update( polygon )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
+            .getUpdatePolygon()
+            .apply( polygon )
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) )
             .onErrorReturn( Archive
                     .getArchive()
                     .getErrorResponse()

@@ -33,7 +33,8 @@ public class PolygonForPatrulController { // SAM - 76
     @MessageMapping ( value = "deletePolygonForPatrul" )
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return CassandraDataControl
             .getInstance()
-            .deletePolygonForPatrul( uuid )
+            .getDeletePolygonForPatrul()
+            .apply( uuid )
             .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
                     error.getMessage(), object ) ) )
             .onErrorReturn( Archive
