@@ -40,9 +40,10 @@ public class CarController {
     @MessageMapping( value = "addCar" )
     public Mono< ApiResponseModel > addCar ( ReqCar reqCar ) { return CassandraDataControl
             .getInstance()
-            .addValue( reqCar )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
+            .getSaveCar()
+            .apply( reqCar )
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) )
             .onErrorReturn( Archive
                     .getArchive()
                     .getErrorResponse()
@@ -51,9 +52,10 @@ public class CarController {
     @MessageMapping ( value = "updateCar" )
     public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return CassandraDataControl
             .getInstance()
-            .update( reqCar )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
+            .getUpdateCar()
+            .apply( reqCar )
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) )
             .onErrorReturn( Archive
                     .getArchive()
                     .getErrorResponse()
