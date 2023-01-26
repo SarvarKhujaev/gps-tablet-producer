@@ -36,7 +36,8 @@ public class CassandraDataControlForEscort {
     private final Logger logger = Logger.getLogger( CassandraDataControl.class.toString() );
     private static CassandraDataControlForEscort cassandraDataControl = new CassandraDataControlForEscort();
 
-    public static CassandraDataControlForEscort getInstance() { return cassandraDataControl != null ? cassandraDataControl
+    public static CassandraDataControlForEscort getInstance() { return cassandraDataControl != null
+            ? cassandraDataControl
             : ( cassandraDataControl = new CassandraDataControlForEscort() ); }
 
     private CassandraDataControlForEscort () {
@@ -105,12 +106,12 @@ public class CassandraDataControlForEscort {
         this.logger.info( "CassandraDataControlForEscort is ready" ); }
 
     private final Supplier< Flux< EscortTuple > > getAllTupleOfEscort = () -> Flux.fromStream(
-                    this.getSession().execute( "SELECT * FROM "
-                                    + CassandraTables.ESCORT.name() + "."
-                                    + CassandraTables.TUPLE_OF_ESCORT.name() + ";" )
-                            .all()
-                            .stream()
-                            .parallel() )
+            this.getSession().execute( "SELECT * FROM "
+                            + CassandraTables.ESCORT.name() + "."
+                            + CassandraTables.TUPLE_OF_ESCORT.name() + ";" )
+                    .all()
+                    .stream()
+                    .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
             .map( EscortTuple::new )
@@ -126,8 +127,8 @@ public class CassandraDataControlForEscort {
 
     private final Predicate< List< UUID > > checkUUIDList = uuids ->
             uuids != null
-                    && !uuids.isEmpty()
-                    && uuids.size() > 0;
+            && !uuids.isEmpty()
+            && uuids.size() > 0;
 
     private final Function< String, Mono< ApiResponseModel > > deleteTupleOfEscort = id ->
             this.getGetCurrentTupleOfEscort()
@@ -298,32 +299,32 @@ public class CassandraDataControlForEscort {
 
     private final Function< PolygonForEscort, Mono< ApiResponseModel > > savePolygonForEscort = polygon ->
             this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.ESCORT.name() + "."
-                            + CassandraTables.POLYGON_FOR_ESCORT.name()
-                            + "(uuid, " +
-                            "uuidOfEscort, " +
-                            "name, " +
-                            "totalTime, " +
-                            "routeIndex, " +
-                            "totalDistance, " +
-                            "pointsList, " +
-                            "latlngs ) VALUES ("
-                            + polygon.getUuid() + ", "
-                            + polygon.getUuidOfEscort() + ", '"
-                            + polygon.getName() + "', "
+                    + CassandraTables.ESCORT.name() + "."
+                    + CassandraTables.POLYGON_FOR_ESCORT.name()
+                    + "(uuid, " +
+                    "uuidOfEscort, " +
+                    "name, " +
+                    "totalTime, " +
+                    "routeIndex, " +
+                    "totalDistance, " +
+                    "pointsList, " +
+                    "latlngs ) VALUES ("
+                    + polygon.getUuid() + ", "
+                    + polygon.getUuidOfEscort() + ", '"
+                    + polygon.getName() + "', "
 
-                            + polygon.getTotalTime() + ", "
-                            + polygon.getRouteIndex() + ", "
-                            + polygon.getTotalDistance() + ", "
+                    + polygon.getTotalTime() + ", "
+                    + polygon.getRouteIndex() + ", "
+                    + polygon.getTotalDistance() + ", "
 
-                            + CassandraConverter
-                            .getInstance()
-                            .convertListOfPointsToCassandra( polygon.getPointsList() ) + ", "
+                    + CassandraConverter
+                    .getInstance()
+                    .convertListOfPointsToCassandra( polygon.getPointsList() ) + ", "
 
-                            + CassandraConverter
-                            .getInstance()
-                            .convertListOfPointsToCassandra( polygon.getLatlngs() )
-                            + ") IF NOT EXISTS;" )
+                    + CassandraConverter
+                    .getInstance()
+                    .convertListOfPointsToCassandra( polygon.getLatlngs() )
+                    + ") IF NOT EXISTS;" )
                     .wasApplied()
                     ? Archive
                     .getArchive()
@@ -349,7 +350,7 @@ public class CassandraDataControlForEscort {
         return Mono.justOrEmpty( row != null ? new PolygonForEscort( row ) : null ); };
 
     private final Function< String, Mono< ApiResponseModel > > deletePolygonForEscort = id ->
-            this.getCurrentPolygonForEscort
+            this.getGetCurrentPolygonForEscort()
                     .apply( id )
                     .flatMap( polygonForEscort -> polygonForEscort.getUuidOfEscort() == null
                             ? Archive
@@ -428,12 +429,12 @@ public class CassandraDataControlForEscort {
                             "success", false ) );
 
     private final Supplier< Flux< PolygonForEscort > > getAllPolygonForEscort = () -> Flux.fromStream(
-                    this.getSession().execute( "SELECT * FROM "
-                                    + CassandraTables.ESCORT.name() + "."
-                                    + CassandraTables.POLYGON_FOR_ESCORT.name() + ";" )
-                            .all()
-                            .stream()
-                            .parallel() )
+            this.getSession().execute( "SELECT * FROM "
+                        + CassandraTables.ESCORT.name() + "."
+                        + CassandraTables.POLYGON_FOR_ESCORT.name() + ";" )
+                    .all()
+                    .stream()
+                    .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
             .map( PolygonForEscort::new )
@@ -442,24 +443,24 @@ public class CassandraDataControlForEscort {
 
     private final Function< TupleOfCar, Mono< ApiResponseModel > > updateTupleOfcar = tupleOfCar ->
             this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.ESCORT.name() + "."
-                            + CassandraTables.TUPLE_OF_CAR.name()
-                            + CassandraConverter
-                            .getInstance()
-                            .getALlNames( TupleOfCar.class )
-                            + " VALUES("
-                            + tupleOfCar.getUuid() + ", "
-                            + tupleOfCar.getUuidOfEscort() + ", "
-                            + tupleOfCar.getUuidOfPatrul() + ", '"
-                            + tupleOfCar.getCarModel() + "', '"
-                            + tupleOfCar.getGosNumber() + "', '"
-                            + tupleOfCar.getTrackerId() + "', '"
-                            + tupleOfCar.getNsfOfPatrul() + "', '"
-                            + tupleOfCar.getSimCardNumber() + "', "
+                    + CassandraTables.ESCORT.name() + "."
+                    + CassandraTables.TUPLE_OF_CAR.name()
+                    + CassandraConverter
+                    .getInstance()
+                    .getALlNames( TupleOfCar.class )
+                    + " VALUES("
+                    + tupleOfCar.getUuid() + ", "
+                    + tupleOfCar.getUuidOfEscort() + ", "
+                    + tupleOfCar.getUuidOfPatrul() + ", '"
+                    + tupleOfCar.getCarModel() + "', '"
+                    + tupleOfCar.getGosNumber() + "', '"
+                    + tupleOfCar.getTrackerId() + "', '"
+                    + tupleOfCar.getNsfOfPatrul() + "', '"
+                    + tupleOfCar.getSimCardNumber() + "', "
 
-                            + tupleOfCar.getLatitude() + ", "
-                            + tupleOfCar.getLongitude() + ", " +
-                            tupleOfCar.getAverageFuelConsumption() + ");" )
+                    + tupleOfCar.getLatitude() + ", "
+                    + tupleOfCar.getLongitude() + ", " +
+                    tupleOfCar.getAverageFuelConsumption() + ");" )
                     .wasApplied()
                     ? Archive
                     .getArchive()
@@ -497,10 +498,10 @@ public class CassandraDataControlForEscort {
                     return Mono.just( tupleTotalData ); } ); };
 
     private final Function< UUID, Mono< TupleOfCar > > getCurrentTupleOfCar = uuid -> Mono.just(
-                    this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.ESCORT.name() + "."
-                            + CassandraTables.TUPLE_OF_CAR.name()
-                            + " where uuid = " + uuid + ";" ).one() )
+            this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.ESCORT.name() + "."
+                    + CassandraTables.TUPLE_OF_CAR.name()
+                    + " where uuid = " + uuid + ";" ).one() )
             .map( TupleOfCar::new );
 
     private final Function< String, Mono< Country > > getCurrentCountry = countryName -> {
@@ -594,13 +595,12 @@ public class CassandraDataControlForEscort {
                     "success", false ) );
 
     private final Supplier< Flux< Country > > getAllCountries = () -> Flux.fromStream (
-                    this.getSession()
-                            .execute( "SELECT * FROM "
-                                    + CassandraTables.ESCORT.name() + "."
-                                    + CassandraTables.COUNTRIES.name() + ";" )
-                            .all()
-                            .stream()
-                            .parallel() )
+            this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.ESCORT.name() + "."
+                    + CassandraTables.COUNTRIES.name() + ";" )
+                    .all()
+                    .stream()
+                    .parallel() )
             .parallel()
             .runOn( Schedulers.parallel() )
             .map( Country::new )
