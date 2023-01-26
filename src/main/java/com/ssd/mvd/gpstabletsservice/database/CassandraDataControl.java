@@ -1296,6 +1296,28 @@ public final class CassandraDataControl {
             .sequential()
             .publishOn( Schedulers.single() );
 
+    private final Supplier< Flux< Notification > > getUnreadNotifications = () -> Flux.fromStream (
+            this.getSession().execute ( "SELECT * FROM "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.NOTIFICATION.name()
+                            + " WHERE wasread = false;" )
+                    .all()
+                    .stream()
+                    .parallel() )
+            .parallel()
+            .runOn( Schedulers.parallel() )
+            .map( Notification::new )
+            .sequential()
+            .publishOn( Schedulers.single() );
+
+    private final Supplier< Mono< Long > > getUnreadNotificationQuantity = () -> Mono.just(
+            this.getSession().execute ( "SELECT count(*) as quantity FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.NOTIFICATION.name()
+                    + " WHERE wasread = false;" )
+                    .one()
+                    .getLong( "quantity" ) );
+
     private final Function< Notification, Notification > saveNotification = notification -> {
         this.getSession().execute( "INSERT INTO "
                 + CassandraTables.TABLETS.name() + "."
