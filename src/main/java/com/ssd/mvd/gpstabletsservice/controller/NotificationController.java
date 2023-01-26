@@ -24,37 +24,36 @@ public class NotificationController {
             .getGetAllNotification()
             .get()
             .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) ); }
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ); }
 
     @MessageMapping ( value = "getUnreadNotifications" )
     public Flux< Notification > getUnreadNotifications () { return CassandraDataControl
             .getInstance()
-            .getGetAllNotification()
+            .getGetUnreadNotifications()
             .get()
-            .filter( notification -> !notification.getWasRead() )
             .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) ); }
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) ); }
 
     @MessageMapping ( value = "setAsRead" )
     public Mono< ApiResponseModel > setAsRead ( String id ) { return CassandraDataControl
             .getInstance()
             .getSetNotificationAsRead()
             .apply( UUID.fromString( id ) )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) )
             .onErrorReturn( Archive
                     .getArchive()
                     .getErrorResponse()
                     .get() ); }
 
     @MessageMapping ( value = "getUnreadNotificationQuantity" )
-    public Mono< Long > getUnreadNotificationQuantity () {
-        return CassandraDataControl
+    public Mono< Long > getUnreadNotificationQuantity () { return CassandraDataControl
             .getInstance()
-            .getGetAllNotification()
+            .getGetUnreadNotificationQuantity()
             .get()
-            .filter( notification -> !notification.getWasRead() )
-            .count(); }
+            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
+                    error.getMessage(), object ) )
+            .onErrorReturn( -1L ); }
 }
