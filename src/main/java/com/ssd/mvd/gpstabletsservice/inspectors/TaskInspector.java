@@ -7,17 +7,17 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.BiFunction;
 
-import com.ssd.mvd.gpstabletsservice.entity.Notification;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import com.ssd.mvd.gpstabletsservice.database.*;
 import com.ssd.mvd.gpstabletsservice.task.card.*;
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.entity.Notification;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;

@@ -1,12 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
 
-import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
