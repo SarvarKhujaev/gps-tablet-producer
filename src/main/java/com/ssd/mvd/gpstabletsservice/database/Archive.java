@@ -13,7 +13,6 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 
 @Data
 public class Archive {
-    private static Archive archive = new Archive();
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
     private final Function< Map< String, ? >, Mono< ApiResponseModel > > function =
@@ -56,8 +55,6 @@ public class Archive {
     private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID",
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
             "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
-
-    public static Archive getArchive () { return archive != null ? archive : ( archive = new Archive() ); }
 
     public String generateToken () {
         byte[] bytes = new byte[ 24 ];

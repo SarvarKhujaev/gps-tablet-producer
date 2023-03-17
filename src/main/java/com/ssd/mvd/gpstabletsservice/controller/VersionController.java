@@ -1,18 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import com.ssd.mvd.gpstabletsservice.request.AndroidVersionUpdate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.request.AndroidVersionUpdate;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-
+import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import reactor.core.publisher.Mono;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
-public class VersionController {
+public class VersionController extends LogInspector {
     @MessageMapping ( value = "saveLastVersion" )
     public Mono< ApiResponseModel > saveLastVersion ( AndroidVersionUpdate androidVersionUpdate ) {
         return CassandraDataControl

@@ -2,19 +2,17 @@ package com.ssd.mvd.gpstabletsservice.tuple;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.UUID;
 
-@Slf4j
 @RestController
-public class EscortController {
+public class EscortController extends LogInspector {
     @MessageMapping ( value = "getAllEscort" )
     public Flux< EscortTuple > getAllTupleOfPatrul () { return CassandraDataControlForEscort
             .getInstance()
@@ -38,13 +36,8 @@ public class EscortController {
             .getInstance()
             .getDeleteTupleOfEscort()
             .apply( id )
-            .onErrorContinue( ( throwable, o ) -> log.error(
-                    "Error: " + throwable.getMessage()
-                            + " Reason: " + o ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "removeEscortCarFromEscort" )
     public Mono< ApiResponseModel > removeEscortCarFromEscort ( UUID uuid ) { return CassandraDataControlForEscort
@@ -78,39 +71,24 @@ public class EscortController {
                 tupleOfCar.setUuidOfPatrul( null );
                 return CassandraDataControlForEscort
                         .getInstance()
-                        .getUpdateTupleOfcar()
+                        .getUpdateTupleOfCar()
                         .apply( tupleOfCar )
-                        .onErrorContinue( ( throwable, o ) -> log.error(
-                                "Error: " + throwable.getMessage()
-                                        + " Reason: " + o ) )
-                        .onErrorReturn( Archive
-                                .getArchive()
-                                .getErrorResponse()
-                                .get() ); } ); }
+                        .onErrorContinue( super::logging )
+                        .onErrorReturn( super.getErrorResponse().get() ); } ); }
 
     @MessageMapping ( value = "addNewEscort" )
     public Flux< ApiResponseModel > addNewTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
             .getInstance()
             .getSaveEscortTuple()
             .apply( escortTuple )
-            .onErrorContinue( ( throwable, o ) -> log.error(
-                    "Error: " + throwable.getMessage()
-                            + " Reason: " + o ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updateEscort" )
     public Mono< ApiResponseModel > updateTupleOfPatrul ( EscortTuple escortTuple ) { return CassandraDataControlForEscort
             .getInstance()
             .getUpdateEscortTuple()
             .apply( escortTuple )
-            .onErrorContinue( ( throwable, o ) -> log.error(
-                    "Error: " + throwable.getMessage()
-                            + " Reason: " + o ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 }

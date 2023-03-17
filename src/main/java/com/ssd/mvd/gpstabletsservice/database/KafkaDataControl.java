@@ -22,49 +22,47 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import lombok.Data;
 import java.util.*;
 
 @Data
-public class KafkaDataControl {
+public class KafkaDataControl extends SerDes {
     private static KafkaDataControl instance = new KafkaDataControl();
-    private final Logger logger = Logger.getLogger( KafkaDataControl.class.toString() );
 
     private final String KAFKA_BROKER = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.KAFKA_BROKER" );
+            .getProperty( "variables.KAFKA_VARIABLES.KAFKA_BROKER" );
 
     private final String GROUP_ID_FOR_KAFKA = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.GROUP_ID_FOR_KAFKA" );
+            .getProperty( "variables.KAFKA_VARIABLES.GROUP_ID_FOR_KAFKA" );
 
     private final String CAR_TOTAL_DATA = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.CAR_TOTAL_DATA" );
+            .getProperty( "variables.KAFKA_VARIABLES.CAR_TOTAL_DATA" );
 
     private final String ACTIVE_TASK = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.ACTIVE_TASK" );
+            .getProperty( "variables.KAFKA_VARIABLES.ACTIVE_TASK" );
 
     private final String NOTIFICATION = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.NOTIFICATION" );
+            .getProperty( "variables.KAFKA_VARIABLES.NOTIFICATION" );
 
     private final String SOS_TOPIC = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.SOS_TOPIC" );
+            .getProperty( "variables.KAFKA_VARIABLES.SOS_TOPIC" );
 
     private final String SOS_TOPIC_FOR_ANDROID_NOTIFICATION = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.SOS_TOPIC_FOR_ANDROID_NOTIFICATION" );
+            .getProperty( "variables.KAFKA_VARIABLES.SOS_TOPIC_FOR_ANDROID_NOTIFICATION" );
 
     public static KafkaDataControl getInstance () { return instance != null ? instance : ( instance = new KafkaDataControl() ); }
 
@@ -79,19 +77,15 @@ public class KafkaDataControl {
             SenderOptions.< String, String >create( this.getGetKafkaSenderOptions().get() )
                     .maxInFlight( 1024 ) );
 
-    private KafkaDataControl () { this.getLogger().info( "KafkaDataControl was created" ); }
+    private KafkaDataControl () { super.logging( "KafkaDataControl was created" ); }
 
     private final Consumer< ActiveTask > writeActiveTaskToKafka = activeTask -> this.getKafkaSender()
             .createOutbound()
-            .send( Mono.just( new ProducerRecord<>( this.getACTIVE_TASK(),
-                        SerDes
-                            .getSerDes()
-                            .serialize( activeTask ) ) ) )
+            .send( Mono.just( new ProducerRecord<>( this.getACTIVE_TASK(), super.serialize( activeTask ) ) ) )
             .then()
-            .doOnError( error -> logger.info( error.getMessage() ) )
-            .doOnSuccess( success -> logger.info( "activeTask: " +
-                    activeTask.getTaskId() +
-                    " was sent at: " + new Date() ) )
+            .doOnError( error -> super.logging( error.getMessage() ) )
+            .doOnSuccess( success -> super.logging( "activeTask: " +
+                    activeTask.getTaskId() + " was sent at: " + new Date() ) )
             .subscribe();
 
     // отправляет уведомление андроидам радом с тем кто отправил сос сигнал
@@ -103,17 +97,15 @@ public class KafkaDataControl {
                                 .parallel()
                                 .runOn( Schedulers.parallel() )
                                 .map( sosNotificationForAndroid -> {
-                                    logger.info( "Sending sos notification to: "
+                                    super.logging( "Sending sos notification to: "
                                             + sosNotificationForAndroid.getPatrulPassportSeries()
                                             + " at: " + new Date() );
                                     return new ProducerRecord<>(
                                             this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION(),
-                                            SerDes
-                                                    .getSerDes()
-                                                    .serialize( sosNotificationForAndroid ) ); } ) )
+                                            super.serialize( sosNotificationForAndroid ) ); } ) )
                         .then()
-                        .doOnError( error -> logger.info( error.getMessage() ) )
-                        .doOnSuccess( success -> logger.info( "All notifications were sent" ) )
+                        .doOnError( error -> super.logging( error.getMessage() ) )
+                        .doOnSuccess( success -> super.logging( "All notifications were sent" ) )
                         .subscribe();
                 return Mono.just( apiResponseModel ); };
 
@@ -123,10 +115,10 @@ public class KafkaDataControl {
                 .createOutbound()
                 .send( Mono.just( new ProducerRecord<>(
                         this.getSOS_TOPIC(),
-                        SerDes.getSerDes().serialize( sosNotification ) ) ) )
+                        super.serialize( sosNotification ) ) ) )
                 .then()
-                .doOnError( error -> logger.info( error.getMessage() ) )
-                .doOnSuccess( success -> logger.info( "sosNotification from: "
+                .doOnError( error -> super.logging( error.getMessage() ) )
+                .doOnSuccess( success -> super.logging( "sosNotification from: "
                         + sosNotification.getPatrulUUID() + " was sent to front end"
                         + " at: " + new Date() ) )
                 .subscribe();
@@ -137,12 +129,10 @@ public class KafkaDataControl {
                 .createOutbound()
                 .send( Mono.just( new ProducerRecord<>(
                         this.getCAR_TOTAL_DATA(),
-                        SerDes
-                                .getSerDes()
-                                .serialize( carTotalData ) ) ) )
+                        super.serialize( carTotalData ) ) ) )
                 .then()
-                .doOnError( error -> logger.info( error.getMessage() ) )
-                .doOnSuccess( success -> logger.info( "Kafka got carTotalData : "
+                .doOnError( error -> super.logging( error.getMessage() ) )
+                .doOnSuccess( success -> super.logging( "Kafka got carTotalData : "
                         + carTotalData.getGosNumber()
                         + " at: " + new Date() ) )
                 .subscribe();
@@ -153,12 +143,10 @@ public class KafkaDataControl {
                 .createOutbound()
                 .send( Mono.just( new ProducerRecord<>(
                         this.getNOTIFICATION(),
-                        SerDes
-                                .getSerDes()
-                                .serialize( notification ) ) ) )
+                        super.serialize( notification ) ) ) )
                 .then()
-                .doOnError( error -> logger.info( error.getMessage() ) )
-                .doOnSuccess( success -> logger.info( "Kafka got notification: "
+                .doOnError( error -> super.logging( error.getMessage() ) )
+                .doOnSuccess( success -> super.logging( "Kafka got notification: "
                         + notification.getTitle()
                         + " at: " + notification.getNotificationWasCreated() ) )
                 .subscribe();
@@ -167,5 +155,5 @@ public class KafkaDataControl {
         instance = null;
         this.getKafkaSender().close();
         CassandraDataControl.getInstance().delete();
-        this.getLogger().info( "Kafka is closed successfully" ); }
+        super.logging( "Kafka is closed successfully" ); }
 }

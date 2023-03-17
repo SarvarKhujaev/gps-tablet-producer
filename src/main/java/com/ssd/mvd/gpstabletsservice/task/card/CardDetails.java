@@ -1,21 +1,19 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 import java.util.*;
-import lombok.Data;
-
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.tuple.TupleOfCar;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.constants.Details;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 
-@Data
-public class CardDetails {
+@lombok.Data
+public class CardDetails extends DataValidateInspector {
     private CarDetails carDetails;
     private PersonDetails personDetails;
     private Map< Details, List< Item > > details = new HashMap<>();
@@ -30,14 +28,10 @@ public class CardDetails {
         this.getDetails().put( Details.TEX_PASSPORT, new ArrayList<>() );
         this.getDetails().put( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR, new ArrayList<>() );
 
-        if ( carTotalData
-                .getDoverennostList() != null
-                && carTotalData
+        if ( super.getCheckParam().test( carTotalData.getDoverennostList() )
+                && super.getCheckList().test( carTotalData
                 .getDoverennostList()
-                .getDoverennostsList() != null
-                && carTotalData
-                .getDoverennostList()
-                .getDoverennostsList().size() > 0 )
+                .getDoverennostsList() ) )
             carTotalData
                     .getDoverennostList()
                     .getDoverennostsList()
@@ -50,17 +44,13 @@ public class CardDetails {
                     this.getDetails().get( Details.ISHONCHNOMA )
                             .add( new Item( "TUGASH SANASI", doverennost.getDateValid() ) ); } );
 
-        if ( carTotalData
+        if ( super.getCheckParam().test( carTotalData
                 .getPsychologyCard()
-                .getModelForCarList() != null
-                && carTotalData
-                .getPsychologyCard()
-                .getModelForCarList()
-                .getModelForCarList() != null
-                && carTotalData
+                .getModelForCarList() )
+                && super.getCheckList().test( carTotalData
                 .getPsychologyCard()
                 .getModelForCarList()
-                .getModelForCarList().size() > 0 ) carTotalData
+                .getModelForCarList() ) ) carTotalData
                 .getPsychologyCard()
                 .getModelForCarList()
                 .getModelForCarList()
@@ -81,13 +71,13 @@ public class CardDetails {
                     this.getDetails().get( Details.NOMIDAGI_MAVJUD_TRANSPORT_VOSITALAR )
                             .add( new Item( "TURI", modelForCar.getVehicleType() ) ); } );
 
-        if ( carTotalData
+        if ( super.getCheckParam().test( carTotalData
                 .getPsychologyCard()
-                .getModelForPassport() != null
-                && carTotalData
+                .getModelForPassport() )
+                && super.getCheckParam().test( carTotalData
                 .getPsychologyCard()
                 .getModelForPassport()
-                .getDocument() != null ) {
+                .getDocument() ) ) {
             this.getDetails()
                     .get( Details.TEX_PASSPORT )
                     .add( new Item( "Seriya va raqam", carTotalData
@@ -170,7 +160,7 @@ public class CardDetails {
                     .getModelForCar()
                     .getTexPassportSerialNumber() ) ); }
 
-        if ( carTotalData.getModelForCar().getTonirovka() != null ) {
+        if ( super.getCheckParam().test( carTotalData.getModelForCar().getTonirovka() ) ) {
             this.getDetails().get( Details.TONIROVKA ).add( new Item( "TURI", carTotalData
                     .getModelForCar()
                     .getTonirovka()
@@ -186,7 +176,7 @@ public class CardDetails {
                     .getTonirovka()
                     .getDateOfValidotion() ) ); }
 
-        if ( carTotalData.getModelForCar().getInsurance() != null ) {
+        if ( super.getCheckParam().test( carTotalData.getModelForCar().getInsurance() ) ) {
             this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "BERILGAN VAQTI", carTotalData
                     .getModelForCar()
                     .getInsurance()
@@ -219,9 +209,7 @@ public class CardDetails {
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() )
                 .subscribe( details -> {
                     switch ( details ) {
-                        case DETAILS -> Archive
-                                .getArchive()
-                                .getDetailsList()
+                        case DETAILS -> super.getDetailsList()
                                 .parallelStream()
                                 .forEach( s -> {
                                     switch ( s ) {
@@ -254,83 +242,95 @@ public class CardDetails {
 
                         case APPLICANT_DATA -> {
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Телефон", card.getEventHuman() != null
-                                            ? card.getEventHuman().getPhone() : "unknown" ) );
+                                    .add( new Item( "Телефон", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getPhone()
+                                            : Errors.DATA_NOT_FOUND.name()) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Имя", card.getEventHuman() != null
-                                            ? card.getEventHuman().getFirstName() : "unknown" ) );
+                                    .add( new Item( "Имя", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getFirstName()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Поступил", card.getEventHuman() != null
-                                            ? card.getEventHuman().getCheckin() : "unknown" ) );
+                                    .add( new Item( "Поступил", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getCheckin()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Больница", card.getEventHuman() != null
-                                            ? card.getEventHuman().getHospital() : "unknown" ) );
+                                    .add( new Item( "Больница", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getHospital()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Отчество", card.getEventHuman() != null
-                                            ? card.getEventHuman().getMiddleName() : "unknown" ) );
+                                    .add( new Item( "Отчество", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getMiddleName()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Фамилия", card.getEventHuman() != null
-                                            ? card.getEventHuman().getLastName() : "unknown" ) );
+                                    .add( new Item( "Фамилия", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getLastName()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "ID Заявителя", card.getEventHuman() != null
-                                            ? card.getEventHuman().getHumanId() : "unknown" ) );
+                                    .add( new Item( "ID Заявителя", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getHumanId()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Отделение", card.getEventHuman() != null
-                                            ? card.getEventHuman().getHospitaldept() : "unknown" ) );
+                                    .add( new Item( "Отделение", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getHospitaldept()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Тип лечения", card.getEventHuman() != null
-                                            ? card.getEventHuman().getTreatmentkind() : "unknown" ) );
+                                    .add( new Item( "Тип лечения", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getTreatmentkind()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
-                                    .add( new Item( "Кто звонил", card.getEventHuman() != null
-                                            ? card.getEventHuman().getFirstName() : "unknown"
+                                    .add( new Item( "Кто звонил", super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getFirstName()
+                                            : Errors.DATA_NOT_FOUND.name()
                                             + " "
-                                            + card.getEventHuman() != null
-                                            ? card.getEventHuman().getMiddleName() : "unknown" ) ); }
+                                            + ( super.getCheckParam().test( card.getEventHuman() )
+                                            ? card.getEventHuman().getMiddleName()
+                                            : Errors.DATA_NOT_FOUND.name() ) ) ); }
 
                         case DATA_OF_VICTIM -> {
                             this.getDetails().get( Details.DATA_OF_VICTIM )
-                                    .add( new Item( "Телефон", card.getVictimHumans() != null
+                                    .add( new Item( "Телефон", super.getCheckParam().test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
-                                            ? card.getVictimHumans().get( 0 ).getPhone() : "unknown" ) );
+                                            ? card.getVictimHumans().get( 0 ).getPhone()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
-                                    .add( new Item( "Имя", card.getVictimHumans() != null
+                                    .add( new Item( "Имя", super.getCheckParam().test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
                                             .getFirstName()
-                                            : "unknown"  ) );
+                                            : Errors.DATA_NOT_FOUND.name()  ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
-                                    .add( new Item( "Отчество", card.getVictimHumans() != null
+                                    .add( new Item( "Отчество", super.getCheckParam().test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
                                             .getMiddleName()
-                                            : "unknown"  ) );
+                                            : Errors.DATA_NOT_FOUND.name()  ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
-                                    .add( new Item( "Фамилия", card.getVictimHumans() != null
+                                    .add( new Item( "Фамилия", super.getCheckParam().test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
                                             .getLastName()
-                                            : "unknown"  ) );
+                                            : Errors.DATA_NOT_FOUND.name()  ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
-                                    .add( new Item( "ID Потерпевшего", card.getVictimHumans() != null
+                                    .add( new Item( "ID Потерпевшего", super.getCheckParam().test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
                                             .getVictimId()
-                                            : "unknown" ) );
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
-                                    .add( new Item( "Дата рождения", card.getVictimHumans() != null
+                                    .add( new Item( "Дата рождения", super.getCheckParam().test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
                                             .getDateOfBirth()
-                                            : "unknown" ) ); }
+                                            : Errors.DATA_NOT_FOUND.name() ) ); }
 
                         case ADDRESS_OF_VICTIM -> {
-                            if ( card.getEventHuman() != null
-                                    && card.getEventHuman().getHumanAddress() != null ) {
+                            if ( super.getCheckParam().test( card.getEventHuman() )
+                                    && super.getCheckParam().test( card.getEventHuman().getHumanAddress() ) ) {
                                 this.getDetails().get( Details.ADDRESS_OF_VICTIM )
                                         .add( new Item( "Улица", card.getEventHuman().getHumanAddress().getStreet() ) );
                                 this.getDetails().get( Details.ADDRESS_OF_VICTIM )
@@ -346,17 +346,20 @@ public class CardDetails {
 
                         case ADDITIONAL_ADDRESS -> {
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                    .add( new Item( "Дом", card.getEventAddress() != null
-                                            ? card.getEventAddress().getFlat() : "unknown" ) );
+                                    .add( new Item( "Дом", super.getCheckParam().test( card.getEventAddress() )
+                                            ? card.getEventAddress().getFlat()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                    .add( new Item( "Адрес", card.getEventAddress() != null
-                                            ? card.getEventAddress().getStreet() : "unknown" ) );
+                                    .add( new Item( "Адрес", super.getCheckParam().test( card.getEventAddress() )
+                                            ? card.getEventAddress().getStreet()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                    .add( new Item( "Квартира", card.getEventAddress() != null
-                                            ? card.getEventAddress().getHouse() : "unknown" ) ); }
+                                    .add( new Item( "Квартира", super.getCheckParam().test( card.getEventAddress() )
+                                            ? card.getEventAddress().getHouse()
+                                            : Errors.DATA_NOT_FOUND.name() ) ); }
 
                         case ADDRESS_OF_INCIDENT -> {
-                            if ( card.getEventAddress() != null ) {
+                            if ( super.getCheckParam().test( card.getEventAddress() ) ) {
                                 this.getDetails().get( Details.APPLICANT_DATA )
                                         .add( new Item( "Улица", card.getEventAddress().getStreet() ) );
                                 this.getDetails().get( Details.APPLICANT_DATA )
@@ -371,8 +374,8 @@ public class CardDetails {
                                         .add( new Item( "Населенныый пункт", card.getEventAddress().getSNote() ) ); } }
 
                         case ADDRESS_OF_APPLICANT -> {
-                            if ( card.getEventHuman() != null
-                                    && card.getEventHuman().getHumanAddress() != null ) {
+                            if ( super.getCheckParam().test( card.getEventHuman() )
+                                    && super.getCheckParam().test( card.getEventHuman().getHumanAddress() ) ) {
                                 this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
                                         .add( new Item( "Улица", card.getEventHuman().getHumanAddress().getStreet() ) );
                                 this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
@@ -387,10 +390,12 @@ public class CardDetails {
                                         .add( new Item( "Населенныый пункт", card.getEventHuman().getHumanAddress().getSNote() ) ); } }
 
                         case ADDITIONAL_ADDRESS_OF_Victim -> {
-                            if ( card.getVictimHumans() != null
-                                    && !card.getVictimHumans().isEmpty()
-                                    && card.getVictimHumans().size() > 0
-                                    && card.getVictimHumans().get( 0 ).getVictimAddress() != null ) {
+                            if ( super.getCheckParam().test( card.getVictimHumans() )
+                                    && super.getCheckList().test( card.getVictimHumans() )
+                                    && super.getCheckParam().test(
+                                            card.getVictimHumans()
+                                                    .get( 0 )
+                                                    .getVictimAddress() ) ) {
                                 this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim )
                                         .add( new Item( "Дом", card.getVictimHumans()
                                                 .get( 0 )
@@ -409,14 +414,17 @@ public class CardDetails {
 
                         case ADDITIONAL_ADDRESS_OF_APPLICANT -> {
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                    .add( new Item( "Дом", card.getEventAddress() != null
-                                            ? card.getEventAddress().getFlat() : "unknown" ) );
+                                    .add( new Item( "Дом", super.getCheckParam().test( card.getEventAddress() )
+                                            ? card.getEventAddress().getFlat()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                    .add( new Item( "Адрес", card.getEventAddress() != null
-                                            ? card.getEventAddress().getHouse() : "unknown" ) );
+                                    .add( new Item( "Адрес", super.getCheckParam().test( card.getEventAddress() )
+                                            ? card.getEventAddress().getHouse()
+                                            : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                    .add( new Item( "Квартира", card.getEventAddress() != null
-                                            ? card.getEventAddress().getStreet() : "unknown" ) ); } } } ); }
+                                    .add( new Item( "Квартира", super.getCheckParam().test( card.getEventAddress() )
+                                            ? card.getEventAddress().getStreet()
+                                            : Errors.DATA_NOT_FOUND.name() ) ); } } } ); }
 
     public CardDetails ( EscortTuple escortTuple, String ru, TupleOfCar tupleOfCar ) {
         this.getDetails().putIfAbsent( Details.ESCORT, new ArrayList<>() );

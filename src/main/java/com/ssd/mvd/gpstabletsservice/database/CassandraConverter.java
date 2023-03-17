@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.database;
 
 import java.util.*;
 import lombok.Data;
+
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
@@ -10,16 +11,13 @@ import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.tuple.Points;
 import com.ssd.mvd.gpstabletsservice.task.card.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
 @Data
-public class CassandraConverter {
+public class CassandraConverter extends LogInspector {
     private String temp;
     private String result;
-
-    private final static CassandraConverter cassandraConverter = new CassandraConverter();
-
-    public static CassandraConverter getInstance() { return cassandraConverter; }
 
     public String getALlNames ( Class object ) {
         StringBuilder result = new StringBuilder( "( " );

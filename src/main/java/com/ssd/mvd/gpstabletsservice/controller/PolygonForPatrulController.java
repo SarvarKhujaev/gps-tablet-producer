@@ -4,13 +4,12 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.entity.Polygon;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.entity.ScheduleForPolygonPatrul;
@@ -18,50 +17,36 @@ import com.ssd.mvd.gpstabletsservice.entity.ScheduleForPolygonPatrul;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 
-@Slf4j
 @RestController
-public class PolygonForPatrulController { // SAM - 76
+public class PolygonForPatrulController extends LogInspector { // SAM - 76
 
     @MessageMapping( value = "listOfPoligonsForPatrul" )
     public Flux< Polygon > listOfPoligonsForPatrul () { return CassandraDataControl
             .getInstance()
             .getGetAllPolygonForPatrul()
             .get()
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) ); }
+            .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "deletePolygonForPatrul" )
     public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return CassandraDataControl
             .getInstance()
             .getDeletePolygonForPatrul()
             .apply( uuid )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updatePolygonForPatrul" )
     public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
             .getUpdatePolygonForPatrul()
             .apply( polygon )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "addPatrulToPolygon" )
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
-        return scheduleForPolygonPatrul.getPatrulUUIDs() == null
-                || scheduleForPolygonPatrul.getPatrulUUIDs().size() == 0
-                ? Archive
-                .getArchive()
-                .getFunction()
-                .apply( Map.of(
+        return super.getCheckList().test( scheduleForPolygonPatrul.getPatrulUUIDs() )
+                ? super.getFunction().apply( Map.of(
                         "message", "Wrong params",
                         "success", false,
                         "code", 201 ) )
@@ -69,24 +54,16 @@ public class PolygonForPatrulController { // SAM - 76
                 .getInstance()
                 .getAddPatrulToPolygon()
                 .apply( scheduleForPolygonPatrul )
-                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                        error.getMessage(), object ) ) )
-                .onErrorReturn( Archive
-                        .getArchive()
-                        .getErrorResponse()
-                        .get() ); }
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "addPolygonForPatrul" )
     public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) { return CassandraDataControl
             .getInstance()
             .getAddPolygonForPatrul()
             .apply( polygon )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getPatrulsForPolygon" )
     public Mono< List< Patrul > > getPatrulsForPolygon ( String uuid ) {

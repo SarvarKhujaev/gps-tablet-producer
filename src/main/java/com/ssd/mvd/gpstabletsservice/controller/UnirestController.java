@@ -1,7 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -26,26 +25,27 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.Address;
+import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 
 @Data
-@Slf4j
-public class UnirestController {
+public class UnirestController extends LogInspector {
     private final String ADDRESS_LOCATION_API = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.ADDRESS_LOCATION_API" );
+            .getProperty( "variables.UNIREST_VARIABLES.ADDRESS_LOCATION_API" );
 
     private final String CHAT_SERVICE_DOMAIN = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.CHAT_SERVICE_DOMAIN" );
+            .getProperty( "variables.UNIREST_VARIABLES.CHAT_SERVICE_DOMAIN" );
 
     private final String CHAT_SERVICE_PREFIX = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.CHAT_SERVICE_PREFIX" );
+            .getProperty( "variables.UNIREST_VARIABLES.CHAT_SERVICE_PREFIX" );
     private static UnirestController serDes = new UnirestController();
 
     private final Gson gson = new Gson();
@@ -76,8 +76,7 @@ public class UnirestController {
                 .map( req -> {
                     req.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
                     return req; } )
-                .onErrorContinue( (throwable, o) -> log.error( "Error in addUser of UnirestController: "
-                        + throwable.getMessage() + " : " + o ) )
+                .onErrorContinue( super::logging )
                 .onErrorStop()
                 .subscribe( req -> this.getRestTemplate()
                         .apply( patrulId.split( "@" )[1] )
@@ -87,7 +86,7 @@ public class UnirestController {
                                 HttpMethod.POST,
                                 new HttpEntity<>( req, null ),
                                 String.class ) );
-        } catch ( Exception e ) { log.error( "Error deleting user: " + e.getMessage() ); } };
+        } catch ( Exception e ) { super.logging( e ); } };
 
     private final Consumer< Patrul > updateUser = patrul -> {
         if ( patrul.getSpecialToken() == null ) return;
@@ -97,8 +96,7 @@ public class UnirestController {
                     req.setId( patrul.getUuid() );
                     req.setRole( Role.USER );
                     return req; } )
-                .onErrorContinue( (throwable, o) -> log.error( "Error in addUser of UnirestController: "
-                        + throwable.getMessage() + " : " + o ) )
+                .onErrorContinue( super::logging )
                 .onErrorStop()
                 .subscribe( req -> this.getRestTemplate()
                         .apply( patrul.getSpecialToken() )
@@ -108,7 +106,7 @@ public class UnirestController {
                                 HttpMethod.POST,
                                 new HttpEntity<>( req, null ),
                                 String.class ) );
-        } catch ( Exception e ) { log.error( "Error in updateUser: " + e.getMessage() ); } };
+        } catch ( Exception e ) { super.logging( e ); } };
 
     private final Consumer< Patrul > addUser = patrul -> {
         try { Mono.just( new Req() )
@@ -117,8 +115,7 @@ public class UnirestController {
                     req.setId( patrul.getUuid() );
                     req.setRole( Role.USER );
                     return req; } )
-                .onErrorContinue( (throwable, o) -> log.error( "Error in addUser of UnirestController: "
-                        + throwable.getMessage() + " : " + o ) )
+                .onErrorContinue( super::logging )
                 .onErrorStop()
                 .subscribe( req -> this.getRestTemplate()
                         .apply( patrul.getSpecialToken() )
@@ -129,7 +126,7 @@ public class UnirestController {
                                 new HttpEntity<>( req, null ),
                                 String.class ) );
             patrul.setSpecialToken( null );
-        } catch ( HttpClientErrorException e ) { log.error( "Error: " + e.getMessage() ); } };
+        } catch ( HttpClientErrorException e ) { super.logging( e ); } };
 
     private <T> List<T> stringToArrayList ( String object, Class< T[] > clazz ) { return Arrays.asList( this.getGson().fromJson( object, clazz ) ); }
 
@@ -146,8 +143,8 @@ public class UnirestController {
             .get( 0 )
             .getDisplay_name();
         } catch ( Exception e ) {
-            log.error( e.getMessage() );
-            return "address not found"; } };
+            super.logging( e );
+            return Errors.DATA_NOT_FOUND.name(); } };
 
     @Data
     public static class Req {
