@@ -5,27 +5,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import lombok.extern.slf4j.Slf4j;
 import java.util.Comparator;
 import java.util.UUID;
 
-@Slf4j
 @RestController
-public class NotificationController {
+public class NotificationController extends LogInspector {
     @MessageMapping ( value = "getAllNotifications" )
     public Flux< Notification > getAllNotifications () { return CassandraDataControl
             .getInstance()
             .getGetAllNotification()
             .get()
             .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
-            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ); }
+            .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getUnreadNotifications" )
     public Flux< Notification > getUnreadNotifications () { return CassandraDataControl
@@ -33,27 +30,21 @@ public class NotificationController {
             .getGetUnreadNotifications()
             .get()
             .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
-            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ); }
+            .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "setAsRead" )
     public Mono< ApiResponseModel > setAsRead ( String id ) { return CassandraDataControl
             .getInstance()
             .getSetNotificationAsRead()
             .apply( UUID.fromString( id ) )
-            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getUnreadNotificationQuantity" )
     public Mono< Long > getUnreadNotificationQuantity () { return CassandraDataControl
             .getInstance()
             .getGetUnreadNotificationQuantity()
             .get()
-            .onErrorContinue( ( error, object ) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) )
+            .onErrorContinue( super::logging )
             .onErrorReturn( -1L ); }
 }

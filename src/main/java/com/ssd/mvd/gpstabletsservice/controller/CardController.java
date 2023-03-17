@@ -22,22 +22,17 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
-@Slf4j
 @RestController
-public class CardController {
-
+public class CardController extends SerDes {
     @MessageMapping ( value = "getListOfCards" )
     public Flux< ActiveTask > getListOfCards () { return CassandraDataControlForTasks
             .getInstance()
             .getGetActiveTasks()
             .get()
             .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) ); }
+            .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
     public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
@@ -51,17 +46,13 @@ public class CardController {
                     .getInstance()
                     .getGetCurrentActiveTask()
                     .apply( patrul ) )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
         if ( request.getTaskType().compareTo( TaskTypes.CARD_102 ) == 0 ) {
-            Card card = SerDes.getSerDes().deserializeCard( request.getCard() );
+            Card card = (Card) super.getDeserializeWithJackson().apply( request.getCard() );
             card.setUuid( UUID.randomUUID() );
 
             if ( card.getCreated_date() == null ) card.setCreated_date( new Date() );
@@ -73,9 +64,7 @@ public class CardController {
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive
-                                    .getArchive()
-                                    .getFunction()
+                            .flatMap( patrul1 -> super.getFunction()
                                     .apply( Map.of( "message", card + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
@@ -83,15 +72,11 @@ public class CardController {
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
-                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                            error.getMessage(), object ) ) )
-                    .onErrorReturn( Archive
-                            .getArchive()
-                            .getErrorResponse()
-                            .get() ); }
+                    .onErrorContinue( super::logging )
+                    .onErrorReturn( super.getErrorResponse().get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
-            CarEvent carEvents = SerDes.getSerDes().deserializeCarEvents ( request.getCard() );
+            CarEvent carEvents = (CarEvent) super.getDeserializeWithJackson().apply( request.getCard() );
             carEvents.setUuid( UUID.randomUUID() );
             if ( carEvents.getCreated_date() == null ) carEvents.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -102,9 +87,7 @@ public class CardController {
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive
-                                    .getArchive()
-                                    .getFunction()
+                            .flatMap( patrul1 -> super.getFunction()
                                     .apply( Map.of( "message", carEvents + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
@@ -112,15 +95,11 @@ public class CardController {
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
-                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                            error.getMessage(), object ) ) )
-                    .onErrorReturn( Archive
-                            .getArchive()
-                            .getErrorResponse()
-                            .get() ); }
+                    .onErrorContinue( super::logging )
+                    .onErrorReturn( super.getErrorResponse().get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
-            FaceEvent facePerson = SerDes.getSerDes().deserializeFaceEvents( request.getCard() );
+            FaceEvent facePerson = (FaceEvent) super.getDeserializeWithJackson().apply( request.getCard() );
             facePerson.setUuid( UUID.randomUUID() );
             if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
                 facePerson.setCreated_date( new Date().toString() );
@@ -132,9 +111,7 @@ public class CardController {
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive
-                                    .getArchive()
-                                    .getFunction()
+                            .flatMap( patrul1 -> super.getFunction()
                                     .apply( Map.of( "message", facePerson + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
@@ -142,15 +119,11 @@ public class CardController {
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
-                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                            error.getMessage(), object ) ) )
-                    .onErrorReturn( Archive
-                            .getArchive()
-                            .getErrorResponse()
-                            .get() ); }
+                    .onErrorContinue( super::logging )
+                    .onErrorReturn( super.getErrorResponse().get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
-            EventFace eventFace = SerDes.getSerDes().deserializeEventFace( request.getCard() );
+            EventFace eventFace = (EventFace) super.getDeserializeWithJackson().apply( request.getCard() );
             eventFace.setUuid( UUID.randomUUID() );
             if ( eventFace.getCreated_date() == null ) eventFace.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -161,9 +134,7 @@ public class CardController {
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive
-                                    .getArchive()
-                                    .getFunction()
+                            .flatMap( patrul1 -> super.getFunction()
                                     .apply( Map.of( "message", eventFace + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
@@ -171,15 +142,11 @@ public class CardController {
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
-                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                            error.getMessage(), object ) ) )
-                    .onErrorReturn( Archive
-                            .getArchive()
-                            .getErrorResponse()
-                            .get() ); }
+                    .onErrorContinue( super::logging )
+                    .onErrorReturn( super.getErrorResponse().get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
-            EventBody eventBody = SerDes.getSerDes().deserializeEventBody( request.getCard() );
+            EventBody eventBody = (EventBody) super.getDeserializeWithJackson().apply( request.getCard() );
             eventBody.setUuid( UUID.randomUUID() );
             if ( eventBody.getCreated_date() == null ) eventBody.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -190,9 +157,7 @@ public class CardController {
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive
-                                    .getArchive()
-                                    .getFunction()
+                            .flatMap( patrul1 -> super.getFunction()
                                     .apply( Map.of( "message", eventBody + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
@@ -200,14 +165,10 @@ public class CardController {
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
-                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                            error.getMessage(), object ) ) )
-                    .onErrorReturn( Archive
-                            .getArchive()
-                            .getErrorResponse()
-                            .get() ); }
+                    .onErrorContinue( super::logging )
+                    .onErrorReturn( super.getErrorResponse().get() ); }
 
-        else { EventCar eventCar = SerDes.getSerDes().deserializeEventCar( request.getCard() );
+        else { EventCar eventCar = (EventCar) super.getDeserializeWithJackson().apply( request.getCard() );
             eventCar.setUuid( UUID.randomUUID() );
             if ( eventCar.getCreated_date() == null ) eventCar.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -218,9 +179,7 @@ public class CardController {
                             .getGetPatrulByUUID()
                             .apply( s ) )
                     .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> Archive
-                                    .getArchive()
-                                    .getFunction()
+                            .flatMap( patrul1 -> super.getFunction()
                                     .apply( Map.of( "message", eventCar + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
@@ -228,19 +187,13 @@ public class CardController {
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
-                    .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                            error.getMessage(), object ) ) )
-                    .onErrorReturn( Archive
-                            .getArchive()
-                            .getErrorResponse()
-                            .get() ); } }
+                    .onErrorContinue( super::logging )
+                    .onErrorReturn( super.getErrorResponse().get() ); } }
 
     @MessageMapping ( value = "addNewWarningCar" )
     public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) {
-        return Archive
-                .getArchive()
-                .getFunction()
-                .apply( Map.of( "message", "Car was saved successfully",
+        return super.getFunction().apply(
+                Map.of( "message", "Car was saved successfully",
                         "success", CassandraDataControlForTasks
                                 .getInstance()
                                 .getSaveCarTotalData()
@@ -248,12 +201,8 @@ public class CardController {
                                         .getInstance()
                                         .getWriteCarTotalDataToKafka()
                                         .apply( carTotalData ) ) ) )
-                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                        error.getMessage(), object ) ) )
-                .onErrorReturn( Archive
-                        .getArchive()
-                        .getErrorResponse()
-                        .get() ); }
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getActiveTaskForFront" )
     public Mono< ActiveTask > getActiveTaskForFront ( TaskDetailsRequest taskDetailsRequest ) {
@@ -268,16 +217,14 @@ public class CardController {
                     .getInstance()
                     .getGetViolationsInformationList()
                     .apply( gosnumber ) )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) ); }
+            .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getAllCarTotalData" )
     public Flux< CarTotalData > getAllCarTotalData () { return CassandraDataControlForTasks
             .getInstance()
             .getGetAllCarTotalData()
             .get()
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) ); }
+            .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "removePatrulFromTask" )
     public Mono< ApiResponseModel > removePatrulFromTask ( UUID uuid ) {
@@ -290,24 +237,16 @@ public class CardController {
                         .getInstance()
                         .getRemovePatrulFromTask()
                         .apply( patrul ) )
-                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                        error.getMessage(), object ) ) )
-                .onErrorReturn( Archive
-                        .getArchive()
-                        .getErrorResponse()
-                        .get() ); }
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getWarningCarDetails" )
     public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return CassandraDataControlForTasks
             .getInstance()
             .getGetWarningCarDetails()
             .apply( gosnumber )
-            .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                    error.getMessage(), object ) ) )
-            .onErrorReturn( Archive
-                    .getArchive()
-                    .getErrorResponse()
-                    .get() ); }
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getDetailsOfTask" )
     public Mono< TaskDetails > getDetailsOfTask ( TaskDetailsRequest request ) { return CassandraDataControlForTasks
@@ -334,10 +273,8 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", request.getCard()
+                        return super.getFunction().apply(
+                                Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } );
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
@@ -356,10 +293,8 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", request.getCard()
+                        return super.getFunction().apply(
+                                Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } );
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
@@ -378,10 +313,8 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", request.getCard()
+                        return super.getFunction().apply(
+                                Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } );
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
@@ -400,10 +333,8 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", request.getCard()
+                        return super.getFunction().apply(
+                                Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } );
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
@@ -422,10 +353,8 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", request.getCard()
+                        return super.getFunction().apply(
+                                Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } );
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
@@ -444,10 +373,8 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", request.getCard()
+                        return super.getFunction().apply(
+                                Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } );
 
             default -> CassandraDataControlForTasks
@@ -466,10 +393,8 @@ public class CardController {
                                                 .changeTaskStatus( patrul,
                                                         com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
                                                         card ) ) );
-                        return Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", request.getCard()
+                        return super.getFunction().apply(
+                                Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } ); }; }
 
     @MessageMapping ( value = "getTaskTimingStatistics" )
@@ -478,6 +403,5 @@ public class CardController {
                 .getInstance()
                 .getGetTaskTimingStatistics()
                 .apply( request )
-                .onErrorContinue( ( (error, object) -> log.error( "Error: {} and reason: {}: ",
-                        error.getMessage(), object ) ) ); }
+                .onErrorContinue( super::logging ); }
 }

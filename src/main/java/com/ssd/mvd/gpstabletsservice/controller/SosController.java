@@ -4,30 +4,25 @@ import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.SosRequest;
+import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 
-@Slf4j
 @RestController
-public class SosController {
+public class SosController extends LogInspector {
     @MessageMapping( value = "getAllSosEntities" )
     public Flux< PatrulSos > getAllSosEntities () { return CassandraDataControlForTasks
             .getInstance()
             .getGetAllSos()
             .get()
-            .onErrorContinue( ( throwable, o ) -> log.error(
-                    "Error: " + throwable.getMessage()
-                            + " Reason: " + o ) )
+            .onErrorContinue( super::logging )
             .onErrorReturn( new PatrulSos() ); }
 
     // используется планшетом чтобы проверить не отправлял ли он СОС раньше
@@ -40,19 +35,13 @@ public class SosController {
                         .getInstance()
                         .getDecode()
                         .apply( token ) )
-                ? Archive
-                .getArchive()
-                .getFunction()
-                .apply( Map.of(
+                ? super.getFunction().apply( Map.of(
                         "message", "U did not send SOS signal",
                         "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                 .builder()
                                 .data( Status.IN_ACTIVE )
                                 .build() ) )
-                : Archive
-                .getArchive()
-                .getFunction()
-                .apply( Map.of(
+                : super.getFunction().apply( Map.of(
                         "message", "U have SOS signal",
                         "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                 .builder()
@@ -69,10 +58,8 @@ public class SosController {
                         .getInstance()
                         .getDecode()
                         .apply( token ) )
-                .onErrorContinue( ( throwable, o ) -> log.error(
-                        "Error: " + throwable.getMessage()
-                                + " Reason: " + o ) )
-                .onErrorReturn( Archive.getArchive().getErrorResponse().get() ); }
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 
     // в случае возникновения какой - либо опасности, патрульный модет отправить сигнал СОС
     // метод перехватывает этот сигнал и вносит в базу и шлет оповещение на фронт
@@ -82,13 +69,8 @@ public class SosController {
                 .getInstance()
                 .getSavePatrulSos()
                 .apply( patrulSos )
-                .onErrorContinue( ( throwable, o ) -> log.error(
-                        "Error: " + throwable.getMessage()
-                                + " Reason: " + o ) )
-                .onErrorReturn( Archive
-                        .getArchive()
-                        .getErrorResponse()
-                        .get() ); }
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updatePatrulStatusInSosTable" )
     public Mono< ApiResponseModel > updatePatrulStatusInSosTable ( SosRequest sosRequest ) {
@@ -96,11 +78,6 @@ public class SosController {
                 .getInstance()
                 .getUpdatePatrulStatusInSosTable()
                 .apply( sosRequest )
-                .onErrorContinue( ( throwable, o ) -> log.error(
-                        "Error: " + throwable.getMessage()
-                                + " Reason: " + o ) )
-                .onErrorReturn( Archive
-                        .getArchive()
-                        .getErrorResponse()
-                        .get() ); }
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 }

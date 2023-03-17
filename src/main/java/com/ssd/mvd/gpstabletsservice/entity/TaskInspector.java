@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import lombok.Data;
 import java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -34,8 +33,8 @@ import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
-@Data
-public final class TaskInspector {
+@lombok.Data
+public final class TaskInspector extends Archive {
     private static TaskInspector taskInspector;
 
     public static TaskInspector getInstance () { return taskInspector != null ? taskInspector : new TaskInspector(); }
@@ -642,7 +641,7 @@ public final class TaskInspector {
                             tupleOfCar.setUuidOfPatrul( null );
                             CassandraDataControlForEscort
                                     .getInstance()
-                                    .getUpdateTupleOfcar()
+                                    .getUpdateTupleOfCar()
                                     .apply( tupleOfCar )
                                     .subscribe(); } );
                 patrul.setTaskTypes( TaskTypes.FREE );
@@ -935,10 +934,7 @@ public final class TaskInspector {
                 .sequential()
                 .publishOn( Schedulers.single() )
                 .collectList()
-                .flatMap( finishedTasks -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "Your list of tasks",
+                .flatMap( finishedTasks -> super.getFunction().apply( Map.of( "message", "Your list of tasks",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( finishedTasks )
@@ -957,10 +953,7 @@ public final class TaskInspector {
                         .apply( patrul.getTaskId() )
                         .flatMap( card -> {
                             card.getReportForCardList().add( reportForCard );
-                            return Archive
-                                    .getArchive()
-                                    .getFunction()
-                                    .apply( Map.of( "message", "Report from: "
+                            return super.getFunction().apply( Map.of( "message", "Report from: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul, Status.FINISHED, card )
@@ -972,10 +965,7 @@ public final class TaskInspector {
                         .apply( UUID.fromString( patrul.getTaskId() ) )
                         .flatMap( selfEmploymentTask -> {
                             selfEmploymentTask.getReportForCards().add( reportForCard );
-                            return Archive
-                                    .getArchive()
-                                    .getFunction()
-                                    .apply( Map.of( "message", "Report from: "
+                            return super.getFunction().apply( Map.of( "message", "Report from: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul, Status.FINISHED, selfEmploymentTask )
@@ -987,10 +977,7 @@ public final class TaskInspector {
                         .apply( patrul.getTaskId() )
                         .flatMap( eventBody -> {
                             eventBody.getReportForCardList().add( reportForCard );
-                            return Archive
-                                    .getArchive()
-                                    .getFunction()
-                                    .apply( Map.of( "message", "Report from: "
+                            return super.getFunction().apply( Map.of( "message", "Report from: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul, Status.FINISHED, eventBody )
@@ -1002,10 +989,7 @@ public final class TaskInspector {
                         .apply( patrul.getTaskId() )
                         .flatMap( eventFace -> {
                             eventFace.getReportForCardList().add( reportForCard );
-                            return Archive
-                                    .getArchive()
-                                    .getFunction()
-                                    .apply( Map.of( "message", "Report from: "
+                            return super.getFunction().apply( Map.of( "message", "Report from: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul, Status.FINISHED, eventFace )
@@ -1017,10 +1001,7 @@ public final class TaskInspector {
                         .apply( patrul.getTaskId() )
                         .flatMap( carEvents -> {
                             carEvents.getReportForCardList().add( reportForCard );
-                            return Archive
-                                    .getArchive()
-                                    .getFunction()
-                                    .apply( Map.of( "message", "Report from: "
+                            return super.getFunction().apply( Map.of( "message", "Report from: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul, Status.FINISHED, carEvents )
@@ -1032,10 +1013,7 @@ public final class TaskInspector {
                         .apply( patrul.getTaskId() )
                         .flatMap( faceEvents -> {
                             faceEvents.getReportForCardList().add( reportForCard );
-                            return Archive
-                                    .getArchive()
-                                    .getFunction()
-                                    .apply( Map.of( "message", "Report from: "
+                            return super.getFunction().apply( Map.of( "message", "Report from: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul, Status.FINISHED, faceEvents )
@@ -1047,19 +1025,15 @@ public final class TaskInspector {
                         .apply( patrul.getTaskId() )
                         .flatMap( eventCar -> {
                             eventCar.getReportForCardList().add( reportForCard );
-                            return Archive
-                                    .getArchive()
-                                    .getFunction()
-                                    .apply( Map.of( "message", "Report from: "
+                            return super.getFunction().apply(
+                                    Map.of( "message", "Report from: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul, Status.FINISHED, eventCar )
                                             .getName() + " was saved" ) ); } );
 
-                default -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have no tasks, thus u cannot send report",
+                default -> super.getFunction().apply(
+                        Map.of( "message", "U have no tasks, thus u cannot send report",
                                 "code", 201,
                                 "success", false ) ); };
 
@@ -1068,10 +1042,7 @@ public final class TaskInspector {
                         .getInstance()
                         .getGetCard102()
                         .apply( patrul.getTaskId() )
-                        .flatMap( card -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, card )
+                        .flatMap( card -> super.getFunction().apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, card )
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
@@ -1082,10 +1053,7 @@ public final class TaskInspector {
                         .getInstance()
                         .getGetSelfEmploymentTask()
                         .apply( UUID.fromString( patrul.getTaskId() ) )
-                        .flatMap( selfEmploymentTask -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, selfEmploymentTask )
+                        .flatMap( selfEmploymentTask -> super.getFunction().apply( Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, selfEmploymentTask )
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
@@ -1096,10 +1064,7 @@ public final class TaskInspector {
                         .getInstance()
                         .getGetEventCar()
                         .apply( patrul.getTaskId() )
-                        .flatMap( eventCar -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Patrul: "
+                        .flatMap( eventCar -> super.getFunction().apply( Map.of( "message", "Patrul: "
                                                 + this.changeTaskStatus( patrul, status, eventCar )
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
@@ -1111,10 +1076,7 @@ public final class TaskInspector {
                         .getInstance()
                         .getGetEventFace()
                         .apply( patrul.getTaskId() )
-                        .flatMap( eventFace -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Patrul: "
+                        .flatMap( eventFace -> super.getFunction().apply( Map.of( "message", "Patrul: "
                                                 + this.changeTaskStatus( patrul, status, eventFace )
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
@@ -1126,10 +1088,7 @@ public final class TaskInspector {
                         .getInstance()
                         .getGetFaceEvents()
                         .apply( patrul.getTaskId() )
-                        .flatMap( faceEvents -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Patrul: "
+                        .flatMap( faceEvents -> super.getFunction().apply( Map.of( "message", "Patrul: "
                                                 + this.changeTaskStatus( patrul, status, faceEvents )
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
@@ -1141,10 +1100,7 @@ public final class TaskInspector {
                         .getInstance()
                         .getGetCarEvents()
                         .apply( patrul.getTaskId() )
-                        .flatMap( carEvents -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Patrul: "
+                        .flatMap( carEvents -> super.getFunction().apply( Map.of( "message", "Patrul: "
                                                 + this.changeTaskStatus( patrul, status, carEvents )
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
@@ -1156,10 +1112,7 @@ public final class TaskInspector {
                         .getInstance()
                         .getGetCurrentTupleOfEscort()
                         .apply( patrul.getTaskId() )
-                        .flatMap( escortTuple -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Patrul: "
+                        .flatMap( escortTuple -> super.getFunction().apply( Map.of( "message", "Patrul: "
                                                 + this.changeTaskStatus( patrul, status, escortTuple )
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
@@ -1171,10 +1124,7 @@ public final class TaskInspector {
                         .getInstance()
                         .getGetEventBody()
                         .apply( patrul.getTaskId() )
-                        .flatMap( eventBody -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Patrul: "
+                        .flatMap( eventBody -> super.getFunction().apply( Map.of( "message", "Patrul: "
                                                 + this.changeTaskStatus( patrul, status, eventBody )
                                                 .getPassportNumber() + " changed his status task to: " + status,
                                         "success", CassandraDataControl
@@ -1187,10 +1137,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetCard102()
                 .apply( patrul.getTaskId() )
-                .flatMap( card -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have " + CARD_102.name() + " Task",
+                .flatMap( card -> super.getFunction().apply( Map.of( "message", "U have " + CARD_102.name() + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new ActiveTask( card, patrul.getStatus() ) )
@@ -1201,10 +1148,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetSelfEmploymentTask()
                 .apply( UUID.fromString( patrul.getTaskId() ) )
-                .flatMap( selfEmploymentTask -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have " + SELF_EMPLOYMENT.name() + " Task",
+                .flatMap( selfEmploymentTask -> super.getFunction().apply( Map.of( "message", "U have " + SELF_EMPLOYMENT.name() + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new ActiveTask( selfEmploymentTask, patrul.getStatus() ) )
@@ -1215,10 +1159,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetEventCar()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventCar -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have " + FIND_FACE_EVENT_CAR.name() + " Task",
+                .flatMap( eventCar -> super.getFunction().apply( Map.of( "message", "U have " + FIND_FACE_EVENT_CAR.name() + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new ActiveTask( eventCar, patrul.getStatus() ) )
@@ -1229,10 +1170,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetEventBody()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventBody -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have " + FIND_FACE_EVENT_BODY.name() + " Task",
+                .flatMap( eventBody -> super.getFunction().apply( Map.of( "message", "U have " + FIND_FACE_EVENT_BODY.name() + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new ActiveTask( eventBody, patrul.getStatus() ) )
@@ -1243,10 +1181,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetEventFace()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventFace -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have " + FIND_FACE_EVENT_FACE.name() + " Task",
+                .flatMap( eventFace -> super.getFunction().apply( Map.of( "message", "U have " + FIND_FACE_EVENT_FACE.name() + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new ActiveTask( eventFace, patrul.getStatus() ) )
@@ -1257,10 +1192,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetCarEvents()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventFace -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have " + FIND_FACE_CAR.name() + " Task",
+                .flatMap( eventFace -> super.getFunction().apply( Map.of( "message", "U have " + FIND_FACE_CAR.name() + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new ActiveTask( eventFace, patrul.getStatus() ) )
@@ -1271,10 +1203,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetFaceEvents()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventFace -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have " + FIND_FACE_PERSON.name() + " Task",
+                .flatMap( eventFace -> super.getFunction().apply( Map.of( "message", "U have " + FIND_FACE_PERSON.name() + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new ActiveTask( eventFace, patrul.getStatus() ) )
@@ -1285,20 +1214,14 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetCurrentTupleOfEscort()
                 .apply( patrul.getTaskId() )
-                .flatMap( escortTuple -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "U have " + ESCORT.name() + " Task",
+                .flatMap( escortTuple -> super.getFunction().apply( Map.of( "message", "U have " + ESCORT.name() + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new ActiveTask( escortTuple, patrul.getStatus() ) )
                                         .type( ESCORT.name() )
                                         .build() ) ) );
 
-        default -> Archive
-                .getArchive()
-                .getFunction()
-                .apply( Map.of( "message", "U have no any Task",
+        default -> super.getFunction().apply( Map.of( "message", "U have no any Task",
                         "code", 201,
                         "success", false ) ); };
 
@@ -1307,70 +1230,49 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetCard102()
                 .apply( patrul.getTaskId() )
-                .flatMap( card -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card )
+                .flatMap( card -> super.getFunction().apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card )
                                 .getName() + " was removed from " + card.getCardId() ) ) );
 
         case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                 .getInstance()
                 .getGetEventCar()
                 .apply( patrul.getTaskId() )
-                .flatMap( card -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card )
+                .flatMap( card -> super.getFunction().apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card )
                                 .getName() + " was removed from " + card.getId() ) ) );
 
         case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                 .getInstance()
                 .getGetEventBody()
                 .apply( patrul.getTaskId() )
-                .flatMap( card -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card )
+                .flatMap( card -> super.getFunction().apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card )
                                 .getName() + " was removed from " + card.getId() ) ) );
 
         case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                 .getInstance()
                 .getGetEventFace()
                 .apply( patrul.getTaskId() )
-                .flatMap( card -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card )
+                .flatMap( card -> super.getFunction().apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card )
                                 .getName() + " was removed from " + card.getId() ) ) );
 
         case FIND_FACE_CAR -> CassandraDataControlForTasks
                 .getInstance()
                 .getGetCarEvents()
                 .apply( patrul.getTaskId() )
-                .flatMap( carEvent -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, carEvent )
+                .flatMap( carEvent -> super.getFunction().apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, carEvent )
                                 .getName() + " was removed from " + carEvent.getId() ) ) );
 
         case FIND_FACE_PERSON -> CassandraDataControlForTasks
                 .getInstance()
                 .getGetFaceEvents()
                 .apply( patrul.getTaskId() )
-                .flatMap( faceEvent -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, faceEvent )
+                .flatMap( faceEvent -> super.getFunction().apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, faceEvent )
                                 .getName() + " was removed from " + faceEvent.getId() ) ) );
 
         default -> CassandraDataControlForTasks
                 .getInstance()
                 .getGetSelfEmploymentTask()
                 .apply( UUID.fromString( patrul.getTaskId() ) )
-                .flatMap( selfEmploymentTask -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, selfEmploymentTask )
+                .flatMap( selfEmploymentTask -> super.getFunction().apply( Map.of( "message", this.changeTaskStatus( patrul, CANCEL, selfEmploymentTask )
                                 .getName() + " was removed from " + selfEmploymentTask.getUuid() ) ) ); };
 
     private final Function< Patrul, Mono< ApiResponseModel > > getTaskDetails = patrul -> switch ( patrul.getTaskTypes() ) {
@@ -1378,10 +1280,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetCard102()
                 .apply( patrul.getTaskId() )
-                .flatMap( card -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "Your task details",
+                .flatMap( card -> super.getFunction().apply( Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new CardDetails( card, patrul, "ru" ) )
@@ -1392,10 +1291,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetEventBody()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventBody -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "Your task details",
+                .flatMap( eventBody -> super.getFunction().apply( Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new CardDetails( new PersonDetails( eventBody ) ) )
@@ -1406,10 +1302,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetEventFace()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventFace -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "Your task details",
+                .flatMap( eventFace -> super.getFunction().apply( Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new CardDetails( new PersonDetails( eventFace ) ) )
@@ -1420,10 +1313,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetEventCar()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventCar -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "Your task details",
+                .flatMap( eventCar -> super.getFunction().apply( Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new CardDetails( new CarDetails( eventCar ) ) )
@@ -1434,10 +1324,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetCarEvents()
                 .apply( patrul.getTaskId() )
-                .flatMap( eventCar -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "Your task details",
+                .flatMap( eventCar -> super.getFunction().apply( Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new CardDetails( new CarDetails( eventCar ) ) )
@@ -1448,10 +1335,7 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetFaceEvents()
                 .apply( patrul.getTaskId() )
-                .flatMap( faceEvent -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "Your task details",
+                .flatMap( faceEvent -> super.getFunction().apply( Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new CardDetails( new PersonDetails( faceEvent ) ) )
@@ -1469,10 +1353,7 @@ public final class TaskInspector {
                                 .get( escortTuple
                                         .getPatrulList()
                                         .indexOf( patrul.getUuid() ) ) )
-                        .flatMap( tupleOfCar -> Archive
-                                .getArchive()
-                                .getFunction()
-                                .apply( Map.of( "message", "Your task details",
+                        .flatMap( tupleOfCar -> super.getFunction().apply( Map.of( "message", "Your task details",
                                         "data", com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                                 .data( new CardDetails( escortTuple, "ru", tupleOfCar ) )
                                                 .type( ESCORT.name() )
@@ -1482,19 +1363,13 @@ public final class TaskInspector {
                 .getInstance()
                 .getGetSelfEmploymentTask()
                 .apply( UUID.fromString( patrul.getTaskId() ) )
-                .flatMap( selfEmploymentTask -> Archive
-                        .getArchive()
-                        .getFunction()
-                        .apply( Map.of( "message", "Your task details",
+                .flatMap( selfEmploymentTask -> super.getFunction().apply( Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                         .data( new CardDetails( selfEmploymentTask, "ru", patrul ) )
                                         .type( ESCORT.name() )
                                         .build() ) ) );
 
-        default -> Archive
-                .getArchive()
-                .getFunction()
-                .apply( Map.of( "message", "You have no tasks",
+        default -> super.getFunction().apply( Map.of( "message", "You have no tasks",
                         "success", false,
                         "code", 201 ) ); };
 }
