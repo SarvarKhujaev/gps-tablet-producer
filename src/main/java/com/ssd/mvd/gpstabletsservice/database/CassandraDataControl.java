@@ -12,6 +12,8 @@ import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
+import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.card.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
@@ -243,30 +245,30 @@ public final class CassandraDataControl extends CassandraConverter {
             .doOnError( throwable -> this.delete() );
 
     private final Function< PoliceType, Mono< ApiResponseModel > > updatePoliceType = policeType -> {
-        this.getGetPatrul()
-                .get()
-                .filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) )
-                .subscribe( patrul -> this.getSession().execute( "UPDATE "
-                        + CassandraTables.TABLETS.name() + "."
-                        + CassandraTables.PATRULS.name()
-                        + " SET policeType = '" + policeType.getPoliceType() + "'"
-                        + " WHERE uuid = " + patrul.getUuid() + ";" ) );
-        return this.getSession().execute( "UPDATE "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.POLICE_TYPE.name()
-                + " SET policeType = '" + policeType.getPoliceType() + "', "
-                + "icon = '" + policeType.getIcon() + "',"
-                + "icon2 = '" + policeType.getIcon2() + "'"
-                + " WHERE uuid = " + policeType.getUuid() + " IF EXISTS;" )
-                .wasApplied()
-                ? super.getFunction()
-                .apply( Map.of( "message", "PoliceType was updated successfully" ) )
-                : super.getFunction()
-                .apply( Map.of(
-                        "message", "This PoliceType has already been applied",
-                        "success", false,
-                        "code", 201 ) )
-                .doOnError( throwable -> this.delete() ); };
+            this.getGetPatrul()
+                    .get()
+                    .filter( patrul -> patrul.getPoliceType().equals( policeType.getPoliceType() ) )
+                    .subscribe( patrul -> this.getSession().execute( "UPDATE "
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.PATRULS.name()
+                            + " SET policeType = '" + policeType.getPoliceType() + "'"
+                            + " WHERE uuid = " + patrul.getUuid() + ";" ) );
+            return this.getSession().execute( "UPDATE "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.POLICE_TYPE.name()
+                    + " SET policeType = '" + policeType.getPoliceType() + "', "
+                    + "icon = '" + policeType.getIcon() + "',"
+                    + "icon2 = '" + policeType.getIcon2() + "'"
+                    + " WHERE uuid = " + policeType.getUuid() + " IF EXISTS;" )
+                    .wasApplied()
+                    ? super.getFunction()
+                    .apply( Map.of( "message", "PoliceType was updated successfully" ) )
+                    : super.getFunction()
+                    .apply( Map.of(
+                            "message", "This PoliceType has already been applied",
+                            "success", false,
+                            "code", 201 ) )
+                    .doOnError( throwable -> this.delete() ); };
 
     private final Function< PoliceType, Mono< ApiResponseModel > > savePoliceType = policeType -> this.getGetAllPoliceTypes()
             .get()
@@ -1531,10 +1533,7 @@ public final class CassandraDataControl extends CassandraConverter {
             .apply( this.getDecode().apply( token ) )
             .flatMap( patrul -> {
                 this.getUpdatePatrulActivity().accept( patrul );
-                if ( Math.abs( TimeInspector
-                        .getInspector()
-                        .getGetTimeDifferenceInHours()
-                        .apply( patrul.getTaskDate().toInstant() ) ) >= 24 ) {
+                if ( super.getCheckTime().apply( patrul.getTaskDate() ) ) {
                     this.getUpdateStatus().apply( patrul, CANCEL );
                     return TaskInspector
                             .getInstance()
@@ -1653,17 +1652,10 @@ public final class CassandraDataControl extends CassandraConverter {
                                     LAST ) )
                             .build() ) );
 
-    private final Predicate< String > test = login -> this.getSession()
-            .execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.PATRULS_LOGIN_TABLE.name()
-                    + " WHERE login = '" + login + "';" )
-            .one() == null;
-
     public void delete () {
+        INSTANCE = null;
         this.getSession().close();
         this.getCluster().close();
-        INSTANCE = null;
         KafkaDataControl.getInstance().clear();
         super.logging( "Cassandra is closed!!!" ); }
 }

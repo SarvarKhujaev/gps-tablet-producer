@@ -14,5 +14,5 @@ public class LogInspector extends DataValidateInspector {
 
     public void logging ( Throwable error ) { this.getLOGGER().error( "Error: " + error.getMessage() ); }
 
-    public void logging ( String message ) { this.getLOGGER().error( message ); }
+    public void logging ( String message ) { this.getLOGGER().info( message ); }
 }

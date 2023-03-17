@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
-import com.ssd.mvd.gpstabletsservice.entity.TimeInspector;
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import java.util.Map;
 
 @RestController

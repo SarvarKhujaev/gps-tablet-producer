@@ -1,4 +1,4 @@
-package com.ssd.mvd.gpstabletsservice.entity;
+package com.ssd.mvd.gpstabletsservice.inspectors;
 
 import java.util.Map;
 import java.util.Date;
@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.BiFunction;
 
+import com.ssd.mvd.gpstabletsservice.entity.Notification;
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -39,7 +41,7 @@ public final class TaskInspector extends Archive {
 
     public static TaskInspector getInstance () { return taskInspector != null ? taskInspector : new TaskInspector(); }
 
-    private final BiFunction< Patrul, Status, String > generateText = ( patrul, status ) -> switch ( status ) {
+    private final BiFunction< Patrul, Status, String > generateText = (patrul, status ) -> switch ( status ) {
         case ATTACHED -> patrul.getName()
                 + " got new task: " + patrul.getTaskId()
                 + " " + patrul.getTaskTypes();
