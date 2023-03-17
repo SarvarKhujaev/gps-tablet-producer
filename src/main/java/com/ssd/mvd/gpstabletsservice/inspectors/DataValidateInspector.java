@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Function;
 import java.util.Objects;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +24,12 @@ public class DataValidateInspector extends Archive {
     private final Predicate< Object > checkParam = Objects::nonNull;
 
     public final Predicate< List< ? > > checkList = list -> list != null && list.size() > 0;
+
+    public final Function< Date, Boolean > checkTime = date -> Math.abs(
+            TimeInspector
+                    .getInspector()
+                    .getGetTimeDifferenceInHours()
+                    .apply( date.toInstant() ) ) >= 24;
 
     private final BiFunction< TaskTimingRequest, Row, Boolean > checkRequest = ( request, row ) ->
             request.getEndDate() == null

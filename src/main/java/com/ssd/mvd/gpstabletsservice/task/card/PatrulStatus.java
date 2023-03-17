@@ -1,6 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import com.ssd.mvd.gpstabletsservice.entity.TimeInspector;
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import lombok.Data;
 

@@ -3,7 +3,7 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
-import com.ssd.mvd.gpstabletsservice.entity.TimeInspector;
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import lombok.Data;
 
 @Data

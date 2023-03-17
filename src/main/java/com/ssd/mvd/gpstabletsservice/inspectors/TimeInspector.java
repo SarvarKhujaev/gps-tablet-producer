@@ -1,4 +1,4 @@
-package com.ssd.mvd.gpstabletsservice.entity;
+package com.ssd.mvd.gpstabletsservice.inspectors;
 
 import java.util.Date;
 import java.time.Instant;
