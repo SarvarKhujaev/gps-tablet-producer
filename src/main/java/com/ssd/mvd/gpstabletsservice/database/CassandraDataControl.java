@@ -844,22 +844,22 @@ public final class CassandraDataControl extends CassandraConverter {
                 this.delete(); } );
 
     private final Function< Patrul, Mono< ApiResponseModel > > savePatrul = patrul -> {
-        if ( this.getGetPatrulByPassportNumber()
-                .apply( patrul.getPassportNumber() ) == null ) {
+        if ( super.getCheckParam().test( this.getGetPatrulByPassportNumber()
+                .apply( patrul.getPassportNumber() ) ) ) {
             patrul.setStatus( FREE );
             patrul.setInPolygon( false );
             patrul.setTaskTypes( TaskTypes.FREE );
             patrul.setListOfTasks( new HashMap<>() );
-            if ( patrul.getBatteryLevel() == null ) patrul.setBatteryLevel( 0 );
-            if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
-            if ( patrul.getPassword() == null ) patrul.setPassword( patrul.getPassportNumber() );
+            if ( super.getCheckParam().test( patrul.getBatteryLevel() ) ) patrul.setBatteryLevel( 0 );
+            if ( super.getCheckParam().test( patrul.getLogin() ) ) patrul.setLogin( patrul.getPassportNumber() );
+            if ( super.getCheckParam().test( patrul.getPassword() ) ) patrul.setPassword( patrul.getPassportNumber() );
             if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
             if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
-            if ( patrul.getOrganName() != null && patrul.getOrganName().contains( "'" ) )
+            if ( super.getCheckParam().test( patrul.getOrganName() ) && patrul.getOrganName().contains( "'" ) )
                 patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
-            if ( this.checkLogin.apply( patrul.getLogin() ) != null ) return super.getFunction()
+            if ( super.getCheckParam().test( this.checkLogin.apply( patrul.getLogin() ) ) ) return super.getFunction()
                     .apply( Map.of(
                             "message", "Patrul with this login has already been inserted, choose another one",
                             "success", false,
@@ -880,16 +880,16 @@ public final class CassandraDataControl extends CassandraConverter {
                             + CassandraTables.PATRULS.name() +
                             super.getALlNames( Patrul.class )
                             + " VALUES ('" +
-                            ( patrul.getTaskDate() != null
+                            ( super.getCheckParam().test( patrul.getTaskDate() )
                                     ? patrul.getTaskDate().toInstant()
                                     : new Date().toInstant() ) + "', '" +
-                            ( patrul.getLastActiveDate() != null
+                            ( super.getCheckParam().test( patrul.getLastActiveDate() )
                                     ? patrul.getLastActiveDate().toInstant()
                                     : new Date().toInstant() ) + "', '" +
-                            ( patrul.getStartedToWorkDate() != null
+                            ( super.getCheckParam().test( patrul.getStartedToWorkDate() )
                                     ? patrul.getStartedToWorkDate().toInstant()
                                     : new Date().toInstant() ) + "', '" +
-                            ( patrul.getDateOfRegistration() != null
+                            ( super.getCheckParam().test( patrul.getDateOfRegistration() )
                                     ? patrul.getDateOfRegistration().toInstant()
                                     : new Date().toInstant() ) + "', " +
 
@@ -909,14 +909,14 @@ public final class CassandraDataControl extends CassandraConverter {
                             patrul.getRegionId() + ", " +
                             patrul.getMahallaId() + ", " +
                             patrul.getDistrictId() + ", " +
-                            ( patrul.getTotalActivityTime() != null
+                            ( super.getCheckParam().test( patrul.getTotalActivityTime() )
                                     ? patrul.getTotalActivityTime() : 0 ) + ", " +
 
-                            ( patrul.getBatteryLevel() != null
+                            ( super.getCheckParam().test( patrul.getBatteryLevel() )
                                     ? patrul.getBatteryLevel() : 0 ) + ", " +
-                            ( patrul.getInPolygon() != null
+                            ( super.getCheckParam().test( patrul.getInPolygon() )
                                     ? patrul.getInPolygon() : false ) + ", " +
-                            ( patrul.getTuplePermission() != null
+                            ( super.getCheckParam().test( patrul.getTuplePermission() )
                                     ? patrul.getTuplePermission() : false ) + ", '" +
 
                             patrul.getName() + "', '" +
@@ -944,15 +944,12 @@ public final class CassandraDataControl extends CassandraConverter {
                             patrul.getTaskTypes() + "', " +
                             super.convertMapToCassandra( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;" )
                     .wasApplied()
-                    ? super.getFunction()
-                    .apply( Map.of( "message", "Patrul was successfully saved" ) )
-                    : super.getFunction()
-                    .apply( Map.of(
+                    ? super.getFunction().apply( Map.of( "message", "Patrul was successfully saved" ) )
+                    : super.getFunction().apply( Map.of(
                             "message", "Patrul has already been saved, choose another one",
                             "success", false,
                             "code", 201 ) );
-        } else return super.getFunction()
-                .apply( Map.of(
+        } else return super.getFunction().apply( Map.of(
                         "message", "This patrul is already exists",
                         "success", false,
                         "code", 201 ) )
@@ -1651,6 +1648,13 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .one(),
                                     LAST ) )
                             .build() ) );
+
+    private final Consumer< Patrul > test = s -> this.getSession()
+            .execute( "UPDATE "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS
+                    + " SET rank = '" + s.getRank() + "'"
+                    + " WHERE uuid = " + s.getUuid() + " IF EXISTS;" );
 
     public void delete () {
         INSTANCE = null;
