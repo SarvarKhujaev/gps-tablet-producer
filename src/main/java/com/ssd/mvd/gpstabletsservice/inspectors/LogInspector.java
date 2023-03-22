@@ -9,10 +9,10 @@ public class LogInspector extends DataValidateInspector {
 
     public Logger getLOGGER() { return LOGGER; }
 
+    public void logging ( Throwable error ) { this.getLOGGER().error( "Error: " + error.getMessage() ); }
+
     public void logging ( Throwable error, Object o ) { this.getLOGGER().error("Error: {} and reason: {}: ",
             error.getMessage(), o ); }
-
-    public void logging ( Throwable error ) { this.getLOGGER().error( "Error: " + error.getMessage() ); }
 
     public void logging ( String message ) { this.getLOGGER().info( message ); }
 }

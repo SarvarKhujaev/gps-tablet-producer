@@ -83,7 +83,7 @@ public class KafkaDataControl extends SerDes {
             .createOutbound()
             .send( Mono.just( new ProducerRecord<>( this.getACTIVE_TASK(), super.serialize( activeTask ) ) ) )
             .then()
-            .doOnError( error -> super.logging( error.getMessage() ) )
+            .doOnError( super::logging )
             .doOnSuccess( success -> super.logging( "activeTask: " +
                     activeTask.getTaskId() + " was sent at: " + new Date() ) )
             .subscribe();
