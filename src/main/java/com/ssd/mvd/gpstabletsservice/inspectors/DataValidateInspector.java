@@ -86,4 +86,33 @@ public class DataValidateInspector extends Archive {
                             + CassandraTables.ESCORT.name() + "."
                             + CassandraTables.POLYGON_FOR_ESCORT.name()
                             + " where uuid = " + polygon.getUuid() + ";" ).one() != null;
+
+    private final Predicate< String > checkTracker = trackerId -> CassandraDataControl
+            .getInstance()
+            .getSession()
+            .execute ( "SELECT * FROM "
+                    + CassandraTables.ESCORT + "."
+                    + CassandraTables.TRACKERSID
+                    + " WHERE trackersId = '" + trackerId + "';" ).one() == null
+            && CassandraDataControl
+            .getInstance()
+            .getSession()
+            .execute( "SELECT * FROM "
+                + CassandraTables.TRACKERS + "."
+                + CassandraTables.TRACKERSID
+                + " WHERE trackersId = '" + trackerId + "';" ).one() == null;
+
+    private final Predicate< String > checkCarNumber = carNumber -> CassandraDataControl
+            .getInstance()
+            .getSession()
+            .execute( "SELECT * FROM "
+                    + CassandraTables.ESCORT.name() + "."
+                    + CassandraTables.TUPLE_OF_CAR.name() +
+                    " where gosnumber = '" + carNumber + "';" ).one() == null
+            && CassandraDataControl
+            .getInstance()
+            .getSession().execute( "SELECT * FROM "
+            + CassandraTables.TABLETS.name() + "."
+            + CassandraTables.CARS.name() +
+            " where gosnumber = '" + carNumber + "';" ).one() == null;
 }
