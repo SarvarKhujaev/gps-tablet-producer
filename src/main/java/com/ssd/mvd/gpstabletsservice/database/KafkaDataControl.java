@@ -154,6 +154,5 @@ public class KafkaDataControl extends SerDes {
     public void clear () {
         instance = null;
         this.getKafkaSender().close();
-        CassandraDataControl.getInstance().delete();
         super.logging( "Kafka is closed successfully" ); }
 }
