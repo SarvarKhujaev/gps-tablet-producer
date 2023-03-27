@@ -9,6 +9,7 @@ import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
+import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.datastax.driver.core.Row;
 
 import java.util.function.BiFunction;
@@ -30,6 +31,15 @@ public class DataValidateInspector extends Archive {
                     .getInspector()
                     .getGetTimeDifferenceInHours()
                     .apply( date.toInstant() ) ) >= 24;
+
+    // проверяет не имеет ли патрульный задание или не привязан ли он к эскорту или машине
+    private final Predicate< Patrul > checkPatrulLinks = patrul ->
+            patrul.getTaskId().equals( "null" )
+                    && patrul.getUuidOfEscort() == null
+                    && patrul.getUuidForPatrulCar() == null
+                    && patrul.getUuidForEscortCar() == null
+                    && patrul.getCarNumber().equals( "null" )
+                    && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0;
 
     private final BiFunction< TaskTimingRequest, Row, Boolean > checkRequest = ( request, row ) ->
             request.getEndDate() == null
