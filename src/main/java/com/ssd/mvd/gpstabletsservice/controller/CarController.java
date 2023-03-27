@@ -42,14 +42,6 @@ public class CarController extends LogInspector {
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
-    @MessageMapping ( value = "updateCar" )
-    public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return CassandraDataControl
-            .getInstance()
-            .getUpdateCar()
-            .apply( reqCar )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
     @MessageMapping( value = "deleteCar" )
     public Mono< ApiResponseModel > deleteCar ( String gosno ) {
         return CassandraDataControl
@@ -58,4 +50,12 @@ public class CarController extends LogInspector {
                 .apply( gosno )
                 .onErrorContinue( super::logging )
                 .onErrorReturn( super.getErrorResponse().get() ); }
+
+    @MessageMapping ( value = "updateCar" )
+    public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return CassandraDataControl
+            .getInstance()
+            .getUpdateCar()
+            .apply( reqCar )
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 }
