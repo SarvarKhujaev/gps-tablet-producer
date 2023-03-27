@@ -794,7 +794,7 @@ public final class CassandraDataControl extends CassandraConverter {
                 patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
-            if ( super.getCheckParam().test( this.checkLogin.apply( patrul.getLogin() ) ) ) return super.getFunction()
+            if ( !super.getCheckParam().test( this.checkLogin.apply( patrul.getLogin() ) ) ) return super.getFunction()
                     .apply( Map.of(
                             "message", "Patrul with this login has already been inserted, choose another one",
                             "success", false,
@@ -1569,6 +1569,9 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .one(),
                                     LAST ) )
                             .build() ) );
+
+    private final Predicate< String > test = s ->
+            this.getSession().execute( "SELECT * FROM escort.trackersid where trackersid = '" + s + "';" ).one() != null;
 
     public void delete ( Throwable throwable ) {
         INSTANCE = null;
