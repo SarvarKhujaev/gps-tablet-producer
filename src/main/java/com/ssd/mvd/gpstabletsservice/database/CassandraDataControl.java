@@ -749,19 +749,10 @@ public final class CassandraDataControl extends CassandraConverter {
                     ? super.getFunction().apply( Map.of( "message", "Image was updated successfully" ) )
                     : Mono.just( super.getErrorResponse().get() );
 
-    // проверяет не имеет ли патрульный задание или не привязан ли он к эскорту или машине
-    private final Predicate< Patrul > checkPatrulLinks = patrul ->
-            patrul.getTaskId().equals( "null" )
-            && patrul.getUuidOfEscort() == null
-            && patrul.getUuidForPatrulCar() == null
-            && patrul.getUuidForEscortCar() == null
-            && patrul.getCarNumber().equals( "null" )
-            && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0;
-
     private final Function< UUID, Mono< ApiResponseModel > > deletePatrul = uuid -> this.getGetPatrulByUUID()
             .apply( uuid )
             .flatMap( patrul -> {
-                if ( this.getCheckPatrulLinks().test( patrul ) ) {
+                if ( super.getCheckPatrulLinks().test( patrul ) ) {
                     this.getSession().execute ( "DELETE FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS_LOGIN_TABLE.name()
@@ -779,7 +770,7 @@ public final class CassandraDataControl extends CassandraConverter {
             .doOnError( this::delete );
 
     private final Function< Patrul, Mono< ApiResponseModel > > savePatrul = patrul -> {
-        if ( super.getCheckParam().test( this.getGetPatrulByPassportNumber()
+        if ( !super.getCheckParam().test( this.getGetPatrulByPassportNumber()
                 .apply( patrul.getPassportNumber() ) ) ) {
             patrul.setStatus( FREE );
             patrul.setInPolygon( false );
@@ -794,7 +785,7 @@ public final class CassandraDataControl extends CassandraConverter {
                 patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
-            if ( !super.getCheckParam().test( this.checkLogin.apply( patrul.getLogin() ) ) ) return super.getFunction()
+            if ( this.getCheckLogin().apply( patrul.getLogin() ) != null ) return super.getFunction()
                     .apply( Map.of(
                             "message", "Patrul with this login has already been inserted, choose another one",
                             "success", false,
@@ -1317,8 +1308,8 @@ public final class CassandraDataControl extends CassandraConverter {
                     + " WHERE login = '" + login + "';" ).one();
 
     private final Function< PatrulLoginRequest, Mono< ApiResponseModel > > login = patrulLoginRequest -> {
-        Row row = this.checkLogin.apply( patrulLoginRequest.getLogin() );
-        return row != null
+        Row row = this.getCheckLogin().apply( patrulLoginRequest.getLogin() );
+        return super.getCheckParam().test( row )
                 ? this.getGetPatrulByUUID()
                 .apply( row.getUUID( "uuid" ) )
                 .flatMap( patrul -> {
@@ -1569,9 +1560,6 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .one(),
                                     LAST ) )
                             .build() ) );
-
-    private final Predicate< String > test = s ->
-            this.getSession().execute( "SELECT * FROM escort.trackersid where trackersid = '" + s + "';" ).one() != null;
 
     public void delete ( Throwable throwable ) {
         INSTANCE = null;
