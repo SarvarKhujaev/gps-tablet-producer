@@ -776,12 +776,12 @@ public final class CassandraDataControl extends CassandraConverter {
             patrul.setInPolygon( false );
             patrul.setTaskTypes( TaskTypes.FREE );
             patrul.setListOfTasks( new HashMap<>() );
-            if ( super.getCheckParam().test( patrul.getBatteryLevel() ) ) patrul.setBatteryLevel( 0 );
-            if ( super.getCheckParam().test( patrul.getLogin() ) ) patrul.setLogin( patrul.getPassportNumber() );
-            if ( super.getCheckParam().test( patrul.getPassword() ) ) patrul.setPassword( patrul.getPassportNumber() );
+            if ( patrul.getBatteryLevel() == null ) patrul.setBatteryLevel( 0 );
+            if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
+            if ( patrul.getPassword() == null ) patrul.setPassword( patrul.getPassportNumber() );
             if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
             if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
-            if ( super.getCheckParam().test( patrul.getOrganName() ) && patrul.getOrganName().contains( "'" ) )
+            if ( patrul.getOrganName() != null && patrul.getOrganName().contains( "'" ) )
                 patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
             if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
             if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
