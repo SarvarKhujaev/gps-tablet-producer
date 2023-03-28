@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,6 +11,7 @@ import com.ssd.mvd.gpstabletsservice.entity.Notification;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Comparator;
 import java.util.UUID;
@@ -19,8 +21,11 @@ public class NotificationController extends LogInspector {
     @MessageMapping ( value = "getAllNotifications" )
     public Flux< Notification > getAllNotifications () { return CassandraDataControl
             .getInstance()
-            .getGetAllNotification()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.NOTIFICATION )
+            .map( Notification::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
             .onErrorContinue( super::logging ); }
 

@@ -1,6 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.entity.Country;
@@ -8,16 +10,20 @@ import com.ssd.mvd.gpstabletsservice.entity.Country;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
 public class CountryController extends LogInspector {
     @MessageMapping ( value = "getAllCountries" )
-    public Flux< Country > getAllCountries () { return CassandraDataControlForEscort
+    public Flux< Country > getAllCountries () { return CassandraDataControl
             .getInstance()
-            .getGetAllCountries()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.ESCORT, CassandraTables.COUNTRIES )
+            .map( Country::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getCurrentCountry" )
@@ -28,7 +34,7 @@ public class CountryController extends LogInspector {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping( value = "addNewCountry" )
-    public Mono< ApiResponseModel > addNewCountry (Country country ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > addNewCountry ( Country country ) { return CassandraDataControlForEscort
             .getInstance()
             .getSaveNewCountry()
             .apply( country )

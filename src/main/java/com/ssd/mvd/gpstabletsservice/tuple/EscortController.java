@@ -4,9 +4,11 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.UUID;
@@ -14,10 +16,13 @@ import java.util.UUID;
 @RestController
 public class EscortController extends LogInspector {
     @MessageMapping ( value = "getAllEscort" )
-    public Flux< EscortTuple > getAllTupleOfPatrul () { return CassandraDataControlForEscort
+    public Flux< EscortTuple > getAllTupleOfPatrul () { return CassandraDataControl
             .getInstance()
-            .getGetAllTupleOfEscort()
-            .get(); }
+            .getGetAllEntities()
+            .apply( CassandraTables.ESCORT, CassandraTables.TUPLE_OF_ESCORT )
+            .map( EscortTuple::new )
+            .sequential()
+            .publishOn( Schedulers.single() ); }
 
     @MessageMapping ( value = "getTupleTotalData" )
     public Mono< TupleTotalData > getTupleTotalData ( String uuid ) { return CassandraDataControlForEscort

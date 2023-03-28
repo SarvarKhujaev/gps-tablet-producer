@@ -17,14 +17,12 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import java.util.Locale;
 import java.util.UUID;
 import java.util.Map;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class CassandraDataControlForEscort extends CassandraConverter {
     private final Session session = CassandraDataControl.getInstance().getSession();
     private final Cluster cluster = CassandraDataControl.getInstance().getCluster();
@@ -93,19 +91,6 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                         CassandraTables.POINTS_ENTITY.name() );
 
         super.logging( "CassandraDataControlForEscort is ready" ); }
-
-    private final Supplier< Flux< EscortTuple > > getAllTupleOfEscort = () -> Flux.fromStream(
-            this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.ESCORT.name() + "."
-                    + CassandraTables.TUPLE_OF_ESCORT.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .map( EscortTuple::new )
-            .sequential()
-            .publishOn( Schedulers.single() );
 
     private final Function< String, Mono< EscortTuple > > getCurrentTupleOfEscort = id -> {
         Row row = this.getSession().execute( "SELECT * FROM "
@@ -355,19 +340,6 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                             "code", 201,
                             "success", false ) );
 
-    private final Supplier< Flux< PolygonForEscort > > getAllPolygonForEscort = () -> Flux.fromStream(
-            this.getSession().execute( "SELECT * FROM "
-                            + CassandraTables.ESCORT.name() + "."
-                            + CassandraTables.POLYGON_FOR_ESCORT.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .map( PolygonForEscort::new )
-            .sequential()
-            .publishOn( Schedulers.single() );
-
     private final Function< TupleOfCar, Mono< ApiResponseModel > > updateTupleOfCar = tupleOfCar ->
             this.getSession().execute( "INSERT INTO "
                     + CassandraTables.ESCORT.name() + "."
@@ -495,17 +467,4 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                     "message", "This country has not been inserted yet",
                     "code", 201,
                     "success", false ) );
-
-    private final Supplier< Flux< Country > > getAllCountries = () -> Flux.fromStream (
-            this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.ESCORT.name() + "."
-                    + CassandraTables.COUNTRIES.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .map( Country::new )
-            .sequential()
-            .publishOn( Schedulers.single() );
 }

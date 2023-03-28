@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -16,6 +17,7 @@ import com.ssd.mvd.gpstabletsservice.entity.ScheduleForPolygonPatrul;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class PolygonForPatrulController extends LogInspector { // SAM - 76
@@ -23,8 +25,11 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
     @MessageMapping( value = "listOfPoligonsForPatrul" )
     public Flux< Polygon > listOfPoligonsForPatrul () { return CassandraDataControl
             .getInstance()
-            .getGetAllPolygonForPatrul()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.POLYGON_FOR_PATRUl )
+            .map( Polygon::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "deletePolygonForPatrul" )

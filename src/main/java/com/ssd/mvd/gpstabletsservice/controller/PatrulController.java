@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.UUID;
 
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +23,7 @@ import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class PatrulController extends SerDes {
@@ -99,18 +101,24 @@ public class PatrulController extends SerDes {
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
     public Flux< Patrul > getAllUsersList () { return CassandraDataControl
             .getInstance()
-            .getGetPatrul()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
+            .map( Patrul::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
     public Flux< Patrul > getPatrulByPortion ( String name ) { return CassandraDataControl
             .getInstance()
-            .getGetPatrul()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
+            .map( Patrul::new )
             .filter( patrul -> patrul
                     .getSurnameNameFatherName()
                     .contains( name ) )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping( value = "addUser" ) // adding new user

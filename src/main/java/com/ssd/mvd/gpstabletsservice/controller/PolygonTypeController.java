@@ -9,6 +9,7 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.entity.PolygonType;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.UUID;
@@ -51,7 +52,10 @@ public class PolygonTypeController extends LogInspector {
     @MessageMapping ( value = "getAllPolygonTypes" )
     public Flux< PolygonType > getAllPolygonTypes () { return CassandraDataControl
             .getInstance()
-            .getGetAllPolygonType()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.POLYGON_TYPE )
+            .map( PolygonType::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 }

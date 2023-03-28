@@ -9,6 +9,7 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.entity.PoliceType;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -17,8 +18,11 @@ public class PoliceTypeController extends LogInspector {
     @MessageMapping ( value = "getPoliceTypeList" )
     public Flux< PoliceType > getPoliceTypeList () { return CassandraDataControl
             .getInstance()
-            .getGetAllPoliceTypes()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.POLICE_TYPE )
+            .map( PoliceType::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping( value = "addPoliceType" )

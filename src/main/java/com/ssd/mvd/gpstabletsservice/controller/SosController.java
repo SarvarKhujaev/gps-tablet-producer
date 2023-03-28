@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.controller;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.SosRequest;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
@@ -11,6 +12,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.Map;
@@ -18,10 +20,14 @@ import java.util.Map;
 @RestController
 public class SosController extends LogInspector {
     @MessageMapping( value = "getAllSosEntities" )
-    public Flux< PatrulSos > getAllSosEntities () { return CassandraDataControlForTasks
+    public Flux< PatrulSos > getAllSosEntities () { return CassandraDataControl
             .getInstance()
-            .getGetAllSos()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.PATRUL_SOS_TABLE )
+            .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.FINISHED ) != 0 )
+            .flatMap( row -> Mono.just( new PatrulSos( row ) ) )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging )
             .onErrorReturn( new PatrulSos() ); }
 
@@ -35,14 +41,14 @@ public class SosController extends LogInspector {
                         .getInstance()
                         .getDecode()
                         .apply( token ) )
-                ? super.getFunction().apply( Map.of(
-                        "message", "U did not send SOS signal",
+                ? super.getFunction().apply(
+                        Map.of( "message", "U did not send SOS signal",
                         "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                 .builder()
                                 .data( Status.IN_ACTIVE )
                                 .build() ) )
-                : super.getFunction().apply( Map.of(
-                        "message", "U have SOS signal",
+                : super.getFunction().apply(
+                        Map.of( "message", "U have SOS signal",
                         "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                 .builder()
                                 .data( Status.ACTIVE )
