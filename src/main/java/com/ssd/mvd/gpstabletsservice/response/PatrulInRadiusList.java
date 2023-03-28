@@ -3,20 +3,15 @@ package com.ssd.mvd.gpstabletsservice.response;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
-
 import java.util.function.BiFunction;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 // используется когда нужно найти патрульных рядом с камерой
 // максимум 5 не занятых патрульных
-// SAM - 1011
 public class PatrulInRadiusList {
     private Double maxDistance;
     private final List< Patrul > freePatrulList = new ArrayList<>(); // максимум 5 не занятых патрульных

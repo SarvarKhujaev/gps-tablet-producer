@@ -1,9 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import lombok.Builder;
-
 @lombok.Data
-@Builder
+@lombok.Builder
 public class Data< T, V > {
     private String type;
     private V subject;

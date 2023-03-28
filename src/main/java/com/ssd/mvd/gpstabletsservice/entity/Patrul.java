@@ -7,16 +7,12 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
-
 import java.time.Duration;
 import java.util.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Patrul {
     private Date taskDate; // for registration of exact time when patrul started to deal with task
     private Date lastActiveDate; // shows when user was online lastly
