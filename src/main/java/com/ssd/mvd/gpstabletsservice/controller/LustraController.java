@@ -9,6 +9,7 @@ import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.entity.AtlasLustra;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -48,7 +49,10 @@ public class LustraController extends LogInspector {
     @MessageMapping( value = "allLustra" ) // the list of all created camera
     public Flux< AtlasLustra > getAllLustra () { return CassandraDataControl
             .getInstance()
-            .getGetAllLustra()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.LUSTRA )
+            .map( AtlasLustra::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 }

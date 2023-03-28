@@ -1,5 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -8,15 +10,19 @@ import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class PolygonForEscortController extends LogInspector {
 
     @MessageMapping ( value = "getAllPolygonForEscort" )
-    public Flux< PolygonForEscort > getAllPolygonForEscort () { return CassandraDataControlForEscort
+    public Flux< PolygonForEscort > getAllPolygonForEscort () { return CassandraDataControl
             .getInstance()
-            .getGetAllPolygonForEscort()
-            .get(); }
+            .getGetAllEntities()
+            .apply( CassandraTables.ESCORT, CassandraTables.POLYGON_FOR_ESCORT )
+            .map( PolygonForEscort::new )
+            .sequential()
+            .publishOn( Schedulers.single() ); }
 
     @MessageMapping ( value = "getCurrentPolygonForEscort" )
     public Mono< PolygonForEscort > getAllPolygonForEscort ( String id ) { return CassandraDataControlForEscort

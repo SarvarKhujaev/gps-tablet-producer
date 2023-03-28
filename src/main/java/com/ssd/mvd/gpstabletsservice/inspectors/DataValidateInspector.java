@@ -7,6 +7,7 @@ import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.controller.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
@@ -19,6 +20,9 @@ import java.util.Objects;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import static java.lang.Math.cos;
+import static java.lang.Math.*;
 
 @lombok.Data
 public class DataValidateInspector extends Archive {
@@ -125,4 +129,14 @@ public class DataValidateInspector extends Archive {
             + CassandraTables.TABLETS.name() + "."
             + CassandraTables.CARS.name() +
             " where gosnumber = '" + carNumber + "';" ).one() == null;
+
+    private final Predicate< Row > checkPatrulStatus = row ->
+            row.getDouble( "latitude" ) > 0 && row.getDouble( "longitude" ) > 0;
+
+    private static final Double p = PI / 180;
+
+    private final BiFunction<Point, Patrul, Double > calculate = ( first, second ) ->
+            12742 * asin( sqrt( 0.5 - cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2
+                    + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p )
+                    * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000;
 }

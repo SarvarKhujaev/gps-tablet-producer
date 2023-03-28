@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
@@ -27,10 +28,14 @@ import java.util.*;
 @RestController
 public class CardController extends SerDes {
     @MessageMapping ( value = "getListOfCards" )
-    public Flux< ActiveTask > getListOfCards () { return CassandraDataControlForTasks
+    public Flux< ActiveTask > getListOfCards () { return CassandraDataControl
             .getInstance()
-            .getGetActiveTasks()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.ACTIVE_TASK )
+            .map( row -> (ActiveTask) super.getDeserialize().apply(
+                    row.getString( "object" ), TaskTypes.ACTIVE_TASK ) )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() )
             .onErrorContinue( super::logging ); }
 
@@ -220,10 +225,14 @@ public class CardController extends SerDes {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getAllCarTotalData" )
-    public Flux< CarTotalData > getAllCarTotalData () { return CassandraDataControlForTasks
+    public Flux< CarTotalData > getAllCarTotalData () { return CassandraDataControl
             .getInstance()
-            .getGetAllCarTotalData()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.CARTOTALDATA )
+            .map( row -> (CarTotalData) super.getDeserialize().apply(
+                    row.getString( "object" ), TaskTypes.ESCORT ) )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "removePatrulFromTask" )

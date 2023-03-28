@@ -9,6 +9,7 @@ import com.ssd.mvd.gpstabletsservice.entity.Polygon;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.UUID;
@@ -44,8 +45,11 @@ public class PolygonController extends LogInspector {
     @MessageMapping( value = "getPolygonList" )
     public Flux< Polygon > getPolygonList () { return CassandraDataControl
             .getInstance()
-            .getGetAllPolygons()
-            .get()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.POLYGON )
+            .map( Polygon::new )
+            .sequential()
+            .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getCurrentPolygon" )

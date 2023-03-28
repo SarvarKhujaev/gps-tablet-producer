@@ -120,10 +120,11 @@ public class CassandraDataControlForTasks extends SerDes {
                                             .getString( "object" ), TaskTypes.ESCORT ) ) )
                             .build() ) );
 
-    private final Function< UUID, Row > getRow = uuid -> this.getSession().execute( "SELECT * FROM "
-            + CassandraTables.TABLETS.name() + "."
-            + CassandraTables.TASKS_STORAGE_TABLE.name()
-            + " where uuid = " + uuid + ";" ).one();
+    private final Function< UUID, Row > getRow = uuid -> this.getSession().execute(
+            "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TASKS_STORAGE_TABLE.name()
+                    + " where uuid = " + uuid + ";" ).one();
 
     private final Function< UUID, Mono< SelfEmploymentTask > > getSelfEmploymentTask = id -> {
         Row row = this.getRow.apply( id );
@@ -174,34 +175,6 @@ public class CassandraDataControlForTasks extends SerDes {
                         row.getString( "object" ), TaskTypes.CARD_102 ) )
                 : Mono.empty(); };
 
-    private final Supplier< Flux< CarTotalData > > getAllCarTotalData = () -> Flux.fromStream(
-            this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.CARTOTALDATA.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .map( row -> (CarTotalData) super.getDeserialize().apply(
-                    row.getString( "object" ), TaskTypes.ESCORT ) )
-            .sequential()
-            .publishOn( Schedulers.single() );
-
-    private final Supplier< Flux< ActiveTask > > getActiveTasks = () -> Flux.fromStream(
-            this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.ACTIVE_TASK.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .map( row -> (ActiveTask) super.getDeserialize().apply(
-                    row.getString( "object" ), TaskTypes.ACTIVE_TASK ) )
-            .sequential()
-            .publishOn( Schedulers.single() );
-
     private final Consumer< String > deleteActiveTask = id -> this.getSession()
             .execute( "DELETE FROM "
             + CassandraTables.TABLETS.name() + "."
@@ -209,14 +182,14 @@ public class CassandraDataControlForTasks extends SerDes {
             + " WHERE id = '" + id + "';" );
 
     public void saveTask ( UUID uuid, String id, TaskTypes taskTypes, Object clazz ) {
-        this.getSession().execute( "INSERT INTO "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.TASKS_STORAGE_TABLE.name()
-                + "(uuid, id, tasktype, object) VALUES ("
-                + uuid + ", '"
-                + id + "', '"
-                + taskTypes + "', '"
-                + super.serialize( clazz ) + "');" ); }
+            this.getSession().execute( "INSERT INTO "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TASKS_STORAGE_TABLE.name()
+                    + "(uuid, id, tasktype, object) VALUES ("
+                    + uuid + ", '"
+                    + id + "', '"
+                    + taskTypes + "', '"
+                    + super.serialize( clazz ) + "');" ); }
 
     private final Function< CarTotalData, Boolean > saveCarTotalData = carTotalData ->
             this.getSession().execute( "INSERT INTO "
@@ -285,16 +258,10 @@ public class CassandraDataControlForTasks extends SerDes {
 
     private final Function< TaskTimingRequest, Mono< TaskTimingStatisticsList > > getTaskTimingStatistics = request ->
         Flux.just( new TaskTimingStatisticsList() )
-                .flatMap( taskTimingStatisticsList ->
-                        Flux.fromStream( this.getSession()
-                                .execute( "SELECT * FROM "
-                                        + CassandraTables.TABLETS.name() + "."
-                                        + CassandraTables.TASKS_TIMING_TABLE.name() + ";" )
-                                .all()
-                                .stream()
-                                .parallel() )
-                        .parallel()
-                        .runOn( Schedulers.parallel() )
+                .flatMap( taskTimingStatisticsList -> CassandraDataControl
+                        .getInstance()
+                        .getGetAllEntities()
+                        .apply( CassandraTables.TABLETS, CassandraTables.TASKS_TIMING_TABLE )
                         .filter( row -> super.getCheckParam().test( row.getTimestamp( "dateofcoming" ) ) )
                         .filter( row -> super.getCheckRequest().apply( request, row ) )
                         .filter( row -> super.getCheckTaskType().apply( request, row ) )
