@@ -3,9 +3,8 @@ package com.ssd.mvd.gpstabletsservice.entity;
 import com.datastax.driver.core.Row;
 import java.util.Date;
 import java.util.UUID;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class TabletUsage {
     private Date startedToUse = new Date();
     private Date lastActiveDate = new Date();

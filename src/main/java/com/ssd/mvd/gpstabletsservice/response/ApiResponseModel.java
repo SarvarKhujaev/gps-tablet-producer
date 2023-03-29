@@ -1,10 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.response;
 
-import lombok.Builder;
-import lombok.Data;
-
-@Builder
-@Data
+@lombok.Data
+@lombok.Builder
 public class ApiResponseModel {
     private com.ssd.mvd.gpstabletsservice.entity.Data data;
     private Boolean success;

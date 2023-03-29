@@ -1,8 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.request;
 
-import lombok.Data;
-
-@Data
+@lombok.Data
 public class PatrulLoginRequest {
     private String simCardNumber;
     private String password;
