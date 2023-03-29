@@ -1,14 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
 import com.datastax.driver.core.UDTValue;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import java.util.UUID;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Points {
     private Double lat;
     private Double lng;

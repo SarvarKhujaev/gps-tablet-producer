@@ -1,15 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import com.datastax.driver.core.Row;
 import com.datastax.driver.core.UDTValue;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import com.datastax.driver.core.Row;
 import java.util.UUID;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class PolygonType {
     private UUID uuid;
     private String name;
