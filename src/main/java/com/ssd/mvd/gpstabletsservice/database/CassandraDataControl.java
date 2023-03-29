@@ -45,8 +45,7 @@ public final class CassandraDataControl extends CassandraConverter {
     private final CodecRegistry codecRegistry = new CodecRegistry();
     private static CassandraDataControl INSTANCE = new CassandraDataControl();
 
-    public static CassandraDataControl getInstance () { return INSTANCE != null
-            ? INSTANCE : ( INSTANCE = new CassandraDataControl() ); }
+    public static CassandraDataControl getInstance () { return INSTANCE != null ? INSTANCE : ( INSTANCE = new CassandraDataControl() ); }
 
     public void register () {
         super.registerCodecForPatrul(
@@ -89,14 +88,13 @@ public final class CassandraDataControl extends CassandraConverter {
 
     private void createTable ( String tableName, Class object, String prefix ) {
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() + "." + tableName +
-                        super.convertClassToCassandra( object ) + prefix ); }
+                + CassandraTables.TABLETS.name() + "." + tableName +
+                super.convertClassToCassandra( object ) + prefix ); }
 
     private CassandraDataControl () {
         SocketOptions options = new SocketOptions();
         options.setConnectTimeoutMillis( 30000 );
         options.setReadTimeoutMillis( 300000 );
-//        options.setReuseAddress( true );
         options.setTcpNoDelay( true );
         options.setKeepAlive( true );
         ( this.session = ( this.cluster = Cluster

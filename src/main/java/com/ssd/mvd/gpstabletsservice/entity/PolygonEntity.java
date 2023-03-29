@@ -1,12 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class PolygonEntity {
     private Double lat;
     private Double lng;

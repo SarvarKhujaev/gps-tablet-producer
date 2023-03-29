@@ -5,11 +5,10 @@ import java.time.Instant;
 import java.time.Duration;
 import java.text.SimpleDateFormat;
 
-import lombok.Data;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-@Data
+@lombok.Data
 public class TimeInspector {
     private Date date; // for comparing with current time
     private Long timestamp = 30L; // time interval of how much time has to be matched to set User like offline 30 mins by default
@@ -28,16 +27,16 @@ public class TimeInspector {
 
     private final Predicate< Instant > checkDate = instant -> this.getEndTimeForEvening() >= this.setDate().getHours()
             && this.getDate().getHours() >= this.getStartTimeForMorning()
-            ? ( this.getGetTimeDifference()
-                    .apply( instant ) <= 10 ) : ( this.getGetTimeDifference().apply( instant ) <= 7 );
+            ? ( this.getGetTimeDifference().apply( instant ) <= 10 )
+            : ( this.getGetTimeDifference().apply( instant ) <= 7 );
 
     // for checking current time of task ending
     private final Function< String, Long > convertTimeToLong = time -> {
         try { return time != null && !time.contains( "null" ) ?
                 new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
                         .parse( time )
-                        .getTime() : 0L;
-        } catch ( Exception e ) { return 0L; } };
+                        .getTime() : 0L; }
+        catch ( Exception e ) { return 0L; } };
 
     private final Function< Instant, Long > getTimeDifference = instant -> Math.abs( Duration.between( Instant.now(), instant ).toMinutes() );
 

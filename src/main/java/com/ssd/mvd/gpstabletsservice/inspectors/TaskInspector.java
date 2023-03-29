@@ -42,27 +42,27 @@ public final class TaskInspector extends Archive {
     public static TaskInspector getInstance () { return taskInspector != null ? taskInspector : new TaskInspector(); }
 
     private final BiFunction< Patrul, Status, String > generateText = (patrul, status ) -> switch ( status ) {
-        case ATTACHED -> patrul.getName()
-                + " got new task: " + patrul.getTaskId()
-                + " " + patrul.getTaskTypes();
+            case ATTACHED -> patrul.getName()
+                    + " got new task: " + patrul.getTaskId()
+                    + " " + patrul.getTaskTypes();
 
-        case ARRIVED -> patrul.getName()
-                + " : " + patrul.getTaskTypes()
-                + " arrived task location: "
-                + " at: " + new Date();
+            case ARRIVED -> patrul.getName()
+                    + " : " + patrul.getTaskTypes()
+                    + " arrived task location: "
+                    + " at: " + new Date();
 
-        case ACCEPTED -> patrul.getName()
-                + " ACCEPTED his task: " + patrul.getTaskId()
-                + " " + patrul.getTaskTypes()
-                + " at: " + new Date();
+            case ACCEPTED -> patrul.getName()
+                    + " ACCEPTED his task: " + patrul.getTaskId()
+                    + " " + patrul.getTaskTypes()
+                    + " at: " + new Date();
 
-        case FINISHED -> patrul.getName()
-                + " completed his task "
-                + " at: " + new Date();
+            case FINISHED -> patrul.getName()
+                    + " completed his task "
+                    + " at: " + new Date();
 
-        default -> patrul.getName()
-                + " has been canceled from task "
-                + " at: " + new Date(); };
+            default -> patrul.getName()
+                    + " has been canceled from task "
+                    + " at: " + new Date(); };
 
     public Patrul changeTaskStatus ( Patrul patrul, Status status, Card card ) {
         patrul.setStatus( status );

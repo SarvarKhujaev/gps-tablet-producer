@@ -3,13 +3,9 @@ package com.ssd.mvd.gpstabletsservice.request;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.datastax.driver.core.Row;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class AndroidVersionUpdate {
     private String link;
     private String version;

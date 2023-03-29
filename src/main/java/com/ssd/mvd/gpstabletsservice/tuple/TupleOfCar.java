@@ -1,14 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
 import com.datastax.driver.core.Row;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import java.util.UUID;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class TupleOfCar {
     private UUID uuid;
     private UUID uuidOfEscort; // UUID of the Escort which this car is linked to

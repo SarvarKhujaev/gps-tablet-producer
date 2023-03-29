@@ -1,14 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
 import com.datastax.driver.core.Row;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import java.util.UUID;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Country {
     private UUID uuid;
 	private String flag; // флаг страны

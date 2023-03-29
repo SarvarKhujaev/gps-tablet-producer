@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import lombok.Data;
 import java.util.Date;
 import java.util.UUID;
 import com.datastax.driver.core.Row;
@@ -16,7 +15,7 @@ import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
-@Data
+@lombok.Data
 public class Notification {
     private String id; // id of any task
     private String type; // might be from 102 or Camera

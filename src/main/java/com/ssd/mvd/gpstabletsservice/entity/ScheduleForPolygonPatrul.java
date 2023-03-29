@@ -2,9 +2,8 @@ package com.ssd.mvd.gpstabletsservice.entity;
 
 import java.util.List;
 import java.util.UUID;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class ScheduleForPolygonPatrul {
     private List< UUID > patrulUUIDs;
     private String uuid;

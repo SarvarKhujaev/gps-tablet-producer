@@ -1,13 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
 import com.datastax.driver.core.UDTValue;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class CameraList {
     private String rtspLink;
     private String cameraName;
