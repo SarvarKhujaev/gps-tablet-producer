@@ -482,41 +482,54 @@ public final class CassandraDataControl extends CassandraConverter {
                                 "success", false,
                                 "code", 201 ) ); } );
 
+    private final Function< ReqCar, Boolean > linkPatrulWithCar = reqCar -> {
+            final Row row = this.getGetPatrulByPassportNumber().apply( reqCar.getPatrulPassportSeries() );
+            return row != null && this.getSession().execute( "UPDATE "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS
+                    + " SET carNumber = '" + reqCar.getGosNumber() + "',"
+                    + " carType = '" + reqCar.getVehicleType() + "'"
+                    + " WHERE uuid = " + row.getUUID( "uuid" ) + ";" )
+                    .wasApplied(); };
+
     private final Function< ReqCar, Mono< ApiResponseModel > > saveCar = reqCar ->
             super.getCheckTracker().test( reqCar.getTrackerId() )
             && super.getCheckCarNumber().test( reqCar.getGosNumber() )
             ? this.getSession().execute( "INSERT INTO "
-            + CassandraTables.TABLETS.name() + "."
-            + CassandraTables.CARS.name() +
-            super.getALlNames( ReqCar.class ) +
-            " VALUES ("
-            + reqCar.getUuid() + ", "
-            + reqCar.getLustraId() + ", '"
+                            + CassandraTables.TABLETS.name() + "."
+                            + CassandraTables.CARS.name()
+                            + super.getALlNames( ReqCar.class )
+                            + " VALUES ("
+                            + reqCar.getUuid() + ", "
+                            + reqCar.getLustraId() + ", '"
 
-            + reqCar.getGosNumber() + "', '"
-            + reqCar.getTrackerId() + "', '"
-            + reqCar.getVehicleType() + "', '"
-            + reqCar.getCarImageLink() + "', '"
-            + reqCar.getPatrulPassportSeries() + "', "
+                            + reqCar.getGosNumber() + "', '"
+                            + reqCar.getTrackerId() + "', '"
+                            + reqCar.getVehicleType() + "', '"
+                            + reqCar.getCarImageLink() + "', '"
+                            + reqCar.getPatrulPassportSeries() + "', "
 
-            + reqCar.getSideNumber() + ", "
-            + reqCar.getSimCardNumber() + ", "
+                            + reqCar.getSideNumber() + ", "
+                            + reqCar.getSimCardNumber() + ", "
 
-            + reqCar.getLatitude() + ", "
-            + reqCar.getLongitude() + ", "
-            + reqCar.getAverageFuelSize() + ", "
-            + reqCar.getAverageFuelConsumption()
-            + ") IF NOT EXISTS;" ).wasApplied()
-            ? super.getFunction().apply( Map.of( "message", "Car was successfully saved" ) )
-            : super.getFunction().apply( Map.of(
-                    "message", "This car was already saved, choose another one",
-                    "success", false,
-                    "code", 201 ) )
-            : super.getFunction().apply( Map.of(
-                    "message", "This trackers or gosnumber is already registered to another car, so choose another one",
-                    "success", false,
-                    "code", 201 ) )
-            .doOnError( this::delete );
+                            + reqCar.getLatitude() + ", "
+                            + reqCar.getLongitude() + ", "
+                            + reqCar.getAverageFuelSize() + ", "
+                            + reqCar.getAverageFuelConsumption()
+                            + ") IF NOT EXISTS;" )
+                    .wasApplied()
+                    ? super.getFunction().apply(
+                            Map.of( "message", "Car was successfully saved",
+                                    "success", this.getLinkPatrulWithCar().apply( reqCar ) ) )
+                    : super.getFunction().apply(
+                            Map.of( "message", "This car was already saved, choose another one",
+                            "success", false,
+                            "code", 201 ) )
+                    : super.getFunction().apply(
+                            Map.of( "message", "This trackers or gosnumber is already registered to another car, so choose another one",
+                            "success", false,
+                            "code", 201 ) )
+                    .doOnError( this::delete );
 
     private final Function< UUID, Mono< Patrul > > getPatrulByUUID = uuid -> {
             Row row = this.getSession().execute( "SELECT * FROM "
