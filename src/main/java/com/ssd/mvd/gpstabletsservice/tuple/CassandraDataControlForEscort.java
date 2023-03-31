@@ -84,12 +84,6 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                 + super.convertClassToCassandra( Country.class )
                 + ", PRIMARY KEY ( uuid ) );" );
 
-        super.registerCodecForPolygonEntity( CassandraTables.ESCORT.name(),
-                        CassandraTables.POLYGON_ENTITY.name() );
-
-        super.registerCodecForPointsList( CassandraTables.ESCORT.name(),
-                        CassandraTables.POINTS_ENTITY.name() );
-
         super.logging( "CassandraDataControlForEscort is ready" ); }
 
     private final Function< String, Mono< EscortTuple > > getCurrentTupleOfEscort = id -> {
@@ -281,11 +275,11 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                             "success", false ) );
 
     private final Function< String, Mono< PolygonForEscort > > getCurrentPolygonForEscort = id -> {
-        Row row = this.getSession().execute( "SELECT * FROM "
-                + CassandraTables.ESCORT.name() + "."
-                + CassandraTables.POLYGON_FOR_ESCORT.name()
-                + " where uuid = " + UUID.fromString( id ) + ";" ).one();
-        return Mono.justOrEmpty( super.getCheckParam().test( row ) ? new PolygonForEscort( row ) : null ); };
+            Row row = this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.ESCORT.name() + "."
+                    + CassandraTables.POLYGON_FOR_ESCORT.name()
+                    + " where uuid = " + UUID.fromString( id ) + ";" ).one();
+            return Mono.justOrEmpty( super.getCheckParam().test( row ) ? new PolygonForEscort( row ) : null ); };
 
     private final Function< String, Mono< ApiResponseModel > > deletePolygonForEscort = id ->
             this.getGetCurrentPolygonForEscort()

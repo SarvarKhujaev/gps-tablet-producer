@@ -48,6 +48,12 @@ public final class CassandraDataControl extends CassandraConverter {
     public static CassandraDataControl getInstance () { return INSTANCE != null ? INSTANCE : ( INSTANCE = new CassandraDataControl() ); }
 
     public void register () {
+        super.registerCodecForPolygonEntity( CassandraTables.ESCORT.name(),
+                CassandraTables.POLYGON_ENTITY.name() );
+
+        super.registerCodecForPointsList( CassandraTables.ESCORT.name(),
+                CassandraTables.POINTS_ENTITY.name() );
+
         super.registerCodecForPatrul(
                 CassandraTables.TABLETS.name(),
                 CassandraTables.PATRUL_TYPE.name() );
@@ -411,17 +417,15 @@ public final class CassandraDataControl extends CassandraConverter {
     private final Function< String, Mono< ApiResponseModel > > deleteCar = gosno ->
             this.getGetCarByUUID().apply( UUID.fromString( gosno ) )
                     .flatMap( reqCar -> {
-                if ( reqCar.getPatrulPassportSeries() == null
-                        && reqCar.getPatrulPassportSeries().equals( "null" ) ) {
-                    this.getSession().execute( "DELETE FROM "
-                            + CassandraTables.TRACKERS + "."
-                            + CassandraTables.TRACKERSID
-                            + " where trackersId = '"
-                            + reqCar.getTrackerId() + "';" );
-                    return this.delete( CassandraTables.CARS.name(),
-                            "uuid",
-                            gosno ); }
-                else return super.getFunction().apply( Map.of(
+                        if ( reqCar.getPatrulPassportSeries() == null
+                                && reqCar.getPatrulPassportSeries().equals( "null" ) ) {
+                            this.getSession().execute( "DELETE FROM "
+                                    + CassandraTables.TRACKERS + "."
+                                    + CassandraTables.TRACKERSID
+                                    + " where trackersId = '"
+                                    + reqCar.getTrackerId() + "';" );
+                            return this.delete( CassandraTables.CARS.name(), "uuid", gosno ); }
+                        else return super.getFunction().apply( Map.of(
                                 "message", "This car is linked to patrul",
                                 "success", false,
                                 "code", 201 ) ); } )
