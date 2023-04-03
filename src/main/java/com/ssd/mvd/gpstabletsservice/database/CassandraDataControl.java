@@ -48,10 +48,12 @@ public final class CassandraDataControl extends CassandraConverter {
     public static CassandraDataControl getInstance () { return INSTANCE != null ? INSTANCE : ( INSTANCE = new CassandraDataControl() ); }
 
     public void register () {
-        super.registerCodecForPolygonEntity( CassandraTables.ESCORT.name(),
+        super.registerCodecForPolygonEntity(
+                CassandraTables.ESCORT.name(),
                 CassandraTables.POLYGON_ENTITY.name() );
 
-        super.registerCodecForPointsList( CassandraTables.ESCORT.name(),
+        super.registerCodecForPointsList(
+                CassandraTables.ESCORT.name(),
                 CassandraTables.POINTS_ENTITY.name() );
 
         super.registerCodecForPatrul(
@@ -226,11 +228,13 @@ public final class CassandraDataControl extends CassandraConverter {
                 .parallel() )
                 .parallel()
                 .runOn( Schedulers.parallel() )
-                .flatMap( row -> Mono.justOrEmpty( row != null ? new PositionInfo( row ) : new PositionInfo() ) )
+                .map( PositionInfo::new )
                 .sequential()
                 .publishOn( Schedulers.single() )
-                .collectList();
-        } catch ( Exception e ) { return Mono.empty(); } };
+                .collectList(); }
+        catch ( Exception e ) {
+            super.logging( e );
+            return Mono.empty(); } };
 
     private final Function< PoliceType, Mono< ApiResponseModel > > updatePoliceType = policeType -> {
             this.getGetAllEntities()
