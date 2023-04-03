@@ -73,10 +73,7 @@ public class Patrul {
             && this.surnameNameFatherName.contains( "NULL" )
             && this.surnameNameFatherName.contains( "null" )
             ? this.surnameNameFatherName
-            : ( this.surnameNameFatherName =
-            this.getName() + " "
-                    + this.getSurname() + " "
-                    + this.getFatherName() ); }
+            : ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
 
     public Boolean check () { return switch ( this.getPoliceType() ) {
             case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;
