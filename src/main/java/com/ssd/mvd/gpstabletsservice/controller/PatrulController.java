@@ -4,9 +4,12 @@ import java.util.Map;
 import java.util.List;
 import java.util.UUID;
 
-import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
@@ -14,6 +17,7 @@ import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.request.PatrulImageRequest;
 import com.ssd.mvd.gpstabletsservice.response.PatrulInRadiusList;
@@ -23,10 +27,11 @@ import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class PatrulController extends SerDes {
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @MessageMapping ( value = "ping" )
     public Mono< Boolean > ping () { return Mono.just( true ); }
 
@@ -62,7 +67,7 @@ public class PatrulController extends SerDes {
     public Mono< ApiResponseModel > getTaskDetails ( Data data ) { return TaskInspector
             .getInstance()
             .getGetTaskDetails()
-            .apply( (Patrul) super.getDeserializeWithJackson().apply( data.getData() ) )
+            .apply( this.objectMapper.convertValue( data.getData(), new TypeReference<>() {} ) )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 

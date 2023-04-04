@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
@@ -9,6 +8,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -20,6 +20,9 @@ import com.ssd.mvd.gpstabletsservice.database.*;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,6 +30,8 @@ import java.util.*;
 
 @RestController
 public class CardController extends SerDes {
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @MessageMapping ( value = "getListOfCards" )
     public Flux< ActiveTask > getListOfCards () { return CassandraDataControl
             .getInstance()
@@ -57,7 +62,7 @@ public class CardController extends SerDes {
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
         if ( request.getTaskType().compareTo( TaskTypes.CARD_102 ) == 0 ) {
-            Card card = (Card) super.getDeserializeWithJackson().apply( request.getCard() );
+            final Card card = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             card.setUuid( UUID.randomUUID() );
 
             if ( card.getCreated_date() == null ) card.setCreated_date( new Date() );
@@ -81,7 +86,7 @@ public class CardController extends SerDes {
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
-            CarEvent carEvents = (CarEvent) super.getDeserializeWithJackson().apply( request.getCard() );
+            final CarEvent carEvents = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             carEvents.setUuid( UUID.randomUUID() );
             if ( carEvents.getCreated_date() == null ) carEvents.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -104,7 +109,7 @@ public class CardController extends SerDes {
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
-            FaceEvent facePerson = (FaceEvent) super.getDeserializeWithJackson().apply( request.getCard() );
+            final FaceEvent facePerson = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             facePerson.setUuid( UUID.randomUUID() );
             if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
                 facePerson.setCreated_date( new Date().toString() );
@@ -128,7 +133,7 @@ public class CardController extends SerDes {
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
-            EventFace eventFace = (EventFace) super.getDeserializeWithJackson().apply( request.getCard() );
+            final EventFace eventFace = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             eventFace.setUuid( UUID.randomUUID() );
             if ( eventFace.getCreated_date() == null ) eventFace.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -151,7 +156,7 @@ public class CardController extends SerDes {
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
         else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
-            EventBody eventBody = (EventBody) super.getDeserializeWithJackson().apply( request.getCard() );
+            final EventBody eventBody = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             eventBody.setUuid( UUID.randomUUID() );
             if ( eventBody.getCreated_date() == null ) eventBody.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
@@ -173,7 +178,7 @@ public class CardController extends SerDes {
                     .onErrorContinue( super::logging )
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
-        else { EventCar eventCar = (EventCar) super.getDeserializeWithJackson().apply( request.getCard() );
+        else { final EventCar eventCar = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             eventCar.setUuid( UUID.randomUUID() );
             if ( eventCar.getCreated_date() == null ) eventCar.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
