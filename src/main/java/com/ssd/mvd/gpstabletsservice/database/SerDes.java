@@ -11,17 +11,12 @@ import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import com.google.gson.Gson;
 
 @lombok.Data
 public class SerDes extends CassandraConverter {
     private final Gson gson = new Gson();
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public <T> String serialize ( T object ) { return this.getGson().toJson( object ); }
 
@@ -38,6 +33,4 @@ public class SerDes extends CassandraConverter {
 
         case ACTIVE_TASK -> this.getGson().fromJson( s, ActiveTask.class );
         default -> this.getGson().fromJson( s, CarTotalData.class ); };
-
-    private final Function< Object, ? > deserializeWithJackson = s -> this.getObjectMapper().convertValue( s, new TypeReference<>() {} );
 }
