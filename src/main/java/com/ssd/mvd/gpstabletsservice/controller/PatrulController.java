@@ -214,8 +214,8 @@ public class PatrulController extends SerDes {
             .getInstance()
             .getGetPatrulByUUID()
             .apply( UUID.fromString( uuid ) )
-            .flatMap( patrul -> patrul.getListOfTasks().keySet().size() > 0 ?
-                    TaskInspector
+            .flatMap( patrul -> patrul.getListOfTasks().keySet().size() > 0
+                    ? TaskInspector
                             .getInstance()
                             .getListOfPatrulTasks( patrul,
                                     0,
