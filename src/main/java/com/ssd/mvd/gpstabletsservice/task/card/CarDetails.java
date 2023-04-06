@@ -3,9 +3,8 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class CarDetails {
     private String ip;
     private String carData;

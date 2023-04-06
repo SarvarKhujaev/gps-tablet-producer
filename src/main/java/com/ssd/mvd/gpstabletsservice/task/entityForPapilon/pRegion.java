@@ -1,8 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
-import lombok.Data;
-
-@Data
+@lombok.Data
 public class pRegion {
     private Integer Id;
     private String Value;

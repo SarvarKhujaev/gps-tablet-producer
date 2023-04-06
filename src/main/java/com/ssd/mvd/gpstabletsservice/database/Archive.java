@@ -4,14 +4,13 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import lombok.Data;
 import java.security.SecureRandom;
 import reactor.core.publisher.Mono;
 
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 
-@Data
+@lombok.Data
 public class Archive {
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();

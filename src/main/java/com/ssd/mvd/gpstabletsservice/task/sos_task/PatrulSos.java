@@ -3,16 +3,13 @@ package com.ssd.mvd.gpstabletsservice.task.sos_task;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.datastax.driver.core.Row;
 
-import lombok.NoArgsConstructor;
-import lombok.Data;
-
-import java.util.Date;
 import java.util.HashMap;
+import java.util.Date;
 import java.util.UUID;
 import java.util.Map;
 
-@Data
-@NoArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
 public class PatrulSos {
     private UUID uuid;
     private UUID patrulUUID;

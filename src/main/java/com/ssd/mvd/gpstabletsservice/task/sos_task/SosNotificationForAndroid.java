@@ -2,9 +2,8 @@ package com.ssd.mvd.gpstabletsservice.task.sos_task;
 
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class SosNotificationForAndroid {
     private Status status;
     private Double latitude;

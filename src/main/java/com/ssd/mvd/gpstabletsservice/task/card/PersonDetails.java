@@ -4,9 +4,8 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.Face
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class PersonDetails {
     private String ip;
     private String FIO;

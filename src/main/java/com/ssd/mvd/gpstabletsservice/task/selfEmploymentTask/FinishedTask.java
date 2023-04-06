@@ -4,11 +4,8 @@ import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.card.CardDetails;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 
-import lombok.Builder;
-import lombok.Data;
-
-@Data
-@Builder
+@lombok.Data
+@lombok.Builder
 public class FinishedTask {
     private String task;
     private Long createdDate;

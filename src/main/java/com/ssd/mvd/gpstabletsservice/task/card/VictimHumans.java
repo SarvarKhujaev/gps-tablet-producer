@@ -2,12 +2,11 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.extern.jackson.Jacksonized;
-import lombok.*;
 
-@Data
+@lombok.Data
 @Jacksonized
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class VictimHumans {
     private String phone;

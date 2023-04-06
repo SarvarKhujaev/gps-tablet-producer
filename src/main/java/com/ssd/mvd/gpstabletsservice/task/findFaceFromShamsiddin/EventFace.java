@@ -10,15 +10,12 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
 import lombok.extern.jackson.Jacksonized;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
 import java.util.*;
 
-@Data
+@lombok.Data
 @Jacksonized
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class EventFace {
     private Long age;

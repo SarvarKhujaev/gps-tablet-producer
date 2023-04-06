@@ -1,12 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Doverennost {
     private String DateBegin;
     private String DateValid;

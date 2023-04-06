@@ -4,15 +4,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 
 import lombok.extern.jackson.Jacksonized;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import java.util.List;
-import lombok.Data;
 
-@Data
+@lombok.Data
 @Jacksonized
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class ModelForAddress {
     private ErrorResponse errorResponse;
     private PermanentRegistration PermanentRegistration;

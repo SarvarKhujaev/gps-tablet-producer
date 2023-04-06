@@ -3,9 +3,8 @@ package com.ssd.mvd.gpstabletsservice.task.sos_task;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import java.util.UUID;
 import java.util.Date;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class SosTotalData {
     private UUID uuid;
     private UUID patrulUUID;

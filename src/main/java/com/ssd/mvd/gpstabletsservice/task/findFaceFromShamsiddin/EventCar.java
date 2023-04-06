@@ -1,9 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin;
 
 import java.util.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
@@ -15,10 +12,10 @@ import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@Data
+@lombok.Data
 @Jacksonized
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class EventCar {
     private Status status = Status.CREATED;

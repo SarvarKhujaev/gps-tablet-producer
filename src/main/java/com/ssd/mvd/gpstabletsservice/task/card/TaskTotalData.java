@@ -2,9 +2,8 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.datastax.driver.core.Row;
 import java.util.List;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class TaskTotalData {
     private Long timeWastedToArrive;
     private Long totalTimeConsumption;

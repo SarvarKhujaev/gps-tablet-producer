@@ -1,6 +1,4 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForPassport;
 
-import lombok.Data;
-
-@Data
+@lombok.Data
 public class RequestGuid {}

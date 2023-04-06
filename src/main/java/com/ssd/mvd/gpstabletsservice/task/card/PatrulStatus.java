@@ -2,9 +2,8 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class PatrulStatus {
     private Patrul patrul;
     private Boolean inTime; // показывает пришел ли Патрульный вовремя

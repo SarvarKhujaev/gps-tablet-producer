@@ -1,20 +1,19 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.*;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.List;
 
 import lombok.extern.jackson.Jacksonized;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
+import java.util.List;
 
-@Data
+@lombok.Data
 @Jacksonized
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 @JsonIgnoreProperties ( ignoreUnknown = true )
 public class CarTotalData {
     private String gosNumber;
