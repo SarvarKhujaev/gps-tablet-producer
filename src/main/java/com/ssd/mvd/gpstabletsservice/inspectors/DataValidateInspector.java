@@ -26,6 +26,10 @@ import static java.lang.Math.*;
 
 @lombok.Data
 public class DataValidateInspector extends Archive {
+    private static final DataValidateInspector INSTANCE = new DataValidateInspector();
+
+    public static DataValidateInspector getInstance() { return INSTANCE; }
+
     private final Predicate< Object > checkParam = Objects::nonNull;
 
     public final Predicate< List< ? > > checkList = list -> list != null && list.size() > 0;

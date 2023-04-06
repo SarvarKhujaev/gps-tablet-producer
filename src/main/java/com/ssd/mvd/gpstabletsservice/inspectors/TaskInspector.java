@@ -766,173 +766,172 @@ public final class TaskInspector extends Archive {
                 .parallel( size )
                 .runOn( Schedulers.parallel() )
                 .flatMap( key -> switch ( TaskTypes.valueOf( patrul.getListOfTasks().get( key ) ) ) {
-                    case CARD_102 -> CassandraDataControlForTasks
-                            .getInstance()
-                            .getGetCard102()
-                            .apply( key )
-                            .map( card -> FinishedTask
-                                    .builder()
-                                    .taskTypes( CARD_102 )
-                                    .task( card.getFabula() )
-                                    .createdDate( card.getCreated_date().getTime() )
-                                    .cardDetails( new CardDetails( card, patrul, "ru" ) )
-                                    .reportForCard( card
-                                            .getReportForCardList()
-                                            .get( this.getReportIndex( card
-                                                            .getReportForCardList(),
-                                                    patrul.getUuid() ) ) )
-                                    .totalTimeConsumption( card
-                                            .getPatrulStatuses()
-                                            .containsKey( patrul.getPassportNumber() )
-                                            ? card
-                                            .getPatrulStatuses()
-                                            .get( patrul.getPassportNumber() )
-                                            .getTotalTimeConsumption() : 0 )
-                                    .build() );
+                        case CARD_102 -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getGetCard102()
+                                .apply( key )
+                                .map( card -> FinishedTask
+                                        .builder()
+                                        .taskTypes( CARD_102 )
+                                        .task( card.getFabula() )
+                                        .createdDate( card.getCreated_date().getTime() )
+                                        .cardDetails( new CardDetails( card, patrul, "ru" ) )
+                                        .reportForCard( card
+                                                .getReportForCardList()
+                                                .get( this.getReportIndex( card.getReportForCardList(),
+                                                        patrul.getUuid() ) ) )
+                                        .totalTimeConsumption( card
+                                                .getPatrulStatuses()
+                                                .containsKey( patrul.getPassportNumber() )
+                                                ? card
+                                                .getPatrulStatuses()
+                                                .get( patrul.getPassportNumber() )
+                                                .getTotalTimeConsumption() : 0 )
+                                        .build() );
 
-                    case FIND_FACE_CAR -> CassandraDataControlForTasks
-                            .getInstance()
-                            .getGetCarEvents()
-                            .apply( key )
-                            .map( carEvent -> FinishedTask
-                                    .builder()
-                                    .taskTypes( FIND_FACE_CAR )
-                                    .task( carEvent.getName() )
-                                    .createdDate( TimeInspector
-                                            .getInspector()
-                                            .getConvertTimeToLong()
-                                            .apply( carEvent.getCreated_date() ) )
-                                    .cardDetails( new CardDetails( new CarDetails( carEvent ) ) )
-                                    .reportForCard( carEvent
-                                            .getReportForCardList()
-                                            .get( this.getReportIndex( carEvent
-                                                    .getReportForCardList(), patrul.getUuid() ) ) )
-                                    .totalTimeConsumption( carEvent
-                                            .getPatrulStatuses()
-                                            .containsKey( patrul.getPassportNumber() )
-                                            ? carEvent
-                                            .getPatrulStatuses()
-                                            .get( patrul.getPassportNumber() )
-                                            .getTotalTimeConsumption() : 0 )
-                                    .build() );
+                        case FIND_FACE_CAR -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getGetCarEvents()
+                                .apply( key )
+                                .map( carEvent -> FinishedTask
+                                        .builder()
+                                        .taskTypes( FIND_FACE_CAR )
+                                        .task( carEvent.getName() )
+                                        .createdDate( TimeInspector
+                                                .getInspector()
+                                                .getConvertTimeToLong()
+                                                .apply( carEvent.getCreated_date() ) )
+                                        .cardDetails( new CardDetails( new CarDetails( carEvent ) ) )
+                                        .reportForCard( carEvent
+                                                .getReportForCardList()
+                                                .get( this.getReportIndex( carEvent
+                                                        .getReportForCardList(), patrul.getUuid() ) ) )
+                                        .totalTimeConsumption( carEvent
+                                                .getPatrulStatuses()
+                                                .containsKey( patrul.getPassportNumber() )
+                                                ? carEvent
+                                                .getPatrulStatuses()
+                                                .get( patrul.getPassportNumber() )
+                                                .getTotalTimeConsumption() : 0 )
+                                        .build() );
 
-                    case FIND_FACE_PERSON -> CassandraDataControlForTasks
-                            .getInstance()
-                            .getGetFaceEvents()
-                            .apply( key )
-                            .map( faceEvent -> FinishedTask
-                                    .builder()
-                                    .taskTypes( FIND_FACE_PERSON )
-                                    .task( faceEvent.getName() )
-                                    .cardDetails( new CardDetails( new PersonDetails( faceEvent ) ) )
-                                    .createdDate( TimeInspector
-                                            .getInspector()
-                                            .getConvertTimeToLong()
-                                            .apply( faceEvent.getCreated_date() ) )
-                                    .reportForCard( faceEvent
-                                            .getReportForCardList()
-                                            .get( this.getReportIndex( faceEvent
-                                                    .getReportForCardList(), patrul.getUuid() ) ) )
-                                    .totalTimeConsumption( faceEvent
-                                            .getPatrulStatuses()
-                                            .containsKey( patrul.getPassportNumber() )
-                                            ? faceEvent
-                                            .getPatrulStatuses()
-                                            .get( patrul.getPassportNumber() )
-                                            .getTotalTimeConsumption() : 0 )
-                                    .build() );
+                        case FIND_FACE_PERSON -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getGetFaceEvents()
+                                .apply( key )
+                                .map( faceEvent -> FinishedTask
+                                        .builder()
+                                        .taskTypes( FIND_FACE_PERSON )
+                                        .task( faceEvent.getName() )
+                                        .cardDetails( new CardDetails( new PersonDetails( faceEvent ) ) )
+                                        .createdDate( TimeInspector
+                                                .getInspector()
+                                                .getConvertTimeToLong()
+                                                .apply( faceEvent.getCreated_date() ) )
+                                        .reportForCard( faceEvent
+                                                .getReportForCardList()
+                                                .get( this.getReportIndex( faceEvent
+                                                        .getReportForCardList(), patrul.getUuid() ) ) )
+                                        .totalTimeConsumption( faceEvent
+                                                .getPatrulStatuses()
+                                                .containsKey( patrul.getPassportNumber() )
+                                                ? faceEvent
+                                                .getPatrulStatuses()
+                                                .get( patrul.getPassportNumber() )
+                                                .getTotalTimeConsumption() : 0 )
+                                        .build() );
 
-                    case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
-                            .getInstance()
-                            .getGetEventCar()
-                            .apply( key )
-                            .map( eventCar -> FinishedTask
-                                    .builder()
-                                    .task( eventCar.getId() )
-                                    .taskTypes( FIND_FACE_EVENT_CAR )
-                                    .createdDate( eventCar.getCreated_date().getTime() )
-                                    .cardDetails( new CardDetails( new CarDetails( eventCar ) ) )
-                                    .reportForCard( eventCar
-                                            .getReportForCardList()
-                                            .get( this.getReportIndex( eventCar
-                                                    .getReportForCardList(), patrul.getUuid() ) ) )
-                                    .totalTimeConsumption( eventCar
-                                            .getPatrulStatuses()
-                                            .containsKey( patrul.getPassportNumber() )
-                                            ? eventCar
-                                            .getPatrulStatuses()
-                                            .get( patrul.getPassportNumber() )
-                                            .getTotalTimeConsumption() : 0 )
-                                    .build() );
+                        case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getGetEventCar()
+                                .apply( key )
+                                .map( eventCar -> FinishedTask
+                                        .builder()
+                                        .task( eventCar.getId() )
+                                        .taskTypes( FIND_FACE_EVENT_CAR )
+                                        .createdDate( eventCar.getCreated_date().getTime() )
+                                        .cardDetails( new CardDetails( new CarDetails( eventCar ) ) )
+                                        .reportForCard( eventCar
+                                                .getReportForCardList()
+                                                .get( this.getReportIndex( eventCar
+                                                        .getReportForCardList(), patrul.getUuid() ) ) )
+                                        .totalTimeConsumption( eventCar
+                                                .getPatrulStatuses()
+                                                .containsKey( patrul.getPassportNumber() )
+                                                ? eventCar
+                                                .getPatrulStatuses()
+                                                .get( patrul.getPassportNumber() )
+                                                .getTotalTimeConsumption() : 0 )
+                                        .build() );
 
-                    case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
-                            .getInstance()
-                            .getGetEventBody()
-                            .apply( key )
-                            .map( eventBody -> FinishedTask
-                                    .builder()
-                                    .task( eventBody.getId() )
-                                    .taskTypes( FIND_FACE_EVENT_BODY )
-                                    .createdDate( eventBody.getCreated_date().getTime() )
-                                    .cardDetails( new CardDetails( new PersonDetails( eventBody ) ) )
-                                    .reportForCard( eventBody
-                                            .getReportForCardList()
-                                            .get( this.getReportIndex( eventBody
-                                                    .getReportForCardList(), patrul.getUuid() ) ) )
-                                    .totalTimeConsumption( eventBody
-                                            .getPatrulStatuses()
-                                            .containsKey( patrul.getPassportNumber() )
-                                            ? eventBody
-                                            .getPatrulStatuses()
-                                            .get( patrul.getPassportNumber() )
-                                            .getTotalTimeConsumption() : 0 )
-                                    .build() );
+                        case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getGetEventBody()
+                                .apply( key )
+                                .map( eventBody -> FinishedTask
+                                        .builder()
+                                        .task( eventBody.getId() )
+                                        .taskTypes( FIND_FACE_EVENT_BODY )
+                                        .createdDate( eventBody.getCreated_date().getTime() )
+                                        .cardDetails( new CardDetails( new PersonDetails( eventBody ) ) )
+                                        .reportForCard( eventBody
+                                                .getReportForCardList()
+                                                .get( this.getReportIndex( eventBody
+                                                        .getReportForCardList(), patrul.getUuid() ) ) )
+                                        .totalTimeConsumption( eventBody
+                                                .getPatrulStatuses()
+                                                .containsKey( patrul.getPassportNumber() )
+                                                ? eventBody
+                                                .getPatrulStatuses()
+                                                .get( patrul.getPassportNumber() )
+                                                .getTotalTimeConsumption() : 0 )
+                                        .build() );
 
-                    case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
-                            .getInstance()
-                            .getGetEventFace()
-                            .apply( key )
-                            .map( eventFace -> FinishedTask
-                                    .builder()
-                                    .task( eventFace.getId() )
-                                    .taskTypes( FIND_FACE_EVENT_FACE )
-                                    .createdDate( eventFace.getCreated_date().getTime() )
-                                    .cardDetails( new CardDetails( new PersonDetails( eventFace ) ) )
-                                    .reportForCard( eventFace
-                                            .getReportForCardList()
-                                            .get( this.getReportIndex( eventFace
-                                                    .getReportForCardList(), patrul.getUuid() ) ) )
-                                    .totalTimeConsumption( eventFace
-                                            .getPatrulStatuses()
-                                            .containsKey( patrul.getPassportNumber() )
-                                            ? eventFace
-                                            .getPatrulStatuses()
-                                            .get( patrul.getPassportNumber() )
-                                            .getTotalTimeConsumption() : 0 )
-                                    .build() );
+                        case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getGetEventFace()
+                                .apply( key )
+                                .map( eventFace -> FinishedTask
+                                        .builder()
+                                        .task( eventFace.getId() )
+                                        .taskTypes( FIND_FACE_EVENT_FACE )
+                                        .createdDate( eventFace.getCreated_date().getTime() )
+                                        .cardDetails( new CardDetails( new PersonDetails( eventFace ) ) )
+                                        .reportForCard( eventFace
+                                                .getReportForCardList()
+                                                .get( this.getReportIndex( eventFace
+                                                        .getReportForCardList(), patrul.getUuid() ) ) )
+                                        .totalTimeConsumption( eventFace
+                                                .getPatrulStatuses()
+                                                .containsKey( patrul.getPassportNumber() )
+                                                ? eventFace
+                                                .getPatrulStatuses()
+                                                .get( patrul.getPassportNumber() )
+                                                .getTotalTimeConsumption() : 0 )
+                                        .build() );
 
-                    default -> CassandraDataControlForTasks
-                            .getInstance()
-                            .getGetSelfEmploymentTask()
-                            .apply( UUID.fromString( key ) )
-                            .map( selfEmploymentTask -> FinishedTask
-                                    .builder()
-                                    .taskTypes( SELF_EMPLOYMENT )
-                                    .task( selfEmploymentTask.getDescription() )
-                                    .createdDate( selfEmploymentTask.getIncidentDate().getTime() )
-                                    .cardDetails( new CardDetails( selfEmploymentTask, "ru", patrul ) )
-                                    .totalTimeConsumption( selfEmploymentTask
-                                            .getPatrulStatuses()
-                                            .containsKey( patrul.getPassportNumber() )
-                                            ? selfEmploymentTask
-                                            .getPatrulStatuses()
-                                            .get( patrul.getPassportNumber() )
-                                            .getTotalTimeConsumption() : 0 )
-                                    .reportForCard( selfEmploymentTask
-                                            .getReportForCards()
-                                            .get( this.getReportIndex( selfEmploymentTask
-                                                    .getReportForCards(), patrul.getUuid() ) ) )
-                                    .build() ); } )
+                        default -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getGetSelfEmploymentTask()
+                                .apply( UUID.fromString( key ) )
+                                .map( selfEmploymentTask -> FinishedTask
+                                        .builder()
+                                        .taskTypes( SELF_EMPLOYMENT )
+                                        .task( selfEmploymentTask.getDescription() )
+                                        .createdDate( selfEmploymentTask.getIncidentDate().getTime() )
+                                        .cardDetails( new CardDetails( selfEmploymentTask, "ru", patrul ) )
+                                        .totalTimeConsumption( selfEmploymentTask
+                                                .getPatrulStatuses()
+                                                .containsKey( patrul.getPassportNumber() )
+                                                ? selfEmploymentTask
+                                                .getPatrulStatuses()
+                                                .get( patrul.getPassportNumber() )
+                                                .getTotalTimeConsumption() : 0 )
+                                        .reportForCard( selfEmploymentTask
+                                                .getReportForCards()
+                                                .get( this.getReportIndex( selfEmploymentTask
+                                                        .getReportForCards(), patrul.getUuid() ) ) )
+                                        .build() ); } )
                 .sequential()
                 .publishOn( Schedulers.single() )
                 .collectList()
