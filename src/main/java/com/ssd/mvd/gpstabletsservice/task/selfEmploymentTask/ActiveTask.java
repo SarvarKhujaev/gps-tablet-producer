@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
-import lombok.Data;
 import java.util.Map;
 import java.util.Date;
 import java.util.UUID;
@@ -16,7 +15,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
-@Data
+@lombok.Data
 public class ActiveTask {
     private Double latitude;
     private Double longitude;

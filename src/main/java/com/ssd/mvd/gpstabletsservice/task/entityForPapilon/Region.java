@@ -1,12 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Region {
     private Long regionId;
     private Long mahallaId;

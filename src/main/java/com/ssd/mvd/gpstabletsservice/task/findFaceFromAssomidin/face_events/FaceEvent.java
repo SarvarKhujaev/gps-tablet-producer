@@ -1,13 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.extern.jackson.Jacksonized;
-import java.util.*;
-import lombok.*;
-
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
@@ -16,10 +8,17 @@ import com.ssd.mvd.gpstabletsservice.task.card.VictimHumans;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
-@Data
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.extern.jackson.Jacksonized;
+import java.util.*;
+
+@lombok.Data
 @Jacksonized
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class FaceEvent {
     private String name;

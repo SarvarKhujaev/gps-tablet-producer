@@ -2,13 +2,10 @@ package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForPassport.ModelForPassport;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class TexPassport {
     private Double weight; // вес без груза
     private Double totalWeight; // общий вес

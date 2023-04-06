@@ -1,13 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.task.sos_task;
 
 import lombok.extern.jackson.Jacksonized;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 @lombok.Data
 @Jacksonized
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Data {
     private String road;
     private String city;

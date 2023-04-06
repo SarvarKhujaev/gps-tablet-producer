@@ -1,13 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
 import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Pinpp {
     private String Data;
     private String Name;

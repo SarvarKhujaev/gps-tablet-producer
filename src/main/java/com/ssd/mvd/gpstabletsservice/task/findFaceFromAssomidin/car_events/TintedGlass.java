@@ -2,11 +2,10 @@ package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class TintedGlass {
     @JsonProperty("TintinType")

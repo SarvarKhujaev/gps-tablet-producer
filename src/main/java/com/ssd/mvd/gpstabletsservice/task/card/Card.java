@@ -1,16 +1,15 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-
 import java.util.*;
-import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Card {
     @JsonProperty( "CardId" )
     private Long cardId;

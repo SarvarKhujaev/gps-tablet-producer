@@ -13,12 +13,11 @@ import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
 import lombok.extern.jackson.Jacksonized;
 import java.util.*;
-import lombok.*;
 
-@Data
+@lombok.Data
 @Jacksonized
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public class CarEvent {
     private String name;

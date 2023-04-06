@@ -3,15 +3,11 @@ package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForAddress.ModelForAddress;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
-
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import java.util.List;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class PsychologyCard {
     @JsonDeserialize
     private Pinpp pinpp;

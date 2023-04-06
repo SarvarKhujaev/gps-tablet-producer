@@ -5,16 +5,12 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.*;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.*;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.*;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
-
 import java.util.List;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class TaskDetails {
     private String date;
     private String title;

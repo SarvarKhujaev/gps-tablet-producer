@@ -11,9 +11,8 @@ import com.datastax.driver.core.Row;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import lombok.Data;
 
-@Data
+@lombok.Data
 public class TaskTimingStatistics { // показывает все таски со временем их выполнения и деталями
     private String carType; // модель машины
     private String organName;

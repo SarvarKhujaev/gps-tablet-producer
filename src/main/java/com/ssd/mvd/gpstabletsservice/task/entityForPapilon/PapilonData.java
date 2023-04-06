@@ -1,12 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class PapilonData {
     private Integer rank;
     private Double score;

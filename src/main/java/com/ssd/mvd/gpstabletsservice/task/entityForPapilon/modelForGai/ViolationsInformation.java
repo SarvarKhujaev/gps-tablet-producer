@@ -1,13 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai;
 
 import com.datastax.driver.core.UDTValue;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@lombok.Data
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class ViolationsInformation {
     private Integer decreeStatus;
     private Integer amount;

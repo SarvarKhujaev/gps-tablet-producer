@@ -3,11 +3,8 @@ package com.ssd.mvd.gpstabletsservice.task.sos_task;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import java.util.UUID;
 
-import lombok.Builder;
-import lombok.Data;
-
-@Data
-@Builder
+@lombok.Data
+@lombok.Builder
 // используется патрульным для того чтобы подтвердить или отказаться от соса
 public class SosRequest {
     private UUID patrulUUID;
