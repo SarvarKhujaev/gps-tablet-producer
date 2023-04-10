@@ -253,7 +253,7 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                     "latlngs ) VALUES ("
                     + polygon.getUuid() + ", "
                     + polygon.getUuidOfEscort() + ", '"
-                    + polygon.getName() + "', "
+                    + polygon.getName().replaceAll( "'", "" ) + "', "
 
                     + polygon.getTotalTime() + ", "
                     + polygon.getRouteIndex() + ", "
@@ -311,7 +311,7 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                             "latlngs ) VALUES ("
                             + polygon.getUuid() + ", "
                             + polygon.getUuidOfEscort() + ", '"
-                            + polygon.getName() + "', "
+                            + polygon.getName().replaceAll( "'", "" ) + "', "
 
                             + polygon.getTotalTime() + ", "
                             + polygon.getRouteIndex() + ", "
