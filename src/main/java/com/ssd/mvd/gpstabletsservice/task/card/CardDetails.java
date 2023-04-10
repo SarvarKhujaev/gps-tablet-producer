@@ -30,10 +30,12 @@ public class CardDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam().test( carTotalData.getDoverennostList() )
+                .getCheckParam()
+                .test( carTotalData.getDoverennostList() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckList().test( carTotalData
+                .getCheckList()
+                .test( carTotalData
                 .getDoverennostList()
                 .getDoverennostsList() ) )
             carTotalData
@@ -50,12 +52,14 @@ public class CardDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam().test( carTotalData
+                .getCheckParam()
+                .test( carTotalData
                 .getPsychologyCard()
                 .getModelForCarList() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckList().test( carTotalData
+                .getCheckList()
+                .test( carTotalData
                 .getPsychologyCard()
                 .getModelForCarList()
                 .getModelForCarList() ) ) carTotalData
@@ -81,12 +85,14 @@ public class CardDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam().test( carTotalData
+                .getCheckParam()
+                .test( carTotalData
                 .getPsychologyCard()
                 .getModelForPassport() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckParam().test( carTotalData
+                .getCheckParam()
+                .test( carTotalData
                 .getPsychologyCard()
                 .getModelForPassport()
                 .getDocument() ) ) {
@@ -174,7 +180,8 @@ public class CardDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam().test( carTotalData.getModelForCar().getTonirovka() ) ) {
+                .getCheckParam()
+                .test( carTotalData.getModelForCar().getTonirovka() ) ) {
             this.getDetails().get( Details.TONIROVKA ).add( new Item( "TURI", carTotalData
                     .getModelForCar()
                     .getTonirovka()
@@ -192,7 +199,8 @@ public class CardDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam().test( carTotalData.getModelForCar().getInsurance() ) ) {
+                .getCheckParam()
+                .test( carTotalData.getModelForCar().getInsurance() ) ) {
             this.getDetails().get( Details.AVTO_SUGURTA ).add( new Item( "BERILGAN VAQTI", carTotalData
                     .getModelForCar()
                     .getInsurance()
@@ -262,67 +270,78 @@ public class CardDetails {
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Телефон", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getPhone()
                                             : Errors.DATA_NOT_FOUND.name()) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Имя", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getFirstName()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Поступил", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getCheckin()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Больница", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getHospital()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Отчество", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getMiddleName()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Фамилия", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getLastName()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "ID Заявителя", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getHumanId()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Отделение", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getHospitaldept()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Тип лечения", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getTreatmentkind()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.APPLICANT_DATA )
                                     .add( new Item( "Кто звонил", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getFirstName()
                                             : Errors.DATA_NOT_FOUND.name()
                                             + " "
                                             + ( DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventHuman() )
+                                            .getCheckParam()
+                                            .test( card.getEventHuman() )
                                             ? card.getEventHuman().getMiddleName()
                                             : Errors.DATA_NOT_FOUND.name() ) ) ); }
 
@@ -330,14 +349,16 @@ public class CardDetails {
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Телефон", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getVictimHumans() )
+                                            .getCheckParam()
+                                            .test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans().get( 0 ).getPhone()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Имя", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getVictimHumans() )
+                                            .getCheckParam()
+                                            .test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
@@ -346,7 +367,8 @@ public class CardDetails {
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Отчество", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getVictimHumans() )
+                                            .getCheckParam()
+                                            .test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
@@ -355,7 +377,8 @@ public class CardDetails {
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Фамилия", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getVictimHumans() )
+                                            .getCheckParam()
+                                            .test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
@@ -364,7 +387,8 @@ public class CardDetails {
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "ID Потерпевшего", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getVictimHumans() )
+                                            .getCheckParam()
+                                            .test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
@@ -373,7 +397,8 @@ public class CardDetails {
                             this.getDetails().get( Details.DATA_OF_VICTIM )
                                     .add( new Item( "Дата рождения", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getVictimHumans() )
+                                            .getCheckParam()
+                                            .test( card.getVictimHumans() )
                                             && card.getVictimHumans().size() > 0
                                             ? card.getVictimHumans()
                                             .get( 0 )
@@ -383,10 +408,12 @@ public class CardDetails {
                         case ADDRESS_OF_VICTIM -> {
                             if ( DataValidateInspector
                                     .getInstance()
-                                    .getCheckParam().test( card.getEventHuman() )
+                                    .getCheckParam()
+                                    .test( card.getEventHuman() )
                                     && DataValidateInspector
                                     .getInstance()
-                                    .getCheckParam().test( card.getEventHuman().getHumanAddress() ) ) {
+                                    .getCheckParam()
+                                    .test( card.getEventHuman().getHumanAddress() ) ) {
                                 this.getDetails().get( Details.ADDRESS_OF_VICTIM )
                                         .add( new Item( "Улица", card.getEventHuman().getHumanAddress().getStreet() ) );
                                 this.getDetails().get( Details.ADDRESS_OF_VICTIM )
@@ -404,26 +431,30 @@ public class CardDetails {
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS )
                                     .add( new Item( "Дом", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventAddress() )
+                                            .getCheckParam()
+                                            .test( card.getEventAddress() )
                                             ? card.getEventAddress().getFlat()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS )
                                     .add( new Item( "Адрес", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventAddress() )
+                                            .getCheckParam()
+                                            .test( card.getEventAddress() )
                                             ? card.getEventAddress().getStreet()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS )
                                     .add( new Item( "Квартира", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventAddress() )
+                                            .getCheckParam()
+                                            .test( card.getEventAddress() )
                                             ? card.getEventAddress().getHouse()
                                             : Errors.DATA_NOT_FOUND.name() ) ); }
 
                         case ADDRESS_OF_INCIDENT -> {
                             if ( DataValidateInspector
                                     .getInstance()
-                                    .getCheckParam().test( card.getEventAddress() ) ) {
+                                    .getCheckParam()
+                                    .test( card.getEventAddress() ) ) {
                                 this.getDetails().get( Details.APPLICANT_DATA )
                                         .add( new Item( "Улица", card.getEventAddress().getStreet() ) );
                                 this.getDetails().get( Details.APPLICANT_DATA )
@@ -440,10 +471,12 @@ public class CardDetails {
                         case ADDRESS_OF_APPLICANT -> {
                             if ( DataValidateInspector
                                     .getInstance()
-                                    .getCheckParam().test( card.getEventHuman() )
+                                    .getCheckParam()
+                                    .test( card.getEventHuman() )
                                     && DataValidateInspector
                                     .getInstance()
-                                    .getCheckParam().test( card.getEventHuman().getHumanAddress() ) ) {
+                                    .getCheckParam()
+                                    .test( card.getEventHuman().getHumanAddress() ) ) {
                                 this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
                                         .add( new Item( "Улица", card.getEventHuman().getHumanAddress().getStreet() ) );
                                 this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
@@ -460,13 +493,16 @@ public class CardDetails {
                         case ADDITIONAL_ADDRESS_OF_Victim -> {
                             if ( DataValidateInspector
                                     .getInstance()
-                                    .getCheckParam().test( card.getVictimHumans() )
+                                    .getCheckParam()
+                                    .test( card.getVictimHumans() )
                                     && DataValidateInspector
                                     .getInstance()
-                                    .getCheckList().test( card.getVictimHumans() )
+                                    .getCheckList()
+                                    .test( card.getVictimHumans() )
                                     && DataValidateInspector
                                     .getInstance()
-                                    .getCheckParam().test(
+                                    .getCheckParam()
+                                    .test(
                                             card.getVictimHumans()
                                                     .get( 0 )
                                                     .getVictimAddress() ) ) {
@@ -490,19 +526,22 @@ public class CardDetails {
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
                                     .add( new Item( "Дом", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventAddress() )
+                                            .getCheckParam()
+                                            .test( card.getEventAddress() )
                                             ? card.getEventAddress().getFlat()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
                                     .add( new Item( "Адрес", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventAddress() )
+                                            .getCheckParam()
+                                            .test( card.getEventAddress() )
                                             ? card.getEventAddress().getHouse()
                                             : Errors.DATA_NOT_FOUND.name() ) );
                             this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
                                     .add( new Item( "Квартира", DataValidateInspector
                                             .getInstance()
-                                            .getCheckParam().test( card.getEventAddress() )
+                                            .getCheckParam()
+                                            .test( card.getEventAddress() )
                                             ? card.getEventAddress().getStreet()
                                             : Errors.DATA_NOT_FOUND.name() ) ); } } } ); }
 
@@ -529,28 +568,28 @@ public class CardDetails {
         this.getDetails().put( Details.SELF_EMPLOYMENT, new ArrayList<>() );
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() )
                 .subscribe( details -> {
-            switch ( details ) {
-                case NUMBER -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "№", selfEmploymentTask.getUuid() ) );
-                case ADDRESS -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Адрес", selfEmploymentTask.getAddress() ) );
-                case DESCRIPTION -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Описание", selfEmploymentTask.getDescription() ) );
-                case ACCEPTED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
-                case REPORT_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Время отправки рапорта", selfEmploymentTask.getIncidentDate() ) );
-                case ACCEPTED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Принятая точка", selfEmploymentTask.getLatOfPatrul() ) );
-                case ARRIVED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Точка прибытия", selfEmploymentTask.getLatOfAccident() ) );
-                case ACCEPTED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Принятая точка", selfEmploymentTask.getLanOfPatrul() ) );
-                case ARRIVED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Точка прибытия", selfEmploymentTask.getLanOfAccident() ) );
-                case ARRIVED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT )
-                        .add( new Item( "Время прибытия", selfEmploymentTask
-                                .getPatruls()
-                                .get( patrul.getUuid() )
-                                .getTaskDate() ) ); } } ); }
+                    switch ( details ) {
+                        case NUMBER -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "№", selfEmploymentTask.getUuid() ) );
+                        case ADDRESS -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Адрес", selfEmploymentTask.getAddress() ) );
+                        case DESCRIPTION -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Описание", selfEmploymentTask.getDescription() ) );
+                        case ACCEPTED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Принятое время", selfEmploymentTask.getIncidentDate() ) );
+                        case REPORT_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Время отправки рапорта", selfEmploymentTask.getIncidentDate() ) );
+                        case ACCEPTED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Принятая точка", selfEmploymentTask.getLatOfPatrul() ) );
+                        case ARRIVED_POINT_LATITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Точка прибытия", selfEmploymentTask.getLatOfAccident() ) );
+                        case ACCEPTED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Принятая точка", selfEmploymentTask.getLanOfPatrul() ) );
+                        case ARRIVED_POINT_LONGITUDE -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Точка прибытия", selfEmploymentTask.getLanOfAccident() ) );
+                        case ARRIVED_TIME -> this.getDetails().get( Details.SELF_EMPLOYMENT )
+                                .add( new Item( "Время прибытия", selfEmploymentTask
+                                        .getPatruls()
+                                        .get( patrul.getUuid() )
+                                        .getTaskDate() ) ); } } ); }
 }
