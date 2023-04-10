@@ -21,7 +21,6 @@ import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class PolygonForPatrulController extends LogInspector { // SAM - 76
-
     @MessageMapping( value = "listOfPoligonsForPatrul" )
     public Flux< Polygon > listOfPoligonsForPatrul () { return CassandraDataControl
             .getInstance()
@@ -31,44 +30,6 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
-
-    @MessageMapping ( value = "deletePolygonForPatrul" )
-    public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return CassandraDataControl
-            .getInstance()
-            .getDeletePolygonForPatrul()
-            .apply( uuid )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "updatePolygonForPatrul" )
-    public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) { return CassandraDataControl
-            .getInstance()
-            .getUpdatePolygonForPatrul()
-            .apply( polygon )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "addPatrulToPolygon" )
-    public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
-        return super.getCheckList().test( scheduleForPolygonPatrul.getPatrulUUIDs() )
-                ? super.getFunction().apply( Map.of(
-                        "message", "Wrong params",
-                        "success", false,
-                        "code", 201 ) )
-                : CassandraDataControl
-                .getInstance()
-                .getAddPatrulToPolygon()
-                .apply( scheduleForPolygonPatrul )
-                .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "addPolygonForPatrul" )
-    public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) { return CassandraDataControl
-            .getInstance()
-            .getAddPolygonForPatrul()
-            .apply( polygon )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getPatrulsForPolygon" )
     public Mono< List< Patrul > > getPatrulsForPolygon ( String uuid ) {
@@ -84,4 +45,46 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
                         .apply( uuid1 )
                         .subscribe( patrulList::add ) ) );
         return Mono.just( patrulList ); }
+
+    @MessageMapping ( value = "deletePolygonForPatrul" )
+    public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return CassandraDataControl
+            .getInstance()
+            .getDeletePolygonForPatrul()
+            .apply( uuid )
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
+
+    @MessageMapping ( value = "addPolygonForPatrul" )
+    public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) {
+        polygon.setName( polygon.getName().replaceAll( "'", "" ) );
+        return CassandraDataControl
+                .getInstance()
+                .getAddPolygonForPatrul()
+                .apply( polygon )
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
+
+    @MessageMapping ( value = "updatePolygonForPatrul" )
+    public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) {
+        polygon.setName( polygon.getName().replaceAll( "'", "" ) );
+        return CassandraDataControl
+                .getInstance()
+                .getUpdatePolygonForPatrul()
+                .apply( polygon )
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
+
+    @MessageMapping ( value = "addPatrulToPolygon" )
+    public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
+        return super.getCheckList().test( scheduleForPolygonPatrul.getPatrulUUIDs() )
+                ? super.getFunction().apply( Map.of(
+                        "message", "Wrong params",
+                        "success", false,
+                        "code", 201 ) )
+                : CassandraDataControl
+                .getInstance()
+                .getAddPatrulToPolygon()
+                .apply( scheduleForPolygonPatrul )
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 }
