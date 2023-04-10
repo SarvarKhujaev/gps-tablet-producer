@@ -39,18 +39,22 @@ public class PolygonForEscortController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updatePolygonForEscort" )
-    public Mono< ApiResponseModel > updatePolygonForEscort ( PolygonForEscort polygon ) { return CassandraDataControlForEscort
-            .getInstance()
-            .getUpdatePolygonForEscort()
-            .apply( polygon )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+    public Mono< ApiResponseModel > updatePolygonForEscort ( final PolygonForEscort polygon ) {
+        polygon.setName( polygon.getName().replaceAll( "'", "" ) );
+        return CassandraDataControlForEscort
+                .getInstance()
+                .getUpdatePolygonForEscort()
+                .apply( polygon )
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "addNewPolygonForEscort" )
-    public Mono< ApiResponseModel > addNewPolygonForEscort ( PolygonForEscort polygon ) { return CassandraDataControlForEscort
-            .getInstance()
-            .getSavePolygonForEscort()
-            .apply( polygon )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+    public Mono< ApiResponseModel > addNewPolygonForEscort ( final PolygonForEscort polygon ) {
+        polygon.setName( polygon.getName().replaceAll( "'", "" ) );
+        return CassandraDataControlForEscort
+                .getInstance()
+                .getSavePolygonForEscort()
+                .apply( polygon )
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.getErrorResponse().get() ); }
 }
