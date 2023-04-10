@@ -60,7 +60,7 @@ public class CardController extends SerDes {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
-    public Flux< ApiResponseModel > linkCardToPatrul ( CardRequest< ? > request ) {
+    public Flux< ApiResponseModel > linkCardToPatrul ( final CardRequest< ? > request ) {
         if ( request.getTaskType().compareTo( TaskTypes.CARD_102 ) == 0 ) {
             final Card card = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             card.setUuid( UUID.randomUUID() );
@@ -69,16 +69,15 @@ public class CardController extends SerDes {
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
-                    .map( s -> CassandraDataControl
+                    .flatMap( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
-                            .apply( s ) )
-                    .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> super.getFunction()
-                                    .apply( Map.of( "message", card + " was linked to: "
+                            .apply( s )
+                            .flatMap( patrul -> super.getFunction().apply(
+                                    Map.of( "message", card + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
-                                            .changeTaskStatus( patrul1, ATTACHED, card )
+                                            .changeTaskStatus( patrul, ATTACHED, card )
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
@@ -92,16 +91,15 @@ public class CardController extends SerDes {
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
-                    .map( s -> CassandraDataControl
+                    .flatMap( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
-                            .apply( s ) )
-                    .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> super.getFunction()
-                                    .apply( Map.of( "message", carEvents + " was linked to: "
+                            .apply( s )
+                            .flatMap( patrul -> super.getFunction().apply(
+                                    Map.of( "message", carEvents + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
-                                            .changeTaskStatus( patrul1, ATTACHED, carEvents )
+                                            .changeTaskStatus( patrul, ATTACHED, carEvents )
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
@@ -116,16 +114,15 @@ public class CardController extends SerDes {
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
-                    .map( s -> CassandraDataControl
+                    .flatMap( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
-                            .apply( s ) )
-                    .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> super.getFunction()
-                                    .apply( Map.of( "message", facePerson + " was linked to: "
+                            .apply( s )
+                            .flatMap( patrul -> super.getFunction().apply(
+                                    Map.of( "message", facePerson + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
-                                            .changeTaskStatus( patrul1, ATTACHED, facePerson )
+                                            .changeTaskStatus( patrul, ATTACHED, facePerson )
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
@@ -139,13 +136,12 @@ public class CardController extends SerDes {
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
-                    .map( s -> CassandraDataControl
+                    .flatMap( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
-                            .apply( s ) )
-                    .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> super.getFunction()
-                                    .apply( Map.of( "message", eventFace + " was linked to: "
+                            .apply( s )
+                            .flatMap( patrul1 -> super.getFunction().apply(
+                                    Map.of( "message", eventFace + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul1, ATTACHED, eventFace )
@@ -162,16 +158,15 @@ public class CardController extends SerDes {
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
-                    .map( s -> CassandraDataControl
+                    .flatMap( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
-                            .apply( s ) )
-                    .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> super.getFunction()
-                                    .apply( Map.of( "message", eventBody + " was linked to: "
+                            .apply( s )
+                            .flatMap( patrul -> super.getFunction().apply(
+                                    Map.of( "message", eventBody + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
-                                            .changeTaskStatus( patrul1, ATTACHED, eventBody )
+                                            .changeTaskStatus( patrul, ATTACHED, eventBody )
                                             .getName() ) ) ) )
                     .sequential()
                     .publishOn( Schedulers.single() )
@@ -184,13 +179,12 @@ public class CardController extends SerDes {
             return Flux.fromStream( request.getPatruls().stream() )
                     .parallel( request.getPatruls().size() )
                     .runOn( Schedulers.parallel() )
-                    .map( s -> CassandraDataControl
+                    .flatMap( s -> CassandraDataControl
                             .getInstance()
                             .getGetPatrulByUUID()
-                            .apply( s ) )
-                    .flatMap( patrul -> patrul
-                            .flatMap( patrul1 -> super.getFunction()
-                                    .apply( Map.of( "message", eventCar + " was linked to: "
+                            .apply( s )
+                            .flatMap( patrul1 -> super.getFunction().apply(
+                                    Map.of( "message", eventCar + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul1, ATTACHED, eventCar )

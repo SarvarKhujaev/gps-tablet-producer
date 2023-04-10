@@ -719,11 +719,11 @@ public final class CassandraDataControl extends CassandraConverter {
                     patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
                 if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
                 if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
-                if ( this.getCheckLogin().apply( patrul.getLogin() ) != null ) return super.getFunction()
-                        .apply( Map.of(
-                                "message", "Patrul with this login has already been inserted, choose another one",
+                if ( this.getCheckLogin().apply( patrul.getLogin() ) != null ) return super.getFunction().apply(
+                        Map.of( "message", "Patrul with this login has already been inserted, choose another one",
                                 "success", false,
                                 "code", 201 ) );
+
                 this.getSession().execute( "INSERT INTO "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.PATRULS_LOGIN_TABLE.name()
@@ -731,10 +731,12 @@ public final class CassandraDataControl extends CassandraConverter {
                         + patrul.getLogin() + "', '"
                         + patrul.getPassword() + "', "
                         + patrul.getUuid() + " ) IF NOT EXISTS;" );
+
                 CassandraDataControlForTasks
                         .getInstance()
                         .getCreateRowInPatrulSosListTable()
                         .accept( patrul.getUuid() );
+
                 return this.getSession().execute( "INSERT INTO "
                                 + CassandraTables.TABLETS.name() + "."
                                 + CassandraTables.PATRULS.name() +
