@@ -111,45 +111,39 @@ public class KafkaDataControl extends SerDes {
 
     // отправляет уведомление фронту
     private final Function< SosNotification, String > writeSosNotificationToKafka = sosNotification -> {
-        this.getKafkaSender()
-                .createOutbound()
-                .send( Mono.just( new ProducerRecord<>(
-                        this.getSOS_TOPIC(),
-                        super.serialize( sosNotification ) ) ) )
-                .then()
-                .doOnError( error -> super.logging( error.getMessage() ) )
-                .doOnSuccess( success -> super.logging( "sosNotification from: "
-                        + sosNotification.getPatrulUUID() + " was sent to front end"
-                        + " at: " + new Date() ) )
-                .subscribe();
-        return "Sos was saved successfully"; };
+            this.getKafkaSender()
+                    .createOutbound()
+                    .send( Mono.just( new ProducerRecord<>( this.getSOS_TOPIC(), super.serialize( sosNotification ) ) ) )
+                    .then()
+                    .doOnError( error -> super.logging( error.getMessage() ) )
+                    .doOnSuccess( success -> super.logging( "sosNotification from: "
+                            + sosNotification.getPatrulUUID() + " was sent to front end"
+                            + " at: " + new Date() ) )
+                    .subscribe();
+            return "Sos was saved successfully"; };
 
     private final Function< CarTotalData, CarTotalData > writeCarTotalDataToKafka = carTotalData -> {
-        this.getKafkaSender()
-                .createOutbound()
-                .send( Mono.just( new ProducerRecord<>(
-                        this.getCAR_TOTAL_DATA(),
-                        super.serialize( carTotalData ) ) ) )
-                .then()
-                .doOnError( error -> super.logging( error.getMessage() ) )
-                .doOnSuccess( success -> super.logging( "Kafka got carTotalData : "
-                        + carTotalData.getGosNumber()
-                        + " at: " + new Date() ) )
-                .subscribe();
-        return carTotalData; };
+            this.getKafkaSender()
+                    .createOutbound()
+                    .send( Mono.just( new ProducerRecord<>( this.getCAR_TOTAL_DATA(), super.serialize( carTotalData ) ) ) )
+                    .then()
+                    .doOnError( error -> super.logging( error.getMessage() ) )
+                    .doOnSuccess( success -> super.logging( "Kafka got carTotalData : "
+                            + carTotalData.getGosNumber()
+                            + " at: " + new Date() ) )
+                    .subscribe();
+            return carTotalData; };
 
     private final Consumer< Notification > writeNotificationToKafka = notification ->
-        this.getKafkaSender()
-                .createOutbound()
-                .send( Mono.just( new ProducerRecord<>(
-                        this.getNOTIFICATION(),
-                        super.serialize( notification ) ) ) )
-                .then()
-                .doOnError( error -> super.logging( error.getMessage() ) )
-                .doOnSuccess( success -> super.logging( "Kafka got notification: "
-                        + notification.getTitle()
-                        + " at: " + notification.getNotificationWasCreated() ) )
-                .subscribe();
+            this.getKafkaSender()
+                    .createOutbound()
+                    .send( Mono.just( new ProducerRecord<>( this.getNOTIFICATION(), super.serialize( notification ) ) ) )
+                    .then()
+                    .doOnError( error -> super.logging( error.getMessage() ) )
+                    .doOnSuccess( success -> super.logging( "Kafka got notification: "
+                            + notification.getTitle()
+                            + " at: " + notification.getNotificationWasCreated() ) )
+                    .subscribe();
 
     public void clear () {
         instance = null;
