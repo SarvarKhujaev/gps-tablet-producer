@@ -27,13 +27,13 @@ public class CarController extends LogInspector {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getCurrentCar" )
-    public Mono< ReqCar > getCurrentCar ( String gosno ) { return CassandraDataControl
+    public Mono< ReqCar > getCurrentCar ( final String gosno ) { return CassandraDataControl
             .getInstance()
             .getGetCarByUUID()
             .apply( UUID.fromString( gosno ) ); }
 
     @MessageMapping( value = "searchByGosnoCar" )
-    public Flux< ReqCar > searchByGosno ( String gosno ) { return CassandraDataControl
+    public Flux< ReqCar > searchByGosno ( final String gosno ) { return CassandraDataControl
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.CARS )
@@ -44,7 +44,7 @@ public class CarController extends LogInspector {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping( value = "addCar" )
-    public Mono< ApiResponseModel > addCar ( ReqCar reqCar ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addCar ( final ReqCar reqCar ) { return CassandraDataControl
             .getInstance()
             .getSaveCar()
             .apply( reqCar )
@@ -52,7 +52,7 @@ public class CarController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping( value = "deleteCar" )
-    public Mono< ApiResponseModel > deleteCar ( String gosno ) {
+    public Mono< ApiResponseModel > deleteCar ( final String gosno ) {
         return CassandraDataControl
                 .getInstance()
                 .getDeleteCar()
@@ -61,7 +61,7 @@ public class CarController extends LogInspector {
                 .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updateCar" )
-    public Mono< ApiResponseModel > updateCar ( ReqCar reqCar ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updateCar ( final ReqCar reqCar ) { return CassandraDataControl
             .getInstance()
             .getUpdateCar()
             .apply( reqCar )
