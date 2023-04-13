@@ -235,7 +235,7 @@ public class CardController extends SerDes {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "removePatrulFromTask" )
-    public Mono< ApiResponseModel > removePatrulFromTask ( UUID uuid ) {
+    public Mono< ApiResponseModel > removePatrulFromTask ( final UUID uuid ) {
         return CassandraDataControl
                 .getInstance()
                 .getGetPatrulByUUID()
@@ -257,13 +257,19 @@ public class CardController extends SerDes {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getDetailsOfTask" )
-    public Mono< TaskDetails > getDetailsOfTask ( TaskDetailsRequest request ) { return CassandraDataControlForTasks
-            .getInstance()
-            .getGetTaskDetails()
-            .apply( request ); }
+    public Mono< TaskDetails > getDetailsOfTask ( final TaskDetailsRequest request ) {
+        return super.getCheckParam().test( request )
+                && super.getCheckParam().test( request.getId() )
+                && super.getCheckParam().test( request.getTaskTypes() )
+                && super.getCheckParam().test( request.getPatrulUUID() )
+                ? CassandraDataControlForTasks
+                .getInstance()
+                .getGetTaskDetails()
+                .apply( request )
+                : Mono.empty(); }
 
     @MessageMapping ( value = "addNewPatrulsToTask" )
-    public Mono< ApiResponseModel > addNewPatrulsToTask ( CardRequest< ? > request ) {
+    public Mono< ApiResponseModel > addNewPatrulsToTask ( final CardRequest< ? > request ) {
         return switch ( request.getTaskType() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
@@ -406,7 +412,7 @@ public class CardController extends SerDes {
                                         + " has got new patrul" ) ); } ); }; }
 
     @MessageMapping ( value = "getTaskTimingStatistics" )
-    public Mono< TaskTimingStatisticsList > getTaskTimingStatistics ( TaskTimingRequest request ) {
+    public Mono< TaskTimingStatisticsList > getTaskTimingStatistics ( final TaskTimingRequest request ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getGetTaskTimingStatistics()
