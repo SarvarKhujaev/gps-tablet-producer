@@ -1,12 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import lombok.Data;
-import reactor.core.publisher.Mono;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.Arrays;
 import java.time.Duration;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,7 +28,7 @@ import com.ssd.mvd.gpstabletsservice.task.sos_task.Address;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 
-@Data
+@lombok.Data
 public class UnirestController extends LogInspector {
     private final String ADDRESS_LOCATION_API = GpsTabletsServiceApplication
             .context
@@ -146,7 +144,7 @@ public class UnirestController extends LogInspector {
             super.logging( e );
             return Errors.DATA_NOT_FOUND.name(); } };
 
-    @Data
+    @lombok.Data
     public static class Req {
         private UUID id;
         private Role role;

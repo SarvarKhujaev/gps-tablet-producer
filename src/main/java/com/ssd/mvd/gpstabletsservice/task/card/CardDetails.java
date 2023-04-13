@@ -34,10 +34,10 @@ public class CardDetails {
                 .test( carTotalData.getDoverennostList() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckList()
-                .test( carTotalData
+                .getCheckRequest()
+                .apply( carTotalData
                 .getDoverennostList()
-                .getDoverennostsList() ) )
+                .getDoverennostsList(), 6 ) )
             carTotalData
                     .getDoverennostList()
                     .getDoverennostsList()
@@ -58,11 +58,11 @@ public class CardDetails {
                 .getModelForCarList() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckList()
-                .test( carTotalData
+                .getCheckRequest()
+                .apply( carTotalData
                 .getPsychologyCard()
                 .getModelForCarList()
-                .getModelForCarList() ) ) carTotalData
+                .getModelForCarList(), 6 ) ) carTotalData
                 .getPsychologyCard()
                 .getModelForCarList()
                 .getModelForCarList()
@@ -497,15 +497,15 @@ public class CardDetails {
                                     .test( card.getVictimHumans() )
                                     && DataValidateInspector
                                     .getInstance()
-                                    .getCheckList()
-                                    .test( card.getVictimHumans() )
+                                    .getCheckRequest()
+                                    .apply( card.getVictimHumans(), 6 )
                                     && DataValidateInspector
                                     .getInstance()
                                     .getCheckParam()
-                                    .test(
-                                            card.getVictimHumans()
-                                                    .get( 0 )
-                                                    .getVictimAddress() ) ) {
+                                    .test( card
+                                            .getVictimHumans()
+                                            .get( 0 )
+                                            .getVictimAddress() ) ) {
                                 this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim )
                                         .add( new Item( "Дом", card.getVictimHumans()
                                                 .get( 0 )

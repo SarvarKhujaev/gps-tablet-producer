@@ -38,7 +38,7 @@ public class NotificationController extends LogInspector {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "setAsRead" )
-    public Mono< ApiResponseModel > setAsRead ( String id ) { return CassandraDataControl
+    public Mono< ApiResponseModel > setAsRead ( final String id ) { return CassandraDataControl
             .getInstance()
             .getSetNotificationAsRead()
             .apply( UUID.fromString( id ) )

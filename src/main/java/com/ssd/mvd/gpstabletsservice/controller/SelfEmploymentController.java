@@ -18,14 +18,14 @@ import java.util.Map;
 @RestController
 public class SelfEmploymentController extends LogInspector {
     @MessageMapping ( value = "getSelfEmployment" ) // returns the current Card
-    public Mono< SelfEmploymentTask > getSelfEmployment ( UUID uuid ) { return CassandraDataControlForTasks
+    public Mono< SelfEmploymentTask > getSelfEmployment ( final UUID uuid ) { return CassandraDataControlForTasks
             .getInstance()
             .getGetSelfEmploymentTask()
             .apply( uuid )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )
-    public Mono< ApiResponseModel > addReportForSelfEmployment ( ReportForCard reportForCard ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addReportForSelfEmployment ( final ReportForCard reportForCard ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
             .apply( reportForCard.getUuidOfPatrul() )
@@ -37,7 +37,7 @@ public class SelfEmploymentController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "addSelfEmployment" ) // saves new Task and link the Patrul who created it
-    public Mono< ApiResponseModel > addSelfEmployment ( SelfEmploymentTask selfEmploymentTask ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addSelfEmployment ( final SelfEmploymentTask selfEmploymentTask ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
             .apply( selfEmploymentTask.getPatruls().keySet().iterator().next() )

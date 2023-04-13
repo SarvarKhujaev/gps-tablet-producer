@@ -27,14 +27,14 @@ public class CountryController extends LogInspector {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getCurrentCountry" )
-    public Mono< Country > getCurrentCountry ( String countryName ) { return CassandraDataControlForEscort
+    public Mono< Country > getCurrentCountry ( final String countryName ) { return CassandraDataControlForEscort
             .getInstance()
             .getGetCurrentCountry()
             .apply( countryName )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping( value = "addNewCountry" )
-    public Mono< ApiResponseModel > addNewCountry ( Country country ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > addNewCountry ( final Country country ) { return CassandraDataControlForEscort
             .getInstance()
             .getSaveNewCountry()
             .apply( country )
@@ -42,7 +42,7 @@ public class CountryController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updateCountry" )
-    public Mono< ApiResponseModel > updateCountry ( Country country ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > updateCountry ( final Country country ) { return CassandraDataControlForEscort
             .getInstance()
             .getUpdate()
             .apply( country )
@@ -50,7 +50,7 @@ public class CountryController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "deleteCountry" )
-    public Mono< ApiResponseModel > deleteCountry ( String countryName ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > deleteCountry ( final String countryName ) { return CassandraDataControlForEscort
             .getInstance()
             .getDeleteCountry()
             .apply( countryName )

@@ -18,7 +18,7 @@ import java.util.UUID;
 public class PolygonController extends LogInspector {
 
     @MessageMapping( value = "deletePolygon" )
-    public Mono< ApiResponseModel > deletePolygon ( String uuid ) { return CassandraDataControl
+    public Mono< ApiResponseModel > deletePolygon ( final String uuid ) { return CassandraDataControl
             .getInstance()
             .delete( CassandraTables.POLYGON.name(),
                     "uuid",
@@ -27,7 +27,7 @@ public class PolygonController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "addNewPolygon" )
-    public Mono< ApiResponseModel > addNewPolygon ( Polygon polygon ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addNewPolygon ( final Polygon polygon ) { return CassandraDataControl
             .getInstance()
             .getSavePolygon()
             .apply( polygon )
@@ -35,7 +35,7 @@ public class PolygonController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updatePolygon" )
-    public Mono< ApiResponseModel > updatePolygon ( Polygon polygon ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updatePolygon ( final Polygon polygon ) { return CassandraDataControl
             .getInstance()
             .getUpdatePolygon()
             .apply( polygon )
@@ -53,7 +53,7 @@ public class PolygonController extends LogInspector {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getCurrentPolygon" )
-    public Mono< Polygon > getCurrentPolygon ( UUID uuid ) { return CassandraDataControl
+    public Mono< Polygon > getCurrentPolygon ( final UUID uuid ) { return CassandraDataControl
             .getInstance()
             .getGetPolygonByUUID()
             .apply( uuid )
