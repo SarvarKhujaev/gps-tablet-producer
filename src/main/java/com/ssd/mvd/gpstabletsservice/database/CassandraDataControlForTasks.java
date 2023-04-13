@@ -101,7 +101,7 @@ public class CassandraDataControlForTasks extends SerDes {
         super.logging( "Starting CassandraDataControl for tasks" ); }
 
     private final Function< String, List< ViolationsInformation > > getViolationsInformationList = gosnumber -> {
-        Row row = this.getSession().execute( "SELECT * FROM "
+        final Row row = this.getSession().execute( "SELECT * FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.CARTOTALDATA.name()
                         + " WHERE gosnumber = '" + gosnumber + "';" ).one();
@@ -127,49 +127,49 @@ public class CassandraDataControlForTasks extends SerDes {
                     + " where uuid = " + uuid + ";" ).one();
 
     private final Function< UUID, Mono< SelfEmploymentTask > > getSelfEmploymentTask = id -> {
-        Row row = this.getRow.apply( id );
+        final Row row = this.getRow.apply( id );
         return super.getCheckParam().test( row )
                 ? Mono.just( (SelfEmploymentTask) super.getDeserialize().apply(
                         row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< FaceEvent > > getFaceEvents = id -> {
-        Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getRow.apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
                 ? Mono.justOrEmpty( (FaceEvent) super.getDeserialize().apply(
                         row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< EventBody > > getEventBody = id -> {
-        Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getRow.apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
                 ? Mono.justOrEmpty( (EventBody) super.getDeserialize().apply(
                         row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< EventFace > > getEventFace = id -> {
-        Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getRow.apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
                 ? Mono.just( (EventFace) super.getDeserialize().apply(
                         row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< CarEvent > > getCarEvents = id -> {
-        Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getRow.apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
                 ? Mono.just( ( CarEvent ) super.getDeserialize().apply(
                         row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< EventCar > > getEventCar = id -> {
-        Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getRow.apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
                 ? Mono.just( (EventCar) super.getDeserialize().apply(
                         row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< Card > > getCard102 = id -> {
-        Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getRow.apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
                 ? Mono.just( ( Card ) super.getDeserialize().apply(
                         row.getString( "object" ), TaskTypes.CARD_102 ) )
@@ -575,7 +575,7 @@ public class CassandraDataControlForTasks extends SerDes {
                     + " WHERE uuid = " + uuid + ";" ).one() );
 
     private final Predicate< UUID > checkSosWasFinished = uuid -> {
-        Row row = this.getSession().execute( "SELECT * FROM "
+        final Row row = this.getSession().execute( "SELECT * FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.PATRUL_SOS_TABLE.name()
                         + " WHERE uuid = " + uuid + ";" )
