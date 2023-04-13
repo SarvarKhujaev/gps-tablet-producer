@@ -96,12 +96,15 @@ public class PatrulController extends SerDes {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "LOGIN" ) // for checking login data of Patrul with his Login and password
-    public Mono< ApiResponseModel > patrulLogin ( final PatrulLoginRequest patrulLoginRequest ) { return CassandraDataControl
-            .getInstance()
-            .getLogin()
-            .apply( patrulLoginRequest )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+    public Mono< ApiResponseModel > patrulLogin ( final PatrulLoginRequest patrulLoginRequest ) {
+        return super.getCheckRequest().apply( patrulLoginRequest, 0 )
+                ? CassandraDataControl
+                    .getInstance()
+                    .getLogin()
+                    .apply( patrulLoginRequest )
+                    .onErrorContinue( super::logging )
+                    .onErrorReturn( super.getErrorResponse().get() )
+                : super.getErrorResponseForWrongParams().get(); }
 
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
     public Flux< Patrul > getAllUsersList () { return CassandraDataControl
