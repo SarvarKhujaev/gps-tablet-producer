@@ -26,7 +26,7 @@ public class PoliceTypeController extends LogInspector {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping( value = "addPoliceType" )
-    public Mono< ApiResponseModel > addPoliceType ( PoliceType policeType ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addPoliceType ( final PoliceType policeType ) { return CassandraDataControl
             .getInstance()
             .getSavePoliceType()
             .apply( policeType )
@@ -34,7 +34,7 @@ public class PoliceTypeController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updatePoliceType" )
-    public Mono< ApiResponseModel > updatePoliceType ( PoliceType policeType ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updatePoliceType ( final PoliceType policeType ) { return CassandraDataControl
             .getInstance()
             .getUpdatePoliceType()
             .apply( policeType )
@@ -42,7 +42,7 @@ public class PoliceTypeController extends LogInspector {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "deletePoliceType" )
-    public Mono< ApiResponseModel > deletePoliceType ( PoliceType policeType ) { return CassandraDataControl
+    public Mono< ApiResponseModel > deletePoliceType ( final PoliceType policeType ) { return CassandraDataControl
             .getInstance()
             .delete( CassandraTables.POLICE_TYPE.name(),
                     "uuid",

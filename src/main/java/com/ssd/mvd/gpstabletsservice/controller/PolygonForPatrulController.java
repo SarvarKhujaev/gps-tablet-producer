@@ -76,7 +76,7 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
 
     @MessageMapping ( value = "addPatrulToPolygon" )
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
-        return super.getCheckList().test( scheduleForPolygonPatrul.getPatrulUUIDs() )
+        return super.getCheckRequest().apply( scheduleForPolygonPatrul.getPatrulUUIDs(), 6 )
                 ? super.getFunction().apply( Map.of(
                         "message", "Wrong params",
                         "success", false,

@@ -1,15 +1,19 @@
 package com.ssd.mvd.gpstabletsservice.inspectors;
 
 import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
+import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.request.AndroidVersionUpdate;
+import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.entity.TabletUsage;
+import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.controller.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.datastax.driver.core.Row;
 
@@ -32,24 +36,36 @@ public class DataValidateInspector extends Archive {
 
     private final Predicate< Object > checkParam = Objects::nonNull;
 
-    public final Predicate< List< ? > > checkList = list -> list != null && list.size() > 0;
+    private final BiFunction< Object, Integer, Boolean > checkRequest = ( o, value ) -> switch ( value ) {
+        case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
+        case 2 -> ( (PatrulActivityRequest) o ).getStartDate() != null && ( (PatrulActivityRequest) o ).getEndDate() != null;
+        case 3 -> ( (Patrul) o ).getTaskId().equals( "null" )
+                && ( (Patrul) o ).getUuidOfEscort() == null
+                && ( (Patrul) o ).getUuidForPatrulCar() == null
+                && ( (Patrul) o ).getUuidForEscortCar() == null
+                && ( (Patrul) o ).getCarNumber().equals( "null" )
+                && ( (Patrul) o ).getTaskTypes().compareTo( TaskTypes.FREE ) == 0;
+        case 4 -> ( (PatrulSos) o ).getPatrulStatuses() != null && ( (PatrulSos) o ).getPatrulStatuses().size() > 19;
+        case 5 -> Math.abs( TimeInspector
+                .getInspector()
+                .getGetTimeDifferenceInHours()
+                .apply( ( (Date) o ).toInstant() ) ) >= 24;
+        case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
+        case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null
+                && ( (AndroidVersionUpdate) o ).getLink() != null;
+        default -> ( (PatrulLoginRequest) o ).getLogin() != null
+                && ( (PatrulLoginRequest) o ).getPassword() != null
+                && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };
 
-    public final Function< Date, Boolean > checkTime = date -> Math.abs(
-            TimeInspector
-                    .getInspector()
-                    .getGetTimeDifferenceInHours()
-                    .apply( date.toInstant() ) ) >= 24;
+    private final BiFunction< TabletUsage, PatrulActivityRequest, Boolean > checkTabletUsage = ( tabletUsages, request ) ->
+            tabletUsages
+                    .getStartedToUse()
+                    .before( request.getEndDate() )
+            && tabletUsages
+                    .getStartedToUse()
+                    .after( request.getStartDate() );
 
-    // проверяет не имеет ли патрульный задание или не привязан ли он к эскорту или машине
-    private final Predicate< Patrul > checkPatrulLinks = patrul ->
-            patrul.getTaskId().equals( "null" )
-                    && patrul.getUuidOfEscort() == null
-                    && patrul.getUuidForPatrulCar() == null
-                    && patrul.getUuidForEscortCar() == null
-                    && patrul.getCarNumber().equals( "null" )
-                    && patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0;
-
-    private final BiFunction< TaskTimingRequest, Row, Boolean > checkRequest = ( request, row ) ->
+    private final BiFunction< TaskTimingRequest, Row, Boolean > checkTaskTimingRequest = ( request, row ) ->
             request.getEndDate() == null
             || request.getStartDate() == null
             || row.getTimestamp( "dateofcoming" ).after( request.getStartDate() )
@@ -74,7 +90,7 @@ public class DataValidateInspector extends Archive {
         else if ( this.getCheckTable().apply( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
         else return CassandraTables.EVENTFACE; };
 
-    private final Predicate<UUID> checkSosTable = patrulUUID -> CassandraDataControl
+    private final Predicate< UUID > checkSosTable = patrulUUID -> CassandraDataControl
             .getInstance()
             .getSession()
             .execute( "SELECT * FROM "
@@ -83,20 +99,14 @@ public class DataValidateInspector extends Archive {
                     + " WHERE patrulUUID = " + patrulUUID + ";" )
             .one() == null;
 
-
-
     // по статусу определяет какой параметр обновлять
-    private final Function<Status, String > defineNecessaryTable = status -> switch ( status ) {
+    private final Function< Status, String > defineNecessaryTable = status -> switch ( status ) {
         case ATTACHED -> "attachedSosList";
         case CANCEL -> "cancelledSosList";
         case CREATED -> "sentSosList";
         default -> "acceptedSosList"; };
 
-    private final Predicate< PatrulSos > checkPatrulSos = patrulSos ->
-            patrulSos.getPatrulStatuses() != null
-            && patrulSos.getPatrulStatuses().size() > 19;
-
-    private final Predicate<PolygonForEscort> checkPolygonForEscort = polygon ->
+    private final Predicate< PolygonForEscort > checkPolygonForEscort = polygon ->
             CassandraDataControlForEscort
                     .getInstance()
                     .getSession()
@@ -134,8 +144,7 @@ public class DataValidateInspector extends Archive {
             + CassandraTables.CARS.name() +
             " where gosnumber = '" + carNumber + "';" ).one() == null;
 
-    private final Predicate< Row > checkPatrulStatus = row ->
-            row.getDouble( "latitude" ) > 0 && row.getDouble( "longitude" ) > 0;
+    private final Predicate< Row > checkPatrulStatus = row -> row.getDouble( "latitude" ) > 0 && row.getDouble( "longitude" ) > 0;
 
     private static final Double p = PI / 180;
 

@@ -690,7 +690,7 @@ public final class CassandraDataControl extends CassandraConverter {
     private final Function< UUID, Mono< ApiResponseModel > > deletePatrul = uuid -> this.getGetPatrulByUUID()
             .apply( uuid )
             .flatMap( patrul -> {
-                if ( super.getCheckPatrulLinks().test( patrul ) ) {
+                if ( super.getCheckRequest().apply( patrul, 3 ) ) {
                     this.getSession().execute ( "DELETE FROM "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS_LOGIN_TABLE.name()
@@ -1188,7 +1188,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     + " WHERE login = '" + login + "';" ).one();
 
     private final Function< PatrulLoginRequest, Mono< ApiResponseModel > > login = patrulLoginRequest -> {
-            Row row = this.getCheckLogin().apply( patrulLoginRequest.getLogin() );
+            final Row row = this.getCheckLogin().apply( patrulLoginRequest.getLogin() );
             return super.getCheckParam().test( row )
                     ? this.getGetPatrulByUUID()
                     .apply( row.getUUID( "uuid" ) )
@@ -1324,7 +1324,7 @@ public final class CassandraDataControl extends CassandraConverter {
             .apply( this.getDecode().apply( token ) )
             .flatMap( patrul -> {
                 this.getUpdatePatrulActivity().accept( patrul );
-                if ( super.getCheckTime().apply( patrul.getTaskDate() ) ) {
+                if ( super.getCheckRequest().apply( patrul.getTaskDate(), 5 ) ) {
                     this.getUpdateStatus().apply( patrul, CANCEL );
                     return TaskInspector
                             .getInstance()

@@ -263,7 +263,7 @@ public class CassandraDataControlForTasks extends SerDes {
                         .getGetAllEntities()
                         .apply( CassandraTables.TABLETS, CassandraTables.TASKS_TIMING_TABLE )
                         .filter( row -> super.getCheckParam().test( row.getTimestamp( "dateofcoming" ) ) )
-                        .filter( row -> super.getCheckRequest().apply( request, row ) )
+                        .filter( row -> super.getCheckTaskTimingRequest().apply( request, row ) )
                         .filter( row -> super.getCheckTaskType().apply( request, row ) )
                         .map( TaskTimingStatistics::new )
                         .sequential()
@@ -432,7 +432,7 @@ public class CassandraDataControlForTasks extends SerDes {
                         + " WHERE patrulUUID = " + patrulUUID + ";" ) ); }
 
     private final Consumer< PatrulSos > save = patrulSos1 -> {
-        if ( super.getCheckPatrulSos().test( patrulSos1 ) )
+        if ( super.getCheckRequest().apply( patrulSos1, 4 ) )
             this.getSession().execute( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.PATRUL_SOS_TABLE.name()

@@ -39,6 +39,17 @@ public class Archive {
             .success( false )
             .build();
 
+    private final Supplier< Mono< ApiResponseModel > > errorResponseForWrongParams = () -> Mono.just(
+            ApiResponseModel
+                    .builder() // in case of wrong login
+                    .status( Status
+                            .builder()
+                            .message( "Wrong Params" )
+                            .code( 201 )
+                            .build() )
+                    .success( false )
+                    .build() );
+
     // возвращает сообзение о слишком большой задержке прихода в точку назначения
     private final Supplier< Mono< ApiResponseModel > > errorResponseForLateComing = () -> Mono.just(
             ApiResponseModel

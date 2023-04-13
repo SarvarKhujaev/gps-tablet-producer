@@ -33,7 +33,7 @@ public class SosController extends LogInspector {
 
     // используется планшетом чтобы проверить не отправлял ли он СОС раньше
     @MessageMapping ( value = "checkSosStatus" )
-    public Mono< ApiResponseModel > checkSosStatus ( String token ) {
+    public Mono< ApiResponseModel > checkSosStatus ( final String token ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getCheckSosTable()
@@ -56,7 +56,7 @@ public class SosController extends LogInspector {
 
     // возвращает список из сос сигналов которые еще не были закрыты и привязаны к данному патрульному
     @MessageMapping ( value = "getAllSosForCurrentPatrul" )
-    public Mono< ApiResponseModel > getAllSosForCurrentPatrul ( String token ) {
+    public Mono< ApiResponseModel > getAllSosForCurrentPatrul ( final String token ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getGetAllSosForCurrentPatrul()
@@ -70,7 +70,7 @@ public class SosController extends LogInspector {
     // в случае возникновения какой - либо опасности, патрульный модет отправить сигнал СОС
     // метод перехватывает этот сигнал и вносит в базу и шлет оповещение на фронт
     @MessageMapping ( value = "saveSosFromPatrul" )
-    public Mono< ApiResponseModel > saveSosFromPatrul ( PatrulSos patrulSos ) {
+    public Mono< ApiResponseModel > saveSosFromPatrul ( final PatrulSos patrulSos ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getSavePatrulSos()
@@ -79,7 +79,7 @@ public class SosController extends LogInspector {
                 .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updatePatrulStatusInSosTable" )
-    public Mono< ApiResponseModel > updatePatrulStatusInSosTable ( SosRequest sosRequest ) {
+    public Mono< ApiResponseModel > updatePatrulStatusInSosTable ( final SosRequest sosRequest ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getUpdatePatrulStatusInSosTable()

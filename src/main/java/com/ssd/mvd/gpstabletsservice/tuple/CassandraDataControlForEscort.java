@@ -97,7 +97,7 @@ public class CassandraDataControlForEscort extends CassandraConverter {
             this.getGetCurrentTupleOfEscort()
                     .apply( id )
                     .flatMap( escortTuple -> {
-                        if ( super.getCheckList().test( escortTuple.getPatrulList() ) )
+                        if ( super.getCheckRequest().apply( escortTuple.getPatrulList(), 6 ) )
                             escortTuple
                                     .getPatrulList()
                                     .parallelStream()
@@ -108,7 +108,7 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                                                     + ", uuidForEscortCar = " + null
                                                     + " where uuid = " + uuid + ";" ) );
 
-                        if ( super.getCheckList().test( escortTuple.getTupleOfCarsList() ) )
+                        if ( super.getCheckRequest().apply( escortTuple.getTupleOfCarsList(), 6 ) )
                             escortTuple
                                     .getTupleOfCarsList()
                                     .parallelStream()

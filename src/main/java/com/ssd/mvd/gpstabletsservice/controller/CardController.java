@@ -45,7 +45,7 @@ public class CardController extends SerDes {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
-    public Mono< ApiResponseModel > getCurrentActiveTask ( String token ) { return CassandraDataControl
+    public Mono< ApiResponseModel > getCurrentActiveTask ( final String token ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
             .apply( CassandraDataControl
@@ -195,7 +195,7 @@ public class CardController extends SerDes {
                     .onErrorReturn( super.getErrorResponse().get() ); } }
 
     @MessageMapping ( value = "addNewWarningCar" )
-    public Mono< ApiResponseModel > addNewWarningCar ( CarTotalData carTotalData ) {
+    public Mono< ApiResponseModel > addNewWarningCar ( final CarTotalData carTotalData ) {
         return super.getFunction().apply(
                 Map.of( "message", "Car was saved successfully",
                         "success", CassandraDataControlForTasks
@@ -209,14 +209,14 @@ public class CardController extends SerDes {
                 .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getActiveTaskForFront" )
-    public Mono< ActiveTask > getActiveTaskForFront ( TaskDetailsRequest taskDetailsRequest ) {
+    public Mono< ActiveTask > getActiveTaskForFront ( final TaskDetailsRequest taskDetailsRequest ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getGetActiveTask()
                 .apply( taskDetailsRequest ); }
 
     @MessageMapping ( value = "getViolationsInformationList" )
-    public Mono< List< ViolationsInformation > > getViolationsInformationList ( String gosnumber ) { return Mono.just(
+    public Mono< List< ViolationsInformation > > getViolationsInformationList ( final String gosnumber ) { return Mono.just(
             CassandraDataControlForTasks
                     .getInstance()
                     .getGetViolationsInformationList()
@@ -249,7 +249,7 @@ public class CardController extends SerDes {
                 .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getWarningCarDetails" )
-    public Mono< ApiResponseModel > getWarningCarDetails ( String gosnumber ) { return CassandraDataControlForTasks
+    public Mono< ApiResponseModel > getWarningCarDetails ( final String gosnumber ) { return CassandraDataControlForTasks
             .getInstance()
             .getGetWarningCarDetails()
             .apply( gosnumber )
