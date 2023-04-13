@@ -1190,8 +1190,7 @@ public final class CassandraDataControl extends CassandraConverter {
     private final Function< PatrulLoginRequest, Mono< ApiResponseModel > > login = patrulLoginRequest -> {
             final Row row = this.getCheckLogin().apply( patrulLoginRequest.getLogin() );
             return super.getCheckParam().test( row )
-                    ? this.getGetPatrulByUUID()
-                    .apply( row.getUUID( "uuid" ) )
+                    ? this.getGetPatrulByUUID().apply( row.getUUID( "uuid" ) )
                     .flatMap( patrul -> {
                         if ( patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) {
                             patrul.setStartedToWorkDate( new Date() );
@@ -1240,8 +1239,7 @@ public final class CassandraDataControl extends CassandraConverter {
 
                             return super.getFunction().apply(
                                     Map.of( "message", "Authentication successfully passed",
-                                            "success", this.getUpdatePatrulStatus()
-                                                    .apply( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ),
+                                            "success", this.getUpdatePatrulStatus().apply( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.LOGIN ),
                                             "data",  com.ssd.mvd.gpstabletsservice.entity.Data
                                                     .builder()
                                                     .type( patrul.getUuid().toString() )
