@@ -67,7 +67,7 @@ public class CardController extends SerDes {
 
             if ( card.getCreated_date() == null ) card.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel( request.getPatruls().size() )
+                    .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
                     .runOn( Schedulers.parallel() )
                     .flatMap( s -> CassandraDataControl
                             .getInstance()
@@ -89,7 +89,7 @@ public class CardController extends SerDes {
             carEvents.setUuid( UUID.randomUUID() );
             if ( carEvents.getCreated_date() == null ) carEvents.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel( request.getPatruls().size() )
+                    .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
                     .runOn( Schedulers.parallel() )
                     .flatMap( s -> CassandraDataControl
                             .getInstance()
@@ -112,7 +112,7 @@ public class CardController extends SerDes {
             if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
                 facePerson.setCreated_date( new Date().toString() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel( request.getPatruls().size() )
+                    .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
                     .runOn( Schedulers.parallel() )
                     .flatMap( s -> CassandraDataControl
                             .getInstance()
@@ -134,7 +134,7 @@ public class CardController extends SerDes {
             eventFace.setUuid( UUID.randomUUID() );
             if ( eventFace.getCreated_date() == null ) eventFace.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel( request.getPatruls().size() )
+                    .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
                     .runOn( Schedulers.parallel() )
                     .flatMap( s -> CassandraDataControl
                             .getInstance()
@@ -156,7 +156,7 @@ public class CardController extends SerDes {
             eventBody.setUuid( UUID.randomUUID() );
             if ( eventBody.getCreated_date() == null ) eventBody.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel( request.getPatruls().size() )
+                    .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
                     .runOn( Schedulers.parallel() )
                     .flatMap( s -> CassandraDataControl
                             .getInstance()
@@ -177,7 +177,7 @@ public class CardController extends SerDes {
             eventCar.setUuid( UUID.randomUUID() );
             if ( eventCar.getCreated_date() == null ) eventCar.setCreated_date( new Date() );
             return Flux.fromStream( request.getPatruls().stream() )
-                    .parallel( request.getPatruls().size() )
+                    .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
                     .runOn( Schedulers.parallel() )
                     .flatMap( s -> CassandraDataControl
                             .getInstance()
@@ -228,8 +228,7 @@ public class CardController extends SerDes {
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.CARTOTALDATA )
-            .map( row -> (CarTotalData) super.getDeserialize().apply(
-                    row.getString( "object" ), TaskTypes.ESCORT ) )
+            .map( row -> (CarTotalData) super.getDeserialize().apply( row.getString( "object" ), TaskTypes.ESCORT ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
@@ -277,36 +276,43 @@ public class CardController extends SerDes {
                     .apply( request.getCard().toString() )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
-                                .map( uuid -> CassandraDataControl
+                                .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
+                                .runOn( Schedulers.parallel() )
+                                .flatMap( uuid -> CassandraDataControl
                                         .getInstance()
                                         .getGetPatrulByUUID()
                                         .apply( uuid ) )
-                                .subscribe( patrulMono -> patrulMono
-                                        .subscribe( patrul -> TaskInspector
-                                                .getInstance()
-                                                .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                        card ) ) );
+                                .map( patrul -> TaskInspector
+                                        .getInstance()
+                                        .changeTaskStatus( patrul,
+                                                com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                card ) )
+                                .sequential()
+                                .publishOn( Schedulers.single() )
+                                .subscribe();
                         return super.getFunction().apply(
-                                Map.of( "message", request.getCard()
-                                        + " has got new patrul" ) ); } );
+                                Map.of( "message", request.getCard() + " has got new patrul" ) ); } );
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
                     .getGetEventFace()
                     .apply( request.getCard().toString() )
-                    .flatMap( card -> {
+                    .flatMap( eventFace -> {
                         Flux.fromStream( request.getPatruls().stream() )
-                                .map( uuid -> CassandraDataControl
+                                .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
+                                .runOn( Schedulers.parallel() )
+                                .flatMap( uuid -> CassandraDataControl
                                         .getInstance()
                                         .getGetPatrulByUUID()
                                         .apply( uuid ) )
-                                .subscribe( patrulMono -> patrulMono
-                                        .subscribe( patrul -> TaskInspector
-                                                .getInstance()
-                                                .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                        card ) ) );
+                                .map( patrul -> TaskInspector
+                                        .getInstance()
+                                        .changeTaskStatus( patrul,
+                                                com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                eventFace ) )
+                                .sequential()
+                                .publishOn( Schedulers.single() )
+                                .subscribe();
                         return super.getFunction().apply(
                                 Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } );
@@ -315,58 +321,67 @@ public class CardController extends SerDes {
                     .getInstance()
                     .getGetEventCar()
                     .apply( request.getCard().toString() )
-                    .flatMap( card -> {
+                    .flatMap( eventCar -> {
                         Flux.fromStream( request.getPatruls().stream() )
-                                .map( uuid -> CassandraDataControl
+                                .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
+                                .runOn( Schedulers.parallel() )
+                                .flatMap( uuid -> CassandraDataControl
                                         .getInstance()
                                         .getGetPatrulByUUID()
                                         .apply( uuid ) )
-                                .subscribe( patrulMono -> patrulMono
-                                        .subscribe( patrul -> TaskInspector
-                                                .getInstance()
-                                                .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                        card ) ) );
+                                .map( patrul -> TaskInspector
+                                        .getInstance()
+                                        .changeTaskStatus( patrul,
+                                                com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                eventCar ) )
+                                .sequential()
+                                .publishOn( Schedulers.single() )
+                                .subscribe();
                         return super.getFunction().apply(
-                                Map.of( "message", request.getCard()
-                                        + " has got new patrul" ) ); } );
+                                Map.of( "message", request.getCard() + " has got new patrul" ) ); } );
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
                     .getGetEventBody()
                     .apply( request.getCard().toString() )
-                    .flatMap( card -> {
+                    .flatMap( eventBody -> {
                         Flux.fromStream( request.getPatruls().stream() )
-                                .map( uuid -> CassandraDataControl
+                                .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
+                                .runOn( Schedulers.parallel() )
+                                .flatMap( uuid -> CassandraDataControl
                                         .getInstance()
                                         .getGetPatrulByUUID()
                                         .apply( uuid ) )
-                                .subscribe( patrulMono -> patrulMono
-                                        .subscribe( patrul -> TaskInspector
-                                                .getInstance()
-                                                .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                        card ) ) );
-                        return super.getFunction().apply(
-                                Map.of( "message", request.getCard()
-                                        + " has got new patrul" ) ); } );
+                                .map( patrul -> TaskInspector
+                                        .getInstance()
+                                        .changeTaskStatus( patrul,
+                                                com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                eventBody ) )
+                                .sequential()
+                                .publishOn( Schedulers.single() )
+                                .subscribe();
+                        return super.getFunction().apply( Map.of( "message", request.getCard() + " has got new patrul" ) ); } );
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
                     .getGetCarEvents()
                     .apply( request.getCard().toString() )
-                    .flatMap( card -> {
+                    .flatMap( carEvent -> {
                         Flux.fromStream( request.getPatruls().stream() )
-                                .map( uuid -> CassandraDataControl
+                                .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
+                                .runOn( Schedulers.parallel() )
+                                .flatMap( uuid -> CassandraDataControl
                                         .getInstance()
                                         .getGetPatrulByUUID()
                                         .apply( uuid ) )
-                                .subscribe( patrulMono -> patrulMono
-                                        .subscribe( patrul -> TaskInspector
-                                                .getInstance()
-                                                .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                        card ) ) );
+                                .map( patrul -> TaskInspector
+                                        .getInstance()
+                                        .changeTaskStatus( patrul,
+                                                com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                carEvent ) )
+                                .sequential()
+                                .publishOn( Schedulers.single() )
+                                .subscribe();
                         return super.getFunction().apply(
                                 Map.of( "message", request.getCard()
                                         + " has got new patrul" ) ); } );
@@ -377,19 +392,21 @@ public class CardController extends SerDes {
                     .apply( request.getCard().toString() )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
-                                .map( uuid -> CassandraDataControl
+                                .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
+                                .runOn( Schedulers.parallel() )
+                                .flatMap( uuid -> CassandraDataControl
                                         .getInstance()
                                         .getGetPatrulByUUID()
                                         .apply( uuid ) )
-                                .subscribe( patrulMono -> patrulMono
-                                        .subscribe( patrul -> TaskInspector
-                                                .getInstance()
-                                                .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                        card ) ) );
-                        return super.getFunction().apply(
-                                Map.of( "message", request.getCard()
-                                        + " has got new patrul" ) ); } );
+                                .map( patrul -> TaskInspector
+                                        .getInstance()
+                                        .changeTaskStatus( patrul,
+                                                com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                card ) )
+                                .sequential()
+                                .publishOn( Schedulers.single() )
+                                .subscribe();
+                        return super.getFunction().apply( Map.of( "message", request.getCard() + " has got new patrul" ) ); } );
 
             default -> CassandraDataControlForTasks
                     .getInstance()
@@ -397,19 +414,21 @@ public class CardController extends SerDes {
                     .apply( UUID.fromString( request.getCard().toString() ) )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
-                                .map( uuid -> CassandraDataControl
+                                .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
+                                .runOn( Schedulers.parallel() )
+                                .flatMap( uuid -> CassandraDataControl
                                         .getInstance()
                                         .getGetPatrulByUUID()
                                         .apply( uuid ) )
-                                .subscribe( patrulMono -> patrulMono
-                                        .subscribe( patrul -> TaskInspector
-                                                .getInstance()
-                                                .changeTaskStatus( patrul,
-                                                        com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                        card ) ) );
-                        return super.getFunction().apply(
-                                Map.of( "message", request.getCard()
-                                        + " has got new patrul" ) ); } ); }; }
+                                .map( patrul -> TaskInspector
+                                        .getInstance()
+                                        .changeTaskStatus( patrul,
+                                                com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
+                                                card ) )
+                                .sequential()
+                                .publishOn( Schedulers.single() )
+                                .subscribe();
+                        return super.getFunction().apply( Map.of( "message", request.getCard() + " has got new patrul" ) ); } ); }; }
 
     @MessageMapping ( value = "getTaskTimingStatistics" )
     public Mono< TaskTimingStatisticsList > getTaskTimingStatistics ( final TaskTimingRequest request ) {

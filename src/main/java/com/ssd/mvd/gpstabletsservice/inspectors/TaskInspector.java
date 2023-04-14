@@ -37,11 +37,11 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.Face
 
 @lombok.Data
 public final class TaskInspector extends Archive {
-    private static TaskInspector taskInspector;
+    private static TaskInspector taskInspector = new TaskInspector();
 
     public static TaskInspector getInstance () { return taskInspector != null ? taskInspector : new TaskInspector(); }
 
-    private final BiFunction< Patrul, Status, String > generateText = (patrul, status ) -> switch ( status ) {
+    private final BiFunction< Patrul, Status, String > generateText = ( patrul, status ) -> switch ( status ) {
             case ATTACHED -> patrul.getName()
                     + " got new task: " + patrul.getTaskId()
                     + " " + patrul.getTaskTypes();
@@ -64,7 +64,7 @@ public final class TaskInspector extends Archive {
                     + " has been canceled from task "
                     + " at: " + new Date(); };
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, Card card ) {
+    public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final Card card ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
@@ -104,7 +104,7 @@ public final class TaskInspector extends Archive {
                 patrul.setLongitudeOfTask( card.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = new PatrulStatus( patrul );
+                final PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 card.getPatrulStatuses().put( patrul.getPassportNumber(), patrulStatus );
 
                 CassandraDataControl
@@ -158,7 +158,7 @@ public final class TaskInspector extends Archive {
                                 status ) ) );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, EventCar eventCar ) {
+    public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final EventCar eventCar ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
@@ -197,7 +197,7 @@ public final class TaskInspector extends Archive {
                 patrul.setLongitudeOfTask( eventCar.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = new PatrulStatus( patrul );
+                final PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 eventCar.getPatrulStatuses()
                         .put( patrul.getPassportNumber(), patrulStatus );
 
@@ -251,7 +251,7 @@ public final class TaskInspector extends Archive {
                                 status  ) ) );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, EventFace eventFace ) {
+    public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final EventFace eventFace ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
@@ -290,7 +290,7 @@ public final class TaskInspector extends Archive {
                 patrul.setLongitudeOfTask( eventFace.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = new PatrulStatus( patrul );
+                final PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 eventFace
                         .getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
@@ -345,7 +345,7 @@ public final class TaskInspector extends Archive {
                                 status  ) ) );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, EventBody eventBody ) {
+    public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final EventBody eventBody ) {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
@@ -384,7 +384,7 @@ public final class TaskInspector extends Archive {
                 patrul.setLongitudeOfTask( eventBody.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = new PatrulStatus( patrul );
+                final PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 eventBody.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
@@ -437,7 +437,7 @@ public final class TaskInspector extends Archive {
                                 status  ) ) );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, CarEvent carEvents ) {
+    public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final CarEvent carEvents ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
@@ -473,13 +473,19 @@ public final class TaskInspector extends Archive {
             case ATTACHED -> {
                 patrul.setTaskTypes( FIND_FACE_CAR );
                 patrul.setTaskId( carEvents.getUUID().toString() ); // saving card id into patrul object
-                if ( carEvents.getDataInfo() != null
-                        && carEvents.getDataInfo().getData() != null ) {
+                if ( DataValidateInspector
+                        .getInstance()
+                        .getCheckParam()
+                        .test( carEvents.getDataInfo() )
+                        && DataValidateInspector
+                        .getInstance()
+                        .getCheckParam()
+                        .test( carEvents.getDataInfo().getData() ) ) {
                     patrul.setLatitudeOfTask( carEvents.getDataInfo().getData().getLatitude() );
                     patrul.setLongitudeOfTask( carEvents.getDataInfo().getData().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = new PatrulStatus( patrul );
+                final PatrulStatus patrulStatus = new PatrulStatus( patrul );
                 carEvents.getPatrulStatuses()
                         .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
@@ -532,7 +538,7 @@ public final class TaskInspector extends Archive {
                                 status  ) ) );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, FaceEvent faceEvent ) {
+    public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final FaceEvent faceEvent ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
@@ -568,15 +574,20 @@ public final class TaskInspector extends Archive {
             case ATTACHED -> {
                 patrul.setTaskTypes( FIND_FACE_PERSON );
                 patrul.setTaskId( faceEvent.getUUID().toString() ); // saving card id into patrul object
-                if ( faceEvent.getDataInfo() != null
-                        && faceEvent.getDataInfo().getData() != null ) {
+                if ( DataValidateInspector
+                        .getInstance()
+                        .getCheckParam()
+                        .test( faceEvent.getDataInfo() )
+                        && DataValidateInspector
+                        .getInstance()
+                        .getCheckParam()
+                        .test( faceEvent.getDataInfo().getData() ) ) {
                     patrul.setLatitudeOfTask( faceEvent.getDataInfo().getData().getLatitude() );
                     patrul.setLongitudeOfTask( faceEvent.getDataInfo().getData().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( new Date() ); // fixing time when patrul started this task
             case ARRIVED -> {
-                PatrulStatus patrulStatus = new PatrulStatus( patrul );
-                faceEvent.getPatrulStatuses()
-                        .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
+                final PatrulStatus patrulStatus = new PatrulStatus( patrul );
+                faceEvent.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), patrulStatus );
 
                 CassandraDataControl
                         .getInstance()
@@ -628,7 +639,7 @@ public final class TaskInspector extends Archive {
                                 status  ) ) );
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, EscortTuple escortTuple ) {
+    public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final EscortTuple escortTuple ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
             case CANCEL, FINISHED -> {
@@ -663,9 +674,33 @@ public final class TaskInspector extends Archive {
 
         return patrul; }
 
-    public Patrul changeTaskStatus ( Patrul patrul, Status status, SelfEmploymentTask selfEmploymentTask ) {
+    public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final SelfEmploymentTask selfEmploymentTask ) {
         patrul.setStatus( status );
         switch ( ( patrul.getStatus() ) ) {
+            case ARRIVED -> {
+                patrul.setTaskTypes( SELF_EMPLOYMENT );
+                patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
+                final PatrulStatus patrulStatus = new PatrulStatus( patrul );
+                selfEmploymentTask.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), patrulStatus );
+
+                CassandraDataControl
+                        .getInstance()
+                        .getGetHistory()
+                        .apply( PatrulActivityRequest
+                                .builder()
+                                .endDate( new Date() )
+                                .startDate( patrul.getTaskDate() )
+                                .patrulUUID( patrul.getPassportNumber() )
+                                .build() )
+                        .subscribe( positionInfos -> CassandraDataControlForTasks
+                                .getInstance()
+                                .getSaveTaskTimeStatistics()
+                                .accept( new TaskTimingStatistics(
+                                        patrul,
+                                        selfEmploymentTask.getUuid().toString(),
+                                        FIND_FACE_PERSON,
+                                        patrulStatus,
+                                        positionInfos ) ) ); }
             case CANCEL, FINISHED -> {
                 if ( status.compareTo( FINISHED ) == 0 ) {
                     CassandraDataControlForTasks
@@ -698,31 +733,6 @@ public final class TaskInspector extends Archive {
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
-            case ARRIVED -> {
-                patrul.setTaskTypes( SELF_EMPLOYMENT );
-                patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
-                PatrulStatus patrulStatus = new PatrulStatus( patrul );
-                selfEmploymentTask.getPatrulStatuses()
-                        .putIfAbsent( patrul.getPassportNumber(), patrulStatus );
-
-                CassandraDataControl
-                        .getInstance()
-                        .getGetHistory()
-                        .apply( PatrulActivityRequest
-                                .builder()
-                                .endDate( new Date() )
-                                .startDate( patrul.getTaskDate() )
-                                .patrulUUID( patrul.getPassportNumber() )
-                                .build() )
-                        .subscribe( positionInfos -> CassandraDataControlForTasks
-                                .getInstance()
-                                .getSaveTaskTimeStatistics()
-                                .accept( new TaskTimingStatistics(
-                                        patrul,
-                                        selfEmploymentTask.getUuid().toString(),
-                                        FIND_FACE_PERSON,
-                                        patrulStatus,
-                                        positionInfos ) ) ); }
             case ATTACHED, ACCEPTED -> {
                 patrul.setTaskTypes( SELF_EMPLOYMENT );
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object
@@ -759,7 +769,7 @@ public final class TaskInspector extends Archive {
                                 status  ) ) );
         return patrul; }
 
-    public Mono< ApiResponseModel > getListOfPatrulTasks ( Patrul patrul, Integer page, Integer size ) {
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( final Patrul patrul, Integer page, Integer size ) {
         return Flux.fromStream( patrul.getListOfTasks().keySet().stream() )
                 .skip( Long.valueOf( page ) * Long.valueOf( size ) )
                 .take( size )
@@ -941,7 +951,7 @@ public final class TaskInspector extends Archive {
                                         .data( finishedTasks )
                                         .build() ) ) ); }
 
-    private Integer getReportIndex ( List< ReportForCard > reportForCardList, UUID uuid ) {
+    private Integer getReportIndex ( final List< ReportForCard > reportForCardList, UUID uuid ) {
         for ( int i = 0; i < reportForCardList.size(); i++ ) if ( reportForCardList.get( i )
                 .getUuidOfPatrul()
                 .compareTo( uuid ) == 0 ) return i;

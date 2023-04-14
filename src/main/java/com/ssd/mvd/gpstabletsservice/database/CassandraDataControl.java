@@ -1442,7 +1442,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     this.getSession().execute( "SELECT * FROM " + keyspace + "." + table + ";" )
                             .all()
                             .stream() )
-                    .parallel()
+                    .parallel( super.getCheckDifference().apply( table.name().length() + keyspace.name().length() ) )
                     .runOn( Schedulers.parallel() );
 
     public void delete ( Throwable throwable ) {

@@ -36,6 +36,8 @@ public class DataValidateInspector extends Archive {
 
     private final Predicate< Object > checkParam = Objects::nonNull;
 
+    private final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
+
     private final BiFunction< Object, Integer, Boolean > checkRequest = ( o, value ) -> switch ( value ) {
         case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
         case 2 -> ( (PatrulActivityRequest) o ).getStartDate() != null && ( (PatrulActivityRequest) o ).getEndDate() != null;

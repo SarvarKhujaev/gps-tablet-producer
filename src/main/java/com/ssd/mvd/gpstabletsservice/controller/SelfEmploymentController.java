@@ -45,7 +45,7 @@ public class SelfEmploymentController extends LogInspector {
                     .apply( Map.of( "message", selfEmploymentTask + " was linked to: "
                             + TaskInspector
                             .getInstance()
-                            .changeTaskStatus( patrul, ATTACHED, selfEmploymentTask )
+                            .changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask )
                             .getName() ) ) )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
