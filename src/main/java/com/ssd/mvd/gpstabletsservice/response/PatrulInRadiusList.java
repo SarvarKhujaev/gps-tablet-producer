@@ -1,9 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.response;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
-import java.util.function.BiFunction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,15 +15,11 @@ import java.util.List;
 public class PatrulInRadiusList {
     private Double maxDistance;
     private final List< Patrul > freePatrulList = new ArrayList<>(); // максимум 5 не занятых патрульных
-
     private final List < Patrul > busyPatrulListInRadius = new ArrayList<>();
     private final List < Patrul > busyPatrulListOutOfRadius = new ArrayList<>();
-
     private final List < Patrul > freePatrulListOutOfRadius = new ArrayList<>(); // список патрульных которые не входят в радиус
 
-    private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
-
-    public PatrulInRadiusList ( List< Patrul > patruls ) {
+    public PatrulInRadiusList ( final List< Patrul > patruls ) {
         for ( int i = 0; i < patruls.size() && freePatrulList.size() < 5; i++ )
             if ( patruls.get( i ).getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) freePatrulList.add( patruls.get( i ) );
 
@@ -35,6 +31,9 @@ public class PatrulInRadiusList {
             if ( patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) freePatrulListOutOfRadius.add( patrul );
 
             else {
-                if ( this.checkDistance.apply( maxDistance, patrul.getDistance() ) ) busyPatrulListInRadius.add( patrul );
+                if ( DataValidateInspector
+                        .getInstance()
+                        .getCheckDistance()
+                        .apply( maxDistance, patrul.getDistance() ) ) busyPatrulListInRadius.add( patrul );
                 else busyPatrulListOutOfRadius.add( patrul ); } } }
 }

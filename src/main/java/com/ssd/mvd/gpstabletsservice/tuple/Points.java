@@ -13,7 +13,7 @@ public class Points {
     private UUID pointId;
     private String pointName;
 
-    public Points( UDTValue value ) {
+    public Points( final UDTValue value ) {
         this.setLat( value.getDouble( "lat" ) );
         this.setLng( value.getDouble( "lng" ) );
 

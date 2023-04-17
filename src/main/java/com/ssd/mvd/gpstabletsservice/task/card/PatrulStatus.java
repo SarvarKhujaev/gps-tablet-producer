@@ -9,7 +9,7 @@ public class PatrulStatus {
     private Boolean inTime; // показывает пришел ли Патрульный вовремя
     private Long totalTimeConsumption; // показывает сколько времени Патрульный потратил на всю задачу от начала до конца
 
-    public PatrulStatus ( Patrul patrul ) {
+    public PatrulStatus ( final Patrul patrul ) {
         this.setPatrul( patrul );
         this.setInTime( patrul.check() );
         this.setTotalTimeConsumption( TimeInspector

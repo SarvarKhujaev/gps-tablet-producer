@@ -14,7 +14,7 @@ public class Country {
 	private String countryNameUz;
 	private String countryNameRu;
 
-    public Country ( Row row ) {
+    public Country ( final Row row ) {
         this.setUuid( row.getUUID( "uuid"   ) );
         this.setFlag( row.getString( "flag" ) );
         this.setSymbol( row.getString( "symbol" ) );

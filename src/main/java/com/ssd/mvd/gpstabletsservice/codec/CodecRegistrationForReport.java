@@ -6,47 +6,56 @@ import com.datastax.driver.core.TypeCodec;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import java.nio.ByteBuffer;
 
 public class CodecRegistrationForReport extends TypeCodec< ReportForCard > {
     private final TypeCodec<UDTValue> innerCodec;
-
     private final UserType userType;
 
-    public CodecRegistrationForReport ( TypeCodec< UDTValue > innerCodec, Class< ReportForCard > javaType ) {
+    public CodecRegistrationForReport ( final TypeCodec< UDTValue > innerCodec, final Class< ReportForCard > javaType ) {
         super( innerCodec.getCqlType(), javaType );
         this.innerCodec = innerCodec;
         this.userType = (UserType)innerCodec.getCqlType(); }
 
     @Override
-    public ByteBuffer serialize ( ReportForCard value, ProtocolVersion protocolVersion )
-            throws InvalidTypeException { return innerCodec.serialize( toUDTValue( value ), protocolVersion ); }
+    public ReportForCard deserialize ( final ByteBuffer bytes, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
+        return this.toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
 
     @Override
-    public ReportForCard deserialize ( ByteBuffer bytes, ProtocolVersion protocolVersion )
-            throws InvalidTypeException {
-        return toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
+    public ByteBuffer serialize ( final ReportForCard value, final ProtocolVersion protocolVersion ) throws InvalidTypeException { return innerCodec.serialize( this.toUDTValue( value ), protocolVersion ); }
 
     @Override
-    public ReportForCard parse( String value ) throws InvalidTypeException { return value == null ||
+    public String format( final ReportForCard reportForCard ) throws InvalidTypeException { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( reportForCard )
+            ? innerCodec.format( this.toUDTValue( reportForCard ) ) : "NULL"; }
+
+    @Override
+    public ReportForCard parse( final String value ) throws InvalidTypeException { return value == null ||
             value.isEmpty() ||
-            value.equalsIgnoreCase("NULL" ) ?
-            null : toAddress( innerCodec.parse( value ) ); }
+            value.equalsIgnoreCase("NULL" )
+            ? null : toAddress( innerCodec.parse( value ) ); }
 
-    @Override
-    public String format( ReportForCard value ) throws InvalidTypeException { return value == null ? "NULL" :
-            innerCodec.format( toUDTValue( value ) ); }
+    protected UDTValue toUDTValue ( final ReportForCard reportForCard ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( reportForCard )
+            ? userType.newValue()
+            .setDouble("lat", reportForCard.getLat() )
+            .setDouble( "lan", reportForCard.getLan() )
+            .setString( "title", reportForCard.getTitle() )
+            .setTimestamp( "date", reportForCard.getDate() )
+            .setList( "imagesIds", reportForCard.getImagesIds() )
+            .setString( "description", reportForCard.getDescription() )
+            .setString( "passportSeries", reportForCard.getPassportSeries() )
+            : null; }
 
-    protected ReportForCard toAddress ( UDTValue value ) { return value == null ? null : new ReportForCard ( value ); }
-
-    protected UDTValue toUDTValue ( ReportForCard value ) { return value == null ? null :
-            userType.newValue()
-                    .setDouble("lat", value.getLat() )
-                    .setDouble( "lan", value.getLan() )
-                    .setString( "title", value.getTitle() )
-                    .setTimestamp( "date", value.getDate() )
-                    .setList( "imagesIds", value.getImagesIds() )
-                    .setString( "description", value.getDescription() )
-                    .setString( "passportSeries", value.getPassportSeries() ); }
+    protected ReportForCard toAddress ( final UDTValue value ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( value )
+            ? new ReportForCard ( value ) : null; }
 }

@@ -14,6 +14,7 @@ import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 public class Archive {
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
+
     private final Function< Map< String, ? >, Mono< ApiResponseModel > > function =
             map -> Mono.just( ApiResponseModel
             .builder() // in case of wrong login
@@ -66,8 +67,8 @@ public class Archive {
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
             "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
 
-    public String generateToken () {
-        byte[] bytes = new byte[ 24 ];
-        this.secureRandom.nextBytes( bytes );
-        return this.encoder.encodeToString( bytes ); }
+    private final Supplier< String > generateToken = () -> {
+        final byte[] bytes = new byte[ 24 ];
+        this.getSecureRandom().nextBytes( bytes );
+        return this.getEncoder().encodeToString( bytes ); };
 }

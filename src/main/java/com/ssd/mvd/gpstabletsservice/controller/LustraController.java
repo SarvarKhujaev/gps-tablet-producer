@@ -34,11 +34,7 @@ public class LustraController extends LogInspector {
     @MessageMapping ( value = "deleteLustra" )
     public Mono< ApiResponseModel > deleteLustra ( final String uuid ) { return CassandraDataControl
             .getInstance()
-            .delete( CassandraTables
-                            .LUSTRA
-                            .name(),
-                    "uuid",
-                    uuid )
+            .delete( CassandraTables.LUSTRA.name(), "uuid", uuid )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 

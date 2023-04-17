@@ -13,7 +13,7 @@ public class TabletUsage {
     private String simCardNumber; // unique identifier of Tablet
     private Long totalActivityTime = 0L; // total time of usage in seconds
 
-    public TabletUsage ( Row row ) {
+    public TabletUsage ( final Row row ) {
         this.setStartedToUse( row.getTimestamp( "startedToUse" ) );
         this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
 
@@ -21,7 +21,7 @@ public class TabletUsage {
         this.setSimCardNumber( row.getString( "simCardNumber" ) );
         this.setTotalActivityTime( row.getLong( "totalActivityTime" ) ); }
 
-    public TabletUsage ( Patrul patrul ) {
+    public TabletUsage ( final Patrul patrul ) {
         this.setUuidOfPatrul( patrul.getUuid() );
         this.setSimCardNumber( patrul.getSimCardNumber() ); }
 }

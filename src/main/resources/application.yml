@@ -1,6 +1,6 @@
 server:
-    port: ${SERVER_PORT}
-    address: ${SERVER_ADDR}
+    port: ${SERVER_PORT:9090}
+    address: ${SERVER_ADDR:localhost}
 
 spring:
     data:
@@ -21,8 +21,8 @@ spring:
 
     rsocket:
         server:
-            port: ${RSOCKET_PORT}
-            address: ${SERVER_ADDR}
+            port: ${RSOCKET_PORT:6060}
+            address: ${SERVER_ADDR:localhost}
 
 variables:
     KAFKA_VARIABLES:

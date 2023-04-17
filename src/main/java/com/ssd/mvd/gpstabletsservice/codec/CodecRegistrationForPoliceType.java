@@ -7,43 +7,52 @@ import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 
 import com.ssd.mvd.gpstabletsservice.entity.PoliceType;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
+
 import java.nio.ByteBuffer;
 
 public class CodecRegistrationForPoliceType extends TypeCodec< PoliceType > {
     private final TypeCodec< UDTValue > innerCodec;
-
     private final UserType userType;
 
-    public CodecRegistrationForPoliceType ( TypeCodec< UDTValue > innerCodec, Class< PoliceType > javaType ) {
+    public CodecRegistrationForPoliceType ( final TypeCodec< UDTValue > innerCodec, final Class< PoliceType > javaType ) {
         super( innerCodec.getCqlType(), javaType );
         this.innerCodec = innerCodec;
         this.userType = (UserType)innerCodec.getCqlType(); }
 
-    @Override
-    public ByteBuffer serialize ( PoliceType value, ProtocolVersion protocolVersion )
-            throws InvalidTypeException { return innerCodec.serialize( toUDTValue( value ), protocolVersion ); }
+    protected PoliceType toAddress ( final UDTValue value ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( value )
+            ? new PoliceType ( value ) : null; }
+
+    protected UDTValue toUDTValue ( final PoliceType policeType ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( policeType )
+            ? userType.newValue()
+            .setUUID( "uuid", policeType.getUuid() )
+            .setString( "icon", policeType.getIcon() )
+            .setString( "icon2", policeType.getIcon2() )
+            .setString( "policeType", policeType.getPoliceType() ) : null; }
 
     @Override
-    public PoliceType deserialize ( ByteBuffer bytes, ProtocolVersion protocolVersion )
-            throws InvalidTypeException {
-        return toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
-
-    @Override
-    public PoliceType parse( String value ) throws InvalidTypeException { return value == null ||
+    public PoliceType parse( final String value ) throws InvalidTypeException { return value == null ||
             value.isEmpty() ||
             value.equalsIgnoreCase("NULL" ) ?
             null : toAddress( innerCodec.parse( value ) ); }
 
     @Override
-    public String format ( PoliceType value ) throws InvalidTypeException { return value == null ? "NULL" :
-            innerCodec.format( toUDTValue( value ) ); }
+    public String format ( final PoliceType policeType ) throws InvalidTypeException { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( policeType )
+            ? innerCodec.format( toUDTValue( policeType ) ) : "NULL"; }
 
-    protected PoliceType toAddress ( UDTValue value ) { return value == null ? null : new PoliceType ( value ); }
+    @Override
+    public ByteBuffer serialize ( final PoliceType value, final ProtocolVersion protocolVersion ) throws InvalidTypeException { return innerCodec.serialize( this.toUDTValue( value ), protocolVersion ); }
 
-    protected UDTValue toUDTValue ( PoliceType value ) { return value == null ? null :
-            userType.newValue()
-                    .setUUID( "uuid", value.getUuid() )
-                    .setString( "icon", value.getIcon() )
-                    .setString( "icon2", value.getIcon2() )
-                    .setString( "policeType", value.getPoliceType() ); }
+    @Override
+    public PoliceType deserialize ( final ByteBuffer bytes, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
+        return this.toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
 }

@@ -1,7 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.codec;
 
-import com.datastax.driver.core.exceptions.InvalidTypeException;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+
+import com.datastax.driver.core.exceptions.InvalidTypeException;
 import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.TypeCodec;
 import com.datastax.driver.core.UDTValue;
@@ -10,7 +12,6 @@ import java.nio.ByteBuffer;
 
 public class CodecRegistrationForPatrul extends TypeCodec< Patrul > {
     private final TypeCodec< UDTValue > innerCodec;
-
     private final UserType userType;
 
     public CodecRegistrationForPatrul ( TypeCodec< UDTValue > innerCodec, Class< Patrul > javaType ) {
@@ -19,27 +20,37 @@ public class CodecRegistrationForPatrul extends TypeCodec< Patrul > {
         this.userType = (UserType)innerCodec.getCqlType(); }
 
     @Override
-    public ByteBuffer serialize ( Patrul patrul, ProtocolVersion protocolVersion )
-            throws InvalidTypeException { return innerCodec.serialize( toUDTValue( patrul ), protocolVersion ); }
+    public ByteBuffer serialize ( final Patrul patrul, final ProtocolVersion protocolVersion ) throws InvalidTypeException { return innerCodec.serialize( this.toUDTValue( patrul ), protocolVersion ); }
 
     @Override
-    public Patrul deserialize ( ByteBuffer bytes, ProtocolVersion protocolVersion )
-            throws InvalidTypeException {
-        return toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
+    public Patrul deserialize ( final ByteBuffer bytes, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
+        return this.toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
 
     @Override
-    public Patrul parse( String value ) throws InvalidTypeException {
-        return value == null || value.isEmpty() || value.equalsIgnoreCase("NULL" ) ?
-                null : toAddress( innerCodec.parse( value ) ); }
+    public String format( final Patrul patrul ) throws InvalidTypeException {
+        return DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( patrul )
+                ? innerCodec.format( this.toUDTValue( patrul ) ) : "NULL"; }
 
     @Override
-    public String format( Patrul value ) throws InvalidTypeException {
-        return value == null ? "NULL" : innerCodec.format( toUDTValue( value ) ); }
+    public Patrul parse( final String value ) throws InvalidTypeException {
+        return value == null || value.isEmpty() || value.equalsIgnoreCase("NULL" )
+                ? null : toAddress( innerCodec.parse( value ) ); }
 
-    protected Patrul toAddress ( UDTValue value ) { return value == null ? null : new Patrul ( value ); }
+    protected Patrul toAddress ( final UDTValue udtValue ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( udtValue )
+            ? new Patrul ( udtValue ) : null; }
 
-    protected UDTValue toUDTValue ( Patrul patrul ) {
-        return patrul == null ? null : userType.newValue()
+    protected UDTValue toUDTValue ( final Patrul patrul ) {
+        return DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( patrul )
+                ? userType.newValue()
                 .setTimestamp( "taskDate", patrul.getTaskDate() )
                 .setTimestamp( "lastActiveDate", patrul.getLastActiveDate() )
                 .setTimestamp( "startedToWorkDate", patrul.getStartedToWorkDate() )
@@ -86,5 +97,6 @@ public class CodecRegistrationForPatrul extends TypeCodec< Patrul > {
 
                 .setString( "status", patrul.getStatus().name() )
                 .setMap( "listOfTasks", patrul.getListOfTasks() )
-                .setString( "taskTypes", patrul.getTaskTypes().name() ); }
+                .setString( "taskTypes", patrul.getTaskTypes().name() )
+                : null; }
 }

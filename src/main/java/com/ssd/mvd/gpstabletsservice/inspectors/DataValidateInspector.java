@@ -32,11 +32,13 @@ import static java.lang.Math.*;
 public class DataValidateInspector extends Archive {
     private static final DataValidateInspector INSTANCE = new DataValidateInspector();
 
-    public static DataValidateInspector getInstance() { return INSTANCE; }
+    public static DataValidateInspector getInstance () { return INSTANCE; }
 
     private final Predicate< Object > checkParam = Objects::nonNull;
 
     private final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
+
+    private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
 
     private final BiFunction< Object, Integer, Boolean > checkRequest = ( o, value ) -> switch ( value ) {
         case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
@@ -53,8 +55,8 @@ public class DataValidateInspector extends Archive {
                 .getGetTimeDifferenceInHours()
                 .apply( ( (Date) o ).toInstant() ) ) >= 24;
         case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
-        case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null
-                && ( (AndroidVersionUpdate) o ).getLink() != null;
+        case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null && ( (AndroidVersionUpdate) o ).getLink() != null;
+        case 8 -> ( (TaskTimingRequest) o ).getStartDate() != null && ( (TaskTimingRequest) o ).getEndDate() != null;
         default -> ( (PatrulLoginRequest) o ).getLogin() != null
                 && ( (PatrulLoginRequest) o ).getPassword() != null
                 && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };

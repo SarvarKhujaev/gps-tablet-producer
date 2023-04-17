@@ -30,7 +30,7 @@ public class PatrulSos {
 
     public UUID getUuid () { return uuid != null ? uuid : ( uuid = UUID.randomUUID() ); }
 
-    public PatrulSos ( Row row ) {
+    public PatrulSos ( final Row row ) {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
 

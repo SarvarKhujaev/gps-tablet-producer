@@ -23,7 +23,7 @@ public class Polygon {
     public List< UUID > patrulList; // the list of all Patruls who works at this polygon
     public List< PolygonEntity > latlngs;
 
-    public Polygon( Row row ) {
+    public Polygon ( final Row row ) {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setOrgan( row.getUUID( "organ" ) );
 

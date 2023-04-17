@@ -23,7 +23,7 @@ public class PolygonForEscort {
 
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    public PolygonForEscort ( Row row ) {
+    public PolygonForEscort ( final Row row ) {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setName( row.getString( "name" ) );
         this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );

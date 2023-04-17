@@ -11,7 +11,7 @@ public class AndroidVersionUpdate {
     private String version;
     private Status status;
 
-    public AndroidVersionUpdate( Row row, Status status ) {
+    public AndroidVersionUpdate( final Row row, final Status status ) {
         this.setStatus( status );
         this.setLink( row.getString( "link" ) );
         this.setVersion( row.getString( "version" ) ); }

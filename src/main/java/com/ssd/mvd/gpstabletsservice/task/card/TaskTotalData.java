@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.datastax.driver.core.Row;
 import java.util.List;
 
@@ -9,8 +10,11 @@ public class TaskTotalData {
     private Long totalTimeConsumption;
     private List< PositionInfo > positionInfoList;
 
-    public TaskTotalData ( Row row ) {
-        if ( row != null ) {
+    public TaskTotalData ( final Row row ) {
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( row ) ) {
             this.setTimeWastedToArrive( row.getLong( "timewastedtoarrive" ) );
             this.setTotalTimeConsumption( row.getLong( "totaltimeconsumption" ) );
             this.setPositionInfoList( row.getList( "positionInfoList", PositionInfo.class ) ); } }
