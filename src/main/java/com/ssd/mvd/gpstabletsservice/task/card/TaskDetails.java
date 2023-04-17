@@ -3,6 +3,7 @@ package com.ssd.mvd.gpstabletsservice.task.card;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.*;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.*;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.*;
 
 import java.util.List;
@@ -22,8 +23,15 @@ public class TaskDetails {
     private ReportForCard reportForCardList;
     private List< PositionInfo > positionInfoList;
 
-    public TaskDetails ( Card card, UUID patrulUUID, TaskTotalData taskTotalData ) {
-        if ( card != null && patrulUUID != null ) {
+    public TaskDetails ( final Card card, final UUID patrulUUID, final TaskTotalData taskTotalData ) {
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( card )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( patrulUUID ) ) {
             this.setTitle( card.getFabula() );
             this.setFabula( card.getFabula() );
             this.setDate( card.getCreated_date().toString() );
@@ -36,7 +44,7 @@ public class TaskDetails {
                     .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                     .forEach( this::setReportForCardList ); } }
 
-    public TaskDetails( CarEvent carEvent, UUID patrulUUID, TaskTotalData taskTotalData ) {
+    public TaskDetails( final CarEvent carEvent, final UUID patrulUUID, final TaskTotalData taskTotalData ) {
         this.setDate( carEvent.getCreated_date() );
         this.setPositionInfoList( taskTotalData.getPositionInfoList() );
         this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
@@ -46,8 +54,15 @@ public class TaskDetails {
                 .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                 .forEach( this::setReportForCardList ); }
 
-    public TaskDetails ( EventCar eventCar, UUID patrulUUID, TaskTotalData taskTotalData ) {
-        if ( eventCar != null && patrulUUID != null ) {
+    public TaskDetails ( final EventCar eventCar, final UUID patrulUUID, final TaskTotalData taskTotalData ) {
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventCar )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( patrulUUID ) ) {
             this.setDate( eventCar.getCreated_date().toString() );
             this.setPositionInfoList( taskTotalData.getPositionInfoList() );
             this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
@@ -57,8 +72,15 @@ public class TaskDetails {
                     .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                     .forEach( this::setReportForCardList ); } }
 
-    public TaskDetails ( EventBody eventBody, UUID patrulUUID, TaskTotalData taskTotalData ) {
-        if ( eventBody != null && patrulUUID != null ) {
+    public TaskDetails ( final EventBody eventBody, final UUID patrulUUID, final TaskTotalData taskTotalData ) {
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventBody )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( patrulUUID ) ) {
             this.setDate( eventBody.getCreated_date().toString() );
             this.setPositionInfoList( taskTotalData.getPositionInfoList() );
             this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
@@ -68,7 +90,7 @@ public class TaskDetails {
                     .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                     .forEach( this::setReportForCardList ); } }
 
-    public TaskDetails ( EventFace eventFace, UUID patrulUUID, TaskTotalData taskTotalData ) {
+    public TaskDetails ( final EventFace eventFace, final UUID patrulUUID, final TaskTotalData taskTotalData ) {
         this.setDate( eventFace.getCreated_date().toString() );
         this.setPositionInfoList( taskTotalData.getPositionInfoList() );
         this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
@@ -78,7 +100,7 @@ public class TaskDetails {
                 .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                 .forEach( this::setReportForCardList ); }
 
-    public TaskDetails ( FaceEvent faceEvent, UUID patrulUUID, TaskTotalData taskTotalData ) {
+    public TaskDetails ( final FaceEvent faceEvent, final UUID patrulUUID, final TaskTotalData taskTotalData ) {
         this.setDate( faceEvent.getCreated_date() );
         this.setPositionInfoList( taskTotalData.getPositionInfoList() );
         this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
@@ -88,7 +110,7 @@ public class TaskDetails {
                 .filter( reportForCard -> reportForCard.getUuidOfPatrul().compareTo( patrulUUID ) == 0 )
                 .forEach( this::setReportForCardList ); }
 
-    public TaskDetails ( SelfEmploymentTask selfEmploymentTask, UUID patrulUUID, TaskTotalData taskTotalData ) {
+    public TaskDetails ( final SelfEmploymentTask selfEmploymentTask, final UUID patrulUUID, final TaskTotalData taskTotalData ) {
         this.setTitle( selfEmploymentTask.getTitle() );
         this.setFabula( selfEmploymentTask.getDescription() );
         this.setDate( selfEmploymentTask.getIncidentDate().toString() );

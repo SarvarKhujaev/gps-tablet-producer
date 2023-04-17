@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
 import java.util.UUID;
@@ -13,11 +14,15 @@ public class PolygonType {
 
     public UUID getUuid () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    public PolygonType ( Row row ) {
-        this.setUuid( row.getUUID( "uuid" ) );
-        this.setName( row.getString( "name" ) ); }
+    public PolygonType ( final Row row ) {
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( row ) ) {
+            this.setUuid( row.getUUID( "uuid" ) );
+            this.setName( row.getString( "name" ) ); } }
 
-    public PolygonType( UDTValue row ) {
+    public PolygonType( final UDTValue row ) {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setName( row.getString( "name" ) ); }
 }

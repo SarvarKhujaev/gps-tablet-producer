@@ -23,7 +23,7 @@ public class TupleOfCar {
 
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    public TupleOfCar( Row row ) {
+    public TupleOfCar( final Row row ) {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );
         this.setUuidOfPatrul( row.getUUID( "uuidOfPatrul" ) );

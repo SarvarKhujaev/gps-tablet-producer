@@ -1,7 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 import static com.ssd.mvd.gpstabletsservice.constants.Status.IN_TIME;
-import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.LATE;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -48,42 +47,38 @@ public class TaskTimingStatistics { // показывает все таски с
     private TaskTypes taskTypes;
     private List< PositionInfo > positionInfoList;
 
-    public TaskTimingStatistics( Row row ) {
-        this.setInTime( row.getBool( "inTime" ) );
-        this.setTaskId( row.getString( "taskId" ) );
-        this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
-        this.setDateOfComing( row.getTimestamp( "dateOfComing" ) );
-        this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-        this.setTimeWastedToArrive( row.getLong( "timeWastedToArrive" ) );
-        this.setTotalTimeConsumption( row.getLong( "totalTimeConsumption" ) );
-        this.setTaskTypes( TaskTypes.valueOf( row.getString("taskTypes" ) ) );
-        this.setPositionInfoList( row.getList( "positionInfoList", PositionInfo.class ) );
-        CassandraDataControl
-                .getInstance()
-                .getGetPatrulByUUID()
-                .apply( this.getPatrulUUID() )
-                .subscribe( patrul1 -> {
-                    this.setPatrulStatus( patrul1.getStatus() );
+    public TaskTimingStatistics ( final Row row, final Patrul patrul ) {
+            this.setInTime( row.getBool( "inTime" ) );
+            this.setTaskId( row.getString( "taskId" ) );
+            this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
+            this.setDateOfComing( row.getTimestamp( "dateOfComing" ) );
+            this.setStatus( Status.valueOf( row.getString( "status" ) ) );
+            this.setTimeWastedToArrive( row.getLong( "timeWastedToArrive" ) );
+            this.setTotalTimeConsumption( row.getLong( "totalTimeConsumption" ) );
+            this.setTaskTypes( TaskTypes.valueOf( row.getString("taskTypes" ) ) );
+            this.setPositionInfoList( row.getList( "positionInfoList", PositionInfo.class ) );
 
-                    this.setCarType( patrul1.getCarType() );
-                    this.setCarNumber( patrul1.getCarNumber() );
-                    this.setOrganName( patrul1.getOrganName() );
-                    this.setTaskIdOfPatrul( patrul1.getTaskId() );
-                    this.setFatherName( patrul1.getFatherName() );
-                    this.setPoliceType( patrul1.getPoliceType() );
-                    this.setDateOfBirth( patrul1.getDateOfBirth() );
-                    this.setPhoneNumber( patrul1.getPhoneNumber() );
-                    this.setPassportNumber( patrul1.getPassportNumber() );
-                    this.setPatrulImageLink( patrul1.getPatrulImageLink() );
-                    this.setSurnameNameFatherName( patrul1.getSurnameNameFatherName() );
+            this.setPatrulStatus( patrul.getStatus() );
 
-                    this.setBatteryLevel( patrul1.getBatteryLevel() );
-                    this.setLastActiveDate( patrul1.getLastActiveDate() );
+            this.setCarType( patrul.getCarType() );
+            this.setCarNumber( patrul.getCarNumber() );
+            this.setOrganName( patrul.getOrganName() );
+            this.setTaskIdOfPatrul( patrul.getTaskId() );
+            this.setFatherName( patrul.getFatherName() );
+            this.setPoliceType( patrul.getPoliceType() );
+            this.setDateOfBirth( patrul.getDateOfBirth() );
+            this.setPhoneNumber( patrul.getPhoneNumber() );
+            this.setPassportNumber( patrul.getPassportNumber() );
+            this.setPatrulImageLink( patrul.getPatrulImageLink() );
+            this.setSurnameNameFatherName( patrul.getSurnameNameFatherName() );
 
-                    this.setLatitude( patrul1.getLatitude() );
-                    this.setLongitude( patrul1.getLongitude() );
-                    this.setLatitudeOfTask( patrul1.getLatitudeOfTask() );
-                    this.setLongitudeOfTask( patrul1.getLongitudeOfTask() ); } ); }
+            this.setBatteryLevel( patrul.getBatteryLevel() );
+            this.setLastActiveDate( patrul.getLastActiveDate() );
+
+            this.setLatitude( patrul.getLatitude() );
+            this.setLongitude( patrul.getLongitude() );
+            this.setLatitudeOfTask( patrul.getLatitudeOfTask() );
+            this.setLongitudeOfTask( patrul.getLongitudeOfTask() ); }
 
     public TaskTimingStatistics (
             Patrul patrul,

@@ -17,7 +17,7 @@ public class EscortTuple {
 
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    public EscortTuple ( Row row ) {
+    public EscortTuple ( final Row row ) {
         this.setUuid( row.getUUID( "id" ) );
         this.setCountries( row.getString( "countries" ) );
         this.setUuidOfPolygon( row.getUUID( "uuidOfPolygon" ) );

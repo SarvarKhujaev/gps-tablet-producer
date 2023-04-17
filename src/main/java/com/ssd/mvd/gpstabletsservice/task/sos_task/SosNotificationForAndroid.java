@@ -21,10 +21,10 @@ public class SosNotificationForAndroid {
     private String patrulPassportSeries;
     private String surnameNameFatherName; // Ф.И.О
 
-    public SosNotificationForAndroid ( PatrulSos patrulSos,
-                                       Patrul patrul,
-                                       Status status,
-                                       String patrulPassportSeries ) {
+    public SosNotificationForAndroid ( final PatrulSos patrulSos,
+                                      final Patrul patrul,
+                                      final Status status,
+                                      final String patrulPassportSeries ) {
         this.setStatus( status );
         this.setAddress( patrulSos.getAddress() );
         this.setLatitude( patrulSos.getLatitude() );

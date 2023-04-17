@@ -69,20 +69,20 @@ public class Patrul {
 
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 
+    public Boolean check () { return switch ( this.getPoliceType() ) {
+        case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;
+        default -> TimeInspector
+                .getInspector()
+                .getCheckDate()
+                .test( this.getTaskDate().toInstant() ); }; }
+
     public String getSurnameNameFatherName () { return this.surnameNameFatherName != null
             && this.surnameNameFatherName.contains( "NULL" )
             && this.surnameNameFatherName.contains( "null" )
             ? this.surnameNameFatherName
             : ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
 
-    public Boolean check () { return switch ( this.getPoliceType() ) {
-            case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;
-            default -> TimeInspector
-                    .getInspector()
-                    .getCheckDate()
-                    .test( this.getTaskDate().toInstant() ); }; }
-
-    public Patrul ( Row row ) {
+    public Patrul ( final Row row ) {
         this.setTaskDate( row.getTimestamp( "taskDate" ) );
         this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
         this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );
@@ -136,7 +136,7 @@ public class Patrul {
         this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
         this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); }
 
-    public Patrul ( UDTValue row ) {
+    public Patrul ( final UDTValue row ) {
         this.setTaskDate( row.getTimestamp( "taskDate" ) );
         this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
         this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );

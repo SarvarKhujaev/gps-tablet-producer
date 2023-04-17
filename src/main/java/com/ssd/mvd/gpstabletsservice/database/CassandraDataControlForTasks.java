@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import lombok.Data;
 import java.util.*;
 import java.util.function.*;
 
@@ -32,16 +31,14 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEv
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
-@Data
+@lombok.Data
 public class CassandraDataControlForTasks extends SerDes {
     private final Session session = CassandraDataControl.getInstance().getSession();
     private final Cluster cluster = CassandraDataControl.getInstance().getCluster();
 
-    private static CassandraDataControlForTasks cassandraDataControl = new CassandraDataControlForTasks();
+    private static CassandraDataControlForTasks INSTANCE = new CassandraDataControlForTasks();
 
-    public static CassandraDataControlForTasks getInstance() { return cassandraDataControl != null
-            ? cassandraDataControl
-            : ( cassandraDataControl = new CassandraDataControlForTasks() ); }
+    public static CassandraDataControlForTasks getInstance () { return INSTANCE != null ? INSTANCE : ( INSTANCE = new CassandraDataControlForTasks() ); }
 
     private CassandraDataControlForTasks () {
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
@@ -105,10 +102,10 @@ public class CassandraDataControlForTasks extends SerDes {
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.CARTOTALDATA.name()
                         + " WHERE gosnumber = '" + gosnumber + "';" ).one();
-        return row != null ? row.getList( "violationsInformationsList", ViolationsInformation.class ) : new ArrayList<>(); };
+        return super.getCheckParam().test( row ) ? row.getList( "violationsInformationsList", ViolationsInformation.class ) : new ArrayList<>(); };
 
-    private final Function< String, Mono< ApiResponseModel > > getWarningCarDetails = gosnumber -> super.getFunction()
-            .apply( Map.of( "message", "Warning car details",
+    private final Function< String, Mono< ApiResponseModel > > getWarningCarDetails = gosnumber -> super.getFunction().apply(
+            Map.of( "message", "Warning car details",
                     "data", com.ssd.mvd.gpstabletsservice.entity.Data
                             .builder()
                             .data( new CardDetails( (CarTotalData) super.getDeserialize().apply(
@@ -127,56 +124,49 @@ public class CassandraDataControlForTasks extends SerDes {
                     + " where uuid = " + uuid + ";" ).one();
 
     private final Function< UUID, Mono< SelfEmploymentTask > > getSelfEmploymentTask = id -> {
-        final Row row = this.getRow.apply( id );
+        final Row row = this.getGetRow().apply( id );
         return super.getCheckParam().test( row )
-                ? Mono.just( (SelfEmploymentTask) super.getDeserialize().apply(
-                        row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+                ? Mono.just( (SelfEmploymentTask) super.getDeserialize().apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< FaceEvent > > getFaceEvents = id -> {
-        final Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getGetRow().apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
-                ? Mono.justOrEmpty( (FaceEvent) super.getDeserialize().apply(
-                        row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
+                ? Mono.justOrEmpty( (FaceEvent) super.getDeserialize().apply( row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< EventBody > > getEventBody = id -> {
-        final Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getGetRow().apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
-                ? Mono.justOrEmpty( (EventBody) super.getDeserialize().apply(
-                        row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
+                ? Mono.justOrEmpty( (EventBody) super.getDeserialize().apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< EventFace > > getEventFace = id -> {
-        final Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getGetRow().apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
-                ? Mono.just( (EventFace) super.getDeserialize().apply(
-                        row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
+                ? Mono.just( (EventFace) super.getDeserialize().apply( row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< CarEvent > > getCarEvents = id -> {
-        final Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getGetRow().apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
-                ? Mono.just( ( CarEvent ) super.getDeserialize().apply(
-                        row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
+                ? Mono.just( ( CarEvent ) super.getDeserialize().apply( row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< EventCar > > getEventCar = id -> {
-        final Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getGetRow().apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
-                ? Mono.just( (EventCar) super.getDeserialize().apply(
-                        row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
+                ? Mono.just( (EventCar) super.getDeserialize().apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
                 : Mono.empty(); };
 
     private final Function< String, Mono< Card > > getCard102 = id -> {
-        final Row row = this.getRow.apply( UUID.fromString( id ) );
+        final Row row = this.getGetRow().apply( UUID.fromString( id ) );
         return super.getCheckParam().test( row )
-                ? Mono.just( ( Card ) super.getDeserialize().apply(
-                        row.getString( "object" ), TaskTypes.CARD_102 ) )
+                ? Mono.just( ( Card ) super.getDeserialize().apply( row.getString( "object" ), TaskTypes.CARD_102 ) )
                 : Mono.empty(); };
 
-    private final Consumer< String > deleteActiveTask = id -> this.getSession()
-            .execute( "DELETE FROM "
+    private final Consumer< String > deleteActiveTask = id -> this.getSession().execute(
+            "DELETE FROM "
             + CassandraTables.TABLETS.name() + "."
             + CassandraTables.ACTIVE_TASK.name()
             + " WHERE id = '" + id + "';" );
@@ -204,7 +194,7 @@ public class CassandraDataControlForTasks extends SerDes {
                     + super.serialize( carTotalData ) + "');" )
                     .wasApplied();
 
-    private final Consumer< ActiveTask > saveActiveTask = ( activeTask ) ->
+    private final Consumer< ActiveTask > saveActiveTask = activeTask ->
             this.getSession().execute( "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.ACTIVE_TASK.name()
@@ -214,11 +204,11 @@ public class CassandraDataControlForTasks extends SerDes {
 
     // если патрульному отменили задание то нужно удалить запись
     private final Consumer< Patrul > deleteRowFromTaskTimingTable = patrul -> {
-        if ( super.getCheckParam().test( patrul.getTaskId() ) ) this.getSession().execute( "DELETE FROM "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.TASKS_TIMING_TABLE.name()
-                + " WHERE taskId = '" + patrul.getTaskId()
-                + "' AND patruluuid = " + patrul.getUuid() + " IF EXISTS;" ); };
+            if ( super.getCheckParam().test( patrul.getTaskId() ) ) this.getSession().execute( "DELETE FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TASKS_TIMING_TABLE.name()
+                    + " WHERE taskId = '" + patrul.getTaskId()
+                    + "' AND patruluuid = " + patrul.getUuid() + " IF EXISTS;" ); };
 
     // обновляет время которое патрульный полностью потратил на выполнение задания
     // если патрульный завершил то обновляем общее время выполнения
@@ -257,34 +247,32 @@ public class CassandraDataControlForTasks extends SerDes {
                     super.convertListOfPointsToCassandra( taskTimingStatistics.getPositionInfoList() ) + ");" );
 
     private final Function< TaskTimingRequest, Mono< TaskTimingStatisticsList > > getTaskTimingStatistics = request ->
-        Flux.just( new TaskTimingStatisticsList() )
-                .flatMap( taskTimingStatisticsList -> CassandraDataControl
-                        .getInstance()
-                        .getGetAllEntities()
-                        .apply( CassandraTables.TABLETS, CassandraTables.TASKS_TIMING_TABLE )
-                        .filter( row -> super.getCheckParam().test( row.getTimestamp( "dateofcoming" ) ) )
-                        .filter( row -> super.getCheckTaskTimingRequest().apply( request, row ) )
-                        .filter( row -> super.getCheckTaskType().apply( request, row ) )
-                        .map( TaskTimingStatistics::new )
-                        .sequential()
-                        .publishOn( Schedulers.single() )
-                        .collectList()
-                        .map( taskTimingStatisticsList1 -> {
-                            taskTimingStatisticsList1
-                                    .parallelStream()
-                                    .forEach( taskTimingStatistics1 -> {
-                                        switch ( taskTimingStatistics1.getStatus() ) {
-                                            case LATE -> taskTimingStatisticsList
-                                                    .getListLate()
-                                                    .add( taskTimingStatistics1 );
-                                            case IN_TIME -> taskTimingStatisticsList
-                                                    .getListInTime()
-                                                    .add( taskTimingStatistics1 );
-                                            default -> taskTimingStatisticsList
-                                                    .getListDidNotArrived()
-                                                    .add( taskTimingStatistics1 ); } } );
-                            return taskTimingStatisticsList; } ) )
-                .single();
+            Flux.just( new TaskTimingStatisticsList() )
+                    .flatMap( taskTimingStatisticsList -> CassandraDataControl
+                            .getInstance()
+                            .getGetAllEntities()
+                            .apply( CassandraTables.TABLETS, CassandraTables.TASKS_TIMING_TABLE )
+                            .filter( row -> super.getCheckParam().test( row.getTimestamp( "dateofcoming" ) ) )
+                            .filter( row -> super.getCheckTaskTimingRequest().apply( request, row ) )
+                            .filter( row -> super.getCheckTaskType().apply( request, row ) )
+                            .flatMap( row -> CassandraDataControl
+                                    .getInstance()
+                                    .getGetPatrulByUUID()
+                                    .apply( row.getUUID( "patrulUUID" ) )
+                                    .map( patrul -> new TaskTimingStatistics( row, patrul ) ) )
+                            .sequential()
+                            .publishOn( Schedulers.single() )
+                            .collectList()
+                            .map( taskTimingStatisticsList1 -> {
+                                taskTimingStatisticsList1
+                                        .parallelStream()
+                                        .forEach( taskTimingStatistics1 -> {
+                                            switch ( taskTimingStatistics1.getStatus() ) {
+                                                case LATE -> taskTimingStatisticsList.getListLate().add( taskTimingStatistics1 );
+                                                case IN_TIME -> taskTimingStatisticsList.getListInTime().add( taskTimingStatistics1 );
+                                                default -> taskTimingStatisticsList.getListDidNotArrived().add( taskTimingStatistics1 ); } } );
+                                return taskTimingStatisticsList; } ) )
+                    .single();
 
     // возвращает список точек локаций, где был патрульной пока не дашел до точки назначения
     private final BiFunction< String, UUID, TaskTotalData > getPositionInfoList = ( taskId, patrulUUID ) ->
@@ -294,67 +282,52 @@ public class CassandraDataControlForTasks extends SerDes {
                     + " WHERE taskid = '" + taskId + "'"
                     + " AND patruluuid = " + patrulUUID + ";" ).one() );
 
-    private final Function< TaskDetailsRequest, Mono< TaskDetails > > getTaskDetails = taskDetailsRequest ->
-            switch ( taskDetailsRequest.getTaskTypes() ) {
-                case CARD_102 -> this.getCard102.apply( taskDetailsRequest.getId() )
-                        .map( card -> new TaskDetails(
-                                card,
+    private final Function< TaskDetailsRequest, Mono< TaskDetails > > getTaskDetails = taskDetailsRequest -> switch ( taskDetailsRequest.getTaskTypes() ) {
+            case CARD_102 -> this.getGetCard102().apply( taskDetailsRequest.getId() )
+                    .map( card -> new TaskDetails(
+                            card,
+                            taskDetailsRequest.getPatrulUUID(),
+                            this.getGetPositionInfoList().apply( card.getCardId().toString(), taskDetailsRequest.getPatrulUUID() ) ) );
+
+            case FIND_FACE_CAR -> super.getCheckTable().apply( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
+                    ? this.getGetCarEvents().apply( taskDetailsRequest.getId() )
+                    .map( carEvent -> new TaskDetails(
+                            carEvent,
+                            taskDetailsRequest.getPatrulUUID(),
+                            this.getGetPositionInfoList().apply( carEvent.getId(), taskDetailsRequest.getPatrulUUID() ) ) )
+                    : this.getGetEventCar().apply( taskDetailsRequest.getId() )
+                    .map( eventCar -> new TaskDetails(
+                            eventCar,
+                            taskDetailsRequest.getPatrulUUID(),
+                            this.getGetPositionInfoList().apply( eventCar.getId(), taskDetailsRequest.getPatrulUUID() ) ) );
+
+            case FIND_FACE_PERSON -> switch ( super.getFindTable().apply( taskDetailsRequest.getId() ) ) {
+                case FACEPERSON -> this.getGetFaceEvents().apply( taskDetailsRequest.getId() )
+                        .map( faceEvent -> new TaskDetails(
+                                faceEvent,
                                 taskDetailsRequest.getPatrulUUID(),
-                                this.getGetPositionInfoList()
-                                        .apply( card.getCardId().toString(),
-                                                taskDetailsRequest.getPatrulUUID() ) ) );
+                                this.getGetPositionInfoList().apply( faceEvent.getId(), taskDetailsRequest.getPatrulUUID() ) ) );
 
-                case FIND_FACE_CAR -> super.getCheckTable().apply( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
-                        ? this.getCarEvents.apply( taskDetailsRequest.getId() )
-                        .map( carEvent -> new TaskDetails(
-                                carEvent,
+                case EVENTBODY -> this.getGetEventBody().apply( taskDetailsRequest.getId() )
+                        .map( eventBody -> new TaskDetails(
+                                eventBody,
                                 taskDetailsRequest.getPatrulUUID(),
-                                this.getGetPositionInfoList()
-                                        .apply( carEvent.getId(),
-                                                taskDetailsRequest.getPatrulUUID() ) ) )
-                        : this.getEventCar.apply( taskDetailsRequest.getId() )
-                        .map( eventCar -> new TaskDetails(
-                                eventCar,
+                                this.getGetPositionInfoList().apply( eventBody.getId(), taskDetailsRequest.getPatrulUUID() ) ) );
+
+                default -> this.getGetEventFace().apply( taskDetailsRequest.getId() )
+                        .map( eventFace -> new TaskDetails(
+                                eventFace,
                                 taskDetailsRequest.getPatrulUUID(),
-                                this.getGetPositionInfoList()
-                                        .apply( eventCar.getId(),
-                                                taskDetailsRequest.getPatrulUUID() ) ) );
+                                this.getGetPositionInfoList().apply( eventFace.getId(), taskDetailsRequest.getPatrulUUID() ) ) ); };
 
-                case FIND_FACE_PERSON -> switch ( super.getFindTable().apply( taskDetailsRequest.getId() ) ) {
-                    case FACEPERSON -> this.getFaceEvents.apply( taskDetailsRequest.getId() )
-                            .map( faceEvent -> new TaskDetails(
-                                    faceEvent,
-                                    taskDetailsRequest.getPatrulUUID(),
-                                    this.getGetPositionInfoList()
-                                            .apply( faceEvent.getId(),
-                                                    taskDetailsRequest.getPatrulUUID() ) ) );
+            default -> this.getGetSelfEmploymentTask().apply( UUID.fromString( taskDetailsRequest.getId() ) )
+                    .map( selfEmploymentTask -> new TaskDetails(
+                            selfEmploymentTask,
+                            taskDetailsRequest.getPatrulUUID(),
+                            this.getGetPositionInfoList().apply( selfEmploymentTask.getUuid().toString(), taskDetailsRequest.getPatrulUUID() ) ) ); };
 
-                    case EVENTBODY -> this.getEventBody.apply( taskDetailsRequest.getId() )
-                            .map( eventBody -> new TaskDetails(
-                                    eventBody,
-                                    taskDetailsRequest.getPatrulUUID(),
-                                    this.getGetPositionInfoList()
-                                            .apply( eventBody.getId(),
-                                                    taskDetailsRequest.getPatrulUUID() ) ) );
-
-                    default -> this.getEventFace.apply( taskDetailsRequest.getId() )
-                            .map( eventFace -> new TaskDetails(
-                                    eventFace,
-                                    taskDetailsRequest.getPatrulUUID(),
-                                    this.getGetPositionInfoList()
-                                            .apply( eventFace.getId(),
-                                                    taskDetailsRequest.getPatrulUUID() ) ) ); };
-
-                default -> this.getSelfEmploymentTask.apply( UUID.fromString( taskDetailsRequest.getId() ) )
-                        .map( selfEmploymentTask -> new TaskDetails(
-                                selfEmploymentTask,
-                                taskDetailsRequest.getPatrulUUID(),
-                                this.getGetPositionInfoList()
-                                        .apply( selfEmploymentTask.getUuid().toString(),
-                                                taskDetailsRequest.getPatrulUUID() ) ) ); };
-
-    private final Function< PatrulSos, Mono< ApiResponseModel > > saveSos = patrulSos -> this.getSession()
-            .execute( "INSERT INTO "
+    private final Function< PatrulSos, Mono< ApiResponseModel > > saveSos = patrulSos -> this.getSession().execute(
+            "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.SOS_TABLE.name()
                     + "( sosWasSendDate, patruluuid, longitude, latitude )"
@@ -364,9 +337,8 @@ public class CassandraDataControlForTasks extends SerDes {
                     + patrulSos.getLongitude() + ", "
                     + patrulSos.getLatitude() + ") IF NOT EXISTS;" )
             .wasApplied()
-            ? super.getFunction()
-            .apply( Map.of(
-                    "message", KafkaDataControl // sending message to Kafka
+            ? super.getFunction().apply(
+                    Map.of( "message", KafkaDataControl // sending message to Kafka
                             .getInstance()
                             .getWriteSosNotificationToKafka()
                             .apply( SosNotification
@@ -378,9 +350,8 @@ public class CassandraDataControlForTasks extends SerDes {
                             .builder()
                             .data( Status.ACTIVE )
                             .build() ) )
-            : super.getFunction()
-            .apply( Map.of(
-                    "message", "Sos was deleted successfully",
+            : super.getFunction().apply(
+                    Map.of( "message", "Sos was deleted successfully",
                     "data", com.ssd.mvd.gpstabletsservice.entity.Data
                             .builder()
                             .data( Status.IN_ACTIVE )
@@ -400,17 +371,12 @@ public class CassandraDataControlForTasks extends SerDes {
                         + " WHERE patrulUUID = " + patrulSos.getPatrulUUID() + ";" );
                 return status; } );
 
-    private final Supplier< Flux< PatrulSos > > getAllSos = () -> Flux.fromStream(
-            this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.PATRUL_SOS_TABLE.name() + ";" )
-                    .all()
-                    .stream()
-                    .parallel() )
-            .parallel()
-            .runOn( Schedulers.parallel() )
+    private final Supplier< Flux< PatrulSos > > getAllSos = () -> CassandraDataControl
+            .getInstance()
+            .getGetAllEntities()
+            .apply( CassandraTables.TABLETS, CassandraTables.PATRUL_SOS_TABLE )
             .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.FINISHED ) != 0 )
-            .flatMap( row -> Mono.just( new PatrulSos( row ) ) )
+            .map( PatrulSos::new )
             .sequential()
             .publishOn( Schedulers.single() );
 
@@ -523,50 +489,47 @@ public class CassandraDataControlForTasks extends SerDes {
                                                     .flatMap( CassandraDataControl
                                                             .getInstance()
                                                             .getGetPatrulByUUID() )
-                                                    .flatMap( patrul1 -> {
-                                                        if ( patrul1.getSos_id() != null
+                                                    .map( patrul1 -> {
+                                                        if ( super.getCheckParam().test( patrul1.getSos_id() )
                                                                 && patrul1.getSos_id().compareTo( patrulSos1.getUuid() ) == 0 )
                                                             this.getUpdatePatrulSos().apply( null, patrul1.getUuid() );
-                                                        return Mono.just( new SosNotificationForAndroid(
+                                                        return new SosNotificationForAndroid(
                                                                 patrulSos1,
                                                                 patrul,
                                                                 Status.IN_ACTIVE,
-                                                                patrul1.getPassportNumber() ) ); } )
+                                                                patrul1.getPassportNumber() ); } )
                                                     .sequential()
                                                     .publishOn( Schedulers.single() ), apiResponseModel ); } } ) );
 
     // используется в случае когда патрульный либо принимает сигнал либо отказывается
     private final Function< SosRequest, Mono< ApiResponseModel > > updatePatrulStatusInSosTable = sosRequest -> {
-        // добавляем данный сос сигнал в список
-        this.updatePatrulSosList( sosRequest.getSosUUID(),
-                sosRequest.getPatrulUUID(),
-                sosRequest.getStatus() );
-        // если патрульный подтвердил данный сигнал то связымаем его с ним
-        if ( sosRequest.getStatus().compareTo( Status.ACCEPTED ) == 0 ) {
-            this.getUpdatePatrulSos().apply( sosRequest.getSosUUID(), sosRequest.getPatrulUUID() );
-            // меняем статус сос сигнала на принятый
+            // добавляем данный сос сигнал в список
+            this.updatePatrulSosList( sosRequest.getSosUUID(), sosRequest.getPatrulUUID(), sosRequest.getStatus() );
+            // если патрульный подтвердил данный сигнал то связымаем его с ним
+            if ( sosRequest.getStatus().compareTo( Status.ACCEPTED ) == 0 ) {
+                this.getUpdatePatrulSos().apply( sosRequest.getSosUUID(), sosRequest.getPatrulUUID() );
+                // меняем статус сос сигнала на принятый
+                this.getSession().execute( "UPDATE "
+                        + CassandraTables.TABLETS.name() + "."
+                        + CassandraTables.PATRUL_SOS_TABLE.name()
+                        + " SET status = '" + Status.ACCEPTED.name() + "'"
+                        + " WHERE uuid = " + sosRequest.getSosUUID() + " IF EXISTS;" );
+                KafkaDataControl
+                        .getInstance()
+                        .getWriteSosNotificationToKafka()
+                        .apply( SosNotification
+                                .builder()
+                                .patrulUUID( this.getGetCurrentPatrulSos().apply( sosRequest.getSosUUID() ).getPatrulUUID() )
+                                .status( Status.ACCEPTED )
+                                .build() ); }
             this.getSession().execute( "UPDATE "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.PATRUL_SOS_TABLE.name()
-                    + " SET status = '" + Status.ACCEPTED.name() + "'"
-                    + " WHERE uuid = " + sosRequest.getSosUUID() + " IF EXISTS;" );
-            KafkaDataControl
-                    .getInstance()
-                    .getWriteSosNotificationToKafka()
-                    .apply( SosNotification
-                            .builder()
-                            .patrulUUID( this.getCurrentPatrulSos.apply( sosRequest.getSosUUID() ).getPatrulUUID() )
-                            .status( Status.ACCEPTED )
-                            .build() ); }
-        this.getSession().execute( "UPDATE "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.PATRUL_SOS_TABLE.name()
-                + " SET patrulStatuses [" + sosRequest.getPatrulUUID() + "] = '"
-                + ( sosRequest.getStatus().compareTo( Status.CANCEL ) == 0
-                ? Status.ATTACHED : sosRequest.getStatus() )
-                + "' WHERE uuid = " + sosRequest.getSosUUID() + ";" );
-        return super.getFunction()
-                .apply( Map.of( "message", "You have changed status of sos task" ) ); };
+                    + " SET patrulStatuses [" + sosRequest.getPatrulUUID() + "] = '"
+                    + ( sosRequest.getStatus().compareTo( Status.CANCEL ) == 0
+                    ? Status.ATTACHED : sosRequest.getStatus() )
+                    + "' WHERE uuid = " + sosRequest.getSosUUID() + ";" );
+            return super.getFunction().apply( Map.of( "message", "You have changed status of sos task" ) ); };
 
     private final Function< UUID, PatrulSos > getCurrentPatrulSos = uuid -> new PatrulSos(
             this.getSession().execute( "SELECT * FROM "
@@ -578,8 +541,7 @@ public class CassandraDataControlForTasks extends SerDes {
         final Row row = this.getSession().execute( "SELECT * FROM "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.PATRUL_SOS_TABLE.name()
-                        + " WHERE uuid = " + uuid + ";" )
-                .one();
+                        + " WHERE uuid = " + uuid + ";" ).one();
         return super.getCheckParam().test( row ) && Status.valueOf( row.getString( "status" ) ).compareTo( Status.CREATED ) == 0; };
 
     // возвращает все сос сигналы для конкретного патрульного
@@ -592,10 +554,10 @@ public class CassandraDataControlForTasks extends SerDes {
                     .getSet( "attachedsoslist", UUID.class )
                     .stream()
                     .parallel() )
-            .parallel()
+            .parallel( patrulUUID.toString().length() )
             .runOn( Schedulers.parallel() )
-            .filter( this.checkSosWasFinished )
-            .map( this.getCurrentPatrulSos )
+            .filter( this.getCheckSosWasFinished() )
+            .map( this.getGetCurrentPatrulSos() )
             .flatMap( patrulSos -> CassandraDataControl
                     .getInstance()
                     .getGetPatrulByUUID()
@@ -618,8 +580,8 @@ public class CassandraDataControlForTasks extends SerDes {
                                     .build() ) ) );
 
     // создает список различных сос сигналов лоя нового патрульного
-    private final Consumer< UUID > createRowInPatrulSosListTable = uuid -> this.getSession()
-            .execute( "INSERT INTO "
+    private final Consumer< UUID > createRowInPatrulSosListTable = uuid -> this.getSession().execute(
+            "INSERT INTO "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.PATRUL_SOS_LIST.name()
                     + " ( patruluuid, " +
@@ -630,31 +592,24 @@ public class CassandraDataControlForTasks extends SerDes {
 
     private final Function< TaskDetailsRequest, Mono< ActiveTask > > getActiveTask = taskDetailsRequest ->
             switch ( taskDetailsRequest.getTaskTypes() ) {
-                case CARD_102 -> this.getCard102
-                        .apply( taskDetailsRequest.getId() )
+                case CARD_102 -> this.getGetCard102().apply( taskDetailsRequest.getId() )
                         .map( ActiveTask::new );
 
-                case FIND_FACE_CAR -> this.getCarEvents
-                        .apply( taskDetailsRequest.getId() )
+                case FIND_FACE_CAR -> this.getGetCarEvents().apply( taskDetailsRequest.getId() )
                         .map( ActiveTask::new );
 
-                case FIND_FACE_PERSON -> this.getFaceEvents
-                        .apply( taskDetailsRequest.getId() )
+                case FIND_FACE_PERSON -> this.getGetFaceEvents().apply( taskDetailsRequest.getId() )
                         .map( ActiveTask::new );
 
-                case FIND_FACE_EVENT_CAR -> this.getEventCar
-                        .apply( taskDetailsRequest.getId() )
+                case FIND_FACE_EVENT_CAR -> this.getGetEventCar().apply( taskDetailsRequest.getId() )
                         .map( ActiveTask::new );
 
-                case FIND_FACE_EVENT_BODY -> this.getEventBody
-                        .apply( taskDetailsRequest.getId() )
+                case FIND_FACE_EVENT_BODY -> this.getGetEventBody().apply( taskDetailsRequest.getId() )
                         .map( ActiveTask::new );
 
-                case FIND_FACE_EVENT_FACE -> this.getEventFace
-                        .apply( taskDetailsRequest.getId() )
+                case FIND_FACE_EVENT_FACE -> this.getGetEventFace().apply( taskDetailsRequest.getId() )
                         .map( ActiveTask::new );
 
-                default -> this.getSelfEmploymentTask
-                        .apply( UUID.fromString( taskDetailsRequest.getId() ) )
+                default -> this.getGetSelfEmploymentTask().apply( UUID.fromString( taskDetailsRequest.getId() ) )
                         .map( ActiveTask::new ); };
 }

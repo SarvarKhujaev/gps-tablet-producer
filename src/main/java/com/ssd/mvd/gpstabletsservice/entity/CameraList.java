@@ -9,7 +9,7 @@ public class CameraList {
     private String rtspLink;
     private String cameraName;
 
-    public CameraList ( UDTValue value ) {
+    public CameraList ( final UDTValue value ) {
         this.setRtspLink( value.getString( "rtspLink" ) );
         this.setCameraName( value.getString( "cameraName" ) ); }
 }

@@ -6,8 +6,10 @@ import com.datastax.driver.core.Row;
 
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.*;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
@@ -38,7 +40,7 @@ public class Notification {
     private TaskTypes taskTypes;
     private Date notificationWasCreated; // the date when this current notification was created
 
-    public Notification ( Row row ) {
+    public Notification ( final Row row ) {
         this.setId( row.getString( "id" ) );
         this.setType( row.getString( "type" ) );
         this.setTitle( row.getString( "title" ) );
@@ -54,15 +56,18 @@ public class Notification {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setWasRead( row.getBool( "wasRead" ) );
         this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-        this.setTaskStatus( row.getString( "taskStatus" ) != null
+        this.setTaskStatus( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( row.getString( "taskStatus" ) )
                 ? Status.valueOf( row.getString( "taskStatus" ) ) : Status.CREATED );
         this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
         this.setNotificationWasCreated( row.getTimestamp( "notificationWasCreated" ) ); }
 
-    public Notification ( Patrul patrul,
-                          Card card,
-                          String text,
-                          Status status ) {
+    public Notification ( final Patrul patrul,
+                          final Card card,
+                          final String text,
+                          final Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setType( CARD_102.name() );
@@ -77,12 +82,17 @@ public class Notification {
         this.setLongitudeOfTask( card.getLongitude() );
         this.setPassportSeries( patrul.getPassportNumber() );
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
-        this.setAddress( card.getAddress() != null ? card.getAddress() : "unknown" ); }
+        this.setAddress( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( card.getAddress() )
+                ? card.getAddress()
+                : Errors.DATA_NOT_FOUND.name() ); }
 
-    public Notification ( Patrul patrul,
-                          EventCar eventCar,
-                          String text,
-                          Status status ) {
+    public Notification ( final  Patrul patrul,
+                          final EventCar eventCar,
+                          final String text,
+                          final Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setUuid( UUID.randomUUID() );
@@ -97,12 +107,17 @@ public class Notification {
         this.setLongitudeOfTask( eventCar.getLongitude() );
         this.setPassportSeries( patrul.getPassportNumber() );
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
-        this.setAddress( eventCar.getAddress() != null ? eventCar.getAddress() : "unknown" ); }
+        this.setAddress( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventCar.getAddress() )
+                ? eventCar.getAddress()
+                : Errors.DATA_NOT_FOUND.name() ); }
 
-    public Notification ( Patrul patrul,
-                          EventFace eventFace,
-                          String text,
-                          Status status ) {
+    public Notification ( final  Patrul patrul,
+                          final EventFace eventFace,
+                          final String text,
+                          final Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setUuid( UUID.randomUUID() );
@@ -117,12 +132,17 @@ public class Notification {
         this.setLongitudeOfTask( eventFace.getLongitude() );
         this.setPassportSeries( patrul.getPassportNumber() );
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
-        this.setAddress( eventFace.getAddress() != null ? eventFace.getAddress() : "unknown" ); }
+        this.setAddress( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventFace.getAddress() )
+                ? eventFace.getAddress()
+                : Errors.DATA_NOT_FOUND.name() ); }
 
-    public Notification ( Patrul patrul,
-                          EventBody eventBody,
-                          String text,
-                          Status status ) {
+    public Notification ( final  Patrul patrul,
+                          final EventBody eventBody,
+                          final String text,
+                          final Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setUuid( UUID.randomUUID() );
@@ -137,12 +157,17 @@ public class Notification {
         this.setLongitudeOfTask( eventBody.getLongitude() );
         this.setPassportSeries( patrul.getPassportNumber() );
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
-        this.setAddress( eventBody.getAddress() != null ? eventBody.getAddress() : "unknown" ); }
+        this.setAddress( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventBody.getAddress() )
+                ? eventBody.getAddress()
+                : Errors.DATA_NOT_FOUND.name() ); }
 
-    public Notification ( Patrul patrul,
-                          CarEvent carEvents,
-                          String text,
-                          Status status ) {
+    public Notification ( final  Patrul patrul,
+                          final CarEvent carEvents,
+                          final String text,
+                          final Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setUuid( UUID.randomUUID() );
@@ -152,24 +177,46 @@ public class Notification {
         this.setTaskStatus( carEvents.getStatus() );
         this.setId( carEvents.getUUID().toString() );
         this.setPoliceType( patrul.getPoliceType() );
-        this.setLatitudeOfTask( carEvents.getDataInfo() != null
-                && carEvents.getDataInfo().getData() != null ?
-                carEvents.getDataInfo().getData().getLatitude() : null );
+        this.setLatitudeOfTask( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( carEvents.getDataInfo() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( carEvents.getDataInfo().getData() )
+                ? carEvents.getDataInfo().getData().getLatitude() : null );
         this.setNotificationWasCreated( new Date() );
-        this.setLongitudeOfTask( carEvents.getDataInfo() != null
-                && carEvents.getDataInfo().getData() != null ?
-                carEvents.getDataInfo().getData().getLongitude() : null );
+        this.setLongitudeOfTask( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( carEvents.getDataInfo() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( carEvents.getDataInfo().getData() )
+                ? carEvents.getDataInfo().getData().getLongitude() : null );
         this.setPassportSeries( patrul.getPassportNumber() );
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
-        this.setAddress( carEvents.getDataInfo() != null
-                && carEvents.getDataInfo().getData() != null
-                && carEvents.getDataInfo().getData().getAddress() != null ?
-                carEvents.getDataInfo().getData().getAddress() : "unknown" ); }
+        this.setAddress( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( carEvents.getDataInfo() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( carEvents.getDataInfo().getData() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( carEvents.getDataInfo().getData().getAddress() )
+                ? carEvents.getDataInfo().getData().getAddress()
+                : Errors.DATA_NOT_FOUND.name() ); }
 
-    public Notification ( Patrul patrul,
-                          FaceEvent faceEvent,
-                          String text,
-                          Status status ) {
+    public Notification ( final  Patrul patrul,
+                          final FaceEvent faceEvent,
+                          final String text,
+                          final Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setUuid( UUID.randomUUID() );
@@ -179,24 +226,46 @@ public class Notification {
         this.setTaskStatus( faceEvent.getStatus() );
         this.setId( faceEvent.getUUID().toString() );
         this.setPoliceType( patrul.getPoliceType() );
-        this.setLatitudeOfTask( faceEvent.getDataInfo() != null
-                && faceEvent.getDataInfo().getData() != null ?
-                faceEvent.getDataInfo().getData().getLatitude() : null );
+        this.setLatitudeOfTask( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo().getData() )
+                ? faceEvent.getDataInfo().getData().getLatitude() : null );
         this.setNotificationWasCreated( new Date() );
-        this.setLongitudeOfTask( faceEvent.getDataInfo() != null
-                && faceEvent.getDataInfo().getData() != null ?
-                faceEvent.getDataInfo().getData().getLongitude() : null );
+        this.setLongitudeOfTask( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo().getData() )
+                ? faceEvent.getDataInfo().getData().getLongitude() : null );
         this.setPassportSeries( patrul.getPassportNumber() );
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
-        this.setAddress( faceEvent.getDataInfo() != null
-                && faceEvent.getDataInfo().getData() != null
-                && faceEvent.getDataInfo().getData().getAddress() != null ?
-                faceEvent.getDataInfo().getData().getAddress() : "unknown" ); }
+        this.setAddress( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo().getData() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo().getData().getAddress() )
+                ? faceEvent.getDataInfo().getData().getAddress()
+                : Errors.DATA_NOT_FOUND.name() ); }
 
-    public Notification ( Patrul patrul,
-                          SelfEmploymentTask selfEmploymentTask,
-                          String text,
-                          Status status ) {
+    public Notification ( final  Patrul patrul,
+                          final SelfEmploymentTask selfEmploymentTask,
+                          final String text,
+                          final Status status ) {
         this.setTitle( text );
         this.setStatus( status );
         this.setUuid( UUID.randomUUID() );
@@ -211,5 +280,10 @@ public class Notification {
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
         this.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
         this.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() );
-        this.setAddress( selfEmploymentTask.getAddress() != null ? selfEmploymentTask.getAddress() : "unknown" ); }
+        this.setAddress( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( selfEmploymentTask.getAddress() )
+                ? selfEmploymentTask.getAddress()
+                : Errors.DATA_NOT_FOUND.name() ); }
 }

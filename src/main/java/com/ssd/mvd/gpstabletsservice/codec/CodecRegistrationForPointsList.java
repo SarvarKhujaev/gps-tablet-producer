@@ -6,44 +6,53 @@ import com.datastax.driver.core.TypeCodec;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.tuple.Points;
 import java.nio.ByteBuffer;
 
 public class CodecRegistrationForPointsList extends TypeCodec< Points > {
-    private final TypeCodec<UDTValue> innerCodec;
-
+    private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
-    public CodecRegistrationForPointsList ( TypeCodec< UDTValue > innerCodec, Class< Points > javaType ) {
+    public CodecRegistrationForPointsList ( final TypeCodec< UDTValue > innerCodec, final Class< Points > javaType ) {
         super( innerCodec.getCqlType(), javaType );
         this.innerCodec = innerCodec;
         this.userType = (UserType)innerCodec.getCqlType(); }
 
     @Override
-    public ByteBuffer serialize ( Points value, ProtocolVersion protocolVersion )
-            throws InvalidTypeException { return innerCodec.serialize( toUDTValue( value ), protocolVersion ); }
+    public Points deserialize ( final ByteBuffer bytes, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
+        return this.toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
 
     @Override
-    public Points deserialize ( ByteBuffer bytes, ProtocolVersion protocolVersion )
-            throws InvalidTypeException {
-        return toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
+    public ByteBuffer serialize ( final Points value, final ProtocolVersion protocolVersion ) throws InvalidTypeException { return innerCodec.serialize( this.toUDTValue( value ), protocolVersion ); }
 
     @Override
-    public Points parse( String value ) throws InvalidTypeException { return value == null ||
+    public String format( final Points points ) throws InvalidTypeException { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( points )
+            ? innerCodec.format( toUDTValue( points ) ) : "NULL"; }
+
+    @Override
+    public Points parse( final String value ) throws InvalidTypeException { return value == null ||
             value.isEmpty() ||
             value.equalsIgnoreCase("NULL" ) ?
-            null : toAddress( innerCodec.parse( value ) ); }
+            null
+            : this.toAddress( innerCodec.parse( value ) ); }
 
-    @Override
-    public String format( Points value ) throws InvalidTypeException { return value == null ? "NULL" :
-            innerCodec.format( toUDTValue( value ) ); }
+    protected UDTValue toUDTValue ( final Points points ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( points )
+            ? userType.newValue()
+            .setDouble("lat", points.getLat() )
+            .setDouble("lng", points.getLng() )
+            .setUUID( "pointId", points.getPointId() )
+            .setString( "pointName", points.getPointName() ) : null; }
 
-    protected Points toAddress ( UDTValue value ) { return value == null ? null : new Points ( value ); }
-
-    protected UDTValue toUDTValue ( Points value ) { return value == null ? null :
-            userType.newValue()
-                    .setDouble("lat", value.getLat() )
-                    .setDouble("lng", value.getLng() )
-                    .setUUID( "pointId", value.getPointId() )
-                    .setString( "pointName", value.getPointName() ); }
+    protected Points toAddress ( final UDTValue value ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( value )
+            ? new Points ( value ) : null; }
 }

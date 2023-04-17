@@ -1,8 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
 import java.util.*;
-import lombok.Data;
-
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
@@ -14,22 +12,22 @@ import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
-@Data
+@lombok.Data
 public class CassandraConverter extends LogInspector {
     private String temp;
     private String result;
 
-    public String getALlNames ( Class object ) {
-        StringBuilder result = new StringBuilder( "( " );
+    public String getALlNames ( final Class object ) {
+        final StringBuilder result = new StringBuilder( "( " );
         this.getFields( object ).forEach( field -> result.append( field.getName() ).append( ", " ) );
         return result.substring( 0, result.length() - 2 ) + " )"; }
 
-    public Stream< Field > getFields ( Class object ) { return Arrays.stream( object.getDeclaredFields() )
+    public Stream< Field > getFields ( final Class object ) { return Arrays.stream( object.getDeclaredFields() )
             .toList()
             .stream(); }
 
-    public String convertClassToCassandra ( Class object ) {
-        StringBuilder result = new StringBuilder( "( " );
+    public String convertClassToCassandra ( final Class object ) {
+        final StringBuilder result = new StringBuilder( "( " );
         this.getFields( object )
                 .filter( field -> field.getType().equals( String.class )
                                 ^ field.getType().equals( Integer.class )
@@ -49,46 +47,40 @@ public class CassandraConverter extends LogInspector {
                     else if ( field.getType().equals( Boolean.class ) ) result.append( " boolean, " ); } );
         return result.substring( 0, result.toString().length() - 2 ); }
 
-    public String convertListToCassandra ( List< UUID > list ) {
+    public String convertListToCassandra ( final List< UUID > list ) {
         result = "[";
         list.forEach( s -> result += s + ", " );
         return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
 
-    public String convertClassToCassandraTable ( Object object ) {
-        StringBuilder result = new StringBuilder( "{ " );
-        this.getFields( object.getClass() )
-                .forEach( field -> {
-                    try {
-                        result.append( field.getName() )
-                                .append( " : " );
-                        org.springframework.util.ReflectionUtils.makeAccessible( field );
-                        result.append( field.get( object ) instanceof String ?
-                                "'" + ( (String) field.get( object ) ).replaceAll( "'", "" ) + "'"
-                                : field.get( object ) ).append( ", " );
-                    } catch ( IllegalAccessException e ) { e.printStackTrace(); } } );
+    public String convertClassToCassandraTable ( final Object object ) {
+        final StringBuilder result = new StringBuilder( "{ " );
+        this.getFields( object.getClass() ).forEach( field -> {
+            try {
+                result.append( field.getName() ).append( " : " );
+                org.springframework.util.ReflectionUtils.makeAccessible( field );
+                result.append( field.get( object ) instanceof String
+                        ? "'" + ( (String) field.get( object ) ).replaceAll( "'", "" ) + "'"
+                        : field.get( object ) ).append( ", " ); }
+            catch ( IllegalAccessException e ) { super.logging( e ); } } );
         return result.substring( 0, result.length() - 2 ) + "}"; }
 
-    public String convertListOfPointsToCassandra ( List< ? > pointsList ) {
+    public String convertListOfPointsToCassandra ( final List< ? > pointsList ) {
         result = "[";
-        ( pointsList != null ? pointsList : new ArrayList<>() )
+        ( super.getCheckParam().test( pointsList ) ? pointsList : new ArrayList<>() )
                 .forEach( points -> result += this.convertClassToCassandraTable( points ) + ", " );
         return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; }
 
-    public String convertMapToCassandra ( Map< String, String > listOfTasks ) {
+    public String convertMapToCassandra ( final Map< String, String > listOfTasks ) {
         result = "{";
         listOfTasks.keySet().forEach( s -> result += "'" + s + "' : '" + listOfTasks.get( s ) + "', " );
         return result.length() == 1 ? result + "}" : result.substring( 0, result.length() - 2 ) + "}"; }
 
-    public String convertSosMapToCassandra ( Map< UUID, String > listOfTasks ) {
+    public String convertSosMapToCassandra ( final Map< UUID, String > listOfTasks ) {
         temp = "{";
-        listOfTasks
-                .keySet()
-                .forEach( key -> temp += "" + key
-                        + " : '"
-                        + listOfTasks.get( key ) + "', ");
+        listOfTasks.keySet().forEach( key -> temp += "" + key + " : '" + listOfTasks.get( key ) + "', ");
         return temp.length() == 1 ? temp + "}" : temp.substring( 0, temp.length() - 2 ) + "}"; }
 
-    public void registerCodecForPatrul ( String dbName, String userType ) {
+    public void registerCodecForPatrul ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
@@ -103,7 +95,7 @@ public class CassandraConverter extends LogInspector {
                                 .getUserType( userType ) ),
                         Patrul.class ) ); }
 
-    public void registerCodecForReport ( String dbName, String userType ) {
+    public void registerCodecForReport ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
@@ -118,7 +110,7 @@ public class CassandraConverter extends LogInspector {
                                 .getUserType( userType ) ),
                         ReportForCard.class ) ); }
 
-    public void registerCodecForPoliceType ( String dbName, String userType ) {
+    public void registerCodecForPoliceType ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
@@ -133,7 +125,7 @@ public class CassandraConverter extends LogInspector {
                                 .getUserType( userType ) ),
                         PoliceType.class ) ); }
 
-    public void registerCodecForCameraList ( String dbName, String userType ) {
+    public void registerCodecForCameraList ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
@@ -148,7 +140,7 @@ public class CassandraConverter extends LogInspector {
                                 .getUserType( userType ) ),
                                 CameraList.class ) ); }
 
-    public void registerCodecForPointsList ( String dbName, String userType ) {
+    public void registerCodecForPointsList ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
@@ -163,7 +155,7 @@ public class CassandraConverter extends LogInspector {
                                                         .getUserType( userType ) ),
                                 Points.class ) ); }
 
-    public void registerCodecForPolygonType ( String dbName, String userType ) {
+    public void registerCodecForPolygonType ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
@@ -179,7 +171,7 @@ public class CassandraConverter extends LogInspector {
                                                         .getUserType( userType ) ),
                                 PolygonType.class ) ); }
 
-    public void registerCodecForPositionInfo ( String dbName, String userType ) {
+    public void registerCodecForPositionInfo ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
@@ -194,7 +186,7 @@ public class CassandraConverter extends LogInspector {
                                 .getUserType( userType ) ),
                         PositionInfo.class ) ); }
 
-    public void registerCodecForPolygonEntity ( String dbName, String userType ) {
+    public void registerCodecForPolygonEntity ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
@@ -209,7 +201,7 @@ public class CassandraConverter extends LogInspector {
                                                         .getUserType( userType ) ),
                                 PolygonEntity.class ) ); }
 
-    public void registerCodecForViolationsInformation ( String dbName, String userType ) {
+    public void registerCodecForViolationsInformation ( final String dbName, final String userType ) {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()

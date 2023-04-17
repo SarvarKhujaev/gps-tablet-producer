@@ -1,6 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.task.sos_task;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+
 import java.util.UUID;
 import java.util.Date;
 
@@ -22,9 +24,9 @@ public class SosTotalData {
 
     private SosNotificationForAndroid sosNotificationForAndroid;
 
-    public SosTotalData ( PatrulSos patrulSos,
-                          String patrulStatus,
-                          SosNotificationForAndroid sosNotificationForAndroid ) {
+    public SosTotalData ( final PatrulSos patrulSos,
+                          final String patrulStatus,
+                          final SosNotificationForAndroid sosNotificationForAndroid ) {
         this.setUuid( patrulSos.getUuid() );
         this.setPatrulUUID( patrulSos.getPatrulUUID() );
 
@@ -37,5 +39,9 @@ public class SosTotalData {
 
         this.setStatus( Status.CREATED );
         this.setSosNotificationForAndroid( sosNotificationForAndroid );
-        this.setPatrulStatus( patrulStatus != null ? Status.valueOf( patrulStatus ) : Status.ATTACHED ); }
+        this.setPatrulStatus( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( patrulStatus )
+                ? Status.valueOf( patrulStatus ) : Status.ATTACHED ); }
 }

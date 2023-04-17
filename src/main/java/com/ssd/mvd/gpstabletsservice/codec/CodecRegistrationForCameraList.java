@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.codec;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.entity.CameraList;
 
 import com.datastax.driver.core.exceptions.InvalidTypeException;
@@ -10,39 +11,45 @@ import com.datastax.driver.core.UserType;
 import java.nio.ByteBuffer;
 
 public class CodecRegistrationForCameraList extends TypeCodec< CameraList > {
-    private final TypeCodec<UDTValue> innerCodec;
-
+    private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
-    public CodecRegistrationForCameraList ( TypeCodec< UDTValue > innerCodec, Class< CameraList > javaType ) {
+    public CodecRegistrationForCameraList ( final TypeCodec< UDTValue > innerCodec, final Class< CameraList > javaType ) {
         super( innerCodec.getCqlType(), javaType );
         this.innerCodec = innerCodec;
         this.userType = (UserType)innerCodec.getCqlType(); }
 
     @Override
-    public ByteBuffer serialize ( CameraList value, ProtocolVersion protocolVersion )
-            throws InvalidTypeException { return innerCodec.serialize( toUDTValue( value ), protocolVersion ); }
+    public ByteBuffer serialize ( final CameraList cameraList, final ProtocolVersion protocolVersion ) throws InvalidTypeException { return innerCodec.serialize( this.toUDTValue( cameraList ), protocolVersion ); }
 
     @Override
-    public CameraList deserialize ( ByteBuffer bytes, ProtocolVersion protocolVersion )
-            throws InvalidTypeException {
-        return toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
+    public CameraList deserialize ( final ByteBuffer bytes, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
+        return this.toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
 
     @Override
-    public CameraList parse( String value ) throws InvalidTypeException { return value == null ||
+    public String format( final CameraList value ) throws InvalidTypeException { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( value )
+            ? innerCodec.format( toUDTValue( value ) ) : "NULL"; }
+
+    @Override
+    public CameraList parse( final String value ) throws InvalidTypeException { return value == null ||
             value.isEmpty() ||
-            value.equalsIgnoreCase("NULL" ) ?
-            null : toAddress( innerCodec.parse( value ) ); }
+            value.equalsIgnoreCase("NULL" )
+            ? null : toAddress( innerCodec.parse( value ) ); }
 
-    @Override
-    public String format( CameraList value ) throws InvalidTypeException { return value == null ? "NULL" :
-            innerCodec.format( toUDTValue( value ) ); }
+    protected UDTValue toUDTValue ( final CameraList cameraList ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( cameraList )
+            ? userType.newValue()
+                    .setString ("rtspLink", cameraList.getRtspLink() )
+                    .setString ( "cameraName", cameraList.getCameraName() ) : null; }
 
-    protected CameraList toAddress ( UDTValue value ) { return value == null ? null :
-            new CameraList ( value ); }
-
-    protected UDTValue toUDTValue ( CameraList value ) { return value == null ? null :
-            userType.newValue()
-                    .setString ("rtspLink", value.getRtspLink() )
-                    .setString ( "cameraName", value.getCameraName() ); }
+    protected CameraList toAddress ( final UDTValue udtValue ) { return DataValidateInspector
+            .getInstance()
+            .getCheckParam()
+            .test( udtValue )
+            ? new CameraList ( udtValue ) : null; }
 }

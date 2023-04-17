@@ -15,13 +15,13 @@ public class PoliceType {
     private String icon2;
     private String policeType;
 
-    public PoliceType ( Row value ) {
+    public PoliceType ( final Row value ) {
         this.setUuid( value.getUUID( "uuid" ) );
         this.setIcon( value.getString( "icon" ) );
         this.setIcon2( value.getString( "icon2" ) );
         this.setPoliceType( value.getString( "PoliceType" ) ); }
 
-    public PoliceType ( UDTValue value ) {
+    public PoliceType ( final UDTValue value ) {
         this.setUuid( value.getUUID( "uuid" ) );
         this.setIcon( value.getString( "icon" ) );
         this.setIcon2( value.getString( "icon2" ) );
