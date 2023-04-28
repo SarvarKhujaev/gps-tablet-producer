@@ -25,7 +25,7 @@ public class ReportForCard { // creates when some of Patrul from current Card ha
     @JsonDeserialize
     private List< String > imagesIds; // contains all images Ids which was downloaded in advance
 
-    public ReportForCard ( UDTValue value ) {
+    public ReportForCard ( final UDTValue value ) {
         this.setLan( value.getDouble( "lan" ) );
         this.setLat( value.getDouble( "lat" ) );
 

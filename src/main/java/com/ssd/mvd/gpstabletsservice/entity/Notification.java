@@ -8,7 +8,6 @@ import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.*;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
@@ -60,7 +59,8 @@ public class Notification {
                 .getInstance()
                 .getCheckParam()
                 .test( row.getString( "taskStatus" ) )
-                ? Status.valueOf( row.getString( "taskStatus" ) ) : Status.CREATED );
+                ? Status.valueOf( row.getString( "taskStatus" ) )
+                : Status.CREATED );
         this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
         this.setNotificationWasCreated( row.getTimestamp( "notificationWasCreated" ) ); }
 

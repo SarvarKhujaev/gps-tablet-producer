@@ -1,8 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 
 @lombok.Data
@@ -18,67 +19,132 @@ public class PersonDetails {
     private Long time;
     private Double confidence;
 
-    public PersonDetails ( EventBody eventBody ) {
+    public PersonDetails ( final EventBody eventBody ) {
         this.setIp( eventBody.getCameraIp() );
         this.setConfidence( eventBody.getConfidence() );
-        this.setDate( eventBody.getCreated_date() != null
-                ? eventBody.getCreated_date().getTime() : null );
-        this.setTime( eventBody.getCreated_date() != null
-                ? eventBody.getCreated_date().getTime() : null );
+
+        this.setDate( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventBody.getCreated_date() )
+                ? eventBody.getCreated_date().getTime()
+                : null );
+
+        this.setTime( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventBody.getCreated_date() )
+                ? eventBody.getCreated_date().getTime()
+                : null );
 
         this.setThumbnail( eventBody.getThumbnail() );
         this.setCameraImage( eventBody.getFullframe() );
         this.setDossier_photo( eventBody.getMatched_dossier() );
 
-        if ( eventBody.getPsychologyCard() != null ) {
-            if ( eventBody.getPsychologyCard().getPinpp() != null )
-                this.setFIO( eventBody.getPsychologyCard().getPinpp().getName() + " " +
-                        eventBody.getPsychologyCard().getPinpp().getSurname() + " " +
-                        eventBody.getPsychologyCard().getPinpp().getPatronym() );
-            if ( eventBody.getPsychologyCard().getPapilonData() != null
-                    && eventBody.getPsychologyCard().getPapilonData().size() > 0 )
-                this.setPassportSeries( eventBody
-                        .getPsychologyCard()
-                        .getPapilonData()
-                        .get( 0 )
-                        .getPassport().split( " " )[0] ); } }
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventBody.getPsychologyCard() ) ) {
+            this.setFIO( DataValidateInspector
+                    .getInstance()
+                    .getCheckParam()
+                    .test( eventBody
+                            .getPsychologyCard()
+                            .getPinpp() )
+                    ? DataValidateInspector
+                    .getInstance()
+                    .getConcatNames()
+                    .apply( eventBody.getPsychologyCard().getPinpp(), 0 )
+                    : null );
+            this.setPassportSeries( DataValidateInspector
+                    .getInstance()
+                    .getCheckRequest()
+                    .apply( eventBody
+                            .getPsychologyCard()
+                            .getPapilonData(), 6 )
+                    ? eventBody
+                    .getPsychologyCard()
+                    .getPapilonData()
+                    .get( 0 )
+                    .getPassport()
+                    .split( " " )[0]
+                    : null ); } }
 
-    public PersonDetails ( EventFace eventFace ) {
+    public PersonDetails ( final EventFace eventFace ) {
         this.setIp( eventFace.getCameraIp() );
         this.setConfidence( eventFace.getConfidence() );
-        this.setDate( eventFace.getCreated_date() != null
-                ? eventFace.getCreated_date().getTime() : null );
-        this.setTime( eventFace.getCreated_date() != null
-                ? eventFace.getCreated_date().getTime() : null );
+
+        this.setDate( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventFace.getCreated_date() )
+                ? eventFace.getCreated_date().getTime()
+                : null );
+
+        this.setTime( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventFace.getCreated_date() )
+                ? eventFace.getCreated_date().getTime()
+                : null );
 
         this.setThumbnail( eventFace.getThumbnail() );
         this.setCameraImage( eventFace.getFullframe() );
         this.setDossier_photo( eventFace.getMatched_dossier() );
 
-        if ( eventFace.getPsychologyCard() != null ) {
-            if ( eventFace.getPsychologyCard().getPinpp() != null )
-                this.setFIO( eventFace.getPsychologyCard().getPinpp().getName() + " " +
-                        eventFace.getPsychologyCard().getPinpp().getSurname() + " " +
-                        eventFace.getPsychologyCard().getPinpp().getPatronym() );
-            if ( eventFace.getPsychologyCard().getPapilonData() != null
-                    && eventFace.getPsychologyCard().getPapilonData().size() > 0 )
-                this.setPassportSeries( eventFace
-                        .getPsychologyCard()
-                        .getPapilonData()
-                        .get( 0 )
-                        .getPassport().split( " " )[0] ); } }
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( eventFace.getPsychologyCard() ) ) {
+            this.setFIO( DataValidateInspector
+                    .getInstance()
+                    .getCheckParam()
+                    .test( eventFace
+                            .getPsychologyCard()
+                            .getPinpp() )
+                    ? DataValidateInspector
+                    .getInstance()
+                    .getConcatNames()
+                    .apply( eventFace.getPsychologyCard().getPinpp(), 0 )
+                    : null );
 
-    public PersonDetails ( FaceEvent faceEvent ) {
+            this.setPassportSeries( DataValidateInspector
+                    .getInstance()
+                    .getCheckRequest()
+                    .apply( eventFace
+                            .getPsychologyCard()
+                            .getPapilonData(), 6 )
+                    ? eventFace
+                    .getPsychologyCard()
+                    .getPapilonData()
+                    .get( 0 )
+                    .getPassport()
+                    .split( " " )[0]
+                    : null ); } }
+
+    public PersonDetails ( final FaceEvent faceEvent ) {
         this.setConfidence( faceEvent.getConfidence() );
-        this.setTime( faceEvent.getCreated_date() != null
+        this.setTime( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getCreated_date() )
                 && !faceEvent.getCreated_date().equals( "null" )
                 ? TimeInspector
                 .getInspector()
                 .getConvertTimeToLong()
-                .apply( faceEvent.getCreated_date() ) : null );
-        this.setIp( faceEvent.getDataInfo() != null
-                && faceEvent.getDataInfo().getData() != null ?
-                faceEvent.getDataInfo().getData().getIp() : null );
+                .apply( faceEvent.getCreated_date() )
+                : null );
+
+        this.setIp( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo() )
+                && DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getDataInfo().getData() )
+                ? faceEvent.getDataInfo().getData().getIp()
+                : null );
 
         // в случае если псих портрет отсутствует то возмем отсюда
         this.setFIO( faceEvent.getComment() );
@@ -86,16 +152,29 @@ public class PersonDetails {
         this.setCameraImage( faceEvent.getFullframe() );
         this.setDossier_photo( faceEvent.getDossier_photo() );
 
-        if ( faceEvent.getPsychologyCard() != null ) {
-            if ( faceEvent.getPsychologyCard().getPinpp() != null )
-                this.setFIO( faceEvent.getPsychologyCard().getPinpp().getName() + " " +
-                        faceEvent.getPsychologyCard().getPinpp().getSurname() + " " +
-                        faceEvent.getPsychologyCard().getPinpp().getPatronym() );
-            if ( faceEvent.getPsychologyCard().getPapilonData() != null
-                    && faceEvent.getPsychologyCard().getPapilonData().size() > 0 )
-                this.setPassportSeries( faceEvent
-                        .getPsychologyCard()
-                        .getPapilonData()
-                        .get( 0 )
-                        .getPassport().split( " " )[0] ); } }
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( faceEvent.getPsychologyCard() ) ) {
+            this.setFIO( DataValidateInspector
+                    .getInstance()
+                    .getCheckParam()
+                    .test( faceEvent.getPsychologyCard().getPinpp() )
+                    ? DataValidateInspector
+                    .getInstance()
+                    .getConcatNames()
+                    .apply( faceEvent.getPsychologyCard().getPinpp(), 0 )
+                    : null );
+
+            this.setPassportSeries( DataValidateInspector
+                    .getInstance()
+                    .getCheckRequest()
+                    .apply( faceEvent.getPsychologyCard().getPapilonData(), 6 )
+                    ? faceEvent
+                    .getPsychologyCard()
+                    .getPapilonData()
+                    .get( 0 )
+                    .getPassport()
+                    .split( " " )[0]
+                    : null ); } }
 }
