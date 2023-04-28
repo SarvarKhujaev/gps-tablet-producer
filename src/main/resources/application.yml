@@ -1,52 +1,52 @@
 server:
-    port: ${SERVER_PORT:9090}
-    address: ${SERVER_ADDR:localhost}
+    port: ${SERVER_PORT}
+    address: ${SERVER_ADDR}
 
 spring:
     data:
         cassandra:
-            port: ${CASSANDRA_PORT:9942}
-            keyspace-name: ${KEYSPACE_NAME:SSD.TABLETS}
-            contact-points: ${CASSANDRA_HOST:10.254.5.1, 10.254.5.2, 10.254.5.3}
-            local-datacenter: ${CASSANDRA_DC:datacenter1}
+            port: ${CASSANDRA_PORT}
+            keyspace-name: ${KEYSPACE_NAME}
+            contact-points: ${CASSANDRA_HOST}
+            local-datacenter: ${CASSANDRA_DC}
             schema-action: CREATE_IF_NOT_EXISTS
 
         request:
-            timeout: ${REQUEST_TIMEOUT_FOR_CASSANDRA:30000}
+            timeout: ${REQUEST_TIMEOUT_FOR_CASSANDRA}
             consistency: quorum
 
         connection:
-            connect-timeout: ${CONNECTION_TIMEOUT_FOR_CASSANDRA:30000}
-            init-query-timeout: ${INIT_QUERY_TIMEOUT_FOR_CASSANDRA:30000}
+            connect-timeout: ${CONNECTION_TIMEOUT_FOR_CASSANDRA}
+            init-query-timeout: ${INIT_QUERY_TIMEOUT_FOR_CASSANDRA}
 
     rsocket:
         server:
-            port: ${RSOCKET_PORT:6060}
-            address: ${SERVER_ADDR:localhost}
+            port: ${RSOCKET_PORT}
+            address: ${SERVER_ADDR}
 
 variables:
     KAFKA_VARIABLES:
-        KAFKA_BROKER : ${KAFKA_BROKER:10.254.6.1:9092, 10.254.6.2:9092, 10.254.6.3:9092}
-        GROUP_ID_FOR_KAFKA : ${GROUP_ID_FOR_KAFKA:SSD.GPS.TABLETS_dev}
+        KAFKA_BROKER : ${KAFKA_BROKER}
+        GROUP_ID_FOR_KAFKA : ${GROUP_ID_FOR_KAFKA}
 
-        SOS_TOPIC: ${SOS_TOPIC:sos_topic}
-        ACTIVE_TASK: ${ACTIVE_TASK:active_task_dev}
-        NOTIFICATION: ${NOTIFICATION:notification_dev}
-        CAR_TOTAL_DATA: ${CAR_TOTAL_DATA:car_total_data_dev}
-        SOS_TOPIC_FOR_ANDROID_NOTIFICATION: ${SOS_TOPIC_FOR_ANDROID_NOTIFICATION:SOS_TOPIC_FOR_ANDROID_NOTIFICATION_DEV}
+        SOS_TOPIC: ${SOS_TOPIC}
+        ACTIVE_TASK: ${ACTIVE_TASK}
+        NOTIFICATION: ${NOTIFICATION}
+        CAR_TOTAL_DATA: ${CAR_TOTAL_DATA}
+        SOS_TOPIC_FOR_ANDROID_NOTIFICATION: ${SOS_TOPIC_FOR_ANDROID_NOTIFICATION}
 
     CASSANDRA_VARIABLES:
-        CASSANDRA_PORT: ${CASSANDRA_PORT:9942}
-        CASSANDRA_HOST: ${CASSANDRA_HOST:10.254.5.1, 10.254.5.2, 10.254.5.3}
+        CASSANDRA_PORT: ${CASSANDRA_PORT}
+        CASSANDRA_HOST: ${CASSANDRA_HOST}
 
-        CASSANDRA_MAX_REQ: ${CASSANDRA_MAX_REQ:1000}
-        CASSANDRA_MAX_CONN_LOCAL: ${CASSANDRA_MAX_CONN_LOCAL:10}
-        CASSANDRA_MAX_CONN_REMOTE: ${CASSANDRA_MAX_CONN_REMOTE:4}
+        CASSANDRA_MAX_REQ: ${CASSANDRA_MAX_REQ}
+        CASSANDRA_MAX_CONN_LOCAL: ${CASSANDRA_MAX_CONN_LOCAL}
+        CASSANDRA_MAX_CONN_REMOTE: ${CASSANDRA_MAX_CONN_REMOTE}
 
-        CASSANDRA_CORE_CONN_LOCAL: ${CASSANDRA_CORE_CONN_LOCAL:4}
-        CASSANDRA_CORE_CONN_REMOTE: ${CASSANDRA_CORE_CONN_REMOTE:2}
+        CASSANDRA_CORE_CONN_LOCAL: ${CASSANDRA_CORE_CONN_LOCAL}
+        CASSANDRA_CORE_CONN_REMOTE: ${CASSANDRA_CORE_CONN_REMOTE}
 
     UNIREST_VARIABLES:
-        ADDRESS_LOCATION_API : ${ADDRESS_LOCATION_API:http://ms-dev.ssd.uz/nominatim/search?q=}
-        CHAT_SERVICE_DOMAIN : ${CHAT_SERVICE_DOMAIN:https://ms.ssd.uz}
-        CHAT_SERVICE_PREFIX : ${CHAT_SERVICE_PREFIX:chat}
+        ADDRESS_LOCATION_API : ${ADDRESS_LOCATION_API}
+        CHAT_SERVICE_DOMAIN : ${CHAT_SERVICE_DOMAIN}
+        CHAT_SERVICE_PREFIX : ${CHAT_SERVICE_PREFIX}
