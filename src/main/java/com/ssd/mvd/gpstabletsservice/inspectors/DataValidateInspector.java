@@ -36,6 +36,8 @@ public class DataValidateInspector extends Archive {
 
     private final Predicate< Object > checkParam = Objects::nonNull;
 
+    private final BiFunction< Status, Status, Boolean > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
+
     private final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
 
     private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
@@ -90,9 +92,9 @@ public class DataValidateInspector extends Archive {
 
     // определяет тип таска
     private final Function< String, CassandraTables > findTable = id -> {
-        if ( this.getCheckTable().apply( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
-        else if ( this.getCheckTable().apply( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
-        else return CassandraTables.EVENTFACE; };
+            if ( this.getCheckTable().apply( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
+            else if ( this.getCheckTable().apply( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
+            else return CassandraTables.EVENTFACE; };
 
     private final Predicate< UUID > checkSosTable = patrulUUID -> CassandraDataControl
             .getInstance()
@@ -105,10 +107,10 @@ public class DataValidateInspector extends Archive {
 
     // по статусу определяет какой параметр обновлять
     private final Function< Status, String > defineNecessaryTable = status -> switch ( status ) {
-        case ATTACHED -> "attachedSosList";
-        case CANCEL -> "cancelledSosList";
-        case CREATED -> "sentSosList";
-        default -> "acceptedSosList"; };
+            case ATTACHED -> "attachedSosList";
+            case CANCEL -> "cancelledSosList";
+            case CREATED -> "sentSosList";
+            default -> "acceptedSosList"; };
 
     private final Predicate< PolygonForEscort > checkPolygonForEscort = polygon ->
             CassandraDataControlForEscort

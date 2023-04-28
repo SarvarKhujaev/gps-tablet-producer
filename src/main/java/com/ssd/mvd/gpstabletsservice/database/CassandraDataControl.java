@@ -1238,10 +1238,12 @@ public final class CassandraDataControl extends CassandraConverter {
     private final Function< String, Mono< ApiResponseModel > > startToWork = token -> this.getGetPatrulByUUID()
             .apply( this.getDecode().apply( token ) )
             .flatMap( patrul -> {
-                    this.getUpdatePatrulActivity().accept( patrul );
-                    this.getUpdateStatus().apply( patrul, START_TO_WORK );
                     patrul.setTotalActivityTime( 0L ); // set to 0 every day
                     patrul.setStartedToWorkDate( new Date() ); // registration of time every day
+
+                    this.getUpdatePatrulActivity().accept( patrul );
+                    this.getUpdateStatus().apply( patrul, START_TO_WORK );
+
                     this.getSession().execute( "UPDATE "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS.name()
