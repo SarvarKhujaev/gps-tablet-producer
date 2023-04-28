@@ -97,27 +97,11 @@ public final class TaskInspector extends DataValidateInspector {
             return patrulStatus; };
 
     private final BiFunction< Patrul, Status, String > generateText = ( patrul, status ) -> switch ( status ) {
-            case ATTACHED -> patrul.getName()
-                    + " got new task: " + patrul.getTaskId()
-                    + " " + patrul.getTaskTypes();
-
-            case ARRIVED -> patrul.getName()
-                    + " : " + patrul.getTaskTypes()
-                    + " arrived task location: "
-                    + " at: " + new Date();
-
-            case ACCEPTED -> patrul.getName()
-                    + " ACCEPTED his task: " + patrul.getTaskId()
-                    + " " + patrul.getTaskTypes()
-                    + " at: " + new Date();
-
-            case FINISHED -> patrul.getName()
-                    + " completed his task "
-                    + " at: " + new Date();
-
-            default -> patrul.getName()
-                    + " has been canceled from task "
-                    + " at: " + new Date(); };
+            case ACCEPTED -> patrul.getName() + " ACCEPTED his task: " + patrul.getTaskId() + " " + patrul.getTaskTypes() + " at: " + new Date();
+            case ARRIVED -> patrul.getName() + " : " + patrul.getTaskTypes() + " arrived task location: " + " at: " + new Date();
+            case ATTACHED -> patrul.getName() + " got new task: " + patrul.getTaskId() + " " + patrul.getTaskTypes();
+            case FINISHED -> patrul.getName() + " completed his task at: " + new Date();
+            default -> patrul.getName() + " has been canceled from task at: " + new Date(); };
 
     public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final Card card ) {
         patrul.setStatus( status );
@@ -572,7 +556,7 @@ public final class TaskInspector extends DataValidateInspector {
                 status,
                 SELF_EMPLOYMENT ); }
 
-    public Mono< ApiResponseModel > getListOfPatrulTasks ( final Patrul patrul, Integer page, Integer size ) {
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( final Patrul patrul, final Integer page, final Integer size ) {
         return Flux.fromStream( patrul.getListOfTasks().keySet().stream() )
                 .skip( Long.valueOf( page ) * Long.valueOf( size ) )
                 .take( size )
@@ -755,7 +739,7 @@ public final class TaskInspector extends DataValidateInspector {
                                         .data( finishedTasks )
                                         .build() ) ) ); }
 
-    private Integer getReportIndex ( final List< ReportForCard > reportForCardList, UUID uuid ) {
+    private Integer getReportIndex ( final List< ReportForCard > reportForCardList, final UUID uuid ) {
         for ( int i = 0; i < reportForCardList.size(); i++ ) if ( reportForCardList.get( i )
                 .getUuidOfPatrul()
                 .compareTo( uuid ) == 0 ) return i;

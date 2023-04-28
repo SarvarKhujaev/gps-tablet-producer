@@ -1015,9 +1015,9 @@ public final class CassandraDataControl extends CassandraConverter {
                         "success", false,
                         "code", 201 ) );
 
-    public Mono< ApiResponseModel > delete ( String table,
-                                             String param,
-                                             String id ) {
+    public Mono< ApiResponseModel > delete ( final String table,
+                                             final String param,
+                                             final String id ) {
             this.getSession().execute ( "DELETE FROM "
                     + CassandraTables.TABLETS.name() + "." + table
                     + " WHERE " + param + " = " + UUID.fromString( id ) + ";" );

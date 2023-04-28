@@ -22,22 +22,11 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import lombok.Data;
 import java.util.*;
 
-@Data
+@lombok.Data
 public class KafkaDataControl extends SerDes {
     private static KafkaDataControl instance = new KafkaDataControl();
-
-    private final String KAFKA_BROKER = GpsTabletsServiceApplication
-            .context
-            .getEnvironment()
-            .getProperty( "variables.KAFKA_VARIABLES.KAFKA_BROKER" );
-
-    private final String GROUP_ID_FOR_KAFKA = GpsTabletsServiceApplication
-            .context
-            .getEnvironment()
-            .getProperty( "variables.KAFKA_VARIABLES.GROUP_ID_FOR_KAFKA" );
 
     private final String CAR_TOTAL_DATA = GpsTabletsServiceApplication
             .context
@@ -68,8 +57,14 @@ public class KafkaDataControl extends SerDes {
 
     private final Supplier< Map< String, Object > > getKafkaSenderOptions = () -> Map.of(
             ProducerConfig.ACKS_CONFIG, "1",
-            ProducerConfig.CLIENT_ID_CONFIG, this.getGROUP_ID_FOR_KAFKA(),
-            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.getKAFKA_BROKER(),
+            ProducerConfig.CLIENT_ID_CONFIG, GpsTabletsServiceApplication
+                    .context
+                    .getEnvironment()
+                    .getProperty( "variables.KAFKA_VARIABLES.GROUP_ID_FOR_KAFKA" ),
+            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, GpsTabletsServiceApplication
+                    .context
+                    .getEnvironment()
+                    .getProperty( "variables.KAFKA_VARIABLES.KAFKA_BROKER" ),
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class );
 

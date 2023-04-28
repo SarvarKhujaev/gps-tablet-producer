@@ -1,9 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.inspectors;
 
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ModelForCar;
 import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
 import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.request.AndroidVersionUpdate;
+import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.Pinpp;
 import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
@@ -36,11 +38,19 @@ public class DataValidateInspector extends Archive {
 
     private final Predicate< Object > checkParam = Objects::nonNull;
 
+    private final BiFunction< Object, Integer, String > concatNames = ( o, integer ) -> integer == 0
+            ? ( ( Pinpp ) o ).getName()
+            + " " +
+            ( ( Pinpp ) o ).getSurname()
+            + " " +
+            ( ( Pinpp ) o ).getPatronym()
+            : ( (ModelForCar) o ).getModel()
+            + " " +
+            ( (ModelForCar) o ).getVehicleType()
+            + " " +
+            ( (ModelForCar) o ).getColor();
+
     private final BiFunction< Status, Status, Boolean > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
-
-    private final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
-
-    private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
 
     private final BiFunction< Object, Integer, Boolean > checkRequest = ( o, value ) -> switch ( value ) {
         case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
@@ -62,6 +72,10 @@ public class DataValidateInspector extends Archive {
         default -> ( (PatrulLoginRequest) o ).getLogin() != null
                 && ( (PatrulLoginRequest) o ).getPassword() != null
                 && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };
+
+    private final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
+
+    private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
 
     private final BiFunction< TabletUsage, PatrulActivityRequest, Boolean > checkTabletUsage = ( tabletUsages, request ) ->
             tabletUsages

@@ -18,9 +18,9 @@ public class CardDetails {
     private PersonDetails personDetails;
     private Map< Details, List< Item > > details = new HashMap<>();
 
-    public CardDetails ( CarDetails carDetails ) { this.setCarDetails( carDetails ); }
+    public CardDetails ( final CarDetails carDetails ) { this.setCarDetails( carDetails ); }
 
-    public CardDetails ( CarTotalData carTotalData ) {
+    public CardDetails ( final CarTotalData carTotalData ) {
         this.getDetails().clear();
         this.getDetails().put( Details.TONIROVKA, new ArrayList<>() );
         this.getDetails().put( Details.ISHONCHNOMA, new ArrayList<>() );
@@ -216,9 +216,9 @@ public class CardDetails {
                     .getInsurance()
                     .getInsuranceSerialNumber() ) ); } }
 
-    public CardDetails ( PersonDetails personDetails ) { this.setPersonDetails( personDetails ); }
+    public CardDetails ( final PersonDetails personDetails ) { this.setPersonDetails( personDetails ); }
 
-    public CardDetails ( Card card, Patrul patrul, String language ) {
+    public CardDetails ( final Card card, final Patrul patrul, final String language ) {
         this.getDetails().clear();
         this.getDetails().put( Details.DETAILS, new ArrayList<>() );
         this.getDetails().put( Details.APPLICANT_DATA, new ArrayList<>() );
@@ -545,7 +545,7 @@ public class CardDetails {
                                             ? card.getEventAddress().getStreet()
                                             : Errors.DATA_NOT_FOUND.name() ) ); } } } ); }
 
-    public CardDetails ( EscortTuple escortTuple, String ru, TupleOfCar tupleOfCar ) {
+    public CardDetails ( final EscortTuple escortTuple, final String ru, final TupleOfCar tupleOfCar ) {
         this.getDetails().putIfAbsent( Details.ESCORT, new ArrayList<>() );
         this.getDetails().putIfAbsent( Details.ESCORT_CAR, new ArrayList<>() );
         this.getDetails().get( Details.ESCORT )
@@ -563,7 +563,7 @@ public class CardDetails {
         this.getDetails().get( Details.ESCORT_CAR )
                 .add( new Item( "Долгота локации машины", tupleOfCar.getLongitude() ) ); }
 
-    public CardDetails ( SelfEmploymentTask selfEmploymentTask, String language, Patrul patrul ) {
+    public CardDetails ( final SelfEmploymentTask selfEmploymentTask, final String language, final Patrul patrul ) {
         this.getDetails().clear();
         this.getDetails().put( Details.SELF_EMPLOYMENT, new ArrayList<>() );
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() )
