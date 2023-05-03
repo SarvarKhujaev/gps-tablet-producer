@@ -29,7 +29,7 @@ variables:
         KAFKA_BROKER : ${KAFKA_BROKER}
         GROUP_ID_FOR_KAFKA : ${GROUP_ID_FOR_KAFKA}
 
-        SOS_TOPIC: ${SOS_TOPIC}
+        SOS_TOPIC: ${SOS_TOPIC:sos_topic}
         ACTIVE_TASK: ${ACTIVE_TASK}
         NOTIFICATION: ${NOTIFICATION}
         CAR_TOTAL_DATA: ${CAR_TOTAL_DATA}
