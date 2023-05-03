@@ -22,7 +22,7 @@ public class CassandraConverter extends LogInspector {
         this.getFields( object ).forEach( field -> result.append( field.getName() ).append( ", " ) );
         return result.substring( 0, result.length() - 2 ) + " )"; }
 
-    public Stream< Field > getFields ( final Class object ) { return Arrays.stream( object.getDeclaredFields() )
+    private Stream< Field > getFields ( final Class object ) { return Arrays.stream( object.getDeclaredFields() )
             .toList()
             .stream(); }
 

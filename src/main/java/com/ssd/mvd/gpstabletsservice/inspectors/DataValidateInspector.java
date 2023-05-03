@@ -39,39 +39,37 @@ public class DataValidateInspector extends Archive {
     private final Predicate< Object > checkParam = Objects::nonNull;
 
     private final BiFunction< Object, Integer, String > concatNames = ( o, integer ) -> integer == 0
-            ? ( ( Pinpp ) o ).getName()
-            + " " +
-            ( ( Pinpp ) o ).getSurname()
-            + " " +
-            ( ( Pinpp ) o ).getPatronym()
-            : ( (ModelForCar) o ).getModel()
-            + " " +
-            ( (ModelForCar) o ).getVehicleType()
-            + " " +
-            ( (ModelForCar) o ).getColor();
+            ? String.join( " ",
+            ( ( Pinpp ) o ).getName(),
+                    ( ( Pinpp ) o ).getSurname(),
+                    ( ( Pinpp ) o ).getPatronym() )
+            : String.join( " ",
+            ( (ModelForCar) o ).getModel(),
+                    ( (ModelForCar) o ).getVehicleType(),
+                    ( (ModelForCar) o ).getColor() );
 
     private final BiFunction< Status, Status, Boolean > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
 
     private final BiFunction< Object, Integer, Boolean > checkRequest = ( o, value ) -> switch ( value ) {
-        case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
-        case 2 -> ( (PatrulActivityRequest) o ).getStartDate() != null && ( (PatrulActivityRequest) o ).getEndDate() != null;
-        case 3 -> ( (Patrul) o ).getTaskId().equals( "null" )
-                && ( (Patrul) o ).getUuidOfEscort() == null
-                && ( (Patrul) o ).getUuidForPatrulCar() == null
-                && ( (Patrul) o ).getUuidForEscortCar() == null
-                && ( (Patrul) o ).getCarNumber().equals( "null" )
-                && ( (Patrul) o ).getTaskTypes().compareTo( TaskTypes.FREE ) == 0;
-        case 4 -> ( (PatrulSos) o ).getPatrulStatuses() != null && ( (PatrulSos) o ).getPatrulStatuses().size() > 19;
-        case 5 -> Math.abs( TimeInspector
-                .getInspector()
-                .getGetTimeDifferenceInHours()
-                .apply( ( (Date) o ).toInstant() ) ) >= 24;
-        case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
-        case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null && ( (AndroidVersionUpdate) o ).getLink() != null;
-        case 8 -> ( (TaskTimingRequest) o ).getStartDate() != null && ( (TaskTimingRequest) o ).getEndDate() != null;
-        default -> ( (PatrulLoginRequest) o ).getLogin() != null
-                && ( (PatrulLoginRequest) o ).getPassword() != null
-                && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };
+            case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
+            case 2 -> ( (PatrulActivityRequest) o ).getStartDate() != null && ( (PatrulActivityRequest) o ).getEndDate() != null;
+            case 3 -> ( (Patrul) o ).getTaskId().equals( "null" )
+                    && ( (Patrul) o ).getUuidOfEscort() == null
+                    && ( (Patrul) o ).getUuidForPatrulCar() == null
+                    && ( (Patrul) o ).getUuidForEscortCar() == null
+                    && ( (Patrul) o ).getCarNumber().equals( "null" )
+                    && ( (Patrul) o ).getTaskTypes().compareTo( TaskTypes.FREE ) == 0;
+            case 4 -> ( (PatrulSos) o ).getPatrulStatuses() != null && ( (PatrulSos) o ).getPatrulStatuses().size() > 19;
+            case 5 -> Math.abs( TimeInspector
+                    .getInspector()
+                    .getGetTimeDifferenceInHours()
+                    .apply( ( (Date) o ).toInstant() ) ) >= 24;
+            case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
+            case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null && ( (AndroidVersionUpdate) o ).getLink() != null;
+            case 8 -> ( (TaskTimingRequest) o ).getStartDate() != null && ( (TaskTimingRequest) o ).getEndDate() != null;
+            default -> ( (PatrulLoginRequest) o ).getLogin() != null
+                    && ( (PatrulLoginRequest) o ).getPassword() != null
+                    && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };
 
     private final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
 
