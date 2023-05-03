@@ -31,27 +31,27 @@ public class KafkaDataControl extends SerDes {
     private final String CAR_TOTAL_DATA = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.KAFKA_VARIABLES.CAR_TOTAL_DATA" );
+            .getProperty( "variables.KAFKA_VARIABLES.KAFKA_TOPICS.CAR_TOTAL_DATA" );
 
     private final String ACTIVE_TASK = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.KAFKA_VARIABLES.ACTIVE_TASK" );
+            .getProperty( "variables.KAFKA_VARIABLES.KAFKA_TOPICS.ACTIVE_TASK" );
 
     private final String NOTIFICATION = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.KAFKA_VARIABLES.NOTIFICATION" );
+            .getProperty( "variables.KAFKA_VARIABLES.KAFKA_TOPICS.NOTIFICATION" );
 
     private final String SOS_TOPIC = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.KAFKA_VARIABLES.SOS_TOPIC" );
+            .getProperty( "variables.KAFKA_VARIABLES.KAFKA_TOPICS.SOS_TOPIC" );
 
     private final String SOS_TOPIC_FOR_ANDROID_NOTIFICATION = GpsTabletsServiceApplication
             .context
             .getEnvironment()
-            .getProperty( "variables.KAFKA_VARIABLES.SOS_TOPIC_FOR_ANDROID_NOTIFICATION" );
+            .getProperty( "variables.KAFKA_VARIABLES.KAFKA_TOPICS.SOS_TOPIC_FOR_ANDROID_NOTIFICATION" );
 
     public static KafkaDataControl getInstance () { return instance != null ? instance : ( instance = new KafkaDataControl() ); }
 
