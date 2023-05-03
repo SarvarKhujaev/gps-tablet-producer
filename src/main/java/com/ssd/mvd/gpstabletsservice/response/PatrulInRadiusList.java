@@ -27,7 +27,7 @@ public class PatrulInRadiusList {
         patruls.removeAll( freePatrulList );
         this.setMaxDistance( freePatrulList.get( 4 ).getDistance() );
 
-        for ( Patrul patrul : patruls ) {
+        for ( final Patrul patrul : patruls ) {
             if ( patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) freePatrulListOutOfRadius.add( patrul );
 
             else {

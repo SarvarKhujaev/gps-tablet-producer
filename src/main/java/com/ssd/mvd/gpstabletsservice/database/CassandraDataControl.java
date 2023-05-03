@@ -1426,7 +1426,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     .parallel( super.getCheckDifference().apply( table.name().length() + keyspace.name().length() ) )
                     .runOn( Schedulers.parallel() );
 
-    public void delete ( Throwable throwable ) {
+    public void delete ( final Throwable throwable ) {
         INSTANCE = null;
         this.getSession().close();
         this.getCluster().close();
