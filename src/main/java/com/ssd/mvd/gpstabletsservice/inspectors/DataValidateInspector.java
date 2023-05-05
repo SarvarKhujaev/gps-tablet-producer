@@ -12,7 +12,6 @@ import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.entity.TabletUsage;
 import com.ssd.mvd.gpstabletsservice.database.Archive;
 import com.ssd.mvd.gpstabletsservice.controller.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -75,13 +74,9 @@ public class DataValidateInspector extends Archive {
 
     private final BiFunction< Double, Double, Boolean > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
 
-    private final BiFunction< TabletUsage, PatrulActivityRequest, Boolean > checkTabletUsage = ( tabletUsages, request ) ->
-            tabletUsages
-                    .getStartedToUse()
-                    .before( request.getEndDate() )
-            && tabletUsages
-                    .getStartedToUse()
-                    .after( request.getStartDate() );
+    private final BiFunction< Row, PatrulActivityRequest, Boolean > checkTabletUsage = ( row, request ) ->
+            row.getTimestamp( "startedToUse" ).before( request.getEndDate() )
+            && row.getTimestamp( "startedToUse" ).after( request.getStartDate() );
 
     private final BiFunction< TaskTimingRequest, Row, Boolean > checkTaskTimingRequest = ( request, row ) ->
             request.getEndDate() == null
