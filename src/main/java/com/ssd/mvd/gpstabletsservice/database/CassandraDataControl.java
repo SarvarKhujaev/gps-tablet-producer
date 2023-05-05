@@ -1277,7 +1277,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                     Map.of( "message", "See you soon my darling )))",
                                             "success", this.getUpdatePatrulStatus().apply( patrul, LOGOUT ) ) ) ); }
 
-                else if ( super.getCheckEquality().apply( status, LOGOUT ) ) return TaskInspector
+                else if ( super.getCheckEquality().apply( status, ACCEPTED ) ) return TaskInspector
                         .getInstance()
                         .getChangeTaskStatus()
                         .apply( patrul, ACCEPTED );
