@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
+import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -38,28 +39,32 @@ public class PatrulController extends SerDes {
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( final String token ) { return CassandraDataControl
             .getInstance()
-            .getArrived()
-            .apply( token ); }
+            .getChangeStatus()
+            .apply( token, Status.ARRIVED )
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "ACCEPTED" )
     public Mono< ApiResponseModel > accepted ( final String token ) { return CassandraDataControl
             .getInstance()
-            .getAccepted()
-            .apply( token ); }
+            .getChangeStatus()
+            .apply( token, Status.ACCEPTED )
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "SET_IN_PAUSE" )
     public Mono< ApiResponseModel > setInPause ( final String token ) { return CassandraDataControl
             .getInstance()
-            .getSetInPause()
-            .apply( token )
+            .getChangeStatus()
+            .apply( token, Status.SET_IN_PAUSE )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "START_TO_WORK" )
     public Mono< ApiResponseModel > starToWork ( final String token ) { return CassandraDataControl
             .getInstance()
-            .getStartToWork()
-            .apply( token )
+            .getChangeStatus()
+            .apply( token, Status.START_TO_WORK )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
@@ -74,24 +79,24 @@ public class PatrulController extends SerDes {
     @MessageMapping ( value = "LOGOUT" ) // used to Log out from current Account
     public Mono< ApiResponseModel > patrulLogout ( final String token ) { return CassandraDataControl
             .getInstance()
-            .getLogout()
-            .apply( token )
+            .getChangeStatus()
+            .apply( token, Status.LOGOUT )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "RETURNED_TO_WORK" )
     public Mono< ApiResponseModel > setInActive ( final String token ) { return CassandraDataControl
             .getInstance()
-            .getBackToWork()
-            .apply( token )
+            .getChangeStatus()
+            .apply( token, Status.RETURNED_TO_WORK )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "STOP_TO_WORK" )
     public Mono< ApiResponseModel > finishWorkOfPatrul ( final String token ) { return CassandraDataControl
             .getInstance()
-            .getStopToWork()
-            .apply( token )
+            .getChangeStatus()
+            .apply( token, Status.STOP_TO_WORK )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
@@ -122,9 +127,7 @@ public class PatrulController extends SerDes {
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
             .map( Patrul::new )
-            .filter( patrul -> patrul
-                    .getSurnameNameFatherName()
-                    .contains( name ) )
+            .filter( patrul -> patrul.getSurnameNameFatherName().contains( name ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
@@ -284,20 +287,8 @@ public class PatrulController extends SerDes {
     @MessageMapping ( value = "getAllUsedTablets" )
     public Mono< List< TabletUsage > > getAllUsedTablets ( final PatrulActivityRequest request ) { return CassandraDataControl
             .getInstance()
-            .getGetPatrulByUUID()
-            .apply( UUID.fromString( request.getPatrulUUID() ) )
-            .flatMap( patrul -> super.getCheckRequest().apply( request, 2 )
-                    ? CassandraDataControl
-                    .getInstance()
-                    .getGetAllUsedTablets()
-                    .apply( patrul )
-                    .filter( tabletUsages -> super.getCheckTabletUsage().apply( tabletUsages, request ) )
-                    .collectList()
-                    : CassandraDataControl
-                    .getInstance()
-                    .getGetAllUsedTablets()
-                    .apply( patrul )
-                    .collectList() ); }
+            .getGetAllUsedTablets()
+            .apply( UUID.fromString( request.getPatrulUUID() ), request ); }
 
     @MessageMapping ( value = "getPatrulInRadiusList" )
     public Mono< PatrulInRadiusList > getPatrulInRadiusList ( final Point point ) {

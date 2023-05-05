@@ -1136,12 +1136,12 @@ public final class CassandraDataControl extends CassandraConverter {
                 + patrul.getTotalActivityTime() + ");" ).isDone(); };
 
     private final Function< Patrul, TabletUsage > checkTableUsage = patrul -> {
-        final Row row = this.getSession().execute( "SELECT * FROM "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.TABLETS_USAGE_TABLE.name()
-                + " WHERE uuidOfPatrul = " + patrul.getUuid()
-                + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one();
-        return super.getCheckParam().test( row ) ? new TabletUsage( row ) : null; };
+            final Row row = this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS.name() + "."
+                    + CassandraTables.TABLETS_USAGE_TABLE.name()
+                    + " WHERE uuidOfPatrul = " + patrul.getUuid()
+                    + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one();
+            return super.getCheckParam().test( row ) ? new TabletUsage( row ) : null; };
 
     private final BiFunction< Patrul, Status, Disposable > updateStatus = ( patrul, status ) ->
             Mono.just( this.getSession().execute ( "SELECT * FROM "
@@ -1157,7 +1157,8 @@ public final class CassandraDataControl extends CassandraConverter {
                             ? ", totalActivityTime = " + abs( TimeInspector
                             .getInspector()
                             .getGetTimeDifferenceInSeconds()
-                            .apply( row.getTimestamp( "startedToUse" ).toInstant() ) ) : "" )
+                            .apply( row.getTimestamp( "startedToUse" ).toInstant() ) )
+                            : "" )
                             + " WHERE uuidOfPatrul = " + patrul.getUuid()
                             + " AND simCardNumber = '" + row.getString( "simCardNumber" ) + "';" ) )
                     .subscribe();
@@ -1235,24 +1236,55 @@ public final class CassandraDataControl extends CassandraConverter {
                             "code", 201,
                             "success", false ) ); };
 
-    private final Function< String, Mono< ApiResponseModel > > startToWork = token -> this.getGetPatrulByUUID()
+    private final BiFunction< String, Status, Mono< ApiResponseModel > > changeStatus = ( token, status ) -> this.getGetPatrulByUUID()
             .apply( this.getDecode().apply( token ) )
             .flatMap( patrul -> {
+                this.getUpdateStatus().apply( patrul, status );
+                this.getUpdatePatrulActivity().accept( patrul );
+
+                if ( super.getCheckEquality().apply( status, START_TO_WORK ) ) {
                     patrul.setTotalActivityTime( 0L ); // set to 0 every day
                     patrul.setStartedToWorkDate( new Date() ); // registration of time every day
-
-                    this.getUpdatePatrulActivity().accept( patrul );
-                    this.getUpdateStatus().apply( patrul, START_TO_WORK );
 
                     this.getSession().execute( "UPDATE "
                             + CassandraTables.TABLETS.name() + "."
                             + CassandraTables.PATRULS.name()
                             + " SET startedToWorkDate = '" + patrul.getStartedToWorkDate().toInstant() + "'"
-                            + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
+                            + " WHERE uuid = " + patrul.getUuid() + ";" );
+
                     return super.getFunction().apply(
                             Map.of( "message", "Patrul: " + START_TO_WORK,
-                                    "success", this.getUpdatePatrulStatus()
-                                            .apply( patrul, START_TO_WORK ) ) ); } );
+                                    "success", this.getUpdatePatrulStatus().apply( patrul, START_TO_WORK ) ) ); }
+
+                else if ( super.getCheckEquality().apply( status, ARRIVED ) ) {
+                    if ( super.getCheckRequest().apply( patrul.getTaskDate(), 5 ) ) {
+                        this.getUpdateStatus().apply( patrul, CANCEL );
+                        return TaskInspector
+                                .getInstance()
+                                .getRemovePatrulFromTask()
+                                .apply( patrul )
+                                .flatMap( apiResponseModel -> super.getErrorResponseForLateComing().get() ); }
+                    else return TaskInspector
+                            .getInstance()
+                            .getChangeTaskStatus()
+                            .apply( patrul, ARRIVED ); }
+
+                else if ( super.getCheckEquality().apply( status, LOGOUT ) ) {
+                    patrul.setTokenForLogin( null );
+                    patrul.setSimCardNumber( null );
+                    return this.getUpdatePatrul().apply( patrul )
+                            .flatMap( aBoolean -> super.getFunction().apply(
+                                    Map.of( "message", "See you soon my darling )))",
+                                            "success", this.getUpdatePatrulStatus().apply( patrul, LOGOUT ) ) ) ); }
+
+                else if ( super.getCheckEquality().apply( status, LOGOUT ) ) return TaskInspector
+                        .getInstance()
+                        .getChangeTaskStatus()
+                        .apply( patrul, ACCEPTED );
+
+                else return super.getFunction().apply(
+                            Map.of( "message", "Patrul: " + status,
+                                    "success", this.getUpdatePatrulStatus().apply( patrul, status ) ) ); } );
 
     private final Function< String, Mono< ApiResponseModel > > checkToken = token -> this.getGetPatrulByUUID()
             .apply( this.getDecode().apply( token ) )
@@ -1264,87 +1296,23 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .data( patrul )
                                     .build() ) ) );
 
-    private final Function< String, Mono< ApiResponseModel > > setInPause = token -> this.getGetPatrulByUUID()
-            .apply( this.getDecode().apply( token ) )
-            .flatMap( patrul -> {
-                this.getUpdateStatus().apply( patrul, SET_IN_PAUSE );
-                this.getUpdatePatrulActivity().accept( patrul );
-                return super.getFunction().apply(
-                        Map.of( "message", "Patrul " + SET_IN_PAUSE,
-                                "success", this.getUpdatePatrulStatus().apply( patrul, SET_IN_PAUSE ) ) ); } );
-
-    private final Function< String, Mono< ApiResponseModel > > backToWork = token -> this.getGetPatrulByUUID()
-            .apply( this.getDecode().apply( token ) )
-            .flatMap( patrul -> {
-                this.getUpdatePatrulActivity().accept( patrul );
-                this.getUpdateStatus().apply( patrul, RETURNED_TO_WORK );
-                return super.getFunction().apply(
-                        Map.of( "message", "Patrul: " + RETURNED_TO_WORK,
-                                "success", this.getUpdatePatrulStatus().apply( patrul, RETURNED_TO_WORK ) ) ); } );
-
-    private final Function< String, Mono< ApiResponseModel > > stopToWork = token -> this.getGetPatrulByUUID()
-            .apply( this.getDecode().apply( token ) )
-            .flatMap( patrul -> {
-                this.getUpdateStatus().apply( patrul, STOP_TO_WORK );
-                this.getUpdatePatrulActivity().accept( patrul );
-                return super.getFunction().apply(
-                        Map.of( "message", "Patrul: " + STOP_TO_WORK,
-                                "success", this.getUpdatePatrulStatus().apply( patrul, STOP_TO_WORK ) ) ); } );
-
-    private final Function< String, Mono< ApiResponseModel > > accepted = token -> this.getGetPatrulByUUID()
-            .apply( this.getDecode().apply( token ) )
-            .flatMap( patrul -> {
-                this.getUpdateStatus().apply( patrul, ACCEPTED );
-                this.getUpdatePatrulActivity().accept( patrul );
-                return TaskInspector
-                        .getInstance()
-                        .getChangeTaskStatus()
-                        .apply( patrul, ACCEPTED ); } );
-
-    private final Function< String, Mono< ApiResponseModel > > arrived = token -> this.getGetPatrulByUUID()
-            .apply( this.getDecode().apply( token ) )
-            .flatMap( patrul -> {
-                this.getUpdatePatrulActivity().accept( patrul );
-                if ( super.getCheckRequest().apply( patrul.getTaskDate(), 5 ) ) {
-                    this.getUpdateStatus().apply( patrul, CANCEL );
-                    return TaskInspector
-                            .getInstance()
-                            .getRemovePatrulFromTask()
-                            .apply( patrul )
-                            .flatMap( apiResponseModel -> super.getErrorResponseForLateComing().get() ); }
-                else {
-                    this.getUpdateStatus().apply( patrul, ARRIVED );
-                    return TaskInspector
-                            .getInstance()
-                            .getChangeTaskStatus()
-                            .apply( patrul, ARRIVED ); } } );
-
-    private final Function< String, Mono< ApiResponseModel > > logout = token -> this.getGetPatrulByUUID()
-            .apply( this.getDecode().apply( token ) )
-            .flatMap( patrul -> {
-                patrul.setTokenForLogin( null );
-                patrul.setSimCardNumber( null );
-                this.getUpdateStatus().apply( patrul, LOGOUT );
-                this.getUpdatePatrulActivity().accept( patrul );
-                return this.getUpdatePatrul()
-                        .apply( patrul )
-                        .flatMap( aBoolean -> super.getFunction().apply(
-                                Map.of( "message", "See you soon my darling )))",
-                                        "success", this.getUpdatePatrulStatus().apply( patrul, LOGOUT ) ) ) ); } );
-
-    private final Function< Patrul, Flux< TabletUsage > > getAllUsedTablets = patrul -> Flux.fromStream(
+    private final BiFunction< UUID, PatrulActivityRequest, Mono< List< TabletUsage > > > getAllUsedTablets = ( uuid, request ) -> Flux.fromStream(
             this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.TABLETS_USAGE_TABLE.name()
-                    + " WHERE uuidOfPatrul = " + patrul.getUuid() + ";" )
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.TABLETS_USAGE_TABLE
+                    + " WHERE uuidOfPatrul = " + uuid + ";" )
                     .all()
                     .stream()
                     .parallel() )
-            .parallel()
+            .parallel( super.getCheckDifference().apply( uuid.toString().length() ) )
             .runOn( Schedulers.parallel() )
+            .filter( row -> super.getCheckRequest().apply( request, 2 )
+                    ? super.getCheckTabletUsage().apply( row, request )
+                    : true )
             .map( TabletUsage::new )
             .sequential()
-            .publishOn( Schedulers.single() );
+            .publishOn( Schedulers.single() )
+            .collectList();
 
     private final Consumer< String > addAllPatrulsToChatService = token -> this.getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
@@ -1381,17 +1349,18 @@ public final class CassandraDataControl extends CassandraConverter {
                             + CassandraTables.ANDROID_VERSION_CONTROL_TABLE.name()
                             + " WHERE id = 'id';" ).one();
             return row.getString( "version" ).compareTo( version ) == 0
-                    ? super.getFunction().apply( Map.of( "message", "you have the last version",
-                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                    .builder()
-                                    .data( new AndroidVersionUpdate( row, LAST ) )
-                                    .build() ) )
-                    : super.getFunction().apply( Map.of(
-                            "message", "you have to update to last version",
-                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                    .builder()
-                                    .data( new AndroidVersionUpdate( row, OPTIONAL ) )
-                                    .build() ) ); };
+                    ? super.getFunction().apply(
+                            Map.of( "message", "you have the last version",
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( new AndroidVersionUpdate( row, LAST ) )
+                                            .build() ) )
+                    : super.getFunction().apply(
+                            Map.of( "message", "you have to update to last version",
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( new AndroidVersionUpdate( row, OPTIONAL ) )
+                                            .build() ) ); };
 
     // обновляет последнюю версию андроид приложения
     private final Function< AndroidVersionUpdate, Mono< ApiResponseModel > > saveLastVersion = androidVersionUpdate ->
