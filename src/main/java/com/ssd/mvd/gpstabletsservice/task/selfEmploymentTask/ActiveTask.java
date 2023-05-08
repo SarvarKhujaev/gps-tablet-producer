@@ -7,7 +7,6 @@ import java.util.UUID;
 import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
@@ -244,11 +243,4 @@ public class ActiveTask {
             this.setDistrict( carEvent.getDataInfo().getData().getDistrict() );
             this.setLongitude( carEvent.getDataInfo().getData().getLongitude() );
             this.setCountryside( carEvent.getDataInfo().getData().getCountryside() ); } }
-
-    public ActiveTask ( final EscortTuple escortTuple, final Status status ) {
-        this.setPatrulStatus( status );
-        this.setStatus( Status.CREATED );
-        this.setCreatedDate( new Date() );
-        this.setType( TaskTypes.ESCORT.name() );
-        this.setTaskId( escortTuple.getUuid().toString() ); }
 }

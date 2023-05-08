@@ -1,11 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
-import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.database.CassandraConverter;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
+import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.entity.Country;
 
 import com.datastax.driver.core.Cluster;
@@ -24,7 +24,7 @@ import java.util.UUID;
 import java.util.Map;
 
 @lombok.Data
-public class CassandraDataControlForEscort extends CassandraConverter {
+public final class CassandraDataControlForEscort extends CassandraConverter {
     private final Session session = CassandraDataControl.getInstance().getSession();
     private final Cluster cluster = CassandraDataControl.getInstance().getCluster();
 
@@ -86,16 +86,16 @@ public class CassandraDataControlForEscort extends CassandraConverter {
         super.logging( "CassandraDataControlForEscort is ready" ); }
 
     private final Function< String, Mono< EscortTuple > > getCurrentTupleOfEscort = id -> {
-        final Row row = this.getSession().execute( "SELECT * FROM "
-                + CassandraTables.ESCORT.name() + "."
-                + CassandraTables.TUPLE_OF_ESCORT.name()
-                + " where id = " + UUID.fromString( id ) + ";" ).one();
-        return Mono.justOrEmpty( super.getCheckParam().test( row ) ? new EscortTuple( row ) : null ); };
+            final Row row = this.getSession().execute( "SELECT * FROM "
+                    + CassandraTables.ESCORT.name() + "."
+                    + CassandraTables.TUPLE_OF_ESCORT.name()
+                    + " where id = " + UUID.fromString( id ) + ";" ).one();
+            return Mono.justOrEmpty( super.getCheckParam().test( row ) ? new EscortTuple( row ) : null ); };
 
     private final Function< String, Mono< ApiResponseModel > > deleteTupleOfEscort = id ->
             this.getGetCurrentTupleOfEscort().apply( id )
                     .flatMap( escortTuple -> {
-                        if ( super.getCheckRequest().apply( escortTuple.getPatrulList(), 6 ) )
+                        if ( super.getCheckRequest().test( escortTuple.getPatrulList(), 6 ) )
                             escortTuple
                                     .getPatrulList()
                                     .parallelStream()
@@ -106,7 +106,7 @@ public class CassandraDataControlForEscort extends CassandraConverter {
                                                     + ", uuidForEscortCar = " + null
                                                     + " where uuid = " + uuid + ";" ) );
 
-                        if ( super.getCheckRequest().apply( escortTuple.getTupleOfCarsList(), 6 ) )
+                        if ( super.getCheckRequest().test( escortTuple.getTupleOfCarsList(), 6 ) )
                             escortTuple
                                     .getTupleOfCarsList()
                                     .parallelStream()

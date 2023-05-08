@@ -10,7 +10,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.tuple.Points;
 import java.nio.ByteBuffer;
 
-public class CodecRegistrationForPointsList extends TypeCodec< Points > {
+public final class CodecRegistrationForPointsList extends TypeCodec< Points > {
     private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
@@ -40,7 +40,7 @@ public class CodecRegistrationForPointsList extends TypeCodec< Points > {
             null
             : this.toAddress( innerCodec.parse( value ) ); }
 
-    protected UDTValue toUDTValue ( final Points points ) { return DataValidateInspector
+    private UDTValue toUDTValue ( final Points points ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( points )
@@ -50,7 +50,7 @@ public class CodecRegistrationForPointsList extends TypeCodec< Points > {
             .setUUID( "pointId", points.getPointId() )
             .setString( "pointName", points.getPointName() ) : null; }
 
-    protected Points toAddress ( final UDTValue value ) { return DataValidateInspector
+    private Points toAddress ( final UDTValue value ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( value )

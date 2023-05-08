@@ -10,8 +10,8 @@ import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 import java.nio.ByteBuffer;
 
-public class CodecRegistrationForPolygonType extends TypeCodec< PolygonType > {
-    private final TypeCodec<UDTValue> innerCodec;
+public final class CodecRegistrationForPolygonType extends TypeCodec< PolygonType > {
+    private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
     public CodecRegistrationForPolygonType ( final TypeCodec< UDTValue > innerCodec, final Class< PolygonType > javaType ) {
@@ -39,7 +39,7 @@ public class CodecRegistrationForPolygonType extends TypeCodec< PolygonType > {
             value.equalsIgnoreCase("NULL" ) ?
             null : toAddress( innerCodec.parse( value ) ); }
 
-    protected UDTValue toUDTValue ( final PolygonType polygonType ) { return DataValidateInspector
+    private UDTValue toUDTValue ( final PolygonType polygonType ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( polygonType )
@@ -47,7 +47,7 @@ public class CodecRegistrationForPolygonType extends TypeCodec< PolygonType > {
             .setUUID( "uuid", polygonType.getUuid() )
             .setString( "name", polygonType.getName() ) : null; }
 
-    protected PolygonType toAddress ( final UDTValue value ) { return DataValidateInspector
+    private PolygonType toAddress ( final UDTValue value ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( value )

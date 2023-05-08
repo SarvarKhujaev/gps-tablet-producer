@@ -17,18 +17,18 @@ public class Archive {
 
     private final Function< Map< String, ? >, Mono< ApiResponseModel > > function =
             map -> Mono.just( ApiResponseModel
-            .builder() // in case of wrong login
-            .status( Status
-                    .builder()
-                    .message( map.get( "message" ).toString() )
-                    .code( map.containsKey( "code" ) ?
-                            Long.parseLong( map.get( "code" ).toString() ) : 200 )
-                    .build() )
-            .data( map.containsKey( "data" ) ?
-                    (com.ssd.mvd.gpstabletsservice.entity.Data) map.get( "data" )
-                    : com.ssd.mvd.gpstabletsservice.entity.Data.builder().build() )
-            .success( !map.containsKey( "success" ) )
-            .build() );
+                    .builder() // in case of wrong login
+                    .status( Status
+                            .builder()
+                            .message( map.get( "message" ).toString() )
+                            .code( map.containsKey( "code" ) ?
+                                    Long.parseLong( map.get( "code" ).toString() ) : 200 )
+                            .build() )
+                    .data( map.containsKey( "data" ) ?
+                            (com.ssd.mvd.gpstabletsservice.entity.Data) map.get( "data" )
+                            : com.ssd.mvd.gpstabletsservice.entity.Data.builder().build() )
+                    .success( !map.containsKey( "success" ) )
+                    .build() );
 
     private final Supplier< ApiResponseModel > errorResponse = () -> ApiResponseModel
             .builder() // in case of wrong login
@@ -52,7 +52,7 @@ public class Archive {
                     .build() );
 
     // возвращает сообзение о слишком большой задержке прихода в точку назначения
-    private final Supplier< Mono< ApiResponseModel > > errorResponseForLateComing = () -> Mono.just(
+    protected final Supplier< Mono< ApiResponseModel > > errorResponseForLateComing = () -> Mono.just(
             ApiResponseModel
                     .builder() // in case of wrong login
                     .status( Status
@@ -68,7 +68,7 @@ public class Archive {
             "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
 
     private final Supplier< String > generateToken = () -> {
-        final byte[] bytes = new byte[ 24 ];
-        this.getSecureRandom().nextBytes( bytes );
-        return this.getEncoder().encodeToString( bytes ); };
+            final byte[] bytes = new byte[ 24 ];
+            this.getSecureRandom().nextBytes( bytes );
+            return this.getEncoder().encodeToString( bytes ); };
 }

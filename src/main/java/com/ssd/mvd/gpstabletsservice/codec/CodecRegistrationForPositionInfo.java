@@ -10,7 +10,7 @@ import com.datastax.driver.core.exceptions.InvalidTypeException;
 import com.ssd.mvd.gpstabletsservice.task.card.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 
-public class CodecRegistrationForPositionInfo extends TypeCodec< PositionInfo > {
+public final class CodecRegistrationForPositionInfo extends TypeCodec< PositionInfo > {
     private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
@@ -39,7 +39,7 @@ public class CodecRegistrationForPositionInfo extends TypeCodec< PositionInfo > 
             value.equalsIgnoreCase("NULL" )
             ? null : toAddress( innerCodec.parse( value ) ); }
 
-    protected UDTValue toUDTValue ( final PositionInfo positionInfo ) { return DataValidateInspector
+    private UDTValue toUDTValue ( final PositionInfo positionInfo ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( positionInfo )
@@ -48,7 +48,7 @@ public class CodecRegistrationForPositionInfo extends TypeCodec< PositionInfo > 
             .setDouble ( "lng", positionInfo.getLng() )
             : null; }
 
-    protected PositionInfo toAddress ( final UDTValue value ) { return DataValidateInspector
+    private PositionInfo toAddress ( final UDTValue value ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( value )

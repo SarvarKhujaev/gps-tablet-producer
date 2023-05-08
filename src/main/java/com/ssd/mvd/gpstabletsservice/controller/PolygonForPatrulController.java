@@ -76,11 +76,11 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
 
     @MessageMapping ( value = "addPatrulToPolygon" )
     public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
-        return super.getCheckRequest().apply( scheduleForPolygonPatrul.getPatrulUUIDs(), 6 )
-                ? super.getFunction().apply( Map.of(
-                        "message", "Wrong params",
-                        "success", false,
-                        "code", 201 ) )
+        return super.getCheckRequest().test( scheduleForPolygonPatrul.getPatrulUUIDs(), 6 )
+                ? super.getFunction().apply(
+                        Map.of( "message", "Wrong params",
+                                "success", false,
+                                "code", 201 ) )
                 : CassandraDataControl
                 .getInstance()
                 .getAddPatrulToPolygon()

@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.text.SimpleDateFormat;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.Predicate;
 
 @lombok.Data
@@ -24,6 +25,8 @@ public class TimeInspector {
     public static TimeInspector getInspector () { return inspector != null ? inspector : ( inspector = new TimeInspector() ); }
 
     private Date setDate () { return ( this.date = new Date() ); }
+
+    private final Supplier< Date > getNewDate = Date::new;
 
     private final Predicate< Instant > checkDate = instant -> this.getEndTimeForEvening() >= this.setDate().getHours()
             && this.getDate().getHours() >= this.getStartTimeForMorning()

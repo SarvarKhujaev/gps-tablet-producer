@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
 
@@ -10,12 +11,15 @@ public class PositionInfo {
     private Double lat;
     private Double lng;
 
-    public PositionInfo( Row row ) {
-        if ( row != null ) {
+    public PositionInfo ( final Row row ) {
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( row ) ) {
             this.setLat( row.getDouble( "latitude" ) );
             this.setLng( row.getDouble( "longitude" ) ); } }
 
-    public PositionInfo( UDTValue value ) {
+    public PositionInfo ( final UDTValue value ) {
         this.setLat( value.getDouble( "lat" ) );
         this.setLng( value.getDouble( "lng" ) ); }
 }

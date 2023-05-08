@@ -6,6 +6,7 @@ import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.SosNotification;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.entity.Notification;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -25,7 +26,7 @@ import java.util.function.Function;
 import java.util.*;
 
 @lombok.Data
-public class KafkaDataControl extends SerDes {
+public final class KafkaDataControl extends SerDes {
     private static KafkaDataControl instance = new KafkaDataControl();
 
     private final String CAR_TOTAL_DATA = GpsTabletsServiceApplication
@@ -80,7 +81,10 @@ public class KafkaDataControl extends SerDes {
             .then()
             .doOnError( super::logging )
             .doOnSuccess( success -> super.logging( "activeTask: " +
-                    activeTask.getTaskId() + " was sent at: " + new Date() ) )
+                    activeTask.getTaskId() + " was sent at: "
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate() ) )
             .subscribe();
 
     // отправляет уведомление андроидам радом с тем кто отправил сос сигнал
@@ -94,7 +98,9 @@ public class KafkaDataControl extends SerDes {
                                 .map( sosNotificationForAndroid -> {
                                     super.logging( "Sending sos notification to: "
                                             + sosNotificationForAndroid.getPatrulPassportSeries()
-                                            + " at: " + new Date() );
+                                            + " at: " + TimeInspector
+                                            .getInspector()
+                                            .getGetNewDate() );
                                     return new ProducerRecord<>(
                                             this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION(),
                                             super.serialize( sosNotificationForAndroid ) ); } ) )
@@ -113,7 +119,9 @@ public class KafkaDataControl extends SerDes {
                     .doOnError( error -> super.logging( error.getMessage() ) )
                     .doOnSuccess( success -> super.logging( "sosNotification from: "
                             + sosNotification.getPatrulUUID() + " was sent to front end"
-                            + " at: " + new Date() ) )
+                            + " at: " + TimeInspector
+                            .getInspector()
+                            .getGetNewDate() ) )
                     .subscribe();
             return "Sos was saved successfully"; };
 
@@ -125,7 +133,9 @@ public class KafkaDataControl extends SerDes {
                     .doOnError( error -> super.logging( error.getMessage() ) )
                     .doOnSuccess( success -> super.logging( "Kafka got carTotalData : "
                             + carTotalData.getGosNumber()
-                            + " at: " + new Date() ) )
+                            + " at: " + TimeInspector
+                            .getInspector()
+                            .getGetNewDate() ) )
                     .subscribe();
             return carTotalData; };
 
@@ -137,6 +147,7 @@ public class KafkaDataControl extends SerDes {
                     .doOnError( error -> super.logging( error.getMessage() ) )
                     .doOnSuccess( success -> super.logging( "Kafka got notification: "
                             + notification.getTitle()
+                            + " for: " + notification.getPassportSeries()
                             + " at: " + notification.getNotificationWasCreated() ) )
                     .subscribe();
 

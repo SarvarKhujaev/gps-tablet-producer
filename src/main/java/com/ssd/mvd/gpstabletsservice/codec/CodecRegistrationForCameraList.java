@@ -10,7 +10,7 @@ import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 import java.nio.ByteBuffer;
 
-public class CodecRegistrationForCameraList extends TypeCodec< CameraList > {
+public final class CodecRegistrationForCameraList extends TypeCodec< CameraList > {
     private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
@@ -39,7 +39,7 @@ public class CodecRegistrationForCameraList extends TypeCodec< CameraList > {
             value.equalsIgnoreCase("NULL" )
             ? null : toAddress( innerCodec.parse( value ) ); }
 
-    protected UDTValue toUDTValue ( final CameraList cameraList ) { return DataValidateInspector
+    private UDTValue toUDTValue ( final CameraList cameraList ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( cameraList )
@@ -47,7 +47,7 @@ public class CodecRegistrationForCameraList extends TypeCodec< CameraList > {
                     .setString ("rtspLink", cameraList.getRtspLink() )
                     .setString ( "cameraName", cameraList.getCameraName() ) : null; }
 
-    protected CameraList toAddress ( final UDTValue udtValue ) { return DataValidateInspector
+    private CameraList toAddress ( final UDTValue udtValue ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( udtValue )

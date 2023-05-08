@@ -10,7 +10,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import java.nio.ByteBuffer;
 
-public class CodecRegistrationForReport extends TypeCodec< ReportForCard > {
+public final class CodecRegistrationForReport extends TypeCodec< ReportForCard > {
     private final TypeCodec<UDTValue> innerCodec;
     private final UserType userType;
 
@@ -39,7 +39,7 @@ public class CodecRegistrationForReport extends TypeCodec< ReportForCard > {
             value.equalsIgnoreCase("NULL" )
             ? null : toAddress( innerCodec.parse( value ) ); }
 
-    protected UDTValue toUDTValue ( final ReportForCard reportForCard ) { return DataValidateInspector
+    private UDTValue toUDTValue ( final ReportForCard reportForCard ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( reportForCard )
@@ -53,7 +53,7 @@ public class CodecRegistrationForReport extends TypeCodec< ReportForCard > {
             .setString( "passportSeries", reportForCard.getPassportSeries() )
             : null; }
 
-    protected ReportForCard toAddress ( final UDTValue value ) { return DataValidateInspector
+    private ReportForCard toAddress ( final UDTValue value ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( value )

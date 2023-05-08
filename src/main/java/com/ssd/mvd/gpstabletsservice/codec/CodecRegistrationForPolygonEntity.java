@@ -7,7 +7,7 @@ import com.datastax.driver.core.exceptions.InvalidTypeException;
 import com.datastax.driver.core.*;
 import java.nio.ByteBuffer;
 
-public class CodecRegistrationForPolygonEntity extends TypeCodec< PolygonEntity > {
+public final class CodecRegistrationForPolygonEntity extends TypeCodec< PolygonEntity > {
     private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
@@ -36,7 +36,7 @@ public class CodecRegistrationForPolygonEntity extends TypeCodec< PolygonEntity 
             value.equalsIgnoreCase("NULL" ) ?
                 null : toAddress( innerCodec.parse( value ) ); }
 
-    protected UDTValue toUDTValue ( final PolygonEntity polygonEntity ) { return DataValidateInspector
+    private UDTValue toUDTValue ( final PolygonEntity polygonEntity ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( polygonEntity )
@@ -44,7 +44,7 @@ public class CodecRegistrationForPolygonEntity extends TypeCodec< PolygonEntity 
             .setDouble("lat", polygonEntity.getLat() )
             .setDouble("lng", polygonEntity.getLng() ) : null; }
 
-    protected PolygonEntity toAddress ( final UDTValue value ) { return DataValidateInspector
+    private PolygonEntity toAddress ( final UDTValue value ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( value )
