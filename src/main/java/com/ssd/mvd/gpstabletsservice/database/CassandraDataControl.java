@@ -949,7 +949,7 @@ public final class CassandraDataControl extends CassandraConverter {
                             .parallel( super.getCheckDifference().apply(
                                     (int) Math.abs( Duration.between( request.getStartDate().toInstant(), request.getEndDate().toInstant() ).toDays() ) ) )
                             .runOn( Schedulers.parallel() )
-                            .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.LOGOUT ) == 0 )
+                            .filter( row -> super.getCheckEquality().test( Status.valueOf( row.getString( "status" ) ), LOGOUT ) )
                             .map( row -> row.getLong( "totalActivityTime" ) )
                             .sequential()
                             .publishOn( Schedulers.single() )
