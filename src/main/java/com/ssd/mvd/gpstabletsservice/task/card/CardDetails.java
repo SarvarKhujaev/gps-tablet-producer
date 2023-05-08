@@ -35,7 +35,7 @@ public class CardDetails {
                 && DataValidateInspector
                 .getInstance()
                 .getCheckRequest()
-                .apply( carTotalData
+                .test( carTotalData
                 .getDoverennostList()
                 .getDoverennostsList(), 6 ) )
             carTotalData
@@ -59,7 +59,7 @@ public class CardDetails {
                 && DataValidateInspector
                 .getInstance()
                 .getCheckRequest()
-                .apply( carTotalData
+                .test( carTotalData
                 .getPsychologyCard()
                 .getModelForCarList()
                 .getModelForCarList(), 6 ) ) carTotalData
@@ -498,7 +498,7 @@ public class CardDetails {
                                     && DataValidateInspector
                                     .getInstance()
                                     .getCheckRequest()
-                                    .apply( card.getVictimHumans(), 6 )
+                                    .test( card.getVictimHumans(), 6 )
                                     && DataValidateInspector
                                     .getInstance()
                                     .getCheckParam()

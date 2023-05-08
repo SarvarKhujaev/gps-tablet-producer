@@ -10,7 +10,7 @@ import com.datastax.driver.core.exceptions.InvalidTypeException;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
-public class CodecRegistrationForViolationsInformation extends TypeCodec< ViolationsInformation > {
+public final class CodecRegistrationForViolationsInformation extends TypeCodec< ViolationsInformation > {
     private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
@@ -39,7 +39,7 @@ public class CodecRegistrationForViolationsInformation extends TypeCodec< Violat
             value.equalsIgnoreCase("NULL" )
             ? null : toAddress( innerCodec.parse( value ) ); }
 
-    protected UDTValue toUDTValue ( final ViolationsInformation violationsInformation ) { return DataValidateInspector
+    private UDTValue toUDTValue ( final ViolationsInformation violationsInformation ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( violationsInformation )
@@ -56,7 +56,7 @@ public class CodecRegistrationForViolationsInformation extends TypeCodec< Violat
             .setString( "violation", violationsInformation.getViolation() )
             .setString( "decreeSerialNumber", violationsInformation.getDecreeSerialNumber() ) : null; }
 
-    protected ViolationsInformation toAddress ( final UDTValue value ) { return DataValidateInspector
+    private ViolationsInformation toAddress ( final UDTValue value ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( value )

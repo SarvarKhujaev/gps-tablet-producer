@@ -34,6 +34,6 @@ public class PatrulInRadiusList {
                 if ( DataValidateInspector
                         .getInstance()
                         .getCheckDistance()
-                        .apply( maxDistance, patrul.getDistance() ) ) busyPatrulListInRadius.add( patrul );
+                        .test( maxDistance, patrul.getDistance() ) ) busyPatrulListInRadius.add( patrul );
                 else busyPatrulListOutOfRadius.add( patrul ); } } }
 }

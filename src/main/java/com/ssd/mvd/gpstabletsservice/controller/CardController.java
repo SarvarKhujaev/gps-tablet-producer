@@ -37,7 +37,7 @@ public class CardController extends SerDes {
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.ACTIVE_TASK )
-            .map( row -> (ActiveTask) super.getDeserialize().apply(
+            .map( row -> (ActiveTask) super.deserialize.apply(
                     row.getString( "object" ), TaskTypes.ACTIVE_TASK ) )
             .sequential()
             .publishOn( Schedulers.single() )
@@ -54,8 +54,8 @@ public class CardController extends SerDes {
                     .apply( token ) )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
-                    .getGetCurrentActiveTask()
-                    .apply( patrul ) )
+                    .getTest()
+                    .apply( patrul, TaskTypes.ACTIVE_TASK ) )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
@@ -228,7 +228,7 @@ public class CardController extends SerDes {
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.CARTOTALDATA )
-            .map( row -> (CarTotalData) super.getDeserialize().apply( row.getString( "object" ), TaskTypes.ESCORT ) )
+            .map( row -> (CarTotalData) super.deserialize.apply( row.getString( "object" ), TaskTypes.ESCORT ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
@@ -242,8 +242,8 @@ public class CardController extends SerDes {
                 .filter( patrul -> patrul.getTaskTypes().compareTo( TaskTypes.FREE ) != 0 )
                 .flatMap( patrul -> TaskInspector
                         .getInstance()
-                        .getRemovePatrulFromTask()
-                        .apply( patrul ) )
+                        .getTest()
+                        .apply( patrul, TaskTypes.FREE ) )
                 .onErrorContinue( super::logging )
                 .onErrorReturn( super.getErrorResponse().get() ); }
 
@@ -432,7 +432,7 @@ public class CardController extends SerDes {
 
     @MessageMapping ( value = "getTaskTimingStatistics" )
     public Mono< TaskTimingStatisticsList > getTaskTimingStatistics ( final TaskTimingRequest request ) {
-        return super.getCheckRequest().apply( request, 8 )
+        return super.getCheckRequest().test( request, 8 )
                 ? CassandraDataControlForTasks
                 .getInstance()
                 .getGetTaskTimingStatistics()

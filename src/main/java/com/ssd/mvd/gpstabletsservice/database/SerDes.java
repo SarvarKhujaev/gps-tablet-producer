@@ -14,13 +14,14 @@ import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import java.util.function.BiFunction;
 import com.google.gson.Gson;
 
-@lombok.Data
 public class SerDes extends CassandraConverter {
     private final Gson gson = new Gson();
 
-    public <T> String serialize ( T object ) { return this.getGson().toJson( object ); }
+    private Gson getGson () { return this.gson; }
 
-    private final BiFunction< String, TaskTypes, ? > deserialize = ( s, taskTypes ) -> switch ( taskTypes ) {
+    protected  <T> String serialize ( final T object ) { return this.getGson().toJson( object ); }
+
+    protected final BiFunction< String, TaskTypes, ? > deserialize = ( s, taskTypes ) -> switch ( taskTypes ) {
         case CARD_102 -> this.getGson().fromJson( s, Card.class );
 
         case FIND_FACE_CAR -> this.getGson().fromJson( s, CarEvent.class );

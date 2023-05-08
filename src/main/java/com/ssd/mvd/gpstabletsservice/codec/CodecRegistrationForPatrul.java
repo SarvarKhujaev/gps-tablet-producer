@@ -10,7 +10,7 @@ import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 import java.nio.ByteBuffer;
 
-public class CodecRegistrationForPatrul extends TypeCodec< Patrul > {
+public final class CodecRegistrationForPatrul extends TypeCodec< Patrul > {
     private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
@@ -39,13 +39,13 @@ public class CodecRegistrationForPatrul extends TypeCodec< Patrul > {
         return value == null || value.isEmpty() || value.equalsIgnoreCase("NULL" )
                 ? null : toAddress( innerCodec.parse( value ) ); }
 
-    protected Patrul toAddress ( final UDTValue udtValue ) { return DataValidateInspector
+    private Patrul toAddress ( final UDTValue udtValue ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( udtValue )
             ? new Patrul ( udtValue ) : null; }
 
-    protected UDTValue toUDTValue ( final Patrul patrul ) {
+    private UDTValue toUDTValue ( final Patrul patrul ) {
         return DataValidateInspector
                 .getInstance()
                 .getCheckParam()

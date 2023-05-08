@@ -15,6 +15,7 @@ import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
@@ -71,8 +72,8 @@ public class PatrulController extends SerDes {
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< ApiResponseModel > getTaskDetails ( final Data data ) { return TaskInspector
             .getInstance()
-            .getGetTaskDetails()
-            .apply( this.objectMapper.convertValue( data.getData(), new TypeReference<>() {} ) )
+            .getTest()
+            .apply( this.objectMapper.convertValue( data.getData(), new TypeReference<>() {} ), TaskTypes.CARD_DETAILS )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
@@ -102,7 +103,7 @@ public class PatrulController extends SerDes {
 
     @MessageMapping ( value = "LOGIN" ) // for checking login data of Patrul with his Login and password
     public Mono< ApiResponseModel > patrulLogin ( final PatrulLoginRequest patrulLoginRequest ) {
-        return super.getCheckRequest().apply( patrulLoginRequest, 0 )
+        return super.getCheckRequest().test( patrulLoginRequest, 0 )
                 ? CassandraDataControl
                     .getInstance()
                     .getLogin()
@@ -155,7 +156,7 @@ public class PatrulController extends SerDes {
 
     @MessageMapping ( value = "findTheClosestPatruls" )
     public Flux< Patrul > findTheClosestPatruls ( final Point point ) {
-            return super.getCheckRequest().apply( point, 1 )
+            return super.getCheckRequest().test( point, 1 )
                     ? CassandraDataControl
                     .getInstance()
                     .getFindTheClosestPatruls()
@@ -292,7 +293,7 @@ public class PatrulController extends SerDes {
 
     @MessageMapping ( value = "getPatrulInRadiusList" )
     public Mono< PatrulInRadiusList > getPatrulInRadiusList ( final Point point ) {
-        return super.getCheckRequest().apply( point, 1 )
+        return super.getCheckRequest().test( point, 1 )
                 ? CassandraDataControl
                 .getInstance()
                 .getGetPatrulInRadiusList()

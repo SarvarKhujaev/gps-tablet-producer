@@ -59,7 +59,7 @@ public class PersonDetails {
             this.setPassportSeries( DataValidateInspector
                     .getInstance()
                     .getCheckRequest()
-                    .apply( eventBody
+                    .test( eventBody
                             .getPsychologyCard()
                             .getPapilonData(), 6 )
                     ? eventBody
@@ -111,7 +111,7 @@ public class PersonDetails {
             this.setPassportSeries( DataValidateInspector
                     .getInstance()
                     .getCheckRequest()
-                    .apply( eventFace
+                    .test( eventFace
                             .getPsychologyCard()
                             .getPapilonData(), 6 )
                     ? eventFace
@@ -169,7 +169,7 @@ public class PersonDetails {
             this.setPassportSeries( DataValidateInspector
                     .getInstance()
                     .getCheckRequest()
-                    .apply( faceEvent.getPsychologyCard().getPapilonData(), 6 )
+                    .test( faceEvent.getPsychologyCard().getPapilonData(), 6 )
                     ? faceEvent
                     .getPsychologyCard()
                     .getPapilonData()

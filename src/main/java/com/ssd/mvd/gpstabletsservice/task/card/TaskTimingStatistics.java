@@ -81,11 +81,11 @@ public class TaskTimingStatistics { // показывает все таски с
             this.setLongitudeOfTask( patrul.getLongitudeOfTask() ); }
 
     public TaskTimingStatistics (
-            Patrul patrul,
-            String taskId,
-            TaskTypes taskTypes,
-            PatrulStatus patrulStatus,
-            List< PositionInfo > positionInfo ) {
+            final Patrul patrul,
+            final String taskId,
+            final TaskTypes taskTypes,
+            final PatrulStatus patrulStatus,
+            final List< PositionInfo > positionInfo ) {
         this.setTaskId( taskId );
         this.setTaskTypes( taskTypes );
         this.setDateOfComing( new Date() );

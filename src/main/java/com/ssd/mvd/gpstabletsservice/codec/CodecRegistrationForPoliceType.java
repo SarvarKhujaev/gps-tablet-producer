@@ -11,7 +11,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 
 import java.nio.ByteBuffer;
 
-public class CodecRegistrationForPoliceType extends TypeCodec< PoliceType > {
+public final class CodecRegistrationForPoliceType extends TypeCodec< PoliceType > {
     private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
 
@@ -20,13 +20,13 @@ public class CodecRegistrationForPoliceType extends TypeCodec< PoliceType > {
         this.innerCodec = innerCodec;
         this.userType = (UserType)innerCodec.getCqlType(); }
 
-    protected PoliceType toAddress ( final UDTValue value ) { return DataValidateInspector
+    private PoliceType toAddress ( final UDTValue value ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( value )
             ? new PoliceType ( value ) : null; }
 
-    protected UDTValue toUDTValue ( final PoliceType policeType ) { return DataValidateInspector
+    private UDTValue toUDTValue ( final PoliceType policeType ) { return DataValidateInspector
             .getInstance()
             .getCheckParam()
             .test( policeType )

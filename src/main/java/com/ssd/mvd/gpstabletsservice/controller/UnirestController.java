@@ -29,7 +29,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 
 @lombok.Data
-public class UnirestController extends LogInspector {
+public final class UnirestController extends LogInspector {
     private final String ADDRESS_LOCATION_API = GpsTabletsServiceApplication
             .context
             .getEnvironment()
@@ -70,79 +70,76 @@ public class UnirestController extends LogInspector {
             .build();
 
     private final Consumer< String > deleteUser = patrulId -> {
-        try { Mono.just( new Req() )
-                .map( req -> {
-                    req.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
-                    return req; } )
-                .onErrorContinue( super::logging )
-                .onErrorStop()
-                .subscribe( req -> this.getRestTemplate()
-                        .apply( patrulId.split( "@" )[1] )
-                        .exchange( this.CHAT_SERVICE_DOMAIN + "/"
-                                + this.CHAT_SERVICE_PREFIX
-                                + "/delete-user",
-                                HttpMethod.POST,
-                                new HttpEntity<>( req, null ),
-                                String.class ) );
-        } catch ( Exception e ) { super.logging( e ); } };
+            try { Mono.just( new Req() )
+                    .map( req -> {
+                        req.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
+                        return req; } )
+                    .onErrorContinue( super::logging )
+                    .subscribe( req -> this.getRestTemplate()
+                            .apply( patrulId.split( "@" )[1] )
+                            .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
+                                    + this.getCHAT_SERVICE_PREFIX()
+                                    + "/delete-user",
+                                    HttpMethod.POST,
+                                    new HttpEntity<>( req, null ),
+                                    String.class ) );
+            } catch ( Exception e ) { super.logging( e ); } };
 
     private final Consumer< Patrul > updateUser = patrul -> {
-        if ( patrul.getSpecialToken() == null ) return;
-        try { Mono.just( new Req() )
-                .map( req -> {
-                    req.setUsername( patrul.getSurnameNameFatherName() );
-                    req.setId( patrul.getUuid() );
-                    req.setRole( Role.USER );
-                    return req; } )
-                .onErrorContinue( super::logging )
-                .onErrorStop()
-                .subscribe( req -> this.getRestTemplate()
-                        .apply( patrul.getSpecialToken() )
-                        .exchange( this.CHAT_SERVICE_DOMAIN + "/"
-                                        + this.CHAT_SERVICE_PREFIX
-                                        + "/edit-user",
-                                HttpMethod.POST,
-                                new HttpEntity<>( req, null ),
-                                String.class ) );
-        } catch ( Exception e ) { super.logging( e ); } };
+            if ( patrul.getSpecialToken() == null ) return;
+            try { Mono.just( new Req() )
+                    .map( req -> {
+                        req.setUsername( patrul.getSurnameNameFatherName() );
+                        req.setId( patrul.getUuid() );
+                        req.setRole( Role.USER );
+                        return req; } )
+                    .onErrorContinue( super::logging )
+                    .subscribe( req -> this.getRestTemplate().apply( patrul.getSpecialToken() )
+                            .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
+                                            + this.getCHAT_SERVICE_PREFIX()
+                                            + "/edit-user",
+                                    HttpMethod.POST,
+                                    new HttpEntity<>( req, null ),
+                                    String.class ) );
+            } catch ( Exception e ) { super.logging( e ); } };
 
     private final Consumer< Patrul > addUser = patrul -> {
-        try { Mono.just( new Req() )
-                .map( req -> {
-                    req.setUsername( patrul.getSurnameNameFatherName() );
-                    req.setId( patrul.getUuid() );
-                    req.setRole( Role.USER );
-                    return req; } )
-                .onErrorContinue( super::logging )
-                .onErrorStop()
-                .subscribe( req -> this.getRestTemplate()
-                        .apply( patrul.getSpecialToken() )
-                        .exchange( this.CHAT_SERVICE_DOMAIN + "/"
-                                        + this.CHAT_SERVICE_PREFIX
-                                        + "/add-user",
-                                HttpMethod.POST,
-                                new HttpEntity<>( req, null ),
-                                String.class ) );
-            patrul.setSpecialToken( null );
-        } catch ( HttpClientErrorException e ) { super.logging( e ); } };
+            try { Mono.just( new Req() )
+                    .map( req -> {
+                        req.setUsername( patrul.getSurnameNameFatherName() );
+                        req.setId( patrul.getUuid() );
+                        req.setRole( Role.USER );
+                        return req; } )
+                    .onErrorContinue( super::logging )
+                    .onErrorStop()
+                    .subscribe( req -> this.getRestTemplate()
+                            .apply( patrul.getSpecialToken() )
+                            .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
+                                            + this.getCHAT_SERVICE_PREFIX()
+                                            + "/add-user",
+                                    HttpMethod.POST,
+                                    new HttpEntity<>( req, null ),
+                                    String.class ) );
+                patrul.setSpecialToken( null );
+            } catch ( HttpClientErrorException e ) { super.logging( e ); } };
 
-    private <T> List<T> stringToArrayList ( String object, Class< T[] > clazz ) { return Arrays.asList( this.getGson().fromJson( object, clazz ) ); }
+    private <T> List<T> stringToArrayList ( final String object, final Class< T[] > clazz ) { return Arrays.asList( this.getGson().fromJson( object, clazz ) ); }
 
     private final BiFunction< Double, Double, String > getAddressByLocation = ( latitude, longitude ) -> {
-        try { return this.stringToArrayList(
-                Unirest.get( this.getADDRESS_LOCATION_API()
-                            + latitude + "," + longitude
-                            + "&limit=5&format=json&addressdetails=1" )
-                        .asJson()
-                        .getBody()
-                        .getArray()
-                        .toString(),
-                Address[].class )
-            .get( 0 )
-            .getDisplay_name();
-        } catch ( Exception e ) {
-            super.logging( e );
-            return Errors.DATA_NOT_FOUND.name(); } };
+            try { return this.stringToArrayList(
+                    Unirest.get( this.getADDRESS_LOCATION_API()
+                                + latitude + "," + longitude
+                                + "&limit=5&format=json&addressdetails=1" )
+                            .asJson()
+                            .getBody()
+                            .getArray()
+                            .toString(),
+                    Address[].class )
+                .get( 0 )
+                .getDisplay_name();
+            } catch ( Exception e ) {
+                super.logging( e );
+                return Errors.DATA_NOT_FOUND.name(); } };
 
     @lombok.Data
     public static class Req {
