@@ -80,11 +80,11 @@ public final class KafkaDataControl extends SerDes {
             .send( Mono.just( new ProducerRecord<>( this.getACTIVE_TASK(), super.serialize( activeTask ) ) ) )
             .then()
             .doOnError( super::logging )
-            .doOnSuccess( success -> super.logging( "activeTask: " +
-                    activeTask.getTaskId() + " was sent at: "
+            .doOnSuccess( success -> super.logging( "activeTask: " + activeTask.getTaskId() + " was sent at: "
                     + TimeInspector
                     .getInspector()
-                    .getGetNewDate() ) )
+                    .getGetNewDate()
+                    .get() ) )
             .subscribe();
 
     // отправляет уведомление андроидам радом с тем кто отправил сос сигнал
@@ -100,12 +100,13 @@ public final class KafkaDataControl extends SerDes {
                                             + sosNotificationForAndroid.getPatrulPassportSeries()
                                             + " at: " + TimeInspector
                                             .getInspector()
-                                            .getGetNewDate() );
+                                            .getGetNewDate()
+                                            .get() );
                                     return new ProducerRecord<>(
                                             this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION(),
                                             super.serialize( sosNotificationForAndroid ) ); } ) )
                         .then()
-                        .doOnError( error -> super.logging( error.getMessage() ) )
+                        .doOnError( super::logging )
                         .doOnSuccess( success -> super.logging( "All notifications were sent" ) )
                         .subscribe();
                 return Mono.just( apiResponseModel ); };
@@ -116,12 +117,13 @@ public final class KafkaDataControl extends SerDes {
                     .createOutbound()
                     .send( Mono.just( new ProducerRecord<>( this.getSOS_TOPIC(), super.serialize( sosNotification ) ) ) )
                     .then()
-                    .doOnError( error -> super.logging( error.getMessage() ) )
+                    .doOnError( super::logging )
                     .doOnSuccess( success -> super.logging( "sosNotification from: "
                             + sosNotification.getPatrulUUID() + " was sent to front end"
                             + " at: " + TimeInspector
                             .getInspector()
-                            .getGetNewDate() ) )
+                            .getGetNewDate()
+                            .get() ) )
                     .subscribe();
             return "Sos was saved successfully"; };
 
@@ -130,12 +132,13 @@ public final class KafkaDataControl extends SerDes {
                     .createOutbound()
                     .send( Mono.just( new ProducerRecord<>( this.getCAR_TOTAL_DATA(), super.serialize( carTotalData ) ) ) )
                     .then()
-                    .doOnError( error -> super.logging( error.getMessage() ) )
+                    .doOnError( super::logging )
                     .doOnSuccess( success -> super.logging( "Kafka got carTotalData : "
                             + carTotalData.getGosNumber()
                             + " at: " + TimeInspector
                             .getInspector()
-                            .getGetNewDate() ) )
+                            .getGetNewDate()
+                            .get() ) )
                     .subscribe();
             return carTotalData; };
 
@@ -144,7 +147,7 @@ public final class KafkaDataControl extends SerDes {
                     .createOutbound()
                     .send( Mono.just( new ProducerRecord<>( this.getNOTIFICATION(), super.serialize( notification ) ) ) )
                     .then()
-                    .doOnError( error -> super.logging( error.getMessage() ) )
+                    .doOnError( super::logging )
                     .doOnSuccess( success -> super.logging( "Kafka got notification: "
                             + notification.getTitle()
                             + " for: " + notification.getPassportSeries()

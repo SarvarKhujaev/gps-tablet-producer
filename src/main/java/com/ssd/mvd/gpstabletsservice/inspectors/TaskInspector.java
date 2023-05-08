@@ -102,7 +102,8 @@ public final class TaskInspector extends DataValidateInspector {
             case ACCEPTED -> patrul.getName() + " ACCEPTED his task: " + patrul.getTaskId() + " " + patrul.getTaskTypes() + " at: "
                     + TimeInspector
                     .getInspector()
-                    .getGetNewDate();
+                    .getGetNewDate()
+                    .get();
             case ARRIVED -> patrul.getName() + " : " + patrul.getTaskTypes() + " arrived task location: " + " at: "
                     + TimeInspector
                     .getInspector()
