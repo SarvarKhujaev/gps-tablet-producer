@@ -1,27 +1,27 @@
 package com.ssd.mvd.gpstabletsservice.inspectors;
 
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ModelForCar;
-import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
-import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForEscort;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.request.AndroidVersionUpdate;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.Pinpp;
-import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.database.Archive;
-import com.ssd.mvd.gpstabletsservice.controller.Point;
+import com.ssd.mvd.gpstabletsservice.entity.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.datastax.driver.core.Row;
 
 import java.util.function.BiPredicate;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Function;
+
 import java.util.Objects;
 import java.util.Date;
 import java.util.List;
@@ -38,15 +38,18 @@ public class DataValidateInspector extends Archive {
 
     private final Predicate< Object > checkParam = Objects::nonNull;
 
-    private final BiFunction< Object, Integer, String > concatNames = ( o, integer ) -> integer == 0
-            ? String.join( " ",
-            ( ( Pinpp ) o ).getName(),
+    private final BiFunction< Object, Integer, String > concatNames = ( o, integer ) -> switch ( integer ) {
+            case 0 -> String.join( " ",
+                    ( ( Pinpp ) o ).getName(),
                     ( ( Pinpp ) o ).getSurname(),
-                    ( ( Pinpp ) o ).getPatronym() )
-            : String.join( " ",
-            ( (ModelForCar) o ).getModel(),
+                    ( ( Pinpp ) o ).getPatronym() );
+
+            case 1 -> String.join( " ",
+                    ( (ModelForCar) o ).getModel(),
                     ( (ModelForCar) o ).getVehicleType(),
                     ( (ModelForCar) o ).getColor() );
+
+            default -> String.valueOf( o ).replaceAll( "'", "" ); };
 
     private final BiPredicate< Status, Status > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
 

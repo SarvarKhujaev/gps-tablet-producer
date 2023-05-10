@@ -4,9 +4,9 @@ import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
-import com.ssd.mvd.gpstabletsservice.task.sos_task.SosRequest;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
+import com.ssd.mvd.gpstabletsservice.request.SosRequest;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;

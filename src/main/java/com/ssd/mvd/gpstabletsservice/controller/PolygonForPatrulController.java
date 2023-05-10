@@ -4,20 +4,20 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-import com.ssd.mvd.gpstabletsservice.entity.Polygon;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.Polygon;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
-import com.ssd.mvd.gpstabletsservice.entity.ScheduleForPolygonPatrul;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.ScheduleForPolygonPatrul;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class PolygonForPatrulController extends LogInspector { // SAM - 76

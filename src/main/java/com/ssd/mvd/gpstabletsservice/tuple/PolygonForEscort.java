@@ -1,6 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
-import com.ssd.mvd.gpstabletsservice.entity.PolygonEntity;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonEntity;
 import com.datastax.driver.core.Row;
 
 import java.util.List;

@@ -3,11 +3,11 @@ package com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin;
 import java.util.*;
 import lombok.extern.jackson.Jacksonized;
 
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
+import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

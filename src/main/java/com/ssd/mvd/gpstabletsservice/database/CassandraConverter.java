@@ -4,12 +4,15 @@ import java.util.*;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
-import com.ssd.mvd.gpstabletsservice.codec.*;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.tuple.Points;
-import com.ssd.mvd.gpstabletsservice.task.card.PositionInfo;
+import com.ssd.mvd.gpstabletsservice.database.codec.*;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonType;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonEntity;
+import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
 @lombok.Data
@@ -114,7 +117,7 @@ public class CassandraConverter extends LogInspector {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
-                .register( new CodecRegistrationForPoliceType ( CassandraDataControl
+                .register( new CodecRegistrationForPoliceType( CassandraDataControl
                         .getInstance()
                         .getCodecRegistry()
                         .codecFor( CassandraDataControl
@@ -159,7 +162,7 @@ public class CassandraConverter extends LogInspector {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
-                .register( new CodecRegistrationForPolygonType (
+                .register( new CodecRegistrationForPolygonType(
                                 CassandraDataControl
                                         .getInstance()
                                         .getCodecRegistry()
@@ -175,7 +178,7 @@ public class CassandraConverter extends LogInspector {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
-                .register( new CodecRegistrationForPositionInfo ( CassandraDataControl
+                .register( new CodecRegistrationForPositionInfo( CassandraDataControl
                         .getInstance()
                         .getCodecRegistry()
                         .codecFor( CassandraDataControl
@@ -190,7 +193,7 @@ public class CassandraConverter extends LogInspector {
         CassandraDataControl
                 .getInstance() // create a new codec for PolygonEntity.class
                 .getCodecRegistry()
-                .register ( new CodecRegistrationForPolygonEntity ( CassandraDataControl
+                .register ( new CodecRegistrationForPolygonEntity( CassandraDataControl
                                         .getInstance()
                                         .getCodecRegistry()
                                         .codecFor ( CassandraDataControl
