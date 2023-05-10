@@ -4,7 +4,7 @@ import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
-import com.ssd.mvd.gpstabletsservice.entity.Polygon;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.Polygon;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;

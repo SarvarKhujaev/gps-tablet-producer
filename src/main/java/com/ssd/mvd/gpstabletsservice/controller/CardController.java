@@ -2,18 +2,25 @@ package com.ssd.mvd.gpstabletsservice.controller;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
+import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.TaskTimingStatisticsList;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
+import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
+import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
+import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.TaskDetails;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
-import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.ActiveTask;
+import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
+import com.ssd.mvd.gpstabletsservice.request.TaskDetailsRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
+import com.ssd.mvd.gpstabletsservice.request.CardRequest;
 import com.ssd.mvd.gpstabletsservice.task.card.*;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
@@ -54,7 +61,7 @@ public class CardController extends SerDes {
                     .apply( token ) )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
-                    .getTest()
+                    .getGetTaskData()
                     .apply( patrul, TaskTypes.ACTIVE_TASK ) )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
@@ -242,7 +249,7 @@ public class CardController extends SerDes {
                 .filter( patrul -> patrul.getTaskTypes().compareTo( TaskTypes.FREE ) != 0 )
                 .flatMap( patrul -> TaskInspector
                         .getInstance()
-                        .getTest()
+                        .getGetTaskData()
                         .apply( patrul, TaskTypes.FREE ) )
                 .onErrorContinue( super::logging )
                 .onErrorReturn( super.getErrorResponse().get() ); }
@@ -256,7 +263,7 @@ public class CardController extends SerDes {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getDetailsOfTask" )
-    public Mono< TaskDetails > getDetailsOfTask ( final TaskDetailsRequest request ) {
+    public Mono<TaskDetails> getDetailsOfTask (final TaskDetailsRequest request ) {
         return super.getCheckParam().test( request )
                 && super.getCheckParam().test( request.getId() )
                 && super.getCheckParam().test( request.getTaskTypes() )
@@ -272,8 +279,9 @@ public class CardController extends SerDes {
         return switch ( request.getTaskType() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetCard102()
+                    .getGetRowDemo()
                     .apply( request.getCard().toString() )
+                    .map( row -> ( Card ) super.deserialize.apply( row.getString( "object" ), TaskTypes.CARD_102 ) )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -295,8 +303,9 @@ public class CardController extends SerDes {
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetEventFace()
+                    .getGetRowDemo()
                     .apply( request.getCard().toString() )
+                    .map( row -> (EventFace) super.deserialize.apply( row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
                     .flatMap( eventFace -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -319,8 +328,9 @@ public class CardController extends SerDes {
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetEventCar()
+                    .getGetRowDemo()
                     .apply( request.getCard().toString() )
+                    .map( row -> (EventCar) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
                     .flatMap( eventCar -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -342,8 +352,9 @@ public class CardController extends SerDes {
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetEventBody()
+                    .getGetRowDemo()
                     .apply( request.getCard().toString() )
+                    .map( row -> (EventBody) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
                     .flatMap( eventBody -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -364,8 +375,9 @@ public class CardController extends SerDes {
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetCarEvents()
+                    .getGetRowDemo()
                     .apply( request.getCard().toString() )
+                    .map( row -> ( CarEvent ) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
                     .flatMap( carEvent -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -388,8 +400,9 @@ public class CardController extends SerDes {
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetFaceEvents()
+                    .getGetRowDemo()
                     .apply( request.getCard().toString() )
+                    .map( row -> (FaceEvent) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -410,9 +423,10 @@ public class CardController extends SerDes {
 
             default -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetSelfEmploymentTask()
-                    .apply( UUID.fromString( request.getCard().toString() ) )
-                    .flatMap( card -> {
+                    .getGetRowDemo()
+                    .apply( request.getCard().toString() )
+                    .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+                    .flatMap( selfEmploymentTask -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
                                 .runOn( Schedulers.parallel() )
@@ -424,14 +438,14 @@ public class CardController extends SerDes {
                                         .getInstance()
                                         .changeTaskStatus( patrul,
                                                 com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                card ) )
+                                                selfEmploymentTask ) )
                                 .sequential()
                                 .publishOn( Schedulers.single() )
                                 .subscribe();
                         return super.getFunction().apply( Map.of( "message", request.getCard() + " has got new patrul" ) ); } ); }; }
 
     @MessageMapping ( value = "getTaskTimingStatistics" )
-    public Mono< TaskTimingStatisticsList > getTaskTimingStatistics ( final TaskTimingRequest request ) {
+    public Mono<TaskTimingStatisticsList> getTaskTimingStatistics (final TaskTimingRequest request ) {
         return super.getCheckRequest().test( request, 8 )
                 ? CassandraDataControlForTasks
                 .getInstance()

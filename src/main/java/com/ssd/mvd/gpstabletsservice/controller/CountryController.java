@@ -1,6 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import com.ssd.mvd.gpstabletsservice.tuple.CassandraDataControlForEscort;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForEscort;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;

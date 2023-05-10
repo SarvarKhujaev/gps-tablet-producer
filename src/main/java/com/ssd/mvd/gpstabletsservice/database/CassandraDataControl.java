@@ -1,24 +1,32 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
-import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
-import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulImageRequest;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulLoginRequest;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.ScheduleForPolygonPatrul;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulActivityStatistics;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulInRadiusList;
+import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PositionInfo;
+import com.ssd.mvd.gpstabletsservice.entity.notifications.Notification;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.TabletUsage;
+import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonEntity;
 import com.ssd.mvd.gpstabletsservice.request.AndroidVersionUpdate;
+import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
-import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
-import com.ssd.mvd.gpstabletsservice.response.PatrulInRadiusList;
-import com.ssd.mvd.gpstabletsservice.request.PatrulImageRequest;
-import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonType;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.Polygon;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
-import com.ssd.mvd.gpstabletsservice.task.card.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.controller.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.entity.Point;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
@@ -37,7 +45,6 @@ import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.Disposable;
 
 @lombok.Data
 public final class CassandraDataControl extends CassandraConverter {
@@ -50,56 +57,56 @@ public final class CassandraDataControl extends CassandraConverter {
     public static CassandraDataControl getInstance () { return INSTANCE != null ? INSTANCE : ( INSTANCE = new CassandraDataControl() ); }
 
     public void register () {
-        super.registerCodecForPolygonEntity(
-                CassandraTables.ESCORT.name(),
-                CassandraTables.POLYGON_ENTITY.name() );
+            super.registerCodecForPolygonEntity(
+                    CassandraTables.ESCORT.name(),
+                    CassandraTables.POLYGON_ENTITY.name() );
 
-        super.registerCodecForPointsList(
-                CassandraTables.ESCORT.name(),
-                CassandraTables.POINTS_ENTITY.name() );
+            super.registerCodecForPointsList(
+                    CassandraTables.ESCORT.name(),
+                    CassandraTables.POINTS_ENTITY.name() );
 
-        super.registerCodecForPatrul(
-                CassandraTables.TABLETS.name(),
-                CassandraTables.PATRUL_TYPE.name() );
+            super.registerCodecForPatrul(
+                    CassandraTables.TABLETS.name(),
+                    CassandraTables.PATRUL_TYPE.name() );
 
-        super.registerCodecForPositionInfo(
-                CassandraTables.TABLETS.name(),
-                CassandraTables.POSITION_INFO.name() );
+            super.registerCodecForPositionInfo(
+                    CassandraTables.TABLETS.name(),
+                    CassandraTables.POSITION_INFO.name() );
 
-        super.registerCodecForCameraList(
-                CassandraTables.TABLETS.name(),
-                CassandraTables.CAMERA_LIST.name() );
+            super.registerCodecForCameraList(
+                    CassandraTables.TABLETS.name(),
+                    CassandraTables.CAMERA_LIST.name() );
 
-        super.registerCodecForReport(
-                CassandraTables.TABLETS.name(),
-                CassandraTables.REPORT_FOR_CARD.name() );
+            super.registerCodecForReport(
+                    CassandraTables.TABLETS.name(),
+                    CassandraTables.REPORT_FOR_CARD.name() );
 
-        super.registerCodecForPoliceType(
-                CassandraTables.TABLETS.name(),
-                CassandraTables.POLICE_TYPE.name() );
+            super.registerCodecForPoliceType(
+                    CassandraTables.TABLETS.name(),
+                    CassandraTables.POLICE_TYPE.name() );
 
-        super.registerCodecForPolygonType(
-                CassandraTables.TABLETS.name(),
-                CassandraTables.POLYGON_TYPE.name() );
+            super.registerCodecForPolygonType(
+                    CassandraTables.TABLETS.name(),
+                    CassandraTables.POLYGON_TYPE.name() );
 
-        super.registerCodecForPolygonEntity(
-                CassandraTables.TABLETS.name(),
-                CassandraTables.POLYGON_ENTITY.name() );
+            super.registerCodecForPolygonEntity(
+                    CassandraTables.TABLETS.name(),
+                    CassandraTables.POLYGON_ENTITY.name() );
 
-        super.registerCodecForViolationsInformation(
-                CassandraTables.TABLETS.name(),
-                CassandraTables.VIOLATION_LIST_TYPE.name() ); }
+            super.registerCodecForViolationsInformation(
+                    CassandraTables.TABLETS.name(),
+                    CassandraTables.VIOLATION_LIST_TYPE.name() ); }
 
     private void createType ( final String typeName, final Class object ) {
-        this.getSession().execute( "CREATE TYPE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + typeName +
-                super.convertClassToCassandra( object ) + " );" ); }
+            this.getSession().execute( "CREATE TYPE IF NOT EXISTS "
+                    + CassandraTables.TABLETS.name() + "."
+                    + typeName +
+                    super.convertClassToCassandra( object ) + " );" ); }
 
     private void createTable ( final String tableName, final Class object, final String prefix ) {
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "." + tableName +
-                super.convertClassToCassandra( object ) + prefix ); }
+            this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
+                    + CassandraTables.TABLETS.name() + "." + tableName +
+                    super.convertClassToCassandra( object ) + prefix ); }
 
     private CassandraDataControl () {
         final SocketOptions options = new SocketOptions();
@@ -239,11 +246,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     .filter( row -> row.getString( "policeType" ).compareTo( policeType.getPoliceType() ) == 0 )
                     .sequential()
                     .publishOn( Schedulers.single() )
-                    .subscribe( row -> this.getSession().execute( "UPDATE "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.PATRULS.name()
-                            + " SET policeType = '" + policeType.getPoliceType() + "'"
-                            + " WHERE uuid = " + row.getUUID( "uuid" ) + ";" ) );
+                    .subscribe( new CustomSubscriber( 4, policeType.getPoliceType(), this.getSession() ) );
             return this.getSession().execute( "UPDATE "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.POLICE_TYPE.name()
@@ -584,11 +587,11 @@ public final class CassandraDataControl extends CassandraConverter {
 
         if ( row.getUUID( "uuid" ).compareTo( patrul.getUuid() ) == 0 ) {
             if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
-            if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
-            if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
-            if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
-            if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
-            if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
+            if ( patrul.getName().contains( "'" ) ) patrul.setName( super.getConcatNames().apply( patrul.getName(), 2 ) );
+            if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( super.getConcatNames().apply( patrul.getSurname(), 2 ) );
+            if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( super.getConcatNames().apply( patrul.getOrganName(), 2 ) );
+            if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( super.getConcatNames().apply( patrul.getFatherName(), 2 ) );
+            if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( super.getConcatNames().apply( patrul.getRegionName(), 2 ) );
 
             if ( row.getString( "login" ).compareTo( patrul.getLogin() ) == 0
                     && row.getString( "password" ).compareTo( patrul.getPassword() ) != 0 )
@@ -722,12 +725,12 @@ public final class CassandraDataControl extends CassandraConverter {
                 if ( patrul.getBatteryLevel() == null ) patrul.setBatteryLevel( 0 );
                 if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
                 if ( patrul.getPassword() == null ) patrul.setPassword( patrul.getPassportNumber() );
-                if ( patrul.getName().contains( "'" ) ) patrul.setName( patrul.getName().replaceAll( "'", "" ) );
-                if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( patrul.getSurname().replaceAll( "'", "" ) );
+                if ( patrul.getName().contains( "'" ) ) patrul.setName( super.getConcatNames().apply( patrul.getName(), 2 ) );
+                if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( super.getConcatNames().apply( patrul.getSurname(), 2 ) );
                 if ( patrul.getOrganName() != null && patrul.getOrganName().contains( "'" ) )
-                    patrul.setOrganName( patrul.getOrganName().replaceAll( "'", "" ) );
-                if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( patrul.getFatherName().replaceAll( "'", "" ) );
-                if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( patrul.getRegionName().replaceAll( "'", "" ) );
+                    patrul.setOrganName( super.getConcatNames().apply( patrul.getOrganName(), 2 ) );
+                if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( super.getConcatNames().apply( patrul.getFatherName(), 2 ) );
+                if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( super.getConcatNames().apply( patrul.getRegionName(), 2 ) );
                 if ( this.getCheckLogin().apply( patrul.getLogin() ) != null ) return super.getFunction().apply(
                         Map.of( "message", "Patrul with this login has already been inserted, choose another one",
                                 "success", false,
@@ -756,25 +759,29 @@ public final class CassandraDataControl extends CassandraConverter {
                                         : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
-                                        .get().toInstant() ) + "', '" +
+                                        .get()
+                                        .toInstant() ) + "', '" +
                                 ( super.getCheckParam().test( patrul.getLastActiveDate() )
                                         ? patrul.getLastActiveDate().toInstant()
                                         : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
-                                        .get().toInstant() ) + "', '" +
+                                        .get()
+                                        .toInstant() ) + "', '" +
                                 ( super.getCheckParam().test( patrul.getStartedToWorkDate() )
                                         ? patrul.getStartedToWorkDate().toInstant()
                                         : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
-                                        .get().toInstant() ) + "', '" +
+                                        .get()
+                                        .toInstant() ) + "', '" +
                                 ( super.getCheckParam().test( patrul.getDateOfRegistration() )
                                         ? patrul.getDateOfRegistration().toInstant()
                                         : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
-                                        .get().toInstant() ) + "', " +
+                                        .get()
+                                        .toInstant() ) + "', " +
 
                                 patrul.getDistance() + ", " +
                                 patrul.getLatitude() + ", " +
@@ -960,7 +967,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .patrul( patrul )
                                     .build() ) );
 
-    private final Function< ScheduleForPolygonPatrul, Mono< ApiResponseModel > > addPatrulToPolygon =
+    private final Function<ScheduleForPolygonPatrul, Mono< ApiResponseModel > > addPatrulToPolygon =
             scheduleForPolygonPatrul -> this.getGetPolygonForPatrul().apply( scheduleForPolygonPatrul.getUuid() )
                     .flatMap( polygon -> Flux.fromStream( scheduleForPolygonPatrul
                                     .getPatrulUUIDs()
@@ -1225,7 +1232,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one();
             return super.getCheckParam().test( row ) ? new TabletUsage( row ) : null; };
 
-    private final BiFunction< Patrul, Status, Disposable > updateStatus = ( patrul, status ) ->
+    private final BiConsumer< Patrul, Status > updateStatus = ( patrul, status ) ->
             Mono.just( this.getSession().execute ( "SELECT * FROM "
                     + CassandraTables.TABLETS.name() + "."
                     + CassandraTables.TABLETS_USAGE_TABLE.name()
@@ -1246,7 +1253,7 @@ public final class CassandraDataControl extends CassandraConverter {
                             : "" )
                             + " WHERE uuidOfPatrul = " + patrul.getUuid()
                             + " AND simCardNumber = '" + row.getString( "simCardNumber" ) + "';" ) )
-                    .subscribe();
+                    .subscribe( new CustomSubscriber( 5 ) );
 
     private final Function< String, Row > checkLogin = login ->
             this.getSession().execute( "SELECT * FROM "
@@ -1266,7 +1273,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .get() );
                             if ( !patrul.getSimCardNumber().equals( "null" )
                                     && !patrul.getSimCardNumber().equals( patrulLoginRequest.getSimCardNumber() ) )
-                                this.getUpdateStatus().apply( patrul, LOGOUT );
+                                this.getUpdateStatus().accept( patrul, LOGOUT );
                             patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
                             patrul.setTokenForLogin (
                                     Base64
@@ -1331,7 +1338,7 @@ public final class CassandraDataControl extends CassandraConverter {
     private final BiFunction< String, Status, Mono< ApiResponseModel > > changeStatus = ( token, status ) -> this.getGetPatrulByUUID()
             .apply( this.getDecode().apply( token ) )
             .flatMap( patrul -> {
-                this.getUpdateStatus().apply( patrul, status );
+                this.getUpdateStatus().accept( patrul, status );
                 this.getUpdatePatrulActivity().accept( patrul );
 
                 if ( super.getCheckEquality().test( status, START_TO_WORK ) ) {
@@ -1353,10 +1360,10 @@ public final class CassandraDataControl extends CassandraConverter {
 
                 else if ( super.getCheckEquality().test( status, ARRIVED ) ) {
                     if ( super.getCheckRequest().test( patrul.getTaskDate(), 5 ) ) {
-                        this.getUpdateStatus().apply( patrul, CANCEL );
+                        this.getUpdateStatus().accept( patrul, CANCEL );
                         return TaskInspector
                                 .getInstance()
-                                .getTest()
+                                .getGetTaskData()
                                 .apply( patrul, TaskTypes.FREE )
                                 .flatMap( apiResponseModel -> super.errorResponseForLateComing.get() ); }
                     else return TaskInspector
@@ -1413,14 +1420,7 @@ public final class CassandraDataControl extends CassandraConverter {
             .sequential()
             .publishOn( Schedulers.single() )
             .collectList()
-            .subscribe( patruls -> patruls
-                    .parallelStream()
-                    .forEach( patrul -> {
-                        patrul.setSpecialToken( token );
-                        UnirestController
-                                .getInstance()
-                                .getAddUser()
-                                .accept( patrul ); } ) );
+            .subscribe( new CustomSubscriber( 3, token ) );
 
     private final Function< String, UUID > decode = token -> UUID.fromString(
             new String( Base64

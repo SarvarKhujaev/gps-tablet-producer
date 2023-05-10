@@ -22,10 +22,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.Address;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 
 @lombok.Data

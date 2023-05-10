@@ -12,20 +12,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
-import com.ssd.mvd.gpstabletsservice.database.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.Request;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.task.card.CardRequest;
+import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
+import com.ssd.mvd.gpstabletsservice.request.CardRequest;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
-import com.ssd.mvd.gpstabletsservice.request.PatrulLoginRequest;
-import com.ssd.mvd.gpstabletsservice.request.PatrulImageRequest;
-import com.ssd.mvd.gpstabletsservice.response.PatrulInRadiusList;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
-import com.ssd.mvd.gpstabletsservice.request.PatrulActivityRequest;
-import com.ssd.mvd.gpstabletsservice.response.PatrulActivityStatistics;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.TabletUsage;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulInRadiusList;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulActivityStatistics;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulLoginRequest;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulImageRequest;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -72,7 +74,7 @@ public class PatrulController extends SerDes {
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< ApiResponseModel > getTaskDetails ( final Data data ) { return TaskInspector
             .getInstance()
-            .getTest()
+            .getGetTaskData()
             .apply( this.objectMapper.convertValue( data.getData(), new TypeReference<>() {} ), TaskTypes.CARD_DETAILS )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
@@ -113,7 +115,7 @@ public class PatrulController extends SerDes {
                 : super.getErrorResponseForWrongParams().get(); }
 
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
-    public Flux< Patrul > getAllUsersList () { return CassandraDataControl
+    public Flux<Patrul> getAllUsersList () { return CassandraDataControl
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
@@ -286,7 +288,7 @@ public class PatrulController extends SerDes {
 
     // возвращает данные обо всех использованных планшетах для каждого патрульного
     @MessageMapping ( value = "getAllUsedTablets" )
-    public Mono< List< TabletUsage > > getAllUsedTablets ( final PatrulActivityRequest request ) { return CassandraDataControl
+    public Mono< List<TabletUsage> > getAllUsedTablets (final PatrulActivityRequest request ) { return CassandraDataControl
             .getInstance()
             .getGetAllUsedTablets()
             .apply( UUID.fromString( request.getPatrulUUID() ), request ); }

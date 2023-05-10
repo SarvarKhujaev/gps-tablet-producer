@@ -1,10 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin;
 
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
+import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
-import com.ssd.mvd.gpstabletsservice.task.card.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

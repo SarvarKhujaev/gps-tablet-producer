@@ -4,10 +4,10 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonType;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
-import com.ssd.mvd.gpstabletsservice.entity.PolygonType;
 
 import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;

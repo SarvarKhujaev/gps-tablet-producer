@@ -1,11 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
-import static com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
-import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
+import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -16,12 +16,13 @@ import java.util.UUID;
 import java.util.Map;
 
 @RestController
-public class SelfEmploymentController extends LogInspector {
+public class SelfEmploymentController extends SerDes {
     @MessageMapping ( value = "getSelfEmployment" ) // returns the current Card
     public Mono< SelfEmploymentTask > getSelfEmployment ( final UUID uuid ) { return CassandraDataControlForTasks
             .getInstance()
-            .getGetSelfEmploymentTask()
-            .apply( uuid )
+            .getGetRowDemo()
+            .apply( uuid.toString() )
+            .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )

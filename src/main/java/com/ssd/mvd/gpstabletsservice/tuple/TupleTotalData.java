@@ -1,6 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.tuple;
 
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import java.util.ArrayList;
 import java.util.List;
 

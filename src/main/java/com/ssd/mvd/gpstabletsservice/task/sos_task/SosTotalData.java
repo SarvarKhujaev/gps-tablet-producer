@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.sos_task;
 
+import com.ssd.mvd.gpstabletsservice.entity.notifications.SosNotificationForAndroid;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 

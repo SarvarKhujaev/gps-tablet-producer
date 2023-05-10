@@ -1,11 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import com.ssd.mvd.gpstabletsservice.entity.Patrul;
-import java.util.*;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
+import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 
 @lombok.Data
 @lombok.NoArgsConstructor
@@ -53,5 +54,5 @@ public class Card {
     @JsonDeserialize
     private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize
-    private Map< String, PatrulStatus > patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
+    private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }
