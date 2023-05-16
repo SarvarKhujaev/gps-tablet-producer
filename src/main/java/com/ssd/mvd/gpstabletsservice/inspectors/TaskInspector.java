@@ -87,7 +87,7 @@ public final class TaskInspector extends SerDes {
                             .apply( patrul.getTaskDate().toInstant() ) );
             patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), taskTypes.name() ); };
 
-    private final BiFunction< Patrul, TaskTypes, PatrulStatus> saveTaskTiming = ( patrul, taskTypes ) -> {
+    private final BiFunction< Patrul, TaskTypes, PatrulStatus > saveTaskTiming = ( patrul, taskTypes ) -> {
             final PatrulStatus patrulStatus = new PatrulStatus( patrul );
             CassandraDataControl
                     .getInstance()
@@ -146,7 +146,12 @@ public final class TaskInspector extends SerDes {
                     if ( card.getPatruls().size() != 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
-                            .accept( new ActiveTask( card, CARD_102 ) ); }
+                            .accept( new ActiveTask(
+                                    card,
+                                    card.getUUID().toString(),
+                                    card.getStatus(),
+                                    CARD_102,
+                                    card.getPatruls() ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -169,7 +174,12 @@ public final class TaskInspector extends SerDes {
             CassandraDataControlForTasks
                     .getInstance()
                     .getSaveActiveTask()
-                    .accept( new ActiveTask( card, CARD_102 ) );
+                    .accept( new ActiveTask(
+                            card,
+                            card.getUUID().toString(),
+                            card.getStatus(),
+                            CARD_102,
+                            card.getPatruls() ) );
 
         return this.saveNotification(
                 card.getUUID(),
@@ -198,7 +208,12 @@ public final class TaskInspector extends SerDes {
                     if ( eventCar.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
-                            .accept( new ActiveTask( eventCar, FIND_FACE_EVENT_CAR ) ); }
+                            .accept( new ActiveTask(
+                                    eventCar,
+                                    eventCar.getUUID().toString(),
+                                    eventCar.getStatus(),
+                                    FIND_FACE_EVENT_CAR,
+                                    eventCar.getPatruls() ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -218,7 +233,12 @@ public final class TaskInspector extends SerDes {
         if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .getSaveActiveTask()
-                .accept( new ActiveTask( eventCar, FIND_FACE_EVENT_CAR ) );
+                .accept( new ActiveTask(
+                        eventCar,
+                        eventCar.getUUID().toString(),
+                        eventCar.getStatus(),
+                        FIND_FACE_EVENT_CAR,
+                        eventCar.getPatruls() ) );
 
         if ( status.compareTo( CANCEL ) != 0 ) eventCar.getPatruls().put( patrul.getUuid(), patrul );
 
@@ -249,7 +269,12 @@ public final class TaskInspector extends SerDes {
                     if ( eventFace.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
-                            .accept( new ActiveTask( eventFace, FIND_FACE_EVENT_FACE ) ); }
+                            .accept( new ActiveTask(
+                                    eventFace,
+                                    eventFace.getUUID().toString(),
+                                    eventFace.getStatus(),
+                                    FIND_FACE_EVENT_FACE,
+                                    eventFace.getPatruls() ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -272,7 +297,12 @@ public final class TaskInspector extends SerDes {
             CassandraDataControlForTasks
                     .getInstance()
                     .getSaveActiveTask()
-                    .accept( new ActiveTask( eventFace, FIND_FACE_EVENT_FACE ) );
+                    .accept( new ActiveTask(
+                            eventFace,
+                            eventFace.getUUID().toString(),
+                            eventFace.getStatus(),
+                            FIND_FACE_EVENT_FACE,
+                            eventFace.getPatruls() ) );
 
         return this.saveNotification(
                 eventFace.getUUID(),
@@ -301,7 +331,12 @@ public final class TaskInspector extends SerDes {
                     if ( eventBody.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
-                            .accept( new ActiveTask( eventBody, FIND_FACE_EVENT_BODY ) ); }
+                            .accept( new ActiveTask(
+                                    eventBody,
+                                    eventBody.getUUID().toString(),
+                                    eventBody.getStatus(),
+                                    FIND_FACE_EVENT_BODY,
+                                    eventBody.getPatruls() ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -320,7 +355,12 @@ public final class TaskInspector extends SerDes {
         if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .getSaveActiveTask()
-                .accept( new ActiveTask( eventBody, FIND_FACE_EVENT_BODY ) );
+                .accept( new ActiveTask(
+                        eventBody,
+                        eventBody.getUUID().toString(),
+                        eventBody.getStatus(),
+                        FIND_FACE_EVENT_BODY,
+                        eventBody.getPatruls() ) );
 
         return this.saveNotification(
                 eventBody.getUUID(),
@@ -349,7 +389,12 @@ public final class TaskInspector extends SerDes {
                     if ( carEvents.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
-                            .accept( new ActiveTask( carEvents, FIND_FACE_CAR ) ); }
+                            .accept( new ActiveTask(
+                                    carEvents,
+                                    carEvents.getUUID().toString(),
+                                    carEvents.getStatus(),
+                                    FIND_FACE_CAR,
+                                    carEvents.getPatruls() ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -378,7 +423,12 @@ public final class TaskInspector extends SerDes {
         if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .getSaveActiveTask()
-                .accept( new ActiveTask( carEvents, FIND_FACE_CAR ) );
+                .accept( new ActiveTask(
+                        carEvents,
+                        carEvents.getUUID().toString(),
+                        carEvents.getStatus(),
+                        FIND_FACE_CAR,
+                        carEvents.getPatruls() ) );
 
         return this.saveNotification(
                 carEvents.getUUID(),
@@ -407,7 +457,12 @@ public final class TaskInspector extends SerDes {
                     if ( faceEvent.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
-                            .accept( new ActiveTask( faceEvent, FIND_FACE_PERSON ) ); }
+                            .accept( new ActiveTask(
+                                    faceEvent,
+                                    faceEvent.getUUID().toString(),
+                                    faceEvent.getStatus(),
+                                    FIND_FACE_PERSON,
+                                    faceEvent.getPatruls() ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -435,7 +490,12 @@ public final class TaskInspector extends SerDes {
             CassandraDataControlForTasks
                     .getInstance()
                     .getSaveActiveTask()
-                    .accept( new ActiveTask( faceEvent, FIND_FACE_PERSON ) );
+                    .accept( new ActiveTask(
+                            faceEvent,
+                            faceEvent.getUUID().toString(),
+                            faceEvent.getStatus(),
+                            FIND_FACE_PERSON,
+                            faceEvent.getPatruls() ) );
 
         return this.saveNotification(
                 faceEvent.getUUID(),
@@ -502,7 +562,12 @@ public final class TaskInspector extends SerDes {
                     if ( selfEmploymentTask.getPatruls().size() > 0 ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
-                            .accept( new ActiveTask( selfEmploymentTask, SELF_EMPLOYMENT ) ); }
+                            .accept( new ActiveTask(
+                                    selfEmploymentTask,
+                                    selfEmploymentTask.getUuid().toString(),
+                                    selfEmploymentTask.getTaskStatus(),
+                                    SELF_EMPLOYMENT,
+                                    selfEmploymentTask.getPatruls() ) ); }
                 patrul.setTaskTypes( TaskTypes.FREE );
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
@@ -517,7 +582,12 @@ public final class TaskInspector extends SerDes {
         if ( selfEmploymentTask.getTaskStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
                 .getSaveActiveTask()
-                .accept( new ActiveTask( selfEmploymentTask, SELF_EMPLOYMENT ) );
+                .accept( new ActiveTask(
+                        selfEmploymentTask,
+                        selfEmploymentTask.getUuid().toString(),
+                        selfEmploymentTask.getTaskStatus(),
+                        SELF_EMPLOYMENT,
+                        selfEmploymentTask.getPatruls() ) );
 
         return this.saveNotification(
                 selfEmploymentTask.getUuid(),
@@ -939,7 +1009,12 @@ public final class TaskInspector extends SerDes {
                         case ACTIVE_TASK -> Map.of( "message", "U have " + CARD_102 + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
-                                        .data( new ActiveTask( card, CARD_102, patrul.getStatus() ) )
+                                        .data( new ActiveTask(
+                                                card,
+                                                CARD_102,
+                                                patrul.getStatus(),
+                                                card.getStatus(),
+                                                card.getUUID().toString() ) )
                                         .type( CARD_102.name() )
                                         .build() );
 
@@ -962,7 +1037,12 @@ public final class TaskInspector extends SerDes {
                         case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_BODY + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
-                                        .data( new ActiveTask( eventBody, FIND_FACE_EVENT_BODY, patrul.getStatus() ) )
+                                        .data( new ActiveTask(
+                                                eventBody,
+                                                FIND_FACE_EVENT_BODY,
+                                                patrul.getStatus(),
+                                                eventBody.getStatus(),
+                                                eventBody.getUUID().toString() ) )
                                         .type( FIND_FACE_EVENT_BODY.name() )
                                         .build() );
 
@@ -985,7 +1065,12 @@ public final class TaskInspector extends SerDes {
                         case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_FACE + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
-                                        .data( new ActiveTask( eventFace, FIND_FACE_EVENT_FACE, patrul.getStatus() ) )
+                                        .data( new ActiveTask(
+                                                eventFace,
+                                                FIND_FACE_EVENT_FACE,
+                                                patrul.getStatus(),
+                                                eventFace.getStatus(),
+                                                eventFace.getUUID().toString() ) )
                                         .type( FIND_FACE_EVENT_FACE.name() )
                                         .build() );
 
@@ -1008,7 +1093,12 @@ public final class TaskInspector extends SerDes {
                         case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_CAR + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
-                                        .data( new ActiveTask( eventCar, FIND_FACE_EVENT_CAR, patrul.getStatus() ) )
+                                        .data( new ActiveTask(
+                                                eventCar,
+                                                FIND_FACE_EVENT_CAR,
+                                                patrul.getStatus(),
+                                                eventCar.getStatus(),
+                                                eventCar.getUUID().toString() ) )
                                         .type( FIND_FACE_EVENT_CAR.name() )
                                         .build() );
 
@@ -1031,7 +1121,12 @@ public final class TaskInspector extends SerDes {
                         case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_CAR + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
-                                        .data( new ActiveTask( carEvent, FIND_FACE_CAR, patrul.getStatus() ) )
+                                        .data( new ActiveTask(
+                                                carEvent,
+                                                FIND_FACE_CAR,
+                                                patrul.getStatus(),
+                                                carEvent.getStatus(),
+                                                carEvent.getUUID().toString() ) )
                                         .type( FIND_FACE_CAR.name() )
                                         .build() );
 
@@ -1054,7 +1149,12 @@ public final class TaskInspector extends SerDes {
                         case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_PERSON + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
-                                        .data( new ActiveTask( faceEvent, FIND_FACE_PERSON, patrul.getStatus() ) )
+                                        .data( new ActiveTask(
+                                                faceEvent,
+                                                FIND_FACE_PERSON,
+                                                patrul.getStatus(),
+                                                faceEvent.getStatus(),
+                                                faceEvent.getUUID().toString() ) )
                                         .type( FIND_FACE_PERSON.name() )
                                         .build() );
 
@@ -1094,7 +1194,12 @@ public final class TaskInspector extends SerDes {
                         case ACTIVE_TASK -> Map.of( "message", "U have " + SELF_EMPLOYMENT + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
-                                        .data( new ActiveTask( selfEmploymentTask, SELF_EMPLOYMENT, patrul.getStatus() ) )
+                                        .data( new ActiveTask(
+                                                selfEmploymentTask,
+                                                SELF_EMPLOYMENT,
+                                                patrul.getStatus(),
+                                                selfEmploymentTask.getTaskStatus(),
+                                                selfEmploymentTask.getUuid().toString() ) )
                                         .type( SELF_EMPLOYMENT.name() )
                                         .build() );
 

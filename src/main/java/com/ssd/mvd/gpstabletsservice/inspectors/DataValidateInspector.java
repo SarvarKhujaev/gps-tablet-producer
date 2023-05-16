@@ -2,6 +2,7 @@ package com.ssd.mvd.gpstabletsservice.inspectors;
 
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulLoginRequest;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ModelForCar;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForEscort;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
@@ -13,8 +14,8 @@ import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.entity.Point;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.entity.Point;
 import com.datastax.driver.core.Row;
 
 import java.util.function.BiPredicate;
@@ -38,6 +39,8 @@ public class DataValidateInspector extends Archive {
 
     private final Predicate< Object > checkParam = Objects::nonNull;
 
+    private final BiPredicate< Status, Status > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
+
     private final BiFunction< Object, Integer, String > concatNames = ( o, integer ) -> switch ( integer ) {
             case 0 -> String.join( " ",
                     ( ( Pinpp ) o ).getName(),
@@ -50,8 +53,6 @@ public class DataValidateInspector extends Archive {
                     ( (ModelForCar) o ).getColor() );
 
             default -> String.valueOf( o ).replaceAll( "'", "" ); };
-
-    private final BiPredicate< Status, Status > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
 
     private final BiPredicate< Object, Integer > checkRequest = ( o, value ) -> switch ( value ) {
             case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
@@ -70,6 +71,7 @@ public class DataValidateInspector extends Archive {
             case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
             case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null && ( (AndroidVersionUpdate) o ).getLink() != null;
             case 8 -> ( (TaskTimingRequest) o ).getStartDate() != null && ( (TaskTimingRequest) o ).getEndDate() != null;
+            case 9 -> this.getCheckParam().test( o ) && this.getCheckParam().test( ( (DataInfo) o ).getData() );
             default -> ( (PatrulLoginRequest) o ).getLogin() != null
                     && ( (PatrulLoginRequest) o ).getPassword() != null
                     && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };

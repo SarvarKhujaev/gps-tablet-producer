@@ -131,13 +131,14 @@ public class CarEvent {
     private UUID uuid;
 
     public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
+
     @JsonDeserialize
     private CarTotalData carTotalData;
 
     @JsonDeserialize
-    private Map<UUID, Patrul> patruls = new HashMap<>(); // the list of patruls who linked to this event
+    private Map< UUID, Patrul > patruls = new HashMap<>(); // the list of patruls who linked to this event
     @JsonDeserialize
-    private List<VictimHumans> victimHumans = new ArrayList<>();  // Jabirlanuchi inson
+    private List< VictimHumans > victimHumans = new ArrayList<>();  // Jabirlanuchi inson
     @JsonDeserialize
     private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize

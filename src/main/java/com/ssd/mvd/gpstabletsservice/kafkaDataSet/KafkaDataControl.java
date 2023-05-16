@@ -1,17 +1,17 @@
 package com.ssd.mvd.gpstabletsservice.kafkaDataSet;
 
 import com.ssd.mvd.gpstabletsservice.entity.notifications.SosNotificationForAndroid;
-import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.entity.notifications.SosNotification;
+import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.entity.notifications.Notification;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
+import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
+import com.ssd.mvd.gpstabletsservice.publisher.CustomPublisher;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
-
 import reactor.kafka.sender.SenderOptions;
 import reactor.kafka.sender.KafkaSender;
 
@@ -77,7 +77,7 @@ public final class KafkaDataControl extends SerDes {
 
     private final Consumer< ActiveTask > writeActiveTaskToKafka = activeTask -> this.getKafkaSender()
             .createOutbound()
-            .send( Mono.just( new ProducerRecord<>( this.getACTIVE_TASK(), super.serialize( activeTask ) ) ) )
+            .send( new CustomPublisher( this.getACTIVE_TASK(), super.serialize( activeTask ) ) )
             .then()
             .doOnError( super::logging )
             .doOnSuccess( success -> super.logging( "activeTask: " + activeTask.getTaskId() + " was sent at: "
@@ -85,7 +85,7 @@ public final class KafkaDataControl extends SerDes {
                     .getInspector()
                     .getGetNewDate()
                     .get() ) )
-            .subscribe();
+            .subscribe( new CustomSubscriber( 9, this.getACTIVE_TASK() ) );
 
     // отправляет уведомление андроидам радом с тем кто отправил сос сигнал
     private final BiFunction< Flux< SosNotificationForAndroid >, ApiResponseModel, Mono< ApiResponseModel > > save =
@@ -93,29 +93,22 @@ public final class KafkaDataControl extends SerDes {
                 this.getKafkaSender()
                         .createOutbound()
                         .send( sosNotificationForAndroidFlux
-                                .parallel()
+                                .parallel( 20 )
                                 .runOn( Schedulers.parallel() )
-                                .map( sosNotificationForAndroid -> {
-                                    super.logging( "Sending sos notification to: "
-                                            + sosNotificationForAndroid.getPatrulPassportSeries()
-                                            + " at: " + TimeInspector
-                                            .getInspector()
-                                            .getGetNewDate()
-                                            .get() );
-                                    return new ProducerRecord<>(
-                                            this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION(),
-                                            super.serialize( sosNotificationForAndroid ) ); } ) )
+                                .flatMap( sosNotificationForAndroid -> new CustomPublisher(
+                                        this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION(),
+                                        super.serialize( sosNotificationForAndroid ) ) ) )
                         .then()
                         .doOnError( super::logging )
                         .doOnSuccess( success -> super.logging( "All notifications were sent" ) )
-                        .subscribe();
+                        .subscribe( new CustomSubscriber( 9, this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION() ) );
                 return Mono.just( apiResponseModel ); };
 
     // отправляет уведомление фронту
     private final Function< SosNotification, String > writeSosNotificationToKafka = sosNotification -> {
             this.getKafkaSender()
                     .createOutbound()
-                    .send( Mono.just( new ProducerRecord<>( this.getSOS_TOPIC(), super.serialize( sosNotification ) ) ) )
+                    .send( new CustomPublisher( this.getSOS_TOPIC(), super.serialize( sosNotification ) ) )
                     .then()
                     .doOnError( super::logging )
                     .doOnSuccess( success -> super.logging( "sosNotification from: "
@@ -124,13 +117,13 @@ public final class KafkaDataControl extends SerDes {
                             .getInspector()
                             .getGetNewDate()
                             .get() ) )
-                    .subscribe();
+                    .subscribe( new CustomSubscriber( 9, this.getSOS_TOPIC() ) );
             return "Sos was saved successfully"; };
 
     private final Function< CarTotalData, CarTotalData > writeCarTotalDataToKafka = carTotalData -> {
             this.getKafkaSender()
                     .createOutbound()
-                    .send( Mono.just( new ProducerRecord<>( this.getCAR_TOTAL_DATA(), super.serialize( carTotalData ) ) ) )
+                    .send( new CustomPublisher( this.getCAR_TOTAL_DATA(), super.serialize( carTotalData ) ) )
                     .then()
                     .doOnError( super::logging )
                     .doOnSuccess( success -> super.logging( "Kafka got carTotalData : "
@@ -139,20 +132,20 @@ public final class KafkaDataControl extends SerDes {
                             .getInspector()
                             .getGetNewDate()
                             .get() ) )
-                    .subscribe();
+                    .subscribe( new CustomSubscriber( 9, this.getCAR_TOTAL_DATA() ) );
             return carTotalData; };
 
-    private final Consumer<Notification> writeNotificationToKafka = notification ->
+    private final Consumer< Notification > writeNotificationToKafka = notification ->
             this.getKafkaSender()
                     .createOutbound()
-                    .send( Mono.just( new ProducerRecord<>( this.getNOTIFICATION(), super.serialize( notification ) ) ) )
+                    .send( new CustomPublisher( this.getNOTIFICATION(), super.serialize( notification ) ) )
                     .then()
                     .doOnError( super::logging )
                     .doOnSuccess( success -> super.logging( "Kafka got notification: "
                             + notification.getTitle()
                             + " for: " + notification.getPassportSeries()
                             + " at: " + notification.getNotificationWasCreated() ) )
-                    .subscribe();
+                    .subscribe( new CustomSubscriber( 9, this.getNOTIFICATION() ) );
 
     public void clear () {
         instance = null;

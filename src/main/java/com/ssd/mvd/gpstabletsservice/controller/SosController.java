@@ -25,7 +25,7 @@ public class SosController extends LogInspector {
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.PATRUL_SOS_TABLE )
             .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.FINISHED ) != 0 )
-            .flatMap( row -> Mono.just( new PatrulSos( row ) ) )
+            .map( PatrulSos::new )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging )

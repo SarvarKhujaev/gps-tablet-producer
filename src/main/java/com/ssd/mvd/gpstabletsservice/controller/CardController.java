@@ -263,7 +263,7 @@ public class CardController extends SerDes {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "getDetailsOfTask" )
-    public Mono<TaskDetails> getDetailsOfTask (final TaskDetailsRequest request ) {
+    public Mono< TaskDetails > getDetailsOfTask ( final TaskDetailsRequest request ) {
         return super.getCheckParam().test( request )
                 && super.getCheckParam().test( request.getId() )
                 && super.getCheckParam().test( request.getTaskTypes() )
