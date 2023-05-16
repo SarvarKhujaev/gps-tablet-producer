@@ -47,6 +47,29 @@ public class TaskTimingStatistics { // показывает все таски с
     private TaskTypes taskTypes;
     private List< PositionInfo > positionInfoList;
 
+    private void save ( final Patrul patrul ) {
+        this.setPatrulStatus( patrul.getStatus() );
+
+        this.setCarType( patrul.getCarType() );
+        this.setCarNumber( patrul.getCarNumber() );
+        this.setOrganName( patrul.getOrganName() );
+        this.setTaskIdOfPatrul( patrul.getTaskId() );
+        this.setFatherName( patrul.getFatherName() );
+        this.setPoliceType( patrul.getPoliceType() );
+        this.setDateOfBirth( patrul.getDateOfBirth() );
+        this.setPhoneNumber( patrul.getPhoneNumber() );
+        this.setPassportNumber( patrul.getPassportNumber() );
+        this.setPatrulImageLink( patrul.getPatrulImageLink() );
+        this.setSurnameNameFatherName( patrul.getSurnameNameFatherName() );
+
+        this.setBatteryLevel( patrul.getBatteryLevel() );
+        this.setLastActiveDate( patrul.getLastActiveDate() );
+
+        this.setLatitude( patrul.getLatitude() );
+        this.setLongitude( patrul.getLongitude() );
+        this.setLatitudeOfTask( patrul.getLatitudeOfTask() );
+        this.setLongitudeOfTask( patrul.getLongitudeOfTask() ); }
+
     public TaskTimingStatistics ( final Row row, final Patrul patrul ) {
             this.setInTime( row.getBool( "inTime" ) );
             this.setTaskId( row.getString( "taskId" ) );
@@ -57,34 +80,14 @@ public class TaskTimingStatistics { // показывает все таски с
             this.setTotalTimeConsumption( row.getLong( "totalTimeConsumption" ) );
             this.setTaskTypes( TaskTypes.valueOf( row.getString("taskTypes" ) ) );
             this.setPositionInfoList( row.getList( "positionInfoList", PositionInfo.class ) );
-
-            this.setPatrulStatus( patrul.getStatus() );
-
-            this.setCarType( patrul.getCarType() );
-            this.setCarNumber( patrul.getCarNumber() );
-            this.setOrganName( patrul.getOrganName() );
-            this.setTaskIdOfPatrul( patrul.getTaskId() );
-            this.setFatherName( patrul.getFatherName() );
-            this.setPoliceType( patrul.getPoliceType() );
-            this.setDateOfBirth( patrul.getDateOfBirth() );
-            this.setPhoneNumber( patrul.getPhoneNumber() );
-            this.setPassportNumber( patrul.getPassportNumber() );
-            this.setPatrulImageLink( patrul.getPatrulImageLink() );
-            this.setSurnameNameFatherName( patrul.getSurnameNameFatherName() );
-
-            this.setBatteryLevel( patrul.getBatteryLevel() );
-            this.setLastActiveDate( patrul.getLastActiveDate() );
-
-            this.setLatitude( patrul.getLatitude() );
-            this.setLongitude( patrul.getLongitude() );
-            this.setLatitudeOfTask( patrul.getLatitudeOfTask() );
-            this.setLongitudeOfTask( patrul.getLongitudeOfTask() ); }
+            this.save( patrul ); }
 
     public TaskTimingStatistics (
             final Patrul patrul,
             final TaskTypes taskTypes,
             final PatrulStatus patrulStatus,
             final List< PositionInfo > positionInfo ) {
+        this.save( patrul );
         this.setTaskTypes( taskTypes );
         this.setDateOfComing( new Date() );
         this.setTotalTimeConsumption( 0L );

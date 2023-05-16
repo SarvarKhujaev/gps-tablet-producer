@@ -220,7 +220,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     super.convertListOfPointsToCassandra.apply( taskTimingStatistics.getPositionInfoList() ) + ");" )
                     .wasApplied();
 
-    private final Function< TaskTimingRequest, Mono<TaskTimingStatisticsList> > getTaskTimingStatistics = request ->
+    private final Function< TaskTimingRequest, Mono< TaskTimingStatisticsList > > getTaskTimingStatistics = request ->
             Flux.just( new TaskTimingStatisticsList() )
                     .flatMap( taskTimingStatisticsList -> CassandraDataControl
                             .getInstance()
@@ -239,7 +239,6 @@ public final class CassandraDataControlForTasks extends SerDes {
                             .collectList()
                             .map( taskTimingStatisticsList1 -> {
                                 taskTimingStatisticsList1
-                                        .parallelStream()
                                         .forEach( taskTimingStatistics1 -> {
                                             switch ( taskTimingStatistics1.getStatus() ) {
                                                 case LATE -> taskTimingStatisticsList.getListLate().add( taskTimingStatistics1 );
