@@ -14,6 +14,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
@@ -39,6 +40,15 @@ public class Notification {
     private Boolean wasRead;
     private TaskTypes taskTypes;
     private Date notificationWasCreated; // the date when this current notification was created
+
+    private void save ( final DataInfo dataInfo ) {
+        if (  DataValidateInspector
+                .getInstance()
+                .getCheckRequest()
+                .test( dataInfo, 9 ) ) {
+            this.setLongitudeOfTask( dataInfo.getData().getLongitude() );
+            this.setLatitudeOfTask( dataInfo.getData().getLatitude() );
+            this.setAddress( dataInfo.getData().getAddress() ); } }
 
     public Notification ( final Row row ) {
         this.setId( row.getString( "id" ) );
@@ -131,81 +141,13 @@ public class Notification {
                         : Errors.DATA_NOT_FOUND.name() ); }
 
             case FIND_FACE_CAR -> {
+                this.save( ( (CarEvent) task ).getDataInfo() );
                 this.setTaskStatus( ( (CarEvent) task ).getStatus() );
-                this.setId( ( (CarEvent) task ).getUUID().toString() );
-
-                this.setLatitudeOfTask( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) task ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) task ).getDataInfo().getData() )
-                        ? ( (CarEvent) task ).getDataInfo().getData().getLatitude() : null );
-
-                this.setLongitudeOfTask( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) task ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) task ).getDataInfo().getData() )
-                        ? ( (CarEvent) task ).getDataInfo().getData().getLongitude() : null );
-
-                this.setAddress( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) task ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) task ).getDataInfo().getData() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) task ).getDataInfo().getData().getAddress() )
-                        ? ( (CarEvent) task ).getDataInfo().getData().getAddress()
-                        : Errors.DATA_NOT_FOUND.name() ); }
+                this.setId( ( (CarEvent) task ).getUUID().toString() ); }
             case FIND_FACE_PERSON -> {
+                this.save( ( (FaceEvent) task ).getDataInfo() );
                 this.setTaskStatus( ( (FaceEvent) task ).getStatus() );
-                this.setId( ( (FaceEvent) task ).getUUID().toString() );
-
-                this.setLatitudeOfTask( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) task ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) task ).getDataInfo().getData() )
-                        ? ( (FaceEvent) task ).getDataInfo().getData().getLatitude() : null );
-
-                this.setLongitudeOfTask( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) task ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) task ).getDataInfo().getData() )
-                        ? ( (FaceEvent) task ).getDataInfo().getData().getLongitude() : null );
-
-                this.setAddress( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) task ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) task ).getDataInfo().getData() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) task ).getDataInfo().getData().getAddress() )
-                        ? ( (FaceEvent) task ).getDataInfo().getData().getAddress()
-                        : Errors.DATA_NOT_FOUND.name() ); }
+                this.setId( ( (FaceEvent) task ).getUUID().toString() ); }
 
             default -> {
                 this.setId( ( (SelfEmploymentTask) task ).getUuid().toString() );

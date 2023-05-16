@@ -232,8 +232,8 @@ public class PatrulController extends SerDes {
                                     patrul.getListOfTasks().keySet().size() * 2 )
                             .onErrorContinue( super::logging )
                             .onErrorReturn( super.getErrorResponse().get() )
-                    : super.getFunction().apply( Map.of(
-                            "message", "You have not completed any task, so try to fix this problem please",
+                    : super.getFunction().apply(
+                            Map.of( "message", "You have not completed any task, so try to fix this problem please",
                             "success", false,
                             "code", 200,
                             "data", Data.builder().build() ) ) ); }

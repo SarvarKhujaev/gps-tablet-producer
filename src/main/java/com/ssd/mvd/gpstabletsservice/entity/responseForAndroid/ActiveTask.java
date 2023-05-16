@@ -15,6 +15,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
 @lombok.Data
@@ -39,207 +40,112 @@ public class ActiveTask {
 
     private Map< UUID, Patrul > patrulList;
 
-    public ActiveTask ( final Object object, final TaskTypes taskTypes ) {
-        this.setCreatedDate( TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get() );
+    private void save ( final DataInfo dataInfo ) {
+        if (  DataValidateInspector
+                .getInstance()
+                .getCheckRequest()
+                .test( dataInfo, 9 ) ) {
+            this.setRegion( dataInfo.getData().getRegion() );
+            this.setAddress( dataInfo.getData().getAddress() );
+            this.setLatitude( dataInfo.getData().getLatitude() );
+            this.setDistrict( dataInfo.getData().getDistrict() );
+            this.setLongitude( dataInfo.getData().getLongitude() );
+            this.setCountryside( dataInfo.getData().getCountryside() ); } }
+
+    public ActiveTask (
+            final Object object,
+            final String taskId,
+            final Status status,
+            final TaskTypes taskTypes,
+            final Map< UUID, Patrul > patrulList ) {
+        this.setStatus( status );
+        this.setTaskId( taskId );
+        this.setType( taskTypes.name() );
+        this.setPatrulList( patrulList );
+        this.setCreatedDate( TimeInspector.getInspector().getGetNewDate().get() );
 
         switch ( taskTypes ) {
             case CARD_102 -> {
-                this.setType( taskTypes.name() );
                 this.setLatitude( ( (Card) object ).getLatitude() );
                 this.setLongitude( ( (Card) object ).getLongitude() );
 
-                this.setStatus( ( (Card) object ).getStatus() );
-                this.setPatrulList( ( (Card) object ).getPatruls() );
-
                 this.setAddress( ( (Card) object ).getAddress() );
                 this.setDescription( ( (Card) object ).getFabula() );
-                this.setTaskId( ( (Card) object ).getUUID().toString() );
 
                 this.setRegion( ( (Card) object ).getEventAddress().getSOblastiId() );
                 this.setDistrict( ( (Card) object ).getEventAddress().getSRegionId() );
                 this.setCountryside( ( (Card) object ).getEventAddress().getSMahallyaId() ); }
 
-            case FIND_FACE_CAR -> {
-                this.setType( taskTypes.name() );
-                this.setStatus( ( (CarEvent) object ).getStatus() );
-                this.setPatrulList( ( (CarEvent) object ).getPatruls() );
-                this.setTaskId( ( (CarEvent) object ).getUUID().toString() );
+            case FIND_FACE_CAR -> this.save( ( (CarEvent) object ).getDataInfo() );
 
-                if ( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) object ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) object ).getDataInfo().getData() ) ) {
-                    this.setRegion( ( (CarEvent) object ).getDataInfo().getData().getRegion() );
-                    this.setAddress( ( (CarEvent) object ).getDataInfo().getData().getAddress() );
-                    this.setLatitude( ( (CarEvent) object ).getDataInfo().getData().getLatitude() );
-                    this.setDistrict( ( (CarEvent) object ).getDataInfo().getData().getDistrict() );
-                    this.setLongitude( ( (CarEvent) object ).getDataInfo().getData().getLongitude() );
-                    this.setCountryside( ( (CarEvent) object ).getDataInfo().getData().getCountryside() ); } }
-            case FIND_FACE_PERSON -> {
-                this.setType( taskTypes.name() );
-                this.setStatus( ( (FaceEvent) object ).getStatus() );
-                this.setPatrulList( ( (FaceEvent) object ).getPatruls() );
-                this.setTaskId( ( (FaceEvent) object ).getUUID().toString() );
-
-                if ( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) object ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) object ).getDataInfo().getData() ) ) {
-                    this.setRegion( ( (FaceEvent) object ).getDataInfo().getData().getRegion() );
-                    this.setAddress( ( (FaceEvent) object ).getDataInfo().getData().getAddress() );
-                    this.setLatitude( ( (FaceEvent) object ).getDataInfo().getData().getLatitude() );
-                    this.setDistrict( ( (FaceEvent) object ).getDataInfo().getData().getDistrict() );
-                    this.setLongitude( ( (FaceEvent) object ).getDataInfo().getData().getLongitude() );
-                    this.setCountryside( ( (FaceEvent) object ).getDataInfo().getData().getCountryside() ); } }
+            case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
 
             case FIND_FACE_EVENT_CAR -> {
                 this.setType( TaskTypes.FIND_FACE_CAR.name() );
-                this.setStatus( ( (EventCar) object ).getStatus() );
                 this.setLatitude( ( (EventCar) object ).getLatitude() );
-                this.setPatrulList( ( (EventCar) object ).getPatruls() );
-                this.setLongitude( ( (EventCar) object ).getLongitude() );
-                this.setTaskId( ( (EventCar) object ).getUUID().toString() ); }
+                this.setLongitude( ( (EventCar) object ).getLongitude() ); }
 
             case FIND_FACE_EVENT_FACE -> {
                 this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-                this.setStatus( ( (EventFace) object ).getStatus() );
                 this.setLatitude( ( (EventFace) object ).getLatitude() );
-                this.setPatrulList( ( (EventFace) object ).getPatruls() );
-                this.setLongitude( ( (EventFace) object ).getLongitude() );
-                this.setTaskId( ( (EventFace) object ).getUUID().toString() ); }
+                this.setLongitude( ( (EventFace) object ).getLongitude() ); }
 
             case FIND_FACE_EVENT_BODY -> {
                 this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-                this.setStatus( ( (EventBody) object ).getStatus() );
                 this.setLatitude( ( (EventBody) object ).getLatitude() );
-                this.setPatrulList( ( (EventBody) object ).getPatruls() );
-                this.setLongitude( ( (EventBody) object ).getLongitude() );
-                this.setTaskId( ( (EventBody) object ).getUUID().toString() ); }
+                this.setLongitude( ( (EventBody) object ).getLongitude() ); }
 
             case SELF_EMPLOYMENT -> {
-                this.setType( taskTypes.name() );
                 this.setTitle( ( (SelfEmploymentTask) object ).getTitle() );
                 this.setAddress( ( (SelfEmploymentTask) object ).getAddress() );
-                this.setStatus( ( (SelfEmploymentTask) object ).getTaskStatus() );
-                this.setPatrulList( ( (SelfEmploymentTask) object ).getPatruls() );
-                this.setTaskId( ( (SelfEmploymentTask) object ).getUuid().toString() );
                 this.setLatitude( ( (SelfEmploymentTask) object ).getLatOfAccident() );
                 this.setDescription( ( (SelfEmploymentTask) object ).getDescription() );
                 this.setLongitude( ( (SelfEmploymentTask) object ).getLanOfAccident() ); } } }
 
-    public ActiveTask ( final Object object, final TaskTypes taskTypes, final Status status ) {
-        this.setCreatedDate( TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get() );
+    public ActiveTask ( final Object object,
+                        final TaskTypes taskTypes,
+                        final Status status,
+                        final Status taskStatus,
+                        final String taskId ) {
+        this.setTaskId( taskId );
+        this.setStatus( taskStatus );
+        this.setPatrulStatus( status );
+        this.setType( taskTypes.name() );
+        this.setCreatedDate( TimeInspector.getInspector().getGetNewDate().get() );
 
         switch ( taskTypes ) {
             case CARD_102 -> {
-                this.setPatrulStatus( status );
-                this.setType( taskTypes.name() );
-                this.setStatus( ( (Card) object ).getStatus() );
-
                 this.setLatitude( ( (Card) object ).getLatitude() );
                 this.setLongitude( ( (Card) object ).getLongitude() );
 
                 this.setAddress( ( (Card) object ).getAddress() );
                 this.setDescription( ( (Card) object ).getFabula() );
-                this.setTaskId( ( (Card) object ).getUUID().toString() );
 
                 this.setRegion( ( (Card) object ).getEventAddress().getSOblastiId() );
                 this.setDistrict( ( (Card) object ).getEventAddress().getSRegionId() );
                 this.setCountryside( ( (Card) object ).getEventAddress().getSMahallyaId() ); }
 
-            case FIND_FACE_CAR -> {
-                this.setPatrulStatus( status );
-                this.setType( taskTypes.name() );
-
-                this.setStatus( ( (CarEvent) object ).getStatus() );
-                this.setTaskId( ( (CarEvent) object ).getUUID().toString() );
-
-                if ( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) object ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (CarEvent) object ).getDataInfo().getData() ) ) {
-                    this.setRegion( ( (CarEvent) object ).getDataInfo().getData().getRegion() );
-                    this.setAddress( ( (CarEvent) object ).getDataInfo().getData().getAddress() );
-                    this.setLatitude( ( (CarEvent) object ).getDataInfo().getData().getLatitude() );
-                    this.setDistrict( ( (CarEvent) object ).getDataInfo().getData().getDistrict() );
-                    this.setLongitude( ( (CarEvent) object ).getDataInfo().getData().getLongitude() );
-                    this.setCountryside( ( (CarEvent) object ).getDataInfo().getData().getCountryside() ); } }
-
-            case FIND_FACE_PERSON -> {
-                this.setPatrulStatus( status );
-                this.setType( taskTypes.name() );
-
-                this.setStatus( ( (FaceEvent) object ).getStatus() );
-                this.setTaskId( ( (FaceEvent) object ).getUUID().toString() );
-
-                if ( DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) object ).getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .getCheckParam()
-                        .test( ( (FaceEvent) object ).getDataInfo().getData() ) ) {
-                    this.setRegion( ( (FaceEvent) object ).getDataInfo().getData().getRegion() );
-                    this.setAddress( ( (FaceEvent) object ).getDataInfo().getData().getAddress() );
-                    this.setLatitude( ( (FaceEvent) object ).getDataInfo().getData().getLatitude() );
-                    this.setDistrict( ( (FaceEvent) object ).getDataInfo().getData().getDistrict() );
-                    this.setLongitude( ( (FaceEvent) object ).getDataInfo().getData().getLongitude() );
-                    this.setCountryside( ( (FaceEvent) object ).getDataInfo().getData().getCountryside() ); } }
+            case FIND_FACE_CAR -> this.save( ( (CarEvent) object ).getDataInfo() );
+            case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
 
             case FIND_FACE_EVENT_CAR -> {
-                this.setPatrulStatus( status );
                 this.setType( TaskTypes.FIND_FACE_CAR.name() );
-                this.setStatus( ( (EventCar) object ).getStatus() );
                 this.setLatitude( ( (EventCar) object ).getLatitude() );
-                this.setPatrulList( ( (EventCar) object ).getPatruls() );
-                this.setLongitude( ( (EventCar) object ).getLongitude() );
-                this.setTaskId( ( (EventCar) object ).getUUID().toString() ); }
+                this.setLongitude( ( (EventCar) object ).getLongitude() ); }
 
             case FIND_FACE_EVENT_FACE -> {
-                this.setPatrulStatus( status );
                 this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-                this.setStatus( ( (EventFace) object ).getStatus() );
                 this.setLatitude( ( (EventFace) object ).getLatitude() );
-                this.setPatrulList( ( (EventFace) object ).getPatruls() );
-                this.setLongitude( ( (EventFace) object ).getLongitude() );
-                this.setTaskId( ( (EventFace) object ).getUUID().toString() ); }
+                this.setLongitude( ( (EventFace) object ).getLongitude() ); }
 
             case FIND_FACE_EVENT_BODY -> {
-                this.setPatrulStatus( status );
                 this.setType( TaskTypes.FIND_FACE_PERSON.name() );
-                this.setStatus( ( (EventBody) object ).getStatus() );
                 this.setLatitude( ( (EventBody) object ).getLatitude() );
-                this.setPatrulList( ( (EventBody) object ).getPatruls() );
-                this.setLongitude( ( (EventBody) object ).getLongitude() );
-                this.setTaskId( ( (EventBody) object ).getUUID().toString() ); }
+                this.setLongitude( ( (EventBody) object ).getLongitude() ); }
 
             case SELF_EMPLOYMENT -> {
-                this.setPatrulStatus( status );
-                this.setType( taskTypes.name() );
-
                 this.setTitle( ( (SelfEmploymentTask) object ).getTitle() );
                 this.setAddress( ( (SelfEmploymentTask) object ).getAddress() );
-                this.setStatus( ( (SelfEmploymentTask) object ).getTaskStatus() );
-                this.setTaskId( ( (SelfEmploymentTask) object ).getUuid().toString() );
                 this.setLatitude( ( (SelfEmploymentTask) object ).getLatOfAccident() );
                 this.setDescription( ( (SelfEmploymentTask) object ).getDescription() );
                 this.setLongitude( ( (SelfEmploymentTask) object ).getLanOfAccident() ); } } }

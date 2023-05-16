@@ -9,9 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class GpsTabletsServiceApplication {
-    public final static ApplicationContext context = SpringApplication.run( GpsTabletsServiceApplication.class );
+    public static ApplicationContext context;
 
     public static void main( final String[] args ) {
+        context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
         CassandraDataControl.getInstance().register();
         KafkaDataControl.getInstance(); }
 }

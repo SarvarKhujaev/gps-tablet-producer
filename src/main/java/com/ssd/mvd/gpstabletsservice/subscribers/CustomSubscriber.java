@@ -60,12 +60,12 @@ public final class CustomSubscriber extends LogInspector implements Subscriber< 
                         .getInstance()
                         .getUnlinkTupleOfCarFromPatrul()
                         .accept( ( (TupleOfCar) o ) ); }
-            case 2 -> {
-                super.logging( "Subscriber got TaskTimingStatistics: " + ( (TaskTimingStatistics) o ).getTaskId() );
-                CassandraDataControlForTasks
-                        .getInstance()
-                        .getSaveTaskTimeStatistics()
-                        .accept( (TaskTimingStatistics) o ); }
+            case 2 -> super.logging( "Subscriber got TaskTimingStatistics: " + o
+                    + " was applied: "
+                    + CassandraDataControlForTasks
+                    .getInstance()
+                    .getSaveTaskTimeStatistics()
+                    .apply( (TaskTimingStatistics) o ) );
             case 3 -> {
                 super.logging( "Subscriber got patruls list: " + ( ( List< Patrul > ) o ).size() );
                 ( ( List< Patrul > ) o )
@@ -87,9 +87,11 @@ public final class CustomSubscriber extends LogInspector implements Subscriber< 
             case 6 -> this.tupleTotalData.setPolygonForEscort( ( PolygonForEscort ) o );
             case 7 -> this.tupleTotalData.getPatrulList().add( ( Patrul ) o );
             case 8 -> this.tupleTotalData.getTupleOfCarList().add( ( TupleOfCar ) o );
-            default -> super.logging( "Message: " + o ); }
+            default -> System.out.println( "Message: " + o ); }
         this.subscription.request( 1 ); }
 
     @Override
-    public void onComplete() { super.logging( "Subscriber completed its work" ); }
+    public void onComplete() {
+        super.logging( "Subscriber completed its work" );
+        if ( this.value == 9 ) super.logging( "Kafka got request for topic: " + this.token ); }
 }
