@@ -73,7 +73,28 @@ public final class TaskInspector extends SerDes {
                                     patrul,
                                     status,
                                     object,
-                                    this.getGenerateText().apply( patrul, status ),
+                                    switch ( status ) {
+                                        case ACCEPTED -> patrul.getName() + " ACCEPTED his task: " + patrul.getTaskId() + " " + patrul.getTaskTypes() + " at: "
+                                                + TimeInspector
+                                                .getInspector()
+                                                .getGetNewDate()
+                                                .get();
+                                        case ARRIVED -> patrul.getName() + " : " + patrul.getTaskTypes() + " arrived task location: " + " at: "
+                                                + TimeInspector
+                                                .getInspector()
+                                                .getGetNewDate()
+                                                .get();
+                                        case ATTACHED -> patrul.getName() + " got new task: " + patrul.getTaskId() + " " + patrul.getTaskTypes();
+                                        case FINISHED -> patrul.getName() + " completed his task at: "
+                                                + TimeInspector
+                                                .getInspector()
+                                                .getGetNewDate()
+                                                .get();
+                                        default -> patrul.getName() + " has been canceled from task at: "
+                                                + TimeInspector
+                                                .getInspector()
+                                                .getGetNewDate()
+                                                .get(); },
                                     taskTypes ) ) );
             return patrul; }
 
@@ -104,29 +125,6 @@ public final class TaskInspector extends SerDes {
                     .map( positionInfos -> new TaskTimingStatistics( patrul, taskTypes, patrulStatus, positionInfos ) )
                     .subscribe( new CustomSubscriber( 2 ) );
             return patrulStatus; };
-
-    private final BiFunction< Patrul, Status, String > generateText = ( patrul, status ) -> switch ( status ) {
-            case ACCEPTED -> patrul.getName() + " ACCEPTED his task: " + patrul.getTaskId() + " " + patrul.getTaskTypes() + " at: "
-                    + TimeInspector
-                    .getInspector()
-                    .getGetNewDate()
-                    .get();
-            case ARRIVED -> patrul.getName() + " : " + patrul.getTaskTypes() + " arrived task location: " + " at: "
-                    + TimeInspector
-                    .getInspector()
-                    .getGetNewDate()
-                    .get();
-            case ATTACHED -> patrul.getName() + " got new task: " + patrul.getTaskId() + " " + patrul.getTaskTypes();
-            case FINISHED -> patrul.getName() + " completed his task at: "
-                    + TimeInspector
-                    .getInspector()
-                    .getGetNewDate()
-                    .get();
-            default -> patrul.getName() + " has been canceled from task at: "
-                    + TimeInspector
-                    .getInspector()
-                    .getGetNewDate()
-                    .get(); };
 
     public Patrul changeTaskStatus ( final Patrul patrul, final Status status, final Card card ) {
         patrul.setStatus( status );
