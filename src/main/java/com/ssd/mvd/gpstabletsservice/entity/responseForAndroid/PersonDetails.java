@@ -25,14 +25,14 @@ public class PersonDetails {
 
         this.setDate( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventBody.getCreated_date() )
                 ? eventBody.getCreated_date().getTime()
                 : null );
 
         this.setTime( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventBody.getCreated_date() )
                 ? eventBody.getCreated_date().getTime()
                 : null );
@@ -43,22 +43,22 @@ public class PersonDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventBody.getPsychologyCard() ) ) {
             this.setFIO( DataValidateInspector
                     .getInstance()
-                    .getCheckParam()
+                    .checkParam
                     .test( eventBody
                             .getPsychologyCard()
                             .getPinpp() )
                     ? DataValidateInspector
                     .getInstance()
-                    .getConcatNames()
+                    .concatNames
                     .apply( eventBody.getPsychologyCard().getPinpp(), 0 )
                     : null );
             this.setPassportSeries( DataValidateInspector
                     .getInstance()
-                    .getCheckRequest()
+                    .checkRequest
                     .test( eventBody
                             .getPsychologyCard()
                             .getPapilonData(), 6 )
@@ -76,14 +76,14 @@ public class PersonDetails {
 
         this.setDate( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventFace.getCreated_date() )
                 ? eventFace.getCreated_date().getTime()
                 : null );
 
         this.setTime( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventFace.getCreated_date() )
                 ? eventFace.getCreated_date().getTime()
                 : null );
@@ -94,23 +94,23 @@ public class PersonDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventFace.getPsychologyCard() ) ) {
             this.setFIO( DataValidateInspector
                     .getInstance()
-                    .getCheckParam()
+                    .checkParam
                     .test( eventFace
                             .getPsychologyCard()
                             .getPinpp() )
                     ? DataValidateInspector
                     .getInstance()
-                    .getConcatNames()
+                    .concatNames
                     .apply( eventFace.getPsychologyCard().getPinpp(), 0 )
                     : null );
 
             this.setPassportSeries( DataValidateInspector
                     .getInstance()
-                    .getCheckRequest()
+                    .checkRequest
                     .test( eventFace
                             .getPsychologyCard()
                             .getPapilonData(), 6 )
@@ -126,7 +126,7 @@ public class PersonDetails {
         this.setConfidence( faceEvent.getConfidence() );
         this.setTime( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( faceEvent.getCreated_date() )
                 && !faceEvent.getCreated_date().equals( "null" )
                 ? TimeInspector
@@ -137,11 +137,11 @@ public class PersonDetails {
 
         this.setIp( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( faceEvent.getDataInfo() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( faceEvent.getDataInfo().getData() )
                 ? faceEvent.getDataInfo().getData().getIp()
                 : null );
@@ -154,21 +154,21 @@ public class PersonDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( faceEvent.getPsychologyCard() ) ) {
             this.setFIO( DataValidateInspector
                     .getInstance()
-                    .getCheckParam()
+                    .checkParam
                     .test( faceEvent.getPsychologyCard().getPinpp() )
                     ? DataValidateInspector
                     .getInstance()
-                    .getConcatNames()
+                    .concatNames
                     .apply( faceEvent.getPsychologyCard().getPinpp(), 0 )
                     : null );
 
             this.setPassportSeries( DataValidateInspector
                     .getInstance()
-                    .getCheckRequest()
+                    .checkRequest
                     .test( faceEvent.getPsychologyCard().getPapilonData(), 6 )
                     ? faceEvent
                     .getPsychologyCard()

@@ -114,7 +114,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.CARTOTALDATA
                     + " WHERE gosnumber = '" + gosnumber + "';" ).one();
-            return super.getCheckParam().test( row ) ? row.getList( "violationsInformationsList", ViolationsInformation.class ) : new ArrayList<>(); };
+            return super.checkParam.test( row ) ? row.getList( "violationsInformationsList", ViolationsInformation.class ) : new ArrayList<>(); };
 
     private final Function< String, Mono< ApiResponseModel > > getWarningCarDetails = gosnumber -> super.getFunction().apply(
             Map.of( "message", "Warning car details",
@@ -130,7 +130,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             .build() ) );
 
     // возвращает запись из БД для конкретной задачи
-    private final Function< String, Mono< Row > > getRowDemo = uuid -> Mono.just(
+    private final Function< String, Mono< Row > > getRowDemo = uuid -> super.convert(
             this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.TASKS_STORAGE_TABLE
@@ -176,7 +176,7 @@ public final class CassandraDataControlForTasks extends SerDes {
 
     // если патрульному отменили задание то нужно удалить запись о времени затраченное на задачу
     private final Function< Patrul, UUID > deleteRowFromTaskTimingTable = patrul -> {
-            if ( super.getCheckParam().test( patrul.getTaskId() ) ) this.getSession().execute( "DELETE FROM "
+            if ( super.checkParam.test( patrul.getTaskId() ) ) this.getSession().execute( "DELETE FROM "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.TASKS_TIMING_TABLE
                     + " WHERE taskId = '" + patrul.getTaskId()
@@ -211,7 +211,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     taskTimingStatistics.getPatrulUUID() + ", " +
                     Math.abs( taskTimingStatistics.getTotalTimeConsumption() ) + ", " +
                     Math.abs( taskTimingStatistics.getTimeWastedToArrive() ) + ", '" +
-                    ( super.getCheckParam().test( taskTimingStatistics.getDateOfComing() )
+                    ( super.checkParam.test( taskTimingStatistics.getDateOfComing() )
                             ? taskTimingStatistics.getDateOfComing().toInstant()
                             : new Date().toInstant() ) + "', '" +
                     taskTimingStatistics.getStatus() + "', '" +
@@ -226,9 +226,9 @@ public final class CassandraDataControlForTasks extends SerDes {
                             .getInstance()
                             .getGetAllEntities()
                             .apply( CassandraTables.TABLETS, CassandraTables.TASKS_TIMING_TABLE )
-                            .filter( row -> super.getCheckParam().test( row.getTimestamp( "dateofcoming" ) ) )
-                            .filter( row -> super.getCheckTaskTimingRequest().test( request, row ) )
-                            .filter( row -> super.getCheckTaskType().test( request, row ) )
+                            .filter( row -> super.checkParam.test( row.getTimestamp( "dateofcoming" ) ) )
+                            .filter( row -> super.checkTaskTimingRequest.test( request, row ) )
+                            .filter( row -> super.checkTaskType.test( request, row ) )
                             .flatMap( row -> CassandraDataControl
                                     .getInstance()
                                     .getGetPatrulByUUID()
@@ -265,7 +265,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             this.getGetTaskTimingInfo().apply( card.getCardId().toString(), taskDetailsRequest.getPatrulUUID() ),
                             card.getReportForCardList() ) );
 
-            case FIND_FACE_CAR -> super.getCheckTable().test( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
+            case FIND_FACE_CAR -> super.checkTable.test( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
                     ? this.getGetRowDemo().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .map( carEvent -> new TaskDetails(
@@ -283,7 +283,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             this.getGetTaskTimingInfo().apply( eventCar.getId(), taskDetailsRequest.getPatrulUUID() ),
                             eventCar.getReportForCardList() ) );
 
-            case FIND_FACE_PERSON -> switch ( super.getFindTable().apply( taskDetailsRequest.getId() ) ) {
+            case FIND_FACE_PERSON -> switch ( super.findTable.apply( taskDetailsRequest.getId() ) ) {
                 case FACEPERSON -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
                         .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                         .map( faceEvent -> new TaskDetails(
@@ -376,7 +376,7 @@ public final class CassandraDataControlForTasks extends SerDes {
     private void updatePatrulSosList ( final UUID sosUUID,
                                        final UUID patrulUUID,
                                        final Status status ) {
-            Mono.just( super.getDefineNecessaryTable().apply( status ) )
+            super.convert( super.defineNecessaryTable.apply( status ) )
                     .subscribe( param -> this.getSession().execute( "UPDATE "
                             + CassandraTables.TABLETS + "."
                             + CassandraTables.PATRUL_SOS_LIST
@@ -384,7 +384,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             + " WHERE patrulUUID = " + patrulUUID + ";" ) ); }
 
     private final Consumer< PatrulSos > save = patrulSos1 -> {
-        if ( super.getCheckRequest().test( patrulSos1, 4 ) )
+        if ( super.checkRequest.test( patrulSos1, 4 ) )
             this.getSession().execute( "INSERT INTO "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.PATRUL_SOS_TABLE
@@ -411,7 +411,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .apply( patrulSos.getPatrulUUID() )
                     .flatMap( patrul -> this.getSaveSos().apply( patrulSos )
                             .flatMap( apiResponseModel -> {
-                                if ( super.getCheckEquality().test(
+                                if ( super.checkEquality.test(
                                         Status.valueOf( apiResponseModel
                                                 .getData()
                                                 .getData()
@@ -475,7 +475,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                                             .getInstance()
                                                             .getGetPatrulByUUID() )
                                                     .map( patrul1 -> {
-                                                        if ( super.getCheckParam().test( patrul1.getSos_id() )
+                                                        if ( super.checkParam.test( patrul1.getSos_id() )
                                                                 && patrul1.getSos_id().compareTo( patrulSos1.getUuid() ) == 0 )
                                                             this.getUpdatePatrulSos().accept( null, patrul1.getUuid() );
                                                         return new SosNotificationForAndroid(
@@ -487,11 +487,11 @@ public final class CassandraDataControlForTasks extends SerDes {
                                                     .publishOn( Schedulers.single() ), apiResponseModel ); } } ) );
 
     // используется в случае когда патрульный либо принимает сигнал либо отказывается
-    private final Function<SosRequest, Mono< ApiResponseModel > > updatePatrulStatusInSosTable = sosRequest -> {
+    private final Function< SosRequest, Mono< ApiResponseModel > > updatePatrulStatusInSosTable = sosRequest -> {
             // добавляем данный сос сигнал в список
             this.updatePatrulSosList( sosRequest.getSosUUID(), sosRequest.getPatrulUUID(), sosRequest.getStatus() );
             // если патрульный подтвердил данный сигнал то связымаем его с ним
-            if ( super.getCheckEquality().test( sosRequest.getStatus(), Status.ACCEPTED ) ) {
+            if ( super.checkEquality.test( sosRequest.getStatus(), Status.ACCEPTED ) ) {
                 this.getUpdatePatrulSos().accept( sosRequest.getSosUUID(), sosRequest.getPatrulUUID() );
                 // меняем статус сос сигнала на принятый
                 this.getSession().execute( "UPDATE "
@@ -511,7 +511,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.PATRUL_SOS_TABLE
                     + " SET patrulStatuses [" + sosRequest.getPatrulUUID() + "] = '"
-                    + ( super.getCheckEquality().test( sosRequest.getStatus(), Status.CANCEL )
+                    + ( super.checkEquality.test( sosRequest.getStatus(), Status.CANCEL )
                     ? Status.ATTACHED : sosRequest.getStatus() )
                     + "' WHERE uuid = " + sosRequest.getSosUUID() + ";" );
             return super.getFunction().apply( Map.of( "message", "You have changed status of sos task" ) ); };
@@ -527,8 +527,8 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.PATRUL_SOS_TABLE
                     + " WHERE uuid = " + uuid + ";" ).one();
-            return super.getCheckParam().test( row )
-                    && super.getCheckEquality().test( Status.valueOf( row.getString( "status" ) ), Status.CREATED ); };
+            return super.checkParam.test( row )
+                    && super.checkEquality.test( Status.valueOf( row.getString( "status" ) ), Status.CREATED ); };
 
     // возвращает все сос сигналы для конкретного патрульного
     private final Function< UUID, Mono< ApiResponseModel > > getAllSosForCurrentPatrul = patrulUUID -> Flux.fromStream(

@@ -87,7 +87,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
 
         super.logging( "CassandraDataControlForEscort is ready" ); }
 
-    private final Function< String, Mono<EscortTuple> > getCurrentTupleOfEscort = id -> Mono.just(
+    private final Function< String, Mono<EscortTuple> > getCurrentTupleOfEscort = id -> super.convert(
             new EscortTuple( this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.ESCORT.name() + "."
                     + CassandraTables.TUPLE_OF_ESCORT.name()
@@ -96,7 +96,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
     private final Function< String, Mono< ApiResponseModel > > deleteTupleOfEscort = id ->
             this.getGetCurrentTupleOfEscort().apply( id )
                     .flatMap( escortTuple -> {
-                        if ( super.getCheckRequest().test( escortTuple.getPatrulList(), 6 ) )
+                        if ( super.checkRequest.test( escortTuple.getPatrulList(), 6 ) )
                             escortTuple
                                     .getPatrulList()
                                     .parallelStream()
@@ -107,7 +107,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                                     + ", uuidForEscortCar = " + null
                                                     + " where uuid = " + uuid + ";" ) );
 
-                        if ( super.getCheckRequest().test( escortTuple.getTupleOfCarsList(), 6 ) )
+                        if ( super.checkRequest.test( escortTuple.getTupleOfCarsList(), 6 ) )
                             escortTuple
                                     .getTupleOfCarsList()
                                     .parallelStream()
@@ -155,7 +155,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     .subscribe( new CustomSubscriber( 0 ) );
 
     private final Function< EscortTuple, Flux< ApiResponseModel > > saveEscortTuple = escortTuple -> {
-            if ( super.getCheckParam().test( escortTuple.getUuidOfPolygon() ) )
+            if ( super.checkParam.test( escortTuple.getUuidOfPolygon() ) )
                 this.getGetCurrentPolygonForEscort()
                         .apply( escortTuple.getUuidOfPolygon().toString() )
                         .subscribe( polygonForEscort1 -> this.getSession().execute ( "UPDATE "
@@ -199,10 +199,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     .build() ); };
 
     private final Function< EscortTuple, Mono< ApiResponseModel > > updateEscortTuple = escortTuple -> {
-            if ( super.getCheckParam().test( escortTuple.getUuidOfPolygon() ) ) this.getGetCurrentTupleOfEscort()
+            if ( super.checkParam.test( escortTuple.getUuidOfPolygon() ) ) this.getGetCurrentTupleOfEscort()
                     .apply( escortTuple.getUuid().toString() )
                     .subscribe( escortTuple1 -> {
-                        if ( super.getCheckParam().test( escortTuple1.getUuidOfPolygon() ) ) this.getSession().execute (
+                        if ( super.checkParam.test( escortTuple1.getUuidOfPolygon() ) ) this.getSession().execute (
                                 "UPDATE "
                                         + CassandraTables.ESCORT + "."
                                         + CassandraTables.POLYGON_FOR_ESCORT
@@ -266,7 +266,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             "code", 201,
                             "success", false ) );
 
-    private final Function< String, Mono< PolygonForEscort > > getCurrentPolygonForEscort = id -> Mono.just(
+    private final Function< String, Mono< PolygonForEscort > > getCurrentPolygonForEscort = id -> super.convert(
             new PolygonForEscort( this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.POLYGON_FOR_ESCORT
@@ -288,7 +288,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                     "success", false ) ) );
 
     private final Function< PolygonForEscort, Mono< ApiResponseModel > > updatePolygonForEscort = polygon ->
-            this.getCheckPolygonForEscort().test( polygon )
+            this.checkPolygonForEscort.test( polygon )
                     ? this.getSession().execute( "INSERT INTO "
                             + CassandraTables.ESCORT + "."
                             + CassandraTables.POLYGON_FOR_ESCORT
@@ -363,7 +363,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
     private final BiFunction< String, TupleTotalData, Mono< TupleTotalData > > getTupleTotalData = (uuid, tupleTotalData ) ->
             this.getGetCurrentTupleOfEscort().apply( uuid )
                     .map( escortTuple -> {
-                        if ( super.getCheckParam().test( escortTuple.getUuidOfPolygon() ) )
+                        if ( super.checkParam.test( escortTuple.getUuidOfPolygon() ) )
                             this.getGetCurrentPolygonForEscort()
                                     .apply( escortTuple.getUuidOfPolygon().toString() )
                                     .subscribe( new CustomSubscriber( 6, tupleTotalData ) );
@@ -387,13 +387,13 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                         .subscribe( new CustomSubscriber( 8, tupleTotalData ) ) );
                         return tupleTotalData; } );
 
-    private final Function< UUID, Mono< TupleOfCar > > getCurrentTupleOfCar = uuid -> Mono.just(
+    private final Function< UUID, Mono< TupleOfCar > > getCurrentTupleOfCar = uuid -> super.convert(
             new TupleOfCar( this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.TUPLE_OF_CAR
                     + " where uuid = " + uuid + ";" ).one() ) );
 
-    private final Function< String, Mono< Country > > getCurrentCountry = countryName -> Mono.just(
+    private final Function< String, Mono< Country > > getCurrentCountry = countryName -> super.convert(
             new Country( this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.COUNTRIES
@@ -415,10 +415,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     + country.getUuid() + ", '"
                     + ( country.getFlag() != null && country.getFlag().length() > 0
                     ? country.getFlag() : Errors.DATA_NOT_FOUND ) + "', '"
-                    + super.getConcatNames().apply( country.getSymbol().toUpperCase(), 2 ) + "', '"
-                    + super.getConcatNames().apply( country.getCountryNameEn().toUpperCase(), 2 ) + "', '"
-                    + super.getConcatNames().apply( country.getCountryNameUz().toUpperCase(), 2 ) + "', '"
-                    + super.getConcatNames().apply( country.getCountryNameRu().toUpperCase(), 2 )
+                    + super.concatNames.apply( country.getSymbol().toUpperCase(), 2 ) + "', '"
+                    + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 2 ) + "', '"
+                    + super.concatNames.apply( country.getCountryNameUz().toUpperCase(), 2 ) + "', '"
+                    + super.concatNames.apply( country.getCountryNameRu().toUpperCase(), 2 )
                     + "') IF NOT EXISTS;" )
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", "Yangi davlat bazaga qoshildi" ) )
@@ -431,11 +431,11 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             "UPDATE "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.COUNTRIES +
-                    " SET countryNameUz = '" + super.getConcatNames().apply( country.getCountryNameUz().toUpperCase(), 2 ) + "', " +
-                    "countryNameRu = '" + super.getConcatNames().apply( country.getCountryNameRu().toUpperCase(), 2 ) + "', " +
+                    " SET countryNameUz = '" + super.concatNames.apply( country.getCountryNameUz().toUpperCase(), 2 ) + "', " +
+                    "countryNameRu = '" + super.concatNames.apply( country.getCountryNameRu().toUpperCase(), 2 ) + "', " +
                     "flag = '" + country.getFlag() + "', " +
-                    "symbol = '" + super.getConcatNames().apply( country.getSymbol().toUpperCase(), 2 ) +
-                    " countryNameEn = '" + super.getConcatNames().apply( country.getCountryNameEn().toUpperCase(), 2 ) +
+                    "symbol = '" + super.concatNames.apply( country.getSymbol().toUpperCase(), 2 ) +
+                    " countryNameEn = '" + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 2 ) +
                     "' WHERE uuid = " + country.getUuid() + " IF EXISTS;" )
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", country.getCountryNameEn() + " muvaffaqiyatli yangilandi" ) )

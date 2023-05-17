@@ -46,13 +46,13 @@ public final class CodecRegistration extends TypeCodec< Object > {
     public String format( final Object o ) throws InvalidTypeException {
         return DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( o )
                 ? innerCodec.format( this.toUDTValue( o ) ) : "NULL"; }
 
     private Object toAddress ( final UDTValue udtValue ) { return DataValidateInspector
             .getInstance()
-            .getCheckParam()
+            .checkParam
             .test( udtValue )
             ? switch ( this.value ) {
                     case 1 -> new Patrul( udtValue );
@@ -69,7 +69,7 @@ public final class CodecRegistration extends TypeCodec< Object > {
     private UDTValue toUDTValue ( final Object o ) {
         return DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( o )
                 ? switch ( this.value ) {
                     case 1 -> userType.newValue()

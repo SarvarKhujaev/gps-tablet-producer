@@ -13,7 +13,7 @@ public class TaskTotalData {
     public TaskTotalData ( final Row row ) {
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( row ) ) {
             this.setTimeWastedToArrive( row.getLong( "timewastedtoarrive" ) );
             this.setTotalTimeConsumption( row.getLong( "totaltimeconsumption" ) );

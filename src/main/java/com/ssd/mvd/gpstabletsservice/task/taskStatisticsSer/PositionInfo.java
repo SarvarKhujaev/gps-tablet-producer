@@ -14,7 +14,7 @@ public class PositionInfo {
     public PositionInfo ( final Row row ) {
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( row ) ) {
             this.setLat( row.getDouble( "latitude" ) );
             this.setLng( row.getDouble( "longitude" ) ); } }
