@@ -4,7 +4,6 @@ import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
-import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
 import com.ssd.mvd.gpstabletsservice.database.*;
 
@@ -22,7 +21,7 @@ public class SelfEmploymentController extends SerDes {
             .getInstance()
             .getGetRowDemo()
             .apply( uuid.toString() )
-            .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+            .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )

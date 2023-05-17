@@ -130,16 +130,19 @@ public class ActiveTask {
 
             case FIND_FACE_EVENT_CAR -> {
                 this.setType( TaskTypes.FIND_FACE_CAR.name() );
+                this.setAddress( ( (EventCar) object ).getAddress() );
                 this.setLatitude( ( (EventCar) object ).getLatitude() );
                 this.setLongitude( ( (EventCar) object ).getLongitude() ); }
 
             case FIND_FACE_EVENT_FACE -> {
                 this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+                this.setAddress( ( (EventFace) object ).getAddress() );
                 this.setLatitude( ( (EventFace) object ).getLatitude() );
                 this.setLongitude( ( (EventFace) object ).getLongitude() ); }
 
             case FIND_FACE_EVENT_BODY -> {
                 this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+                this.setAddress( ( (EventBody) object ).getAddress() );
                 this.setLatitude( ( (EventBody) object ).getLatitude() );
                 this.setLongitude( ( (EventBody) object ).getLongitude() ); }
 
