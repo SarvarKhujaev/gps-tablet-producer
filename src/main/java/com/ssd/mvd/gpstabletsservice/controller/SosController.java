@@ -34,10 +34,8 @@ public class SosController extends LogInspector {
     // используется планшетом чтобы проверить не отправлял ли он СОС раньше
     @MessageMapping ( value = "checkSosStatus" )
     public Mono< ApiResponseModel > checkSosStatus ( final String token ) {
-        return CassandraDataControlForTasks
-                .getInstance()
-                .getCheckSosTable()
-                .test( CassandraDataControl
+        return super.checkSosTable.test(
+                CassandraDataControl
                         .getInstance()
                         .getDecode()
                         .apply( token ) )

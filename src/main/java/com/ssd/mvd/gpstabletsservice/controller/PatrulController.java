@@ -105,7 +105,7 @@ public class PatrulController extends SerDes {
 
     @MessageMapping ( value = "LOGIN" ) // for checking login data of Patrul with his Login and password
     public Mono< ApiResponseModel > patrulLogin ( final PatrulLoginRequest patrulLoginRequest ) {
-        return super.getCheckRequest().test( patrulLoginRequest, 0 )
+        return super.checkRequest.test( patrulLoginRequest, 0 )
                 ? CassandraDataControl
                     .getInstance()
                     .getLogin()
@@ -158,7 +158,7 @@ public class PatrulController extends SerDes {
 
     @MessageMapping ( value = "findTheClosestPatruls" )
     public Flux< Patrul > findTheClosestPatruls ( final Point point ) {
-            return super.getCheckRequest().test( point, 1 )
+            return super.checkRequest.test( point, 1 )
                     ? CassandraDataControl
                     .getInstance()
                     .getFindTheClosestPatruls()
@@ -278,7 +278,7 @@ public class PatrulController extends SerDes {
 
     @MessageMapping ( value = "getPatrulStatistics" )
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( final PatrulActivityRequest request ) {
-            return super.getCheckParam().test( request.getPatrulUUID() )
+            return super.checkParam.test( request.getPatrulUUID() )
                     ? CassandraDataControl
                     .getInstance()
                     .getGetPatrulStatistics()
@@ -295,7 +295,7 @@ public class PatrulController extends SerDes {
 
     @MessageMapping ( value = "getPatrulInRadiusList" )
     public Mono< PatrulInRadiusList > getPatrulInRadiusList ( final Point point ) {
-        return super.getCheckRequest().test( point, 1 )
+        return super.checkRequest.test( point, 1 )
                 ? CassandraDataControl
                 .getInstance()
                 .getGetPatrulInRadiusList()

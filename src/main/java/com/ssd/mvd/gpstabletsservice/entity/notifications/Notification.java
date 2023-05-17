@@ -44,7 +44,7 @@ public class Notification {
     private void save ( final DataInfo dataInfo ) {
         if (  DataValidateInspector
                 .getInstance()
-                .getCheckRequest()
+                .checkRequest
                 .test( dataInfo, 9 ) ) {
             this.setLongitudeOfTask( dataInfo.getData().getLongitude() );
             this.setLatitudeOfTask( dataInfo.getData().getLatitude() );
@@ -68,7 +68,7 @@ public class Notification {
         this.setStatus( Status.valueOf( row.getString( "status" ) ) );
         this.setTaskStatus( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( row.getString( "taskStatus" ) )
                 ? Status.valueOf( row.getString( "taskStatus" ) )
                 : Status.CREATED );
@@ -101,7 +101,7 @@ public class Notification {
                 this.setLongitudeOfTask( ( (Card) task ).getLongitude() );
                 this.setAddress( DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( ( (Card) task ).getAddress() )
                         ? ( (Card) task ).getAddress()
                         : Errors.DATA_NOT_FOUND.name() ); }
@@ -113,7 +113,7 @@ public class Notification {
                 this.setLongitudeOfTask( ( (EventCar) task ).getLongitude() );
                 this.setAddress( DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( ( (EventCar) task ).getAddress() )
                         ? ( (EventCar) task ).getAddress()
                         : Errors.DATA_NOT_FOUND.name() ); }
@@ -124,7 +124,7 @@ public class Notification {
                 this.setLongitudeOfTask( ( (EventFace) task ).getLongitude() );
                 this.setAddress( DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( ( (EventFace) task ).getAddress() )
                         ? ( (EventFace) task ).getAddress()
                         : Errors.DATA_NOT_FOUND.name() ); }
@@ -135,7 +135,7 @@ public class Notification {
                 this.setLongitudeOfTask( ( (EventBody) task ).getLongitude() );
                 this.setAddress( DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( ( (EventBody) task ).getAddress() )
                         ? ( (EventBody) task ).getAddress()
                         : Errors.DATA_NOT_FOUND.name() ); }
@@ -157,7 +157,7 @@ public class Notification {
 
                 this.setAddress( DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( ( (SelfEmploymentTask) task ).getAddress() )
                         ? ( (SelfEmploymentTask) task ).getAddress()
                         : Errors.DATA_NOT_FOUND.name() ); } } }

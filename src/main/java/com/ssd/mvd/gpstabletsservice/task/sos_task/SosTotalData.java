@@ -42,7 +42,7 @@ public class SosTotalData {
         this.setSosNotificationForAndroid( sosNotificationForAndroid );
         this.setPatrulStatus( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( patrulStatus )
                 ? Status.valueOf( patrulStatus ) : Status.ATTACHED ); }
 }

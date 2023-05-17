@@ -13,6 +13,8 @@ public class Pinpp {
     private String Surname;
     private String Country;
     private String Address;
+    private String Passport;
+    private String pCitizen;
     private String District;
     private String Patronym;
     private String Cadastre;

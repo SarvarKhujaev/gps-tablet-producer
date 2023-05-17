@@ -130,7 +130,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.getCheckEquality().test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, CARD_102 );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, CARD_102 );
                 else card.getPatruls().remove( CassandraDataControlForTasks
                             .getInstance()
                             .getDeleteRowFromTaskTimingTable()
@@ -191,7 +191,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.getCheckEquality().test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_CAR );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_CAR );
                 else eventCar.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -252,7 +252,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.getCheckEquality().test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_FACE );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_FACE );
                 else eventFace.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -314,7 +314,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.getCheckEquality().test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_BODY );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_BODY );
                 else eventBody.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -372,7 +372,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.getCheckEquality().test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_CAR );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_CAR );
                 else carEvents.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -401,11 +401,11 @@ public final class TaskInspector extends SerDes {
                 patrul.setTaskId( carEvents.getUUID().toString() ); // saving card id into patrul object
                 if ( DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( carEvents.getDataInfo() )
                         && DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( carEvents.getDataInfo().getData() ) ) {
                     patrul.setLatitudeOfTask( carEvents.getDataInfo().getData().getLatitude() );
                     patrul.setLongitudeOfTask( carEvents.getDataInfo().getData().getLongitude() ); } }
@@ -440,7 +440,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.getCheckEquality().test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_PERSON );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_PERSON );
                 else faceEvent.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -469,11 +469,11 @@ public final class TaskInspector extends SerDes {
                 patrul.setTaskId( faceEvent.getUUID().toString() ); // saving card id into patrul object
                 if ( DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( faceEvent.getDataInfo() )
                         && DataValidateInspector
                         .getInstance()
-                        .getCheckParam()
+                        .checkParam
                         .test( faceEvent.getDataInfo().getData() ) ) {
                     patrul.setLatitudeOfTask( faceEvent.getDataInfo().getData().getLatitude() );
                     patrul.setLongitudeOfTask( faceEvent.getDataInfo().getData().getLongitude() ); } }
@@ -507,7 +507,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.getCheckEquality().test( status, FINISHED ) ) patrul.getListOfTasks().put( patrul.getTaskId(), ESCORT.name() );
+                if ( super.checkEquality.test( status, FINISHED ) ) patrul.getListOfTasks().put( patrul.getTaskId(), ESCORT.name() );
                 else escortTuple.getPatrulList().remove( patrul.getUuid() );
                 CassandraDataControlForEscort
                         .getInstance()
@@ -543,7 +543,7 @@ public final class TaskInspector extends SerDes {
                 selfEmploymentTask.getPatrulStatuses().putIfAbsent(
                         patrul.getPassportNumber(), this.getSaveTaskTiming().apply( patrul, SELF_EMPLOYMENT ) ); }
             case CANCEL, FINISHED -> {
-                if ( super.getCheckEquality().test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, SELF_EMPLOYMENT );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, SELF_EMPLOYMENT );
                 else selfEmploymentTask.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -599,7 +599,7 @@ public final class TaskInspector extends SerDes {
         return Flux.fromStream( patrul.getListOfTasks().keySet().stream() )
                 .skip( Long.valueOf( page ) * Long.valueOf( size ) )
                 .take( size )
-                .parallel( super.getCheckDifference().apply( size ) )
+                .parallel( super.checkDifference.apply( size ) )
                 .runOn( Schedulers.parallel() )
                 .flatMap( key -> switch ( TaskTypes.valueOf( patrul.getListOfTasks().get( key ) ) ) {
                         case CARD_102 -> CassandraDataControlForTasks

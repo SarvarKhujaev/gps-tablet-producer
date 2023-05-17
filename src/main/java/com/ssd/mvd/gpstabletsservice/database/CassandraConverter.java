@@ -78,7 +78,7 @@ public class CassandraConverter extends LogInspector {
 
     protected final Function< List< ? >, String > convertListOfPointsToCassandra = pointsList -> {
             result = "[";
-            ( super.getCheckParam().test( pointsList ) ? pointsList : new ArrayList<>() )
+            ( super.checkParam.test( pointsList ) ? pointsList : new ArrayList<>() )
                     .forEach( points -> result += this.convertClassToCassandraTable.apply( points ) + ", " );
             return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; };
 
@@ -89,7 +89,7 @@ public class CassandraConverter extends LogInspector {
 
     protected final Function< Map< UUID, String >, String > convertSosMapToCassandra = listOfTasks -> {
             temp = "{";
-            listOfTasks.keySet().forEach( key -> temp += "" + key + " : '" + listOfTasks.get( key ) + "', ");
+            listOfTasks.keySet().forEach( key -> temp += key + " : '" + listOfTasks.get( key ) + "', ");
             return temp.length() == 1 ? temp + "}" : temp.substring( 0, temp.length() - 2 ) + "}"; };
 
     private final Function< Class, Stream< Field > > getFields = object -> Arrays.stream( object.getDeclaredFields() ).toList().stream();

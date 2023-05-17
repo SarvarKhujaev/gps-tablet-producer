@@ -24,14 +24,14 @@ public class CarDetails {
 
         this.setDate( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventCar.getCreated_date() )
                 ? eventCar.getCreated_date().getTime()
                 : null );
 
         this.setTime( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventCar.getCreated_date() )
                 ? eventCar.getCreated_date().getTime()
                 : null );
@@ -42,15 +42,15 @@ public class CarDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventCar.getCarTotalData() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( eventCar.getCarTotalData().getModelForCar() ) ) {
             this.setCarNumber( DataValidateInspector
                     .getInstance()
-                    .getCheckParam()
+                    .checkParam
                     .test( eventCar
                             .getCarTotalData()
                             .getModelForCar()
@@ -65,7 +65,7 @@ public class CarDetails {
 
             this.setCarData( DataValidateInspector
                     .getInstance()
-                    .getConcatNames()
+                    .concatNames
                     .apply( eventCar
                             .getCarTotalData()
                             .getModelForCar(), 1 ) ); } }
@@ -75,7 +75,7 @@ public class CarDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( carEvent.getCreated_date() )
                 && !carEvent.getCreated_date().equals( "null" ) )
             this.setTime( ( this.date = TimeInspector
@@ -85,11 +85,11 @@ public class CarDetails {
 
         this.setIp( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( carEvent.getDataInfo() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( carEvent.getDataInfo().getData() )
                 ? carEvent.getDataInfo().getData().getIp()
                 : null );
@@ -100,17 +100,17 @@ public class CarDetails {
 
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( carEvent.getCarTotalData() )
                 && DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( carEvent
                         .getCarTotalData()
                         .getModelForCar() ) ) {
             this.setCarNumber( DataValidateInspector
                     .getInstance()
-                    .getCheckParam()
+                    .checkParam
                     .test( carEvent
                             .getCarTotalData()
                             .getModelForCar()
@@ -125,7 +125,7 @@ public class CarDetails {
 
             this.setCarData( DataValidateInspector
                     .getInstance()
-                    .getConcatNames()
+                    .concatNames
                     .apply( carEvent
                             .getCarTotalData()
                             .getModelForCar(), 1 ) ); } }

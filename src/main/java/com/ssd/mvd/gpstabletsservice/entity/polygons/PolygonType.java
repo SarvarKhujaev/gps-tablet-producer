@@ -17,7 +17,7 @@ public class PolygonType {
     public PolygonType ( final Row row ) {
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( row ) ) {
             this.setUuid( row.getUUID( "uuid" ) );
             this.setName( row.getString( "name" ) ); } }

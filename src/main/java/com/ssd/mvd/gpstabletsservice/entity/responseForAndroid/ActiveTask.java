@@ -43,7 +43,7 @@ public class ActiveTask {
     private void save ( final DataInfo dataInfo ) {
         if (  DataValidateInspector
                 .getInstance()
-                .getCheckRequest()
+                .checkRequest
                 .test( dataInfo, 9 ) ) {
             this.setRegion( dataInfo.getData().getRegion() );
             this.setAddress( dataInfo.getData().getAddress() );

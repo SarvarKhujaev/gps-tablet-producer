@@ -32,7 +32,7 @@ public class PatrulInRadiusList {
             else {
                 if ( DataValidateInspector
                         .getInstance()
-                        .getCheckDistance()
+                        .checkDistance
                         .test( maxDistance, patrul.getDistance() ) ) busyPatrulListInRadius.add( patrul );
                 else busyPatrulListOutOfRadius.add( patrul ); } } }
 }

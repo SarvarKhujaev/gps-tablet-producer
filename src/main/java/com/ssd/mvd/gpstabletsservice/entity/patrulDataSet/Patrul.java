@@ -86,7 +86,7 @@ public class Patrul {
     public Patrul ( final Row row ) {
         if ( DataValidateInspector
                 .getInstance()
-                .getCheckParam()
+                .checkParam
                 .test( row ) ) {
             this.setTaskDate( row.getTimestamp( "taskDate" ) );
             this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );

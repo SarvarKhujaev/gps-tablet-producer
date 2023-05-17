@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 public class VersionController extends LogInspector {
     @MessageMapping ( value = "saveLastVersion" )
     public Mono< ApiResponseModel > saveLastVersion ( final AndroidVersionUpdate androidVersionUpdate ) {
-        return super.getCheckRequest().test( androidVersionUpdate, 7 )
+        return super.checkRequest.test( androidVersionUpdate, 7 )
                 ? CassandraDataControl
                 .getInstance()
                 .getSaveLastVersion()
@@ -22,7 +22,7 @@ public class VersionController extends LogInspector {
 
     @MessageMapping ( value = "checkVersionForAndroid" )
     public Mono< ApiResponseModel > checkVersionForAndroid ( final String version ) {
-        return super.getCheckParam().test( version )
+        return super.checkParam.test( version )
                 ? CassandraDataControl
                 .getInstance()
                 .getCheckVersionForAndroid()

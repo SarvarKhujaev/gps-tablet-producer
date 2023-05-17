@@ -44,9 +44,9 @@ public final class UnirestController extends LogInspector {
             .context
             .getEnvironment()
             .getProperty( "variables.UNIREST_VARIABLES.CHAT_SERVICE_PREFIX" );
-    private static UnirestController serDes = new UnirestController();
 
     private final Gson gson = new Gson();
+    private static UnirestController serDes = new UnirestController();
 
     public static UnirestController getInstance () { return serDes != null ? serDes : ( serDes = new UnirestController() ); }
 

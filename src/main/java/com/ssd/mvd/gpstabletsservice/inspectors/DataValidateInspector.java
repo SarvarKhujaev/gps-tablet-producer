@@ -17,31 +17,33 @@ import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Point;
 import com.datastax.driver.core.Row;
+import reactor.core.publisher.Mono;
 
+import java.util.UUID;
 import java.util.function.BiPredicate;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Function;
 
-import java.util.Objects;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 import static java.lang.Math.cos;
 import static java.lang.Math.*;
 
-@lombok.Data
+import java.util.Objects;
+import java.util.Date;
+import java.util.List;
+
 public class DataValidateInspector extends Archive {
     private static final DataValidateInspector INSTANCE = new DataValidateInspector();
 
     public static DataValidateInspector getInstance () { return INSTANCE; }
 
-    private final Predicate< Object > checkParam = Objects::nonNull;
+    public final Predicate< Object > checkParam = Objects::nonNull;
 
-    private final BiPredicate< Status, Status > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
+    protected <T> Mono< T > convert ( final T o ) { return Mono.just( o ); }
 
-    private final BiFunction< Object, Integer, String > concatNames = ( o, integer ) -> switch ( integer ) {
+    protected final BiPredicate< Status, Status > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
+
+    public final BiFunction< Object, Integer, String > concatNames = ( o, integer ) -> switch ( integer ) {
             case 0 -> String.join( " ",
                     ( ( Pinpp ) o ).getName(),
                     ( ( Pinpp ) o ).getSurname(),
@@ -54,7 +56,7 @@ public class DataValidateInspector extends Archive {
 
             default -> String.valueOf( o ).replaceAll( "'", "" ); };
 
-    private final BiPredicate< Object, Integer > checkRequest = ( o, value ) -> switch ( value ) {
+    public final BiPredicate< Object, Integer > checkRequest = ( o, value ) -> switch ( value ) {
             case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
             case 2 -> ( (PatrulActivityRequest) o ).getStartDate() != null && ( (PatrulActivityRequest) o ).getEndDate() != null;
             case 3 -> ( (Patrul) o ).getTaskId().equals( "null" )
@@ -71,45 +73,31 @@ public class DataValidateInspector extends Archive {
             case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
             case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null && ( (AndroidVersionUpdate) o ).getLink() != null;
             case 8 -> ( (TaskTimingRequest) o ).getStartDate() != null && ( (TaskTimingRequest) o ).getEndDate() != null;
-            case 9 -> this.getCheckParam().test( o ) && this.getCheckParam().test( ( (DataInfo) o ).getData() );
+            case 9 -> this.checkParam.test( o ) && this.checkParam.test( ( (DataInfo) o ).getData() );
             default -> ( (PatrulLoginRequest) o ).getLogin() != null
                     && ( (PatrulLoginRequest) o ).getPassword() != null
                     && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };
 
-    private final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
+    protected final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
 
-    private final BiPredicate< Double, Double > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
+    public final BiPredicate< Double, Double > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
 
-    private final BiPredicate< Row, PatrulActivityRequest > checkTabletUsage = ( row, request ) ->
+    protected final BiPredicate< Row, PatrulActivityRequest > checkTabletUsage = ( row, request ) ->
             row.getTimestamp( "startedToUse" ).before( request.getEndDate() )
             && row.getTimestamp( "startedToUse" ).after( request.getStartDate() );
 
-    private final BiPredicate< TaskTimingRequest, Row > checkTaskTimingRequest = ( request, row ) ->
+    protected final BiPredicate< TaskTimingRequest, Row > checkTaskTimingRequest = ( request, row ) ->
             request.getEndDate() == null
             || request.getStartDate() == null
             || row.getTimestamp( "dateofcoming" ).after( request.getStartDate() )
             && row.getTimestamp( "dateofcoming").before( request.getEndDate() );
 
-    private final BiPredicate< TaskTimingRequest, Row > checkTaskType = (request, row ) ->
+    protected final BiPredicate< TaskTimingRequest, Row > checkTaskType = ( request, row ) ->
             request.getTaskType() == null
             || request.getTaskType().size() == 0
             || request.getTaskType().contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) );
 
-    private final BiPredicate< String, String > checkTable = ( id, tableName ) -> CassandraDataControl
-            .getInstance()
-            .getSession()
-            .execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + tableName
-                    + " where id = '" + id + "';" ).one() != null;
-
-    // определяет тип таска
-    private final Function< String, CassandraTables > findTable = id -> {
-            if ( this.getCheckTable().test( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
-            else if ( this.getCheckTable().test( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
-            else return CassandraTables.EVENTFACE; };
-
-    private final Predicate< UUID > checkSosTable = patrulUUID -> CassandraDataControl
+    protected final Predicate< UUID > checkSosTable = patrulUUID -> CassandraDataControl
             .getInstance()
             .getSession()
             .execute( "SELECT * FROM "
@@ -118,23 +106,37 @@ public class DataValidateInspector extends Archive {
                     + " WHERE patrulUUID = " + patrulUUID + ";" )
             .one() == null;
 
+    protected final BiPredicate< String, String > checkTable = ( id, tableName ) -> CassandraDataControl
+            .getInstance()
+            .getSession()
+            .execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS + "."
+                    + tableName
+                    + " WHERE id = '" + id + "';" ).one() != null;
+
+    // определяет тип таска
+    protected final Function< String, CassandraTables > findTable = id -> {
+            if ( this.checkTable.test( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
+            else if ( this.checkTable.test( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
+            else return CassandraTables.EVENTFACE; };
+
     // по статусу определяет какой параметр обновлять
-    private final Function< Status, String > defineNecessaryTable = status -> switch ( status ) {
+    protected final Function< Status, String > defineNecessaryTable = status -> switch ( status ) {
             case ATTACHED -> "attachedSosList";
             case CANCEL -> "cancelledSosList";
             case CREATED -> "sentSosList";
             default -> "acceptedSosList"; };
 
-    private final Predicate< PolygonForEscort > checkPolygonForEscort = polygon ->
+    protected final Predicate< PolygonForEscort > checkPolygonForEscort = polygon ->
             CassandraDataControlForEscort
                     .getInstance()
                     .getSession()
                     .execute( "SELECT * FROM "
-                            + CassandraTables.ESCORT.name() + "."
-                            + CassandraTables.POLYGON_FOR_ESCORT.name()
+                            + CassandraTables.ESCORT + "."
+                            + CassandraTables.POLYGON_FOR_ESCORT
                             + " where uuid = " + polygon.getUuid() + ";" ).one() != null;
 
-    private final Predicate< String > checkTracker = trackerId -> CassandraDataControl
+    protected final Predicate< String > checkTracker = trackerId -> CassandraDataControl
             .getInstance()
             .getSession()
             .execute ( "SELECT * FROM "
@@ -149,26 +151,26 @@ public class DataValidateInspector extends Archive {
                     + CassandraTables.TRACKERSID
                     + " WHERE trackersId = '" + trackerId + "';" ).one() == null;
 
-    private final Predicate< String > checkCarNumber = carNumber -> CassandraDataControl
+    protected final Predicate< String > checkCarNumber = carNumber -> CassandraDataControl
             .getInstance()
             .getSession()
             .execute( "SELECT * FROM "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.TUPLE_OF_CAR +
-                    " where gosnumber = '" + carNumber + "';" ).one() == null
+                    " WHERE gosnumber = '" + carNumber + "';" ).one() == null
             && CassandraDataControl
             .getInstance()
             .getSession()
             .execute( "SELECT * FROM "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.CARS +
-                    " where gosnumber = '" + carNumber + "';" ).one() == null;
+                    " WHERE gosnumber = '" + carNumber + "';" ).one() == null;
 
-    private final Predicate< Row > checkPatrulStatus = row -> row.getDouble( "latitude" ) > 0 && row.getDouble( "longitude" ) > 0;
+    protected final Predicate< Row > checkPatrulLocation = row -> row.getDouble( "latitude" ) > 0 && row.getDouble( "longitude" ) > 0;
 
     private static final Double p = PI / 180;
 
-    private final BiFunction< Point, Patrul, Double > calculate = ( first, second ) ->
+    protected final BiFunction< Point, Patrul, Double > calculate = ( first, second ) ->
             12742 * asin( sqrt( 0.5 - cos( ( second.getLatitude() - first.getLatitude() ) * p ) / 2
                     + cos( first.getLatitude() * p ) * cos( second.getLatitude() * p )
                     * ( 1 - cos( ( second.getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000;
