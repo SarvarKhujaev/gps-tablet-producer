@@ -44,8 +44,7 @@ public class CardController extends SerDes {
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.ACTIVE_TASK )
-            .map( row -> (ActiveTask) super.deserialize.apply(
-                    row.getString( "object" ), TaskTypes.ACTIVE_TASK ) )
+            .map( row -> super.deserialize( row.getString( "object" ), ActiveTask.class ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .sort( Comparator.comparing( ActiveTask::getCreatedDate ).reversed() )
@@ -235,7 +234,7 @@ public class CardController extends SerDes {
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.CARTOTALDATA )
-            .map( row -> (CarTotalData) super.deserialize.apply( row.getString( "object" ), TaskTypes.ESCORT ) )
+            .map( row -> super.deserialize( row.getString( "object" ), CarTotalData.class ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
@@ -281,7 +280,7 @@ public class CardController extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( request.getCard().toString() )
-                    .map( row -> ( Card ) super.deserialize.apply( row.getString( "object" ), TaskTypes.CARD_102 ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .flatMap( card -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -305,7 +304,7 @@ public class CardController extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( request.getCard().toString() )
-                    .map( row -> (EventFace) super.deserialize.apply( row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .flatMap( eventFace -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -330,7 +329,7 @@ public class CardController extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( request.getCard().toString() )
-                    .map( row -> (EventCar) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -354,7 +353,7 @@ public class CardController extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( request.getCard().toString() )
-                    .map( row -> (EventBody) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -377,7 +376,7 @@ public class CardController extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( request.getCard().toString() )
-                    .map( row -> ( CarEvent ) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .flatMap( carEvent -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
@@ -402,8 +401,8 @@ public class CardController extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( request.getCard().toString() )
-                    .map( row -> (FaceEvent) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
-                    .flatMap( card -> {
+                    .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
+                    .flatMap( faceEvent -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )
                                 .runOn( Schedulers.parallel() )
@@ -415,7 +414,7 @@ public class CardController extends SerDes {
                                         .getInstance()
                                         .changeTaskStatus( patrul,
                                                 com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED,
-                                                card ) )
+                                                faceEvent ) )
                                 .sequential()
                                 .publishOn( Schedulers.single() )
                                 .subscribe();
@@ -425,7 +424,7 @@ public class CardController extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( request.getCard().toString() )
-                    .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .flatMap( selfEmploymentTask -> {
                         Flux.fromStream( request.getPatruls().stream() )
                                 .parallel( super.getCheckDifference().apply( request.getPatruls().size() ) )

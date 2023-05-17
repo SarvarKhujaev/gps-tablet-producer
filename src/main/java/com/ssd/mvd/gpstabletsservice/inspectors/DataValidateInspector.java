@@ -153,15 +153,15 @@ public class DataValidateInspector extends Archive {
             .getInstance()
             .getSession()
             .execute( "SELECT * FROM "
-                    + CassandraTables.ESCORT.name() + "."
-                    + CassandraTables.TUPLE_OF_CAR.name() +
+                    + CassandraTables.ESCORT + "."
+                    + CassandraTables.TUPLE_OF_CAR +
                     " where gosnumber = '" + carNumber + "';" ).one() == null
             && CassandraDataControl
             .getInstance()
             .getSession()
             .execute( "SELECT * FROM "
-                    + CassandraTables.TABLETS.name() + "."
-                    + CassandraTables.CARS.name() +
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.CARS +
                     " where gosnumber = '" + carNumber + "';" ).one() == null;
 
     private final Predicate< Row > checkPatrulStatus = row -> row.getDouble( "latitude" ) > 0 && row.getDouble( "longitude" ) > 0;

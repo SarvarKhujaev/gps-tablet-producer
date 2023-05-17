@@ -120,13 +120,13 @@ public final class CassandraDataControlForTasks extends SerDes {
             Map.of( "message", "Warning car details",
                     "data", com.ssd.mvd.gpstabletsservice.entity.Data
                             .builder()
-                            .data( new CardDetails( (CarTotalData) super.deserialize.apply(
+                            .data( new CardDetails( super.deserialize(
                                     this.getSession().execute( "SELECT * FROM "
                                                     + CassandraTables.TABLETS + "."
                                                     + CassandraTables.CARTOTALDATA
                                                     + " WHERE gosnumber = '" + gosnumber + "';" )
                                             .one()
-                                            .getString( "object" ), TaskTypes.ESCORT ) ) )
+                                            .getString( "object" ), CarTotalData.class ) ) )
                             .build() ) );
 
     // возвращает запись из БД для конкретной задачи
@@ -248,7 +248,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .single();
 
     // возвращает список точек локаций, где был патрульной пока не дашел до точки назначения
-    private final BiFunction< String, UUID, TaskTotalData > getPositionInfoList = ( taskId, patrulUUID ) ->
+    private final BiFunction< String, UUID, TaskTotalData > getTaskTimingInfo = ( taskId, patrulUUID ) ->
             new TaskTotalData( this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.TASKS_TIMING_TABLE
@@ -257,67 +257,67 @@ public final class CassandraDataControlForTasks extends SerDes {
 
     private final Function< TaskDetailsRequest, Mono< TaskDetails > > getTaskDetails = taskDetailsRequest -> switch ( taskDetailsRequest.getTaskTypes() ) {
             case CARD_102 -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> ( Card ) super.deserialize.apply( row.getString( "object" ), TaskTypes.CARD_102 ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .map( card -> new TaskDetails(
                             card,
                             taskDetailsRequest.getPatrulUUID(),
                             CARD_102,
-                            this.getGetPositionInfoList().apply( card.getCardId().toString(), taskDetailsRequest.getPatrulUUID() ),
+                            this.getGetTaskTimingInfo().apply( card.getCardId().toString(), taskDetailsRequest.getPatrulUUID() ),
                             card.getReportForCardList() ) );
 
             case FIND_FACE_CAR -> super.getCheckTable().test( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
                     ? this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> ( CarEvent ) super.deserialize.apply( row.getString("object" ), FIND_FACE_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .map( carEvent -> new TaskDetails(
                             carEvent,
                             taskDetailsRequest.getPatrulUUID(),
                             FIND_FACE_CAR,
-                            this.getGetPositionInfoList().apply( carEvent.getId(), taskDetailsRequest.getPatrulUUID() ),
+                            this.getGetTaskTimingInfo().apply( carEvent.getId(), taskDetailsRequest.getPatrulUUID() ),
                             carEvent.getReportForCardList() ) )
                     : this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (EventCar) super.deserialize.apply( row.getString("object" ), FIND_FACE_EVENT_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .map( eventCar -> new TaskDetails(
                             eventCar,
                             taskDetailsRequest.getPatrulUUID(),
                             FIND_FACE_EVENT_CAR,
-                            this.getGetPositionInfoList().apply( eventCar.getId(), taskDetailsRequest.getPatrulUUID() ),
+                            this.getGetTaskTimingInfo().apply( eventCar.getId(), taskDetailsRequest.getPatrulUUID() ),
                             eventCar.getReportForCardList() ) );
 
             case FIND_FACE_PERSON -> switch ( super.getFindTable().apply( taskDetailsRequest.getId() ) ) {
                 case FACEPERSON -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                        .map( row -> (FaceEvent) super.deserialize.apply( row.getString("object" ), FIND_FACE_PERSON ) )
+                        .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                         .map( faceEvent -> new TaskDetails(
                                 faceEvent,
                                 taskDetailsRequest.getPatrulUUID(),
                                 FIND_FACE_PERSON,
-                                this.getGetPositionInfoList().apply( faceEvent.getId(), taskDetailsRequest.getPatrulUUID() ),
+                                this.getGetTaskTimingInfo().apply( faceEvent.getId(), taskDetailsRequest.getPatrulUUID() ),
                                 faceEvent.getReportForCardList() ) );
 
                 case EVENTBODY -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (EventBody) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                         .map( eventBody -> new TaskDetails(
                                 eventBody,
                                 taskDetailsRequest.getPatrulUUID(),
                                 FIND_FACE_EVENT_BODY,
-                                this.getGetPositionInfoList().apply( eventBody.getId(), taskDetailsRequest.getPatrulUUID() ),
+                                this.getGetTaskTimingInfo().apply( eventBody.getId(), taskDetailsRequest.getPatrulUUID() ),
                                 eventBody.getReportForCardList() ) );
 
                 default -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (EventFace) super.deserialize.apply( row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                         .map( eventFace -> new TaskDetails(
                                 eventFace,
                                 taskDetailsRequest.getPatrulUUID(),
                                 FIND_FACE_EVENT_FACE,
-                                this.getGetPositionInfoList().apply( eventFace.getId(), taskDetailsRequest.getPatrulUUID() ),
+                                this.getGetTaskTimingInfo().apply( eventFace.getId(), taskDetailsRequest.getPatrulUUID() ),
                                 eventFace.getReportForCardList() ) ); };
 
             default -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .map( selfEmploymentTask -> new TaskDetails(
                             selfEmploymentTask,
                             taskDetailsRequest.getPatrulUUID(),
                             SELF_EMPLOYMENT,
-                            this.getGetPositionInfoList().apply( selfEmploymentTask.getUuid().toString(), taskDetailsRequest.getPatrulUUID() ),
+                            this.getGetTaskTimingInfo().apply( selfEmploymentTask.getUuid().toString(), taskDetailsRequest.getPatrulUUID() ),
                             selfEmploymentTask.getReportForCards() ) ); };
 
     private final Function< PatrulSos, Mono< ApiResponseModel > > saveSos = patrulSos -> this.getSession().execute(
@@ -578,7 +578,7 @@ public final class CassandraDataControlForTasks extends SerDes {
 
     private final Function< TaskDetailsRequest, Mono< ActiveTask > > getActiveTask = taskDetailsRequest -> switch ( taskDetailsRequest.getTaskTypes() ) {
             case CARD_102 -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (Card) super.deserialize.apply( row.getString( "object" ), CARD_102 ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .map( card -> new ActiveTask(
                             card,
                             card.getUUID().toString(),
@@ -587,7 +587,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             card.getPatruls() ) );
 
             case FIND_FACE_CAR -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> ( CarEvent ) super.deserialize.apply( row.getString("object" ), FIND_FACE_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .map( carEvent -> new ActiveTask(
                             carEvent,
                             carEvent.getUUID().toString(),
@@ -596,7 +596,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             carEvent.getPatruls() ) );
 
             case FIND_FACE_PERSON -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (FaceEvent) super.deserialize.apply( row.getString("object" ), FIND_FACE_PERSON ) )
+                    .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .map( faceEvent -> new ActiveTask(
                             faceEvent,
                             faceEvent.getUUID().toString(),
@@ -605,7 +605,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             faceEvent.getPatruls() ) );
 
             case FIND_FACE_EVENT_CAR -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (EventCar) super.deserialize.apply( row.getString("object" ), FIND_FACE_EVENT_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .map( eventCar -> new ActiveTask(
                             eventCar,
                             eventCar.getUUID().toString(),
@@ -614,7 +614,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             eventCar.getPatruls() ) );
 
             case FIND_FACE_EVENT_BODY -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (EventBody) super.deserialize.apply( row.getString("object" ), FIND_FACE_EVENT_BODY ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .map( eventBody -> new ActiveTask(
                             eventBody,
                             eventBody.getUUID().toString(),
@@ -623,7 +623,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             eventBody.getPatruls() ) );
 
             case FIND_FACE_EVENT_FACE -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (EventFace) super.deserialize.apply( row.getString( "object" ), FIND_FACE_EVENT_FACE ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .map( eventFace -> new ActiveTask(
                             eventFace,
                             eventFace.getUUID().toString(),
@@ -632,7 +632,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             eventFace.getPatruls() ) );
 
             default -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
-                    .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), SELF_EMPLOYMENT ) )
+                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .map( selfEmploymentTask -> new ActiveTask(
                             selfEmploymentTask,
                             selfEmploymentTask.getUuid().toString(),

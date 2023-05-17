@@ -606,7 +606,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetRowDemo()
                                 .apply( key )
-                    .map( row -> ( Card ) super.deserialize.apply( row.getString( "object" ), TaskTypes.CARD_102 ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                                 .map( card -> FinishedTask
                                         .builder()
                                         .taskTypes( CARD_102 )
@@ -629,7 +629,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetRowDemo()
                                 .apply( key )
-                    .map( row -> ( CarEvent ) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                                 .map( carEvent -> FinishedTask
                                         .builder()
                                         .taskTypes( FIND_FACE_CAR )
@@ -656,7 +656,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetRowDemo()
                                 .apply( key )
-                    .map( row -> (FaceEvent) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
+                    .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                                 .map( faceEvent -> FinishedTask
                                         .builder()
                                         .taskTypes( FIND_FACE_PERSON )
@@ -683,7 +683,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetRowDemo()
                                 .apply( key )
-                    .map( row -> (EventCar) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                                 .map( eventCar -> FinishedTask
                                         .builder()
                                         .task( eventCar.getId() )
@@ -707,7 +707,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetRowDemo()
                                 .apply( key )
-                    .map( row -> (EventBody) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                                 .map( eventBody -> FinishedTask
                                         .builder()
                                         .task( eventBody.getId() )
@@ -731,7 +731,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetRowDemo()
                                 .apply( key )
-                    .map( row -> (EventFace) super.deserialize.apply( row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                                 .map( eventFace -> FinishedTask
                                         .builder()
                                         .task( eventFace.getId() )
@@ -755,7 +755,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetRowDemo()
                                 .apply( key )
-                    .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                                 .map( selfEmploymentTask -> FinishedTask
                                         .builder()
                                         .taskTypes( SELF_EMPLOYMENT )
@@ -795,7 +795,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> ( Card ) super.deserialize.apply( row.getString( "object" ), TaskTypes.CARD_102 ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .flatMap( card -> {
                         card.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
@@ -807,7 +807,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .flatMap( selfEmploymentTask -> {
                         selfEmploymentTask.getReportForCards().add( reportForCard );
                         return super.getFunction().apply(
@@ -819,7 +819,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventBody) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> {
                         eventBody.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
@@ -831,7 +831,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventFace) super.deserialize.apply( row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .flatMap( eventFace -> {
                         eventFace.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
@@ -843,7 +843,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> ( CarEvent ) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .flatMap( carEvents -> {
                         carEvents.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
@@ -855,7 +855,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (FaceEvent) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
+                    .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .flatMap( faceEvents -> {
                         faceEvents.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
@@ -866,7 +866,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventCar) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> {
                         eventCar.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
@@ -884,7 +884,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> ( Card ) super.deserialize.apply( row.getString( "object" ), TaskTypes.CARD_102 ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .flatMap( card -> super.getFunction().apply(
                             Map.of( "message", "Patrul: "
                                     + this.changeTaskStatus( patrul, status, card ).getPassportNumber()
@@ -898,7 +898,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .flatMap( selfEmploymentTask -> super.getFunction().apply(
                             Map.of( "message", "Patrul: "
                                             + this.changeTaskStatus( patrul, status, selfEmploymentTask ).getPassportNumber()
@@ -912,7 +912,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventCar) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> super.getFunction().apply(
                             Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, eventCar ).getPassportNumber()
                                             + " changed his status task to: " + status,
@@ -925,7 +925,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventFace) super.deserialize.apply( row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .flatMap( eventFace -> super.getFunction().apply(
                             Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, eventFace ).getPassportNumber()
                                             + " changed his status task to: " + status,
@@ -938,7 +938,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (FaceEvent) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
+                    .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .flatMap( faceEvents -> super.getFunction().apply(
                             Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, faceEvents )
                                             .getPassportNumber() + " changed his status task to: " + status,
@@ -951,7 +951,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> ( CarEvent ) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .flatMap( carEvents -> super.getFunction().apply(
                             Map.of( "message", "Patrul: "
                                             + this.changeTaskStatus( patrul, status, carEvents ).getPassportNumber()
@@ -978,7 +978,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventBody) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> super.getFunction().apply(
                             Map.of( "message", "Patrul: "
                                             + this.changeTaskStatus( patrul, status, eventBody ).getPassportNumber()
@@ -990,12 +990,12 @@ public final class TaskInspector extends SerDes {
 
     // по запросу проверяет какая задача дана конкретному патрульному
     // после чего возвращает краткое ( ACTIVE_TASK ), полное ( CARD_DETAILS ) или же по дефолту убирает патрульного из задачи
-    private final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = (patrul, taskTypes ) -> switch ( patrul.getTaskTypes() ) {
+    private final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = ( patrul, taskTypes ) -> switch ( patrul.getTaskTypes() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> ( Card ) super.deserialize.apply( row.getString( "object" ), TaskTypes.CARD_102 ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .flatMap( card -> super.getFunction().apply( switch ( taskTypes ) {
                         case CARD_DETAILS -> Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
@@ -1023,7 +1023,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventBody) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_BODY ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> super.getFunction().apply( switch ( taskTypes ) {
                         case CARD_DETAILS -> Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
@@ -1051,7 +1051,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventFace) super.deserialize.apply( row.getString( "object" ), TaskTypes.FIND_FACE_EVENT_FACE ) )
+                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class) )
                     .flatMap( eventFace -> super.getFunction().apply( switch ( taskTypes ) {
                         case CARD_DETAILS -> Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
@@ -1079,7 +1079,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (EventCar) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_EVENT_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> super.getFunction().apply( switch ( taskTypes ) {
                         case CARD_DETAILS -> Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
@@ -1107,7 +1107,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> ( CarEvent ) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_CAR ) )
+                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .flatMap( carEvent -> super.getFunction().apply( switch ( taskTypes ) {
                         case CARD_DETAILS -> Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
@@ -1135,7 +1135,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (FaceEvent) super.deserialize.apply( row.getString("object" ), TaskTypes.FIND_FACE_PERSON ) )
+                    .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .flatMap( faceEvent -> super.getFunction().apply( switch ( taskTypes ) {
                         case CARD_DETAILS -> Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
@@ -1181,7 +1181,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getGetRowDemo()
                     .apply( patrul.getTaskId() )
-                    .map( row -> (SelfEmploymentTask) super.deserialize.apply( row.getString("object" ), TaskTypes.SELF_EMPLOYMENT ) )
+                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .flatMap( selfEmploymentTask -> super.getFunction().apply( switch ( taskTypes ) {
                         case CARD_DETAILS -> Map.of( "message", "Your task details",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data.builder()

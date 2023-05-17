@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -83,58 +84,62 @@ public class Patrul {
             : ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
 
     public Patrul ( final Row row ) {
-        this.setTaskDate( row.getTimestamp( "taskDate" ) );
-        this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
-        this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );
-        this.setDateOfRegistration( row.getTimestamp( "dateOfRegistration" ) );
+        if ( DataValidateInspector
+                .getInstance()
+                .getCheckParam()
+                .test( row ) ) {
+            this.setTaskDate( row.getTimestamp( "taskDate" ) );
+            this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
+            this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );
+            this.setDateOfRegistration( row.getTimestamp( "dateOfRegistration" ) );
 
-        this.setDistance( row.getDouble( "distance" ) );
-        this.setLatitude( row.getDouble( "latitude" ) );
-        this.setLongitude( row.getDouble( "longitude" ) );
-        this.setLatitudeOfTask( row.getDouble( "latitudeOfTask" ) );
-        this.setLongitudeOfTask( row.getDouble( "longitudeOfTask" ) );
+            this.setDistance( row.getDouble( "distance" ) );
+            this.setLatitude( row.getDouble( "latitude" ) );
+            this.setLongitude( row.getDouble( "longitude" ) );
+            this.setLatitudeOfTask( row.getDouble( "latitudeOfTask" ) );
+            this.setLongitudeOfTask( row.getDouble( "longitudeOfTask" ) );
 
-        this.setUuid( row.getUUID( "uuid" ) );
-        this.setOrgan( row.getUUID( "organ" ) );
-        this.setSos_id( row.getUUID( "sos_id" ) );
-        this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );
-        this.setUuidForPatrulCar( row.getUUID( "uuidForPatrulCar" ) );
-        this.setUuidForEscortCar( row.getUUID( "uuidForEscortCar" ) );
+            this.setUuid( row.getUUID( "uuid" ) );
+            this.setOrgan( row.getUUID( "organ" ) );
+            this.setSos_id( row.getUUID( "sos_id" ) );
+            this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );
+            this.setUuidForPatrulCar( row.getUUID( "uuidForPatrulCar" ) );
+            this.setUuidForEscortCar( row.getUUID( "uuidForEscortCar" ) );
 
-        this.setRegionId( row.getLong( "regionId" ) );
-        this.setMahallaId( row.getLong( "mahallaId" ) );
-        this.setDistrictId( row.getLong( "districtId" ) );
-        this.setTotalActivityTime( row.getLong( "totalActivityTime" ) );
+            this.setRegionId( row.getLong( "regionId" ) );
+            this.setMahallaId( row.getLong( "mahallaId" ) );
+            this.setDistrictId( row.getLong( "districtId" ) );
+            this.setTotalActivityTime( row.getLong( "totalActivityTime" ) );
 
-        this.setInPolygon( row.getBool( "inPolygon" ) );
-        this.setBatteryLevel( row.getInt( "batteryLevel" ) );
-        this.setTuplePermission( row.getBool( "tuplePermission" ) );
+            this.setInPolygon( row.getBool( "inPolygon" ) );
+            this.setBatteryLevel( row.getInt( "batteryLevel" ) );
+            this.setTuplePermission( row.getBool( "tuplePermission" ) );
 
-        this.setName( row.getString( "name" ) );
-        this.setRank( row.getString( "rank" ) );
-        this.setEmail( row.getString( "email" ) );
-        this.setLogin( row.getString( "login" ) );
-        this.setTaskId( row.getString( "taskId" ) );
-        this.setCarType( row.getString( "carType" ) );
-        this.setSurname( row.getString( "surname" ) );
-        this.setPassword( row.getString( "password" ) );
-        this.setCarNumber( row.getString( "carNumber" ) );
-        this.setOrganName( row.getString( "organName" ) );
-        this.setRegionName( row.getString( "regionName" ) );
-        this.setPoliceType( row.getString( "policeType" ) );
-        this.setFatherName( row.getString( "fatherName" ) );
-        this.setDateOfBirth( row.getString( "dateOfBirth" ) );
-        this.setPhoneNumber( row.getString( "phoneNumber" ) );
-        this.setSpecialToken( row.getString( "specialToken" ) );
-        this.setTokenForLogin( row.getString( "tokenForLogin" ) );
-        this.setSimCardNumber( row.getString( "simCardNumber" ) );
-        this.setPassportNumber( row.getString( "passportNumber" ) );
-        this.setPatrulImageLink( row.getString( "patrulImageLink" ) );
-        this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) );
+            this.setName( row.getString( "name" ) );
+            this.setRank( row.getString( "rank" ) );
+            this.setEmail( row.getString( "email" ) );
+            this.setLogin( row.getString( "login" ) );
+            this.setTaskId( row.getString( "taskId" ) );
+            this.setCarType( row.getString( "carType" ) );
+            this.setSurname( row.getString( "surname" ) );
+            this.setPassword( row.getString( "password" ) );
+            this.setCarNumber( row.getString( "carNumber" ) );
+            this.setOrganName( row.getString( "organName" ) );
+            this.setRegionName( row.getString( "regionName" ) );
+            this.setPoliceType( row.getString( "policeType" ) );
+            this.setFatherName( row.getString( "fatherName" ) );
+            this.setDateOfBirth( row.getString( "dateOfBirth" ) );
+            this.setPhoneNumber( row.getString( "phoneNumber" ) );
+            this.setSpecialToken( row.getString( "specialToken" ) );
+            this.setTokenForLogin( row.getString( "tokenForLogin" ) );
+            this.setSimCardNumber( row.getString( "simCardNumber" ) );
+            this.setPassportNumber( row.getString( "passportNumber" ) );
+            this.setPatrulImageLink( row.getString( "patrulImageLink" ) );
+            this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) );
 
-        this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-        this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
-        this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); }
+            this.setStatus( Status.valueOf( row.getString( "status" ) ) );
+            this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
+            this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); } }
 
     public Patrul ( final UDTValue row ) {
         this.setTaskDate( row.getTimestamp( "taskDate" ) );

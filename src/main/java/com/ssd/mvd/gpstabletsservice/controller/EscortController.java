@@ -40,7 +40,7 @@ public class EscortController extends LogInspector {
             .apply( id ); }
 
     @MessageMapping ( value = "deleteEscort" )
-    public Mono< ApiResponseModel > deleteTupleOfPatrul ( final String id ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > deleteEscort ( final String id ) { return CassandraDataControlForEscort
             .getInstance()
             .getDeleteTupleOfEscort()
             .apply( id )
@@ -85,7 +85,7 @@ public class EscortController extends LogInspector {
                         .onErrorReturn( super.getErrorResponse().get() ); } ); }
 
     @MessageMapping ( value = "addNewEscort" )
-    public Flux< ApiResponseModel > addNewTupleOfPatrul ( final EscortTuple escortTuple ) { return CassandraDataControlForEscort
+    public Flux< ApiResponseModel > addNewEscort ( final EscortTuple escortTuple ) { return CassandraDataControlForEscort
             .getInstance()
             .getSaveEscortTuple()
             .apply( escortTuple )

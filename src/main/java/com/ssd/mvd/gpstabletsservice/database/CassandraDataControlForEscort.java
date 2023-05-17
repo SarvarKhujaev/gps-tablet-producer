@@ -101,7 +101,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                     .getPatrulList()
                                     .parallelStream()
                                     .forEach( uuid -> this.getSession().execute(
-                                            "UPDATE " + CassandraTables.TABLETS.name() +
+                                            "UPDATE " + CassandraTables.TABLETS +
                                                     "." + CassandraTables.PATRULS +
                                                     " SET uuidOfEscort = " + null
                                                     + ", uuidForEscortCar = " + null
@@ -115,8 +115,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                             .apply( uuid )
                                             .subscribe( tupleOfCar1 -> this.getSession().execute(
                                                     "UPDATE " +
-                                                            CassandraTables.ESCORT.name() + "."
-                                                            + CassandraTables.TUPLE_OF_CAR.name() +
+                                                            CassandraTables.ESCORT + "."
+                                                            + CassandraTables.TUPLE_OF_CAR +
                                                             " SET uuidOfEscort = " + null
                                                             + ", uuidOfPatrul = " + null
                                                             + " where uuid = " + uuid +
@@ -126,8 +126,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                 Map.of( "message", id + " was successfully deleted",
                                         "success", this.getSession()
                                                 .execute( "DELETE FROM "
-                                                        + CassandraTables.ESCORT.name() + "."
-                                                        + CassandraTables.TUPLE_OF_ESCORT.name()
+                                                        + CassandraTables.ESCORT + "."
+                                                        + CassandraTables.TUPLE_OF_ESCORT
                                                         + " where id = " + UUID.fromString( id ) + ";" )
                                                 .wasApplied() ) ); } );
 
@@ -158,8 +158,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             if ( super.getCheckParam().test( escortTuple.getUuidOfPolygon() ) )
                 this.getGetCurrentPolygonForEscort()
                         .apply( escortTuple.getUuidOfPolygon().toString() )
-                        .subscribe( polygonForEscort1 -> this.getSession()
-                                .execute ( "UPDATE "
+                        .subscribe( polygonForEscort1 -> this.getSession().execute ( "UPDATE "
                                         + CassandraTables.ESCORT + "."
                                         + CassandraTables.POLYGON_FOR_ESCORT
                                         + " SET uuidOfEscort = " + escortTuple.getUuid()
@@ -212,8 +211,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
 
             this.getLinkPatrulWithEscortCar().accept( escortTuple );
             return this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.ESCORT.name() + "."
-                            + CassandraTables.TUPLE_OF_ESCORT.name()
+                            + CassandraTables.ESCORT + "."
+                            + CassandraTables.TUPLE_OF_ESCORT
                             + "( id," +
                             " countries," +
                             " uuidOfPolygon," +
