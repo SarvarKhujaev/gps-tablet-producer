@@ -26,6 +26,7 @@ import com.ssd.mvd.gpstabletsservice.entity.polygons.Polygon;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+import com.ssd.mvd.gpstabletsservice.tuple.Points;
 import com.ssd.mvd.gpstabletsservice.entity.Point;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
@@ -34,18 +35,17 @@ import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
+import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Schedulers;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.nio.charset.StandardCharsets;
 import static java.lang.Math.*;
 
 import java.util.function.*;
 import java.time.Duration;
 import java.util.*;
-
-import com.ssd.mvd.gpstabletsservice.tuple.Points;
-import reactor.core.publisher.ParallelFlux;
-import reactor.core.scheduler.Schedulers;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @lombok.Data
 public final class CassandraDataControl extends CassandraConverter {

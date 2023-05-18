@@ -71,15 +71,16 @@ public class CassandraConverter extends LogInspector {
                     result.append( field.getName() ).append( " : " );
                     org.springframework.util.ReflectionUtils.makeAccessible( field );
                     result.append( field.get( object ) instanceof String
-                            ? "'" + ( (String) field.get( object ) ).replaceAll( "'", "" ) + "'"
+                            ? "'" + super.concatNames.apply( field.get( object ), 2 ) + "'"
                             : field.get( object ) ).append( ", " ); }
                 catch ( final IllegalAccessException e ) { super.logging( e ); } } );
             return result.substring( 0, result.length() - 2 ) + "}"; };
 
     protected final Function< List< ? >, String > convertListOfPointsToCassandra = pointsList -> {
             result = "[";
-            ( super.checkParam.test( pointsList ) ? pointsList : new ArrayList<>() )
-                    .forEach( points -> result += this.convertClassToCassandraTable.apply( points ) + ", " );
+            ( super.checkParam.test( pointsList )
+                    ? pointsList
+                    : new ArrayList<>() ).forEach( points -> result += this.convertClassToCassandraTable.apply( points ) + ", " );
             return result.length() == 1 ? result + "]" : result.substring( 0, result.length() - 2 ) + "]"; };
 
     protected final Function< Map< String, String >, String > convertMapToCassandra = listOfTasks -> {

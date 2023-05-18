@@ -15,8 +15,10 @@ public class Archive {
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
 
+    protected <T> Mono< T > convert ( final T o ) { return Mono.just( o ); }
+
     private final Function< Map< String, ? >, Mono< ApiResponseModel > > function =
-            map -> Mono.just( ApiResponseModel
+            map -> this.convert( ApiResponseModel
                     .builder() // in case of wrong login
                     .status( Status
                             .builder()
@@ -40,7 +42,7 @@ public class Archive {
             .success( false )
             .build();
 
-    private final Supplier< Mono< ApiResponseModel > > errorResponseForWrongParams = () -> Mono.just(
+    private final Supplier< Mono< ApiResponseModel > > errorResponseForWrongParams = () -> this.convert(
             ApiResponseModel
                     .builder() // in case of wrong login
                     .status( Status
@@ -52,7 +54,7 @@ public class Archive {
                     .build() );
 
     // возвращает сообзение о слишком большой задержке прихода в точку назначения
-    protected final Supplier< Mono< ApiResponseModel > > errorResponseForLateComing = () -> Mono.just(
+    protected final Supplier< Mono< ApiResponseModel > > errorResponseForLateComing = () -> this.convert(
             ApiResponseModel
                     .builder() // in case of wrong login
                     .status( Status

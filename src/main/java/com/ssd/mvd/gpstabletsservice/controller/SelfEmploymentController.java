@@ -17,11 +17,16 @@ import java.util.Map;
 @RestController
 public class SelfEmploymentController extends SerDes {
     @MessageMapping ( value = "getSelfEmployment" ) // returns the current Card
-    public Mono< SelfEmploymentTask > getSelfEmployment ( final UUID uuid ) { return CassandraDataControlForTasks
-            .getInstance()
-            .getGetRowDemo()
-            .apply( uuid.toString() )
-            .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
+    public Mono< SelfEmploymentTask > getSelfEmployment ( final String uuid ) {
+        return CassandraDataControlForTasks
+                .getInstance()
+                .getGetTask()
+                .apply( uuid )
+                .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
+                .map( selfEmploymentTask -> {
+                    selfEmploymentTask.setPatruls( null );
+                    selfEmploymentTask.setReportForCards( null );
+                    return selfEmploymentTask; } )
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )

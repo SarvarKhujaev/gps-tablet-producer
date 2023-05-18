@@ -130,7 +130,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             .build() ) );
 
     // возвращает запись из БД для конкретной задачи
-    private final Function< String, Mono< Row > > getRowDemo = uuid -> super.convert(
+    private final Function< String, Mono< Row > > getTask = uuid -> super.convert(
             this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.TASKS_STORAGE_TABLE
@@ -256,7 +256,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + " AND patruluuid = " + patrulUUID + ";" ).one() );
 
     private final Function< TaskDetailsRequest, Mono< TaskDetails > > getTaskDetails = taskDetailsRequest -> switch ( taskDetailsRequest.getTaskTypes() ) {
-            case CARD_102 -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            case CARD_102 -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .map( card -> new TaskDetails(
                             card,
@@ -266,7 +266,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             card.getReportForCardList() ) );
 
             case FIND_FACE_CAR -> super.checkTable.test( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
-                    ? this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+                    ? this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .map( carEvent -> new TaskDetails(
                             carEvent,
@@ -274,7 +274,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             FIND_FACE_CAR,
                             this.getGetTaskTimingInfo().apply( carEvent.getId(), taskDetailsRequest.getPatrulUUID() ),
                             carEvent.getReportForCardList() ) )
-                    : this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+                    : this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .map( eventCar -> new TaskDetails(
                             eventCar,
@@ -284,7 +284,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             eventCar.getReportForCardList() ) );
 
             case FIND_FACE_PERSON -> switch ( super.findTable.apply( taskDetailsRequest.getId() ) ) {
-                case FACEPERSON -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+                case FACEPERSON -> this.getGetTask().apply( taskDetailsRequest.getId() )
                         .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                         .map( faceEvent -> new TaskDetails(
                                 faceEvent,
@@ -293,7 +293,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                 this.getGetTaskTimingInfo().apply( faceEvent.getId(), taskDetailsRequest.getPatrulUUID() ),
                                 faceEvent.getReportForCardList() ) );
 
-                case EVENTBODY -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+                case EVENTBODY -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                         .map( eventBody -> new TaskDetails(
                                 eventBody,
@@ -302,7 +302,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                 this.getGetTaskTimingInfo().apply( eventBody.getId(), taskDetailsRequest.getPatrulUUID() ),
                                 eventBody.getReportForCardList() ) );
 
-                default -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+                default -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                         .map( eventFace -> new TaskDetails(
                                 eventFace,
@@ -311,7 +311,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                 this.getGetTaskTimingInfo().apply( eventFace.getId(), taskDetailsRequest.getPatrulUUID() ),
                                 eventFace.getReportForCardList() ) ); };
 
-            default -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            default -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .map( selfEmploymentTask -> new TaskDetails(
                             selfEmploymentTask,
@@ -577,7 +577,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     "acceptedSosList ) VALUES ( " + uuid + ", {}, {}, {}, {} ) IF NOT EXISTS;" );
 
     private final Function< TaskDetailsRequest, Mono< ActiveTask > > getActiveTask = taskDetailsRequest -> switch ( taskDetailsRequest.getTaskTypes() ) {
-            case CARD_102 -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            case CARD_102 -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .map( card -> new ActiveTask(
                             card,
@@ -586,7 +586,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             CARD_102,
                             card.getPatruls() ) );
 
-            case FIND_FACE_CAR -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            case FIND_FACE_CAR -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .map( carEvent -> new ActiveTask(
                             carEvent,
@@ -595,7 +595,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             FIND_FACE_CAR,
                             carEvent.getPatruls() ) );
 
-            case FIND_FACE_PERSON -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            case FIND_FACE_PERSON -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .map( faceEvent -> new ActiveTask(
                             faceEvent,
@@ -604,7 +604,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             FIND_FACE_PERSON,
                             faceEvent.getPatruls() ) );
 
-            case FIND_FACE_EVENT_CAR -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            case FIND_FACE_EVENT_CAR -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .map( eventCar -> new ActiveTask(
                             eventCar,
@@ -613,7 +613,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             FIND_FACE_EVENT_CAR,
                             eventCar.getPatruls() ) );
 
-            case FIND_FACE_EVENT_BODY -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            case FIND_FACE_EVENT_BODY -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .map( eventBody -> new ActiveTask(
                             eventBody,
@@ -622,7 +622,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             FIND_FACE_EVENT_BODY,
                             eventBody.getPatruls() ) );
 
-            case FIND_FACE_EVENT_FACE -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            case FIND_FACE_EVENT_FACE -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .map( eventFace -> new ActiveTask(
                             eventFace,
@@ -631,7 +631,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             FIND_FACE_EVENT_FACE,
                             eventFace.getPatruls() ) );
 
-            default -> this.getGetRowDemo().apply( taskDetailsRequest.getId() )
+            default -> this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .map( selfEmploymentTask -> new ActiveTask(
                             selfEmploymentTask,

@@ -16,20 +16,19 @@ import com.ssd.mvd.gpstabletsservice.tuple.PolygonForEscort;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Point;
-import com.datastax.driver.core.Row;
-import reactor.core.publisher.Mono;
 
-import java.util.UUID;
 import java.util.function.BiPredicate;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Function;
 
+import com.datastax.driver.core.Row;
 import static java.lang.Math.cos;
 import static java.lang.Math.*;
 
 import java.util.Objects;
 import java.util.Date;
+import java.util.UUID;
 import java.util.List;
 
 public class DataValidateInspector extends Archive {
@@ -38,8 +37,6 @@ public class DataValidateInspector extends Archive {
     public static DataValidateInspector getInstance () { return INSTANCE; }
 
     public final Predicate< Object > checkParam = Objects::nonNull;
-
-    protected <T> Mono< T > convert ( final T o ) { return Mono.just( o ); }
 
     protected final BiPredicate< Status, Status > checkEquality = ( o, b ) -> o.compareTo( b ) == 0;
 

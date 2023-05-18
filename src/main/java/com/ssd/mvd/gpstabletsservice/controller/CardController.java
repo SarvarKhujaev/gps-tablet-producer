@@ -278,7 +278,7 @@ public class CardController extends SerDes {
         return switch ( request.getTaskType() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( request.getCard().toString() )
                     .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .flatMap( card -> {
@@ -301,7 +301,7 @@ public class CardController extends SerDes {
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( request.getCard().toString() )
                     .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .flatMap( eventFace -> {
@@ -324,7 +324,7 @@ public class CardController extends SerDes {
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( request.getCard().toString() )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> {
@@ -347,7 +347,7 @@ public class CardController extends SerDes {
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( request.getCard().toString() )
                     .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> {
@@ -370,7 +370,7 @@ public class CardController extends SerDes {
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( request.getCard().toString() )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .flatMap( carEvent -> {
@@ -393,7 +393,7 @@ public class CardController extends SerDes {
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( request.getCard().toString() )
                     .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .flatMap( faceEvent -> {
@@ -416,7 +416,7 @@ public class CardController extends SerDes {
 
             default -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( request.getCard().toString() )
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .flatMap( selfEmploymentTask -> {
