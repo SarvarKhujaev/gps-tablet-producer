@@ -42,12 +42,17 @@ public class SelfEmploymentController extends SerDes {
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "addSelfEmployment" ) // saves new Task and link the Patrul who created it
-    public Mono< ApiResponseModel > addSelfEmployment ( final SelfEmploymentTask selfEmploymentTask ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addSelfEmployment ( final SelfEmploymentTask selfEmploymentTask ) {
+        selfEmploymentTask.setAddress( UnirestController
+                .getInstance()
+                .getGetAddressByLocation()
+                .apply( selfEmploymentTask.getLatOfAccident(), selfEmploymentTask.getLanOfAccident() ) );
+        return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
             .apply( selfEmploymentTask.getPatruls().keySet().iterator().next() )
-            .flatMap( patrul -> super.getFunction()
-                    .apply( Map.of( "message", selfEmploymentTask + " was linked to: "
+            .flatMap( patrul -> super.getFunction().apply(
+                    Map.of( "message", selfEmploymentTask + " was linked to: "
                             + TaskInspector
                             .getInstance()
                             .changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask )
