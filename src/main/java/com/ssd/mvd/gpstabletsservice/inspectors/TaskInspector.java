@@ -604,7 +604,7 @@ public final class TaskInspector extends SerDes {
                 .flatMap( key -> switch ( TaskTypes.valueOf( patrul.getListOfTasks().get( key ) ) ) {
                         case CARD_102 -> CassandraDataControlForTasks
                                 .getInstance()
-                                .getGetRowDemo()
+                                .getGetTask()
                                 .apply( key )
                     .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                                 .map( card -> FinishedTask
@@ -627,7 +627,7 @@ public final class TaskInspector extends SerDes {
 
                         case FIND_FACE_CAR -> CassandraDataControlForTasks
                                 .getInstance()
-                                .getGetRowDemo()
+                                .getGetTask()
                                 .apply( key )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                                 .map( carEvent -> FinishedTask
@@ -654,7 +654,7 @@ public final class TaskInspector extends SerDes {
 
                         case FIND_FACE_PERSON -> CassandraDataControlForTasks
                                 .getInstance()
-                                .getGetRowDemo()
+                                .getGetTask()
                                 .apply( key )
                     .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                                 .map( faceEvent -> FinishedTask
@@ -681,7 +681,7 @@ public final class TaskInspector extends SerDes {
 
                         case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                                 .getInstance()
-                                .getGetRowDemo()
+                                .getGetTask()
                                 .apply( key )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                                 .map( eventCar -> FinishedTask
@@ -705,7 +705,7 @@ public final class TaskInspector extends SerDes {
 
                         case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                                 .getInstance()
-                                .getGetRowDemo()
+                                .getGetTask()
                                 .apply( key )
                     .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                                 .map( eventBody -> FinishedTask
@@ -729,7 +729,7 @@ public final class TaskInspector extends SerDes {
 
                         case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                                 .getInstance()
-                                .getGetRowDemo()
+                                .getGetTask()
                                 .apply( key )
                     .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                                 .map( eventFace -> FinishedTask
@@ -753,7 +753,7 @@ public final class TaskInspector extends SerDes {
 
                         default -> CassandraDataControlForTasks
                                 .getInstance()
-                                .getGetRowDemo()
+                                .getGetTask()
                                 .apply( key )
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                                 .map( selfEmploymentTask -> FinishedTask
@@ -793,7 +793,7 @@ public final class TaskInspector extends SerDes {
     private final BiFunction< Patrul, ReportForCard, Mono< ApiResponseModel > > saveReportForTask = ( patrul, reportForCard ) -> switch ( patrul.getTaskTypes() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .flatMap( card -> {
@@ -805,7 +805,7 @@ public final class TaskInspector extends SerDes {
 
             case SELF_EMPLOYMENT -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .flatMap( selfEmploymentTask -> {
@@ -817,7 +817,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> {
@@ -829,7 +829,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .flatMap( eventFace -> {
@@ -841,7 +841,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .flatMap( carEvents -> {
@@ -853,7 +853,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .flatMap( faceEvents -> {
@@ -864,7 +864,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> {
@@ -882,7 +882,7 @@ public final class TaskInspector extends SerDes {
     private final BiFunction< Patrul, Status, Mono< ApiResponseModel > > changeTaskStatus = ( patrul, status ) -> switch ( patrul.getTaskTypes() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .flatMap( card -> super.getFunction().apply(
@@ -896,7 +896,7 @@ public final class TaskInspector extends SerDes {
 
             case SELF_EMPLOYMENT -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .flatMap( selfEmploymentTask -> super.getFunction().apply(
@@ -910,7 +910,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> super.getFunction().apply(
@@ -923,7 +923,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .flatMap( eventFace -> super.getFunction().apply(
@@ -936,7 +936,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .flatMap( faceEvents -> super.getFunction().apply(
@@ -949,7 +949,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .flatMap( carEvents -> super.getFunction().apply(
@@ -976,7 +976,7 @@ public final class TaskInspector extends SerDes {
 
             default -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> super.getFunction().apply(
@@ -993,7 +993,7 @@ public final class TaskInspector extends SerDes {
     private final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = ( patrul, taskTypes ) -> switch ( patrul.getTaskTypes() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                     .flatMap( card -> super.getFunction().apply( switch ( taskTypes ) {
@@ -1021,7 +1021,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> super.getFunction().apply( switch ( taskTypes ) {
@@ -1049,7 +1049,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString( "object" ), EventFace.class) )
                     .flatMap( eventFace -> super.getFunction().apply( switch ( taskTypes ) {
@@ -1077,7 +1077,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> super.getFunction().apply( switch ( taskTypes ) {
@@ -1105,7 +1105,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .flatMap( carEvent -> super.getFunction().apply( switch ( taskTypes ) {
@@ -1133,7 +1133,7 @@ public final class TaskInspector extends SerDes {
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .flatMap( faceEvent -> super.getFunction().apply( switch ( taskTypes ) {
@@ -1179,7 +1179,7 @@ public final class TaskInspector extends SerDes {
 
             case SELF_EMPLOYMENT -> CassandraDataControlForTasks
                     .getInstance()
-                    .getGetRowDemo()
+                    .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .flatMap( selfEmploymentTask -> super.getFunction().apply( switch ( taskTypes ) {

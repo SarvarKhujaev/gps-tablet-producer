@@ -36,29 +36,28 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
 
     private CassandraDataControlForEscort () {
         this.getSession().execute( "CREATE KEYSPACE IF NOT EXISTS "
-                + CassandraTables.ESCORT.name() +
+                + CassandraTables.ESCORT +
                 " WITH REPLICATION = {" +
                 "'class' : 'NetworkTopologyStrategy'," +
                 "'datacenter1':3 }" +
                 "AND DURABLE_WRITES = false;" );
 
         this.getSession().execute("CREATE TYPE IF NOT EXISTS "
-                + CassandraTables.ESCORT.name() + "."
-                + CassandraTables.POINTS_ENTITY.name()
+                + CassandraTables.ESCORT + "."
+                + CassandraTables.POINTS_ENTITY
                 + "( lat double, "
                 + "lng double, " +
                 "pointId uuid, " +
                 "pointName text );" );
 
         this.getSession().execute("CREATE TYPE IF NOT EXISTS "
-                + CassandraTables.ESCORT.name() + "."
-                + CassandraTables.POLYGON_ENTITY.name()
-                + "( lat double,"
-                + "lng double );" );
+                + CassandraTables.ESCORT + "."
+                + CassandraTables.POLYGON_ENTITY
+                + "( lat double, lng double );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.ESCORT.name() + "."
-                + CassandraTables.POLYGON_FOR_ESCORT.name()
+                + CassandraTables.ESCORT + "."
+                + CassandraTables.POLYGON_FOR_ESCORT
                 + "( uuid uuid PRIMARY KEY, " +
                 "uuidOfEscort uuid, " +
                 "name text, " +
@@ -66,13 +65,13 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                 "routeIndex int, " +
                 "totalDistance int, " +
                 "pointsList list< frozen < "
-                + CassandraTables.POINTS_ENTITY.name() + " > >, " +
+                + CassandraTables.POINTS_ENTITY + " > >, " +
                 "latlngs list< frozen < "
-                + CassandraTables.POLYGON_ENTITY.name() + " > > );" );
+                + CassandraTables.POLYGON_ENTITY + " > > );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.ESCORT.name() + "."
-                + CassandraTables.TUPLE_OF_ESCORT.name() +
+                + CassandraTables.ESCORT + "."
+                + CassandraTables.TUPLE_OF_ESCORT +
                 " ( uuid uuid PRIMARY KEY, " +
                 " countries text, " +
                 " uuidOfPolygon uuid, " +
@@ -80,18 +79,18 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                 " patrulList list< uuid > );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.ESCORT.name() + "."
-                + CassandraTables.COUNTRIES.name()
+                + CassandraTables.ESCORT + "."
+                + CassandraTables.COUNTRIES
                 + super.convertClassToCassandra.apply( Country.class )
                 + ", PRIMARY KEY ( uuid ) );" );
 
         super.logging( "CassandraDataControlForEscort is ready" ); }
 
-    private final Function< String, Mono<EscortTuple> > getCurrentTupleOfEscort = id -> super.convert(
+    private final Function< String, Mono< EscortTuple > > getCurrentTupleOfEscort = id -> super.convert(
             new EscortTuple( this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.ESCORT.name() + "."
-                    + CassandraTables.TUPLE_OF_ESCORT.name()
-                    + " where id = " + UUID.fromString( id ) + ";" ).one() ) );
+                    + CassandraTables.ESCORT + "."
+                    + CassandraTables.TUPLE_OF_ESCORT
+                    + " WHERE id = " + UUID.fromString( id ) + ";" ).one() ) );
 
     private final Function< String, Mono< ApiResponseModel > > deleteTupleOfEscort = id ->
             this.getGetCurrentTupleOfEscort().apply( id )
@@ -105,7 +104,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                                     "." + CassandraTables.PATRULS +
                                                     " SET uuidOfEscort = " + null
                                                     + ", uuidForEscortCar = " + null
-                                                    + " where uuid = " + uuid + ";" ) );
+                                                    + " WHERE uuid = " + uuid + ";" ) );
 
                         if ( super.checkRequest.test( escortTuple.getTupleOfCarsList(), 6 ) )
                             escortTuple
@@ -119,8 +118,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                                             + CassandraTables.TUPLE_OF_CAR +
                                                             " SET uuidOfEscort = " + null
                                                             + ", uuidOfPatrul = " + null
-                                                            + " where uuid = " + uuid +
-                                                            " and trackerid = '" + tupleOfCar1.getTrackerId() + "';" ) ) );
+                                                            + " WHERE uuid = " + uuid +
+                                                            " AND trackerid = '" + tupleOfCar1.getTrackerId() + "';" ) ) );
 
                         return super.getFunction().apply(
                                 Map.of( "message", id + " was successfully deleted",
@@ -128,7 +127,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                                 .execute( "DELETE FROM "
                                                         + CassandraTables.ESCORT + "."
                                                         + CassandraTables.TUPLE_OF_ESCORT
-                                                        + " where id = " + UUID.fromString( id ) + ";" )
+                                                        + " WHERE id = " + UUID.fromString( id ) + ";" )
                                                 .wasApplied() ) ); } );
 
     private final Consumer< EscortTuple > linkPatrulWithEscortCar = escortTuple ->
@@ -226,9 +225,9 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     .wasApplied()
                     ? super.getFunction().apply( Map.of( "message", escortTuple.getUuid() + " was updated successfully" ) )
                     : super.getFunction().apply(
-                    Map.of( "message", escortTuple.getUuid() + " does not exists",
-                            "code", 201,
-                            "success", false ) ); };
+                            Map.of( "message", escortTuple.getUuid() + " does not exists",
+                                    "code", 201,
+                                    "success", false ) ); };
 
     private final Function<PolygonForEscort, Mono< ApiResponseModel > > savePolygonForEscort = polygon ->
             this.getSession().execute( "INSERT INTO "
@@ -270,7 +269,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             new PolygonForEscort( this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.POLYGON_FOR_ESCORT
-                    + " where uuid = " + UUID.fromString( id ) + ";" ).one() ) );
+                    + " WHERE uuid = " + UUID.fromString( id ) + ";" ).one() ) );
 
     private final Function< String, Mono< ApiResponseModel > > deletePolygonForEscort = id ->
             this.getGetCurrentPolygonForEscort().apply( id )
@@ -280,7 +279,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                     "success", this.getSession().execute( "DELETE FROM "
                                                     + CassandraTables.ESCORT + "."
                                                     + CassandraTables.POLYGON_FOR_ESCORT
-                                                    + " where uuid = " + UUID.fromString( id ) + ";" )
+                                                    + " WHERE uuid = " + UUID.fromString( id ) + ";" )
                                             .wasApplied() ) )
                             : super.getFunction().apply(
                             Map.of( "message", id + " cannot be removed. cause it is linked to Escort",
@@ -312,19 +311,19 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             + super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() ) + ");" )
                     .wasApplied()
                     ? super.getFunction().apply(
-                    Map.of( "message", "Polygon was updated successfully",
-                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                    .builder()
-                                    .type( polygon.getUuid().toString() )
-                                    .build() ) )
+                            Map.of( "message", "Polygon was updated successfully",
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .type( polygon.getUuid().toString() )
+                                            .build() ) )
                     : super.getFunction().apply(
-                    Map.of( "message", "This polygon has already been saved",
-                            "code", 201,
-                            "success", false ) )
+                            Map.of( "message", "This polygon has already been saved",
+                                    "code", 201,
+                                    "success", false ) )
                     : super.getFunction().apply(
-                    Map.of( "message", "This polygon does not exists. so u cannot update it",
-                            "code", 201,
-                            "success", false ) );
+                            Map.of( "message", "This polygon does not exists. so u cannot update it",
+                                    "code", 201,
+                                    "success", false ) );
 
     private final Consumer<TupleOfCar> unlinkTupleOfCarFromPatrul = tupleOfCar ->
             this.getSession().execute(
@@ -354,11 +353,11 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             tupleOfCar.getAverageFuelConsumption() + ");" )
                     .wasApplied()
                     ? super.getFunction().apply(
-                    Map.of( "message", "Car" + tupleOfCar.getGosNumber() + " was updated successfully" ) )
+                            Map.of( "message", "Car" + tupleOfCar.getGosNumber() + " was updated successfully" ) )
                     : super.getFunction().apply(
-                    Map.of( "message", "This car does not exists",
-                            "code", 201,
-                            "success", false ) );
+                            Map.of( "message", "This car does not exists",
+                                    "code", 201,
+                                    "success", false ) );
 
     private final BiFunction< String, TupleTotalData, Mono< TupleTotalData > > getTupleTotalData = (uuid, tupleTotalData ) ->
             this.getGetCurrentTupleOfEscort().apply( uuid )
@@ -391,7 +390,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             new TupleOfCar( this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.TUPLE_OF_CAR
-                    + " where uuid = " + uuid + ";" ).one() ) );
+                    + " WHERE uuid = " + uuid + ";" ).one() ) );
 
     private final Function< String, Mono< Country > > getCurrentCountry = countryName -> super.convert(
             new Country( this.getSession().execute( "SELECT * FROM "
@@ -403,7 +402,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             this.getSession().execute ( "DELETE FROM "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.COUNTRIES
-                    + " where uuid = " + UUID.fromString( countryName ) + ";" );
+                    + " WHERE uuid = " + UUID.fromString( countryName ) + ";" );
             return super.getFunction().apply( Map.of( "message", countryName + " bazadan ochirildi" ) ); };
 
     private final Function< Country, Mono< ApiResponseModel > > saveNewCountry = country -> this.getSession().execute(
@@ -423,9 +422,9 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", "Yangi davlat bazaga qoshildi" ) )
             : super.getFunction().apply(
-            Map.of( "message", "This country has already been inserted",
-                    "code", 201,
-                    "success", false ) );
+                    Map.of( "message", "This country has already been inserted",
+                            "code", 201,
+                            "success", false ) );
 
     private final Function< Country, Mono< ApiResponseModel > > update = country -> this.getSession().execute(
             "UPDATE "
@@ -440,7 +439,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", country.getCountryNameEn() + " muvaffaqiyatli yangilandi" ) )
             : super.getFunction().apply(
-            Map.of( "message", "This country has not been inserted yet",
-                    "code", 201,
-                    "success", false ) );
+                    Map.of( "message", "This country has not been inserted yet",
+                            "code", 201,
+                            "success", false ) );
 }
