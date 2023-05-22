@@ -1237,35 +1237,36 @@ public final class CassandraDataControl extends CassandraConverter {
                 + patrul.getSimCardNumber() + "', "
                 + patrul.getTotalActivityTime() + ");" ).isDone(); };
 
-    private final Function< Patrul, TabletUsage > checkTableUsage = patrul -> new TabletUsage(
-            this.getSession().execute( "SELECT * FROM "
+    private final Function< Patrul, TabletUsage > checkTableUsage = patrul -> {
+            final Row row = this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.TABLETS_USAGE_TABLE
                     + " WHERE uuidOfPatrul = " + patrul.getUuid()
-                    + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one() );
+                    + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one();
+            return super.checkParam.test( row ) ? new TabletUsage( row ) : null; };
 
-    private final BiConsumer< Patrul, Status > updateStatus = ( patrul, status ) ->
-            super.convert( this.getSession().execute ( "SELECT * FROM "
-                            + CassandraTables.TABLETS + "."
-                            + CassandraTables.TABLETS_USAGE_TABLE
-                            + " WHERE uuidOfPatrul = " + patrul.getUuid()
-                            + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one() )
-                    .map( row -> this.getSession().execute( "UPDATE "
-                            + CassandraTables.TABLETS + "."
-                            + CassandraTables.TABLETS_USAGE_TABLE
-                            + " SET lastActiveDate = '" + TimeInspector
-                            .getInspector()
-                            .getGetNewDate()
-                            .get().toInstant() + "'"
-                            + ( status.compareTo( LOGOUT ) == 0
-                            ? ", totalActivityTime = " + abs( TimeInspector
-                            .getInspector()
-                            .getGetTimeDifferenceInSeconds()
-                            .apply( row.getTimestamp( "startedToUse" ).toInstant() ) )
-                            : "" )
-                            + " WHERE uuidOfPatrul = " + patrul.getUuid()
-                            + " AND simCardNumber = '" + row.getString( "simCardNumber" ) + "';" ) )
-                    .subscribe( new CustomSubscriber( 5 ) );
+    private final BiConsumer< Patrul, Status > updateStatus = ( patrul, status ) -> {
+            final Row row = this.getSession().execute ( "SELECT * FROM "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.TABLETS_USAGE_TABLE
+                    + " WHERE uuidOfPatrul = " + patrul.getUuid()
+                    + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one();
+
+            if ( super.checkParam.test( row ) ) this.getSession().execute( "UPDATE "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.TABLETS_USAGE_TABLE
+                    + " SET lastActiveDate = '" + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get().toInstant() + "'"
+                    + ( status.compareTo( LOGOUT ) == 0
+                    ? ", totalActivityTime = " + abs( TimeInspector
+                    .getInspector()
+                    .getGetTimeDifferenceInSeconds()
+                    .apply( row.getTimestamp( "startedToUse" ).toInstant() ) )
+                    : "" )
+                    + " WHERE uuidOfPatrul = " + patrul.getUuid()
+                    + " AND simCardNumber = '" + row.getString( "simCardNumber" ) + "';" ); };
 
     private final Function< String, Row > checkLogin = login ->
             this.getSession().execute( "SELECT * FROM "
