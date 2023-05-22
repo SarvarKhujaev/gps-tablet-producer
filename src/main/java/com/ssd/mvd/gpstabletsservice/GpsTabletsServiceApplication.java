@@ -1,13 +1,11 @@
 package com.ssd.mvd.gpstabletsservice;
 
-import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.util.UUID;
 
 @SpringBootApplication
 public class GpsTabletsServiceApplication {
