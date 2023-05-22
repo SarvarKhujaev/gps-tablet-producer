@@ -1,14 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.extern.jackson.Jacksonized;
 import java.util.*;
 
 @lombok.Data
+@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 public class SelfEmploymentTask {
@@ -27,6 +29,7 @@ public class SelfEmploymentTask {
 
     public UUID getUuid() { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
 
+    @JsonDeserialize
     private List< String > images;
     @JsonDeserialize
     private List< ReportForCard > reportForCards = new ArrayList<>();

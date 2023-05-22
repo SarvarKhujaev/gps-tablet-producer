@@ -137,7 +137,7 @@ public final class UnirestController extends LogInspector {
                     Address[].class )
                 .get( 0 )
                 .getDisplay_name();
-            } catch ( Exception e ) {
+            } catch ( final Exception e ) {
                 super.logging( e );
                 return Errors.DATA_NOT_FOUND.name(); } };
 
