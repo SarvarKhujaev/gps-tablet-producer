@@ -53,10 +53,7 @@ public final class TaskInspector extends SerDes {
             final TaskTypes taskTypes ) {
             CassandraDataControlForTasks
                     .getInstance()
-                    .saveTask( uuid,
-                            taskId,
-                            taskTypes,
-                            object );
+                    .saveTask( uuid, taskId, taskTypes, object );
 
             CassandraDataControl
                     .getInstance()

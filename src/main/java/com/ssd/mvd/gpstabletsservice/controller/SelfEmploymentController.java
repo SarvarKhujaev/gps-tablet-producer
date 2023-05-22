@@ -11,7 +11,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Mono;
-import java.util.UUID;
 import java.util.Map;
 
 @RestController
@@ -43,10 +42,11 @@ public class SelfEmploymentController extends SerDes {
 
     @MessageMapping ( value = "addSelfEmployment" ) // saves new Task and link the Patrul who created it
     public Mono< ApiResponseModel > addSelfEmployment ( final SelfEmploymentTask selfEmploymentTask ) {
-        selfEmploymentTask.setAddress( UnirestController
-                .getInstance()
-                .getGetAddressByLocation()
-                .apply( selfEmploymentTask.getLatOfAccident(), selfEmploymentTask.getLanOfAccident() ) );
+        selfEmploymentTask.setAddress( super.concatNames.apply(
+                UnirestController
+                        .getInstance()
+                        .getGetAddressByLocation()
+                        .apply( selfEmploymentTask.getLatOfAccident(), selfEmploymentTask.getLanOfAccident() ), 3 ) );
         return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
