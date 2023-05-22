@@ -1024,31 +1024,31 @@ public final class CassandraDataControl extends CassandraConverter {
                     .getLong( "quantity" ) );
 
     private final Function< Notification, Notification > saveNotification = notification -> {
-        this.getSession().execute( "INSERT INTO "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.NOTIFICATION +
-                super.getALlNames.apply( Notification.class )
-                + " VALUES ('"
-                + notification.getId() + "', '"
-                + notification.getType() + "', '"
-                + notification.getTitle() + "', '"
-                + notification.getAddress() + "', '"
-                + notification.getCarNumber() + "', '"
-                + notification.getPoliceType() + "', '"
-                + notification.getNsfOfPatrul() + "', '"
-                + notification.getPassportSeries() + "', "
+            this.getSession().execute( "INSERT INTO "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.NOTIFICATION +
+                    super.getALlNames.apply( Notification.class )
+                    + " VALUES ('"
+                    + notification.getId() + "', '"
+                    + notification.getType() + "', '"
+                    + notification.getTitle() + "', '"
+                    + notification.getAddress() + "', '"
+                    + notification.getCarNumber() + "', '"
+                    + notification.getPoliceType() + "', '"
+                    + notification.getNsfOfPatrul() + "', '"
+                    + notification.getPassportSeries() + "', "
 
-                + notification.getLongitudeOfTask() + ", "
-                + notification.getLongitudeOfTask() + ", "
+                    + notification.getLongitudeOfTask() + ", "
+                    + notification.getLongitudeOfTask() + ", "
 
-                + notification.getUuid() + ", '"
-                + notification.getStatus() + "', '"
-                + notification.getTaskStatus() + "', "
+                    + notification.getUuid() + ", '"
+                    + notification.getStatus() + "', '"
+                    + notification.getTaskStatus() + "', "
 
-                + false + ", '"
-                + notification.getTaskTypes() + "', '"
-                + notification.getNotificationWasCreated().toInstant() + "');" );
-        return notification; };
+                    + false + ", '"
+                    + notification.getTaskTypes() + "', '"
+                    + notification.getNotificationWasCreated().toInstant() + "');" );
+            return notification; };
 
     private final Function< UUID, Mono< ApiResponseModel > > setNotificationAsRead = uuid ->
             this.getSession().execute( "UPDATE "
