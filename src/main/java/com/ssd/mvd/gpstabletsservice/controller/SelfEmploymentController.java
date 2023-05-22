@@ -56,7 +56,8 @@ public class SelfEmploymentController extends SerDes {
                             + TaskInspector
                             .getInstance()
                             .changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask )
-                            .getName() ) ) )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+                            .getName() ) ) );
+//            .onErrorContinue( super::logging )
+//            .onErrorReturn( super.getErrorResponse().get() );
+    }
 }
