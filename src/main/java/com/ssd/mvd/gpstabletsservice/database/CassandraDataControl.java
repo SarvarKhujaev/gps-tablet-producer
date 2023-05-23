@@ -223,13 +223,13 @@ public final class CassandraDataControl extends CassandraConverter {
                         "PRIMARY KEY( uuid ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.PATRULS_LOGIN_TABLE.name()
+                + CassandraTables.TABLETS + "."
+                + CassandraTables.PATRULS_LOGIN_TABLE
                 + " ( login text, password text, uuid uuid, PRIMARY KEY ( (login), uuid ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.PATRULS_STATUS_TABLE.name()
+                + CassandraTables.TABLETS + "."
+                + CassandraTables.PATRULS_STATUS_TABLE
                 + " ( uuid uuid, " +
                 "date timestamp, " +
                 "status text, " +
@@ -238,8 +238,8 @@ public final class CassandraDataControl extends CassandraConverter {
                 "PRIMARY KEY( uuid, date, status ) );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.TABLETS.name() + "."
-                + CassandraTables.ANDROID_VERSION_CONTROL_TABLE.name()
+                + CassandraTables.TABLETS + "."
+                + CassandraTables.ANDROID_VERSION_CONTROL_TABLE
                 + " ( id text PRIMARY KEY, version text, link text );" );
 
         super.logging( "Cassandra is ready" ); }
@@ -302,13 +302,13 @@ public final class CassandraDataControl extends CassandraConverter {
                     .wasApplied()
                     ? super.getFunction().apply( Map.of( "message", "PoliceType was saved successfully" ) )
                     : super.getFunction().apply(
-                    Map.of( "message", "This PoliceType has already been applied",
-                            "success", false,
-                            "code", 201 ) )
+                            Map.of( "message", "This PoliceType has already been applied",
+                                    "success", false,
+                                    "code", 201 ) )
                     : super.getFunction().apply(
-                    Map.of( "message", "This policeType name is already defined, choose another one",
-                            "success", false,
-                            "code", 201 ) ) )
+                            Map.of( "message", "This policeType name is already defined, choose another one",
+                                    "success", false,
+                                    "code", 201 ) ) )
             .doOnError( this::delete );
 
     private final BiFunction< AtlasLustra, Boolean, Mono< ApiResponseModel > > saveLustra = ( atlasLustra, check ) ->
@@ -494,9 +494,9 @@ public final class CassandraDataControl extends CassandraConverter {
                                 .wasApplied()
                                 ? super.getFunction().apply( Map.of( "message", "Car was successfully saved" ) )
                                 : super.getFunction().apply(
-                                Map.of( "message", "This car does not exist, choose another one",
-                                        "success", false,
-                                        "code", 201 ) ); } );
+                                        Map.of( "message", "This car does not exist, choose another one",
+                                                "success", false,
+                                            "code", 201 ) ); } );
 
     private final Function< ReqCar, Boolean > linkPatrulWithCar = reqCar -> {
             final Row row = this.getGetPatrulByPassportNumber().apply( reqCar.getPatrulPassportSeries() );
@@ -577,7 +577,8 @@ public final class CassandraDataControl extends CassandraConverter {
                     : TimeInspector
                     .getInspector()
                     .getGetNewDate()
-                    .get().toInstant() ) + "', "
+                    .get()
+                    .toInstant() ) + "', "
                     + "listOfTasks = " + super.convertMapToCassandra.apply( patrul.getListOfTasks() )
                     + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
 
@@ -589,7 +590,8 @@ public final class CassandraDataControl extends CassandraConverter {
                     + " SET lastActiveDate = '" + TimeInspector
                     .getInspector()
                     .getGetNewDate()
-                    .get().toInstant() + "'"
+                    .get()
+                    .toInstant() + "'"
                     + " WHERE uuid = " + patrul.getUuid() + ";" );
 
     private final Function< Patrul, Mono< ApiResponseModel > > updatePatrul = patrul -> {
@@ -1496,9 +1498,9 @@ public final class CassandraDataControl extends CassandraConverter {
 
     private final BiFunction< CassandraTables, CassandraTables, ParallelFlux< Row > > getAllEntities =
             ( keyspace, table ) -> Flux.fromStream(
-                            this.getSession().execute( "SELECT * FROM " + keyspace + "." + table + ";" )
-                                    .all()
-                                    .stream() )
+                    this.getSession().execute( "SELECT * FROM " + keyspace + "." + table + ";" )
+                            .all()
+                            .stream() )
                     .parallel( super.checkDifference.apply( table.name().length() + keyspace.name().length() ) )
                     .runOn( Schedulers.parallel() );
 
