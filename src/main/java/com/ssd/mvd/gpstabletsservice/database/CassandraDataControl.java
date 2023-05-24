@@ -1457,19 +1457,20 @@ public final class CassandraDataControl extends CassandraConverter {
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.ANDROID_VERSION_CONTROL_TABLE
                     + " WHERE id = 'id';" ).one();
-            return row.getString( "version" ).compareTo( version ) == 0
+            return Integer.parseInt( super.concatNames.apply( row.getString( "version" ), 2 ) )
+                    <= Integer.parseInt( super.concatNames.apply( version, 2 ) )
                     ? super.getFunction().apply(
-                    Map.of( "message", "you have the last version",
-                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                    .builder()
-                                    .data( new AndroidVersionUpdate( row, LAST ) )
-                                    .build() ) )
+                            Map.of( "message", "you have the last version",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( new AndroidVersionUpdate( row, LAST ) )
+                                            .build() ) )
                     : super.getFunction().apply(
-                    Map.of( "message", "you have to update to last version",
-                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                    .builder()
-                                    .data( new AndroidVersionUpdate( row, OPTIONAL ) )
-                                    .build() ) ); };
+                            Map.of( "message", "you have to update to last version",
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( new AndroidVersionUpdate( row, OPTIONAL ) )
+                                            .build() ) ); };
 
     // обновляет последнюю версию андроид приложения
     private final Function< AndroidVersionUpdate, Mono< ApiResponseModel > > saveLastVersion = androidVersionUpdate ->

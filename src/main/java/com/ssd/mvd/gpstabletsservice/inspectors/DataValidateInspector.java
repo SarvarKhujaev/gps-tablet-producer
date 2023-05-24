@@ -51,6 +51,8 @@ public class DataValidateInspector extends Archive {
                     ( (ModelForCar) o ).getVehicleType(),
                     ( (ModelForCar) o ).getColor() );
 
+            case 2 -> String.join( "", String.valueOf( o ).split( "[.]" ) );
+
             default -> String.valueOf( o ).replaceAll( "'", "" ); };
 
     public final BiPredicate< Object, Integer > checkRequest = ( o, value ) -> switch ( value ) {
