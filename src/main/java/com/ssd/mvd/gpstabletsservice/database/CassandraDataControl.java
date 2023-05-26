@@ -1321,8 +1321,8 @@ public final class CassandraDataControl extends CassandraConverter {
                                             + tabletUsage.getUuidOfPatrul() + ", '"
                                             + tabletUsage.getSimCardNumber() + "', "
                                             + tabletUsage.getTotalActivityTime() + ") IF NOT EXISTS;" ) );
-                            else super.convert( tabletUsage1 )
-                                    .subscribe( tabletUsage -> this.getSession().execute( "UPDATE "
+                            else super.convert( tabletUsage1 ).subscribe( tabletUsage ->
+                                    this.getSession().execute( "UPDATE "
                                             + CassandraTables.TABLETS + "."
                                             + CassandraTables.TABLETS_USAGE_TABLE
                                             + " SET lastActiveDate = '" + TimeInspector
@@ -1457,8 +1457,11 @@ public final class CassandraDataControl extends CassandraConverter {
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.ANDROID_VERSION_CONTROL_TABLE
                     + " WHERE id = 'id';" ).one();
-            return Integer.parseInt( super.concatNames.apply( row.getString( "version" ), 2 ) )
-                    <= Integer.parseInt( super.concatNames.apply( version, 2 ) )
+            byte check = 0;
+            final String[] first = version.split( "[.]" );
+            final String[] second = row.getString( "version" ).split( "[.]" );
+            while ( check < first.length && Integer.parseInt( first[ check ] ) >= Integer.parseInt( second[ check ] ) ) check++;
+            return check == first.length
                     ? super.getFunction().apply(
                             Map.of( "message", "you have the last version",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
