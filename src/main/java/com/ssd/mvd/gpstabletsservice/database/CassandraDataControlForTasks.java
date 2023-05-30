@@ -130,11 +130,12 @@ public final class CassandraDataControlForTasks extends SerDes {
                             .build() ) );
 
     // возвращает запись из БД для конкретной задачи
-    private final Function< String, Mono< Row > > getTask = uuid -> super.convert(
-            this.getSession().execute( "SELECT * FROM "
+    private final Function< String, Mono< Row > > getTask = uuid -> {
+            final Row row = this.getSession().execute( "SELECT * FROM "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.TASKS_STORAGE_TABLE
-                    + " WHERE uuid = " + UUID.fromString( uuid ) + ";" ).one() );
+                    + " WHERE uuid = " + UUID.fromString( uuid ) + ";" ).one();
+            return super.checkParam.test( row ) ? super.convert( row ) : Mono.empty(); };
 
     private final Consumer< String > deleteActiveTask = id -> this.getSession().execute(
             "DELETE FROM " + CassandraTables.TABLETS + "." + CassandraTables.ACTIVE_TASK + " WHERE id = '" + id + "';" );
