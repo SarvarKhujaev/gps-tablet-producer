@@ -21,12 +21,14 @@ public class SelfEmploymentController extends SerDes {
                 .getInstance()
                 .getGetTask()
                 .apply( uuid )
-                .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
-                .map( selfEmploymentTask -> {
-                    selfEmploymentTask.setPatruls( null );
-                    selfEmploymentTask.setReportForCards( null );
-                    return selfEmploymentTask; } )
-            .onErrorContinue( super::logging ); }
+                .flatMap( row -> super.checkParam.test( row )
+                        ? super.convert( super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
+                        .map( selfEmploymentTask -> {
+                            selfEmploymentTask.setPatruls( null );
+                            selfEmploymentTask.setReportForCards( null );
+                            return selfEmploymentTask; } )
+                        : Mono.empty() )
+                .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )
     public Mono< ApiResponseModel > addReportForSelfEmployment ( final ReportForCard reportForCard ) { return CassandraDataControl
