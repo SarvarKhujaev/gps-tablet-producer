@@ -170,6 +170,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getSaveActiveTask()
                     .accept( new ActiveTask(
+                            patrul.getStatus(),
                             card,
                             card.getUUID().toString(),
                             card.getStatus(),
@@ -229,6 +230,7 @@ public final class TaskInspector extends SerDes {
                 .getInstance()
                 .getSaveActiveTask()
                 .accept( new ActiveTask(
+                        patrul.getStatus(),
                         eventCar,
                         eventCar.getUUID().toString(),
                         eventCar.getStatus(),
@@ -293,6 +295,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getSaveActiveTask()
                     .accept( new ActiveTask(
+                            patrul.getStatus(),
                             eventFace,
                             eventFace.getUUID().toString(),
                             eventFace.getStatus(),
@@ -351,6 +354,7 @@ public final class TaskInspector extends SerDes {
                 .getInstance()
                 .getSaveActiveTask()
                 .accept( new ActiveTask(
+                        patrul.getStatus(),
                         eventBody,
                         eventBody.getUUID().toString(),
                         eventBody.getStatus(),
@@ -419,6 +423,7 @@ public final class TaskInspector extends SerDes {
                 .getInstance()
                 .getSaveActiveTask()
                 .accept( new ActiveTask(
+                        patrul.getStatus(),
                         carEvents,
                         carEvents.getUUID().toString(),
                         carEvents.getStatus(),
@@ -486,6 +491,7 @@ public final class TaskInspector extends SerDes {
                     .getInstance()
                     .getSaveActiveTask()
                     .accept( new ActiveTask(
+                            patrul.getStatus(),
                             faceEvent,
                             faceEvent.getUUID().toString(),
                             faceEvent.getStatus(),
@@ -578,6 +584,7 @@ public final class TaskInspector extends SerDes {
                 .getInstance()
                 .getSaveActiveTask()
                 .accept( new ActiveTask(
+                        patrul.getStatus(),
                         selfEmploymentTask,
                         selfEmploymentTask.getUuid().toString(),
                         selfEmploymentTask.getTaskStatus(),

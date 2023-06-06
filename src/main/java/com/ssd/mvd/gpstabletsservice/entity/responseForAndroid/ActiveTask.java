@@ -102,6 +102,58 @@ public class ActiveTask {
                 this.setDescription( ( (SelfEmploymentTask) object ).getDescription() );
                 this.setLongitude( ( (SelfEmploymentTask) object ).getLanOfAccident() ); } } }
 
+    public ActiveTask (
+            final Status patrulStatus,
+            final Object object,
+            final String taskId,
+            final Status status,
+            final TaskTypes taskTypes,
+            final Map< UUID, Patrul > patrulList ) {
+        this.setStatus( status );
+        this.setTaskId( taskId );
+        this.setType( taskTypes.name() );
+        this.setPatrulList( patrulList );
+        this.setPatrulStatus( patrulStatus );
+        this.setCreatedDate( TimeInspector.getInspector().getGetNewDate().get() );
+
+        switch ( taskTypes ) {
+            case CARD_102 -> {
+                this.setLatitude( ( (Card) object ).getLatitude() );
+                this.setLongitude( ( (Card) object ).getLongitude() );
+
+                this.setAddress( ( (Card) object ).getAddress() );
+                this.setDescription( ( (Card) object ).getFabula() );
+
+                this.setRegion( ( (Card) object ).getEventAddress().getSOblastiId() );
+                this.setDistrict( ( (Card) object ).getEventAddress().getSRegionId() );
+                this.setCountryside( ( (Card) object ).getEventAddress().getSMahallyaId() ); }
+
+            case FIND_FACE_CAR -> this.save( ( (CarEvent) object ).getDataInfo() );
+
+            case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
+
+            case FIND_FACE_EVENT_CAR -> {
+                this.setType( TaskTypes.FIND_FACE_CAR.name() );
+                this.setLatitude( ( (EventCar) object ).getLatitude() );
+                this.setLongitude( ( (EventCar) object ).getLongitude() ); }
+
+            case FIND_FACE_EVENT_FACE -> {
+                this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+                this.setLatitude( ( (EventFace) object ).getLatitude() );
+                this.setLongitude( ( (EventFace) object ).getLongitude() ); }
+
+            case FIND_FACE_EVENT_BODY -> {
+                this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+                this.setLatitude( ( (EventBody) object ).getLatitude() );
+                this.setLongitude( ( (EventBody) object ).getLongitude() ); }
+
+            case SELF_EMPLOYMENT -> {
+                this.setTitle( ( (SelfEmploymentTask) object ).getTitle() );
+                this.setAddress( ( (SelfEmploymentTask) object ).getAddress() );
+                this.setLatitude( ( (SelfEmploymentTask) object ).getLatOfAccident() );
+                this.setDescription( ( (SelfEmploymentTask) object ).getDescription() );
+                this.setLongitude( ( (SelfEmploymentTask) object ).getLanOfAccident() ); } } }
+
     public ActiveTask ( final Object object,
                         final TaskTypes taskTypes,
                         final Status status,
