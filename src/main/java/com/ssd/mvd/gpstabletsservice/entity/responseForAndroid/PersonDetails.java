@@ -19,6 +19,16 @@ public class PersonDetails {
     private Long time;
     private Double confidence;
 
+    private String concat ( final String name ) {
+        final String[] temp = name.split( " " );
+        return temp.length > 3
+                ? String.join( " ",
+                temp[ 0 ].split( "/" )[1],
+                temp[ 1 ].split( "/" )[1],
+                temp[ 3 ].split( "/" )[1],
+                temp[ 4 ] )
+                : String.join( " ", temp ); }
+
     public PersonDetails ( final EventBody eventBody ) {
         this.setIp( eventBody.getCameraIp() );
         this.setConfidence( eventBody.getConfidence() );
@@ -47,14 +57,15 @@ public class PersonDetails {
                 .test( eventBody.getPsychologyCard() ) ) {
             this.setFIO( DataValidateInspector
                     .getInstance()
-                    .checkParam
+                    .checkRequest
                     .test( eventBody
                             .getPsychologyCard()
-                            .getPinpp() )
-                    ? DataValidateInspector
-                    .getInstance()
-                    .concatNames
-                    .apply( eventBody.getPsychologyCard().getPinpp(), 0 )
+                            .getPapilonData(), 6 )
+                    ? this.concat( eventBody
+                    .getPsychologyCard()
+                    .getPapilonData()
+                    .get( 0 )
+                    .getName() )
                     : null );
             this.setPassportSeries( DataValidateInspector
                     .getInstance()
@@ -98,14 +109,15 @@ public class PersonDetails {
                 .test( eventFace.getPsychologyCard() ) ) {
             this.setFIO( DataValidateInspector
                     .getInstance()
-                    .checkParam
+                    .checkRequest
                     .test( eventFace
                             .getPsychologyCard()
-                            .getPinpp() )
-                    ? DataValidateInspector
-                    .getInstance()
-                    .concatNames
-                    .apply( eventFace.getPsychologyCard().getPinpp(), 0 )
+                            .getPapilonData(), 6 )
+                    ? this.concat( eventFace
+                    .getPsychologyCard()
+                    .getPapilonData()
+                    .get( 0 )
+                    .getName() )
                     : null );
 
             this.setPassportSeries( DataValidateInspector
@@ -158,12 +170,13 @@ public class PersonDetails {
                 .test( faceEvent.getPsychologyCard() ) ) {
             this.setFIO( DataValidateInspector
                     .getInstance()
-                    .checkParam
-                    .test( faceEvent.getPsychologyCard().getPinpp() )
-                    ? DataValidateInspector
-                    .getInstance()
-                    .concatNames
-                    .apply( faceEvent.getPsychologyCard().getPinpp(), 0 )
+                    .checkRequest
+                    .test( faceEvent.getPsychologyCard().getPapilonData(), 6 )
+                    ? this.concat( faceEvent
+                    .getPsychologyCard()
+                    .getPapilonData()
+                    .get( 0 )
+                    .getName() )
                     : null );
 
             this.setPassportSeries( DataValidateInspector
