@@ -60,7 +60,7 @@ public final class CustomSubscriber extends LogInspector implements Subscriber< 
                         .getInstance()
                         .getUnlinkTupleOfCarFromPatrul()
                         .accept( ( (TupleOfCar) o ) ); }
-            case 2 -> super.logging( "Subscriber got TaskTimingStatistics: " + o
+            case 2 -> super.logging( "Subscriber got TaskTimingStatistics: "
                     + " was applied: "
                     + CassandraDataControlForTasks
                     .getInstance()
