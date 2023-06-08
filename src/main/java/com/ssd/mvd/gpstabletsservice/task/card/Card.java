@@ -17,7 +17,7 @@ import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties ( ignoreUnknown = true )
 public class Card {
-    @JsonProperty( value = "CardId" )
+    @JsonProperty( value = "id" )
     private Long cardId;
     private Long gomNum;  //??
     @JsonProperty( value = "FirstOfAll" )
