@@ -1,21 +1,26 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 import java.util.*;
+import lombok.extern.jackson.Jacksonized;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 
+@Jacksonized
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
+@JsonIgnoreProperties ( ignoreUnknown = true )
 public class Card {
-    @JsonProperty( "CardId" )
+    @JsonProperty( value = "CardId" )
     private Long cardId;
     private Long gomNum;  //??
-    @JsonProperty("FirstOfAll")
+    @JsonProperty( value = "FirstOfAll" )
     private Long firstOfAll;  //??
     private Long deadQuantity;   //O'lganlar soni
     private Long traumaQuantity;   //Jarohatlanganlar soni
@@ -34,7 +39,7 @@ public class Card {
 
     private Date eventEnd;   // Tugallangan vaqt
     private Date eventStart;  // Yaratilish vaqt
-    @JsonProperty( "dateCreateCard" )
+    @JsonProperty( value = "dateCreateCard" )
     private Date created_date;   // Qachon yaratilgani
 
     @JsonDeserialize
