@@ -1472,7 +1472,7 @@ public final class CassandraDataControl extends CassandraConverter {
                             Map.of( "message", "you have to update to last version",
                                     "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                             .builder()
-                                            .data( new AndroidVersionUpdate( row, OPTIONAL ) )
+                                            .data( new AndroidVersionUpdate( row, FORCE ) )
                                             .build() ) ); };
 
     // обновляет последнюю версию андроид приложения
