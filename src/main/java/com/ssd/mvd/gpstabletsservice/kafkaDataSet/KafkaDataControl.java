@@ -27,7 +27,7 @@ import java.util.*;
 
 @lombok.Data
 public final class KafkaDataControl extends SerDes {
-    private static KafkaDataControl instance = new KafkaDataControl();
+    private final static KafkaDataControl instance = new KafkaDataControl();
 
     private final String CAR_TOTAL_DATA = GpsTabletsServiceApplication
             .context
@@ -54,7 +54,7 @@ public final class KafkaDataControl extends SerDes {
             .getEnvironment()
             .getProperty( "variables.KAFKA_VARIABLES.KAFKA_TOPICS.SOS_TOPIC_FOR_ANDROID_NOTIFICATION" );
 
-    public static KafkaDataControl getInstance () { return instance != null ? instance : ( instance = new KafkaDataControl() ); }
+    public static KafkaDataControl getInstance () { return instance; }
 
     private final Supplier< Map< String, Object > > getKafkaSenderOptions = () -> Map.of(
             ProducerConfig.ACKS_CONFIG, "1",
@@ -102,7 +102,7 @@ public final class KafkaDataControl extends SerDes {
                         .doOnError( super::logging )
                         .doOnSuccess( success -> super.logging( "All notifications were sent" ) )
                         .subscribe( new CustomSubscriber( 9, this.getSOS_TOPIC_FOR_ANDROID_NOTIFICATION() ) );
-                return Mono.just( apiResponseModel ); };
+                return super.convert( apiResponseModel ); };
 
     // отправляет уведомление фронту
     private final Function< SosNotification, String > writeSosNotificationToKafka = sosNotification -> {
@@ -148,7 +148,6 @@ public final class KafkaDataControl extends SerDes {
                     .subscribe( new CustomSubscriber( 9, this.getNOTIFICATION() ) );
 
     public void clear () {
-        instance = null;
         this.getKafkaSender().close();
         super.logging( "Kafka is closed successfully" ); }
 }

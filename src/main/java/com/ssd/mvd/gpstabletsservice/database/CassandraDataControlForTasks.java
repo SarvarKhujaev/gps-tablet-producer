@@ -583,6 +583,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .map( card -> new ActiveTask(
                             card,
                             card.getUUID().toString(),
+                            card.getCardId().toString(),
                             card.getStatus(),
                             CARD_102,
                             card.getPatruls() ) );
@@ -592,6 +593,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .map( carEvent -> new ActiveTask(
                             carEvent,
                             carEvent.getUUID().toString(),
+                            carEvent.getId(),
                             carEvent.getStatus(),
                             FIND_FACE_CAR,
                             carEvent.getPatruls() ) );
@@ -601,6 +603,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .map( faceEvent -> new ActiveTask(
                             faceEvent,
                             faceEvent.getUUID().toString(),
+                            faceEvent.getId(),
                             faceEvent.getStatus(),
                             FIND_FACE_PERSON,
                             faceEvent.getPatruls() ) );
@@ -610,6 +613,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .map( eventCar -> new ActiveTask(
                             eventCar,
                             eventCar.getUUID().toString(),
+                            eventCar.getId(),
                             eventCar.getStatus(),
                             FIND_FACE_EVENT_CAR,
                             eventCar.getPatruls() ) );
@@ -619,6 +623,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .map( eventBody -> new ActiveTask(
                             eventBody,
                             eventBody.getUUID().toString(),
+                            eventBody.getId(),
                             eventBody.getStatus(),
                             FIND_FACE_EVENT_BODY,
                             eventBody.getPatruls() ) );
@@ -628,6 +633,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .map( eventFace -> new ActiveTask(
                             eventFace,
                             eventFace.getUUID().toString(),
+                            eventFace.getId(),
                             eventFace.getStatus(),
                             FIND_FACE_EVENT_FACE,
                             eventFace.getPatruls() ) );
@@ -636,6 +642,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                     .map( selfEmploymentTask -> new ActiveTask(
                             selfEmploymentTask,
+                            selfEmploymentTask.getUuid().toString(),
                             selfEmploymentTask.getUuid().toString(),
                             selfEmploymentTask.getTaskStatus(),
                             SELF_EMPLOYMENT,
