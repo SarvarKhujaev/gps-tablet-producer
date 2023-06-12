@@ -40,10 +40,11 @@ import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulA
 
 @lombok.Data
 public final class TaskInspector extends SerDes {
-    private static TaskInspector taskInspector = new TaskInspector();
+    private final static TaskInspector taskInspector = new TaskInspector();
 
-    public static TaskInspector getInstance () { return taskInspector != null ? taskInspector : new TaskInspector(); }
+    public static TaskInspector getInstance () { return taskInspector; }
 
+    // функция заполняет форму для уведомления для андроида и фронта
     private Patrul saveNotification (
             final UUID uuid,
             final String taskId,
@@ -51,16 +52,16 @@ public final class TaskInspector extends SerDes {
             final Object object,
             final Status status,
             final TaskTypes taskTypes ) {
-            CassandraDataControlForTasks
+            CassandraDataControlForTasks // сохраняем саму задачу в БД
                     .getInstance()
                     .saveTask( uuid, taskId, taskTypes, object );
 
             CassandraDataControl
                     .getInstance()
-                    .getUpdatePatrulAfterTask()
+                    .getUpdatePatrulAfterTask() // обновляем статус патрульного после каждого изменения
                     .accept( patrul );
 
-            KafkaDataControl
+            KafkaDataControl // отправляем в Кафку уведомление
                     .getInstance()
                     .getWriteNotificationToKafka()
                     .accept( CassandraDataControl
@@ -71,12 +72,13 @@ public final class TaskInspector extends SerDes {
                                     status,
                                     object,
                                     switch ( status ) {
-                                        case ACCEPTED -> patrul.getName() + " ACCEPTED his task: " + patrul.getTaskId() + " " + patrul.getTaskTypes() + " at: "
+                                        case ACCEPTED -> patrul.getName() + " " + ACCEPTED + " his task: " + patrul.getTaskId() + " " + patrul.getTaskTypes() + " at: "
                                                 + TimeInspector
                                                 .getInspector()
                                                 .getGetNewDate()
                                                 .get();
-                                        case ARRIVED -> patrul.getName() + " : " + patrul.getTaskTypes() + " arrived task location: " + " at: "
+                                        case ARRIVED -> patrul.getName() + " " + ARRIVED + " : "
+                                                + patrul.getTaskTypes() + " task location at: "
                                                 + TimeInspector
                                                 .getInspector()
                                                 .getGetNewDate()
@@ -91,7 +93,7 @@ public final class TaskInspector extends SerDes {
                                                 + TimeInspector
                                                 .getInspector()
                                                 .getGetNewDate()
-                                                .get(); },
+                                                .get(); }, // составляем сообщение для уведомления
                                     taskTypes ) ) );
             return patrul; }
 
@@ -132,18 +134,19 @@ public final class TaskInspector extends SerDes {
                             .getInstance()
                             .getDeleteRowFromTaskTimingTable()
                             .apply( patrul ) );
-                if ( card.getPatruls().size() == card.getReportForCardList().size() ) {
+                if ( card.getPatruls().size() == card.getReportForCardList().size() ) { // в случае если количество патрульных равно количеству рапортов, то значит что таск закрыт
                     card.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( card.getUUID().toString() );
-                    if ( card.getPatruls().size() != 0 ) KafkaDataControl
+                    if ( card.getPatruls().size() != 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
                                     card,
                                     card.getUUID().toString(),
+                                    card.getCardId().toString(),
                                     card.getStatus(),
                                     CARD_102,
                                     card.getPatruls() ) ); }
@@ -163,19 +166,19 @@ public final class TaskInspector extends SerDes {
                     patrul.getPassportNumber(),
                     this.getSaveTaskTiming().apply( patrul, CARD_102 ) ); }
 
-        if ( status.compareTo( CANCEL ) != 0 ) card.getPatruls().put( patrul.getUuid(), patrul );
+        if ( status.compareTo( CANCEL ) != 0 ) card.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
 
-        if ( card.getStatus().compareTo( FINISHED ) != 0 )
-            CassandraDataControlForTasks
-                    .getInstance()
-                    .getSaveActiveTask()
-                    .accept( new ActiveTask(
-                            patrul.getStatus(),
-                            card,
-                            card.getUUID().toString(),
-                            card.getStatus(),
-                            CARD_102,
-                            card.getPatruls() ) );
+        if ( card.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
+                .getInstance()
+                .getSaveActiveTask()
+                .accept( new ActiveTask(
+                        patrul.getStatus(),
+                        card,
+                        card.getUUID().toString(),
+                        card.getCardId().toString(),
+                        card.getStatus(),
+                        CARD_102,
+                        card.getPatruls() ) );
 
         return this.saveNotification(
                 card.getUUID(),
@@ -195,18 +198,19 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getDeleteRowFromTaskTimingTable()
                                 .apply( patrul ) );
-                if ( eventCar.getPatruls().size() == eventCar.getReportForCardList().size() ) {
+                if ( eventCar.getPatruls().size() == eventCar.getReportForCardList().size() ) { // в случае если количество патрульных равно количеству рапортов, то значит что таск закрыт
                     eventCar.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( eventCar.getUUID().toString() );
-                    if ( eventCar.getPatruls().size() > 0 ) KafkaDataControl
+                    if ( eventCar.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
                                     eventCar,
                                     eventCar.getUUID().toString(),
+                                    eventCar.getId(),
                                     eventCar.getStatus(),
                                     FIND_FACE_EVENT_CAR,
                                     eventCar.getPatruls() ) ); }
@@ -226,18 +230,19 @@ public final class TaskInspector extends SerDes {
                     patrul.getPassportNumber(),
                     this.getSaveTaskTiming().apply( patrul, FIND_FACE_EVENT_CAR ) ); }
 
-        if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+        if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
                 .getInstance()
                 .getSaveActiveTask()
                 .accept( new ActiveTask(
                         patrul.getStatus(),
                         eventCar,
                         eventCar.getUUID().toString(),
+                        eventCar.getId(),
                         eventCar.getStatus(),
                         FIND_FACE_EVENT_CAR,
                         eventCar.getPatruls() ) );
 
-        if ( status.compareTo( CANCEL ) != 0 ) eventCar.getPatruls().put( patrul.getUuid(), patrul );
+        if ( status.compareTo( CANCEL ) != 0 ) eventCar.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
 
         return this.saveNotification(
                 eventCar.getUUID(),
@@ -252,23 +257,24 @@ public final class TaskInspector extends SerDes {
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
                 if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_FACE );
-                else eventFace.getPatruls().remove(
+                else eventFace.getPatruls().remove( // убираем патрульного из задачи
                         CassandraDataControlForTasks
                                 .getInstance()
                                 .getDeleteRowFromTaskTimingTable()
                                 .apply( patrul ) );
-                if ( eventFace.getPatruls().size() == eventFace.getReportForCardList().size() ) {
+                if ( eventFace.getPatruls().size() == eventFace.getReportForCardList().size() ) { // в случае если количество патрульных равно количеству рапортов, то значит что таск закрыт
                     eventFace.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( eventFace.getUUID().toString() );
-                    if ( eventFace.getPatruls().size() > 0 ) KafkaDataControl
+                    if ( eventFace.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
                                     eventFace,
                                     eventFace.getUUID().toString(),
+                                    eventFace.getId(),
                                     eventFace.getStatus(),
                                     FIND_FACE_EVENT_FACE,
                                     eventFace.getPatruls() ) ); }
@@ -288,19 +294,19 @@ public final class TaskInspector extends SerDes {
                     patrul.getPassportNumber(),
                     this.getSaveTaskTiming().apply( patrul, FIND_FACE_PERSON ) ); }
 
-        if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul );
+        if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
 
-        if ( eventFace.getStatus().compareTo( FINISHED ) != 0 )
-            CassandraDataControlForTasks
-                    .getInstance()
-                    .getSaveActiveTask()
-                    .accept( new ActiveTask(
-                            patrul.getStatus(),
-                            eventFace,
-                            eventFace.getUUID().toString(),
-                            eventFace.getStatus(),
-                            FIND_FACE_EVENT_FACE,
-                            eventFace.getPatruls() ) );
+        if ( eventFace.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
+                .getInstance()
+                .getSaveActiveTask()
+                .accept( new ActiveTask(
+                        patrul.getStatus(),
+                        eventFace,
+                        eventFace.getUUID().toString(),
+                        eventFace.getId(),
+                        eventFace.getStatus(),
+                        FIND_FACE_EVENT_FACE,
+                        eventFace.getPatruls() ) );
 
         return this.saveNotification(
                 eventFace.getUUID(),
@@ -320,18 +326,19 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getDeleteRowFromTaskTimingTable()
                                 .apply( patrul ) );
-                if ( eventBody.getPatruls().size() == eventBody.getReportForCardList().size() ) {
+                if ( eventBody.getPatruls().size() == eventBody.getReportForCardList().size() ) { // в случае если количество патрульных равно количеству рапортов, то значит что таск закрыт
                     eventBody.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( eventBody.getUUID().toString() );
-                    if ( eventBody.getPatruls().size() > 0 ) KafkaDataControl
+                    if ( eventBody.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
                                     eventBody,
                                     eventBody.getUUID().toString(),
+                                    eventBody.getId(),
                                     eventBody.getStatus(),
                                     FIND_FACE_EVENT_BODY,
                                     eventBody.getPatruls() ) ); }
@@ -349,14 +356,15 @@ public final class TaskInspector extends SerDes {
                     .get() ); // fixing time when patrul started this task
             case ARRIVED -> eventBody.getPatrulStatuses().putIfAbsent(
                     patrul.getPassportNumber(), this.getSaveTaskTiming().apply( patrul, FIND_FACE_PERSON ) ); }
-        if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul );
-        if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+        if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
+        if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
                 .getInstance()
                 .getSaveActiveTask()
                 .accept( new ActiveTask(
                         patrul.getStatus(),
                         eventBody,
                         eventBody.getUUID().toString(),
+                        eventBody.getId(),
                         eventBody.getStatus(),
                         FIND_FACE_EVENT_BODY,
                         eventBody.getPatruls() ) );
@@ -379,18 +387,19 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getDeleteRowFromTaskTimingTable()
                                 .apply( patrul ) );
-                if ( carEvents.getPatruls().size() == carEvents.getReportForCardList().size() ) {
+                if ( carEvents.getPatruls().size() == carEvents.getReportForCardList().size() ) { // в случае если количество патрульных равно количеству рапортов, то значит что таск закрыт
                     carEvents.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( carEvents.getUUID().toString() );
-                    if ( carEvents.getPatruls().size() > 0 ) KafkaDataControl
+                    if ( carEvents.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
                                     carEvents,
                                     carEvents.getUUID().toString(),
+                                    carEvents.getId(),
                                     carEvents.getStatus(),
                                     FIND_FACE_CAR,
                                     carEvents.getPatruls() ) ); }
@@ -417,15 +426,16 @@ public final class TaskInspector extends SerDes {
             case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent(
                     patrul.getPassportNumber(), this.getSaveTaskTiming().apply( patrul, FIND_FACE_CAR ) ); }
 
-        if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul );
+        if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
 
-        if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
+        if ( carEvents.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
                 .getInstance()
                 .getSaveActiveTask()
                 .accept( new ActiveTask(
                         patrul.getStatus(),
                         carEvents,
                         carEvents.getUUID().toString(),
+                        carEvents.getId(),
                         carEvents.getStatus(),
                         FIND_FACE_CAR,
                         carEvents.getPatruls() ) );
@@ -448,18 +458,19 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getDeleteRowFromTaskTimingTable()
                                 .apply( patrul ) );
-                if ( faceEvent.getPatruls().size() == faceEvent.getReportForCardList().size() ) {
+                if ( faceEvent.getPatruls().size() == faceEvent.getReportForCardList().size() ) { // в случае если количество патрульных равно количеству рапортов, то значит что таск закрыт
                     faceEvent.setStatus( FINISHED );
                     CassandraDataControlForTasks
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( faceEvent.getUUID().toString() );
-                    if ( faceEvent.getPatruls().size() > 0 ) KafkaDataControl
+                    if ( faceEvent.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
                                     faceEvent,
                                     faceEvent.getUUID().toString(),
+                                    faceEvent.getId(),
                                     faceEvent.getStatus(),
                                     FIND_FACE_PERSON,
                                     faceEvent.getPatruls() ) ); }
@@ -485,18 +496,18 @@ public final class TaskInspector extends SerDes {
                     .get() ); // fixing time when patrul started this task
             case ARRIVED -> faceEvent.getPatrulStatuses().putIfAbsent(
                         patrul.getPassportNumber(), this.getSaveTaskTiming().apply( patrul, FIND_FACE_PERSON ) ); }
-        if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul );
-        if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 )
-            CassandraDataControlForTasks
-                    .getInstance()
-                    .getSaveActiveTask()
-                    .accept( new ActiveTask(
-                            patrul.getStatus(),
-                            faceEvent,
-                            faceEvent.getUUID().toString(),
-                            faceEvent.getStatus(),
-                            FIND_FACE_PERSON,
-                            faceEvent.getPatruls() ) );
+        if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
+        if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
+                .getInstance()
+                .getSaveActiveTask()
+                .accept( new ActiveTask(
+                        patrul.getStatus(),
+                        faceEvent,
+                        faceEvent.getUUID().toString(),
+                        faceEvent.getId(),
+                        faceEvent.getStatus(),
+                        FIND_FACE_PERSON,
+                        faceEvent.getPatruls() ) );
 
         return this.saveNotification(
                 faceEvent.getUUID(),
@@ -566,6 +577,7 @@ public final class TaskInspector extends SerDes {
                             .accept( new ActiveTask(
                                     selfEmploymentTask,
                                     selfEmploymentTask.getUuid().toString(),
+                                    selfEmploymentTask.getUuid().toString(),
                                     selfEmploymentTask.getTaskStatus(),
                                     SELF_EMPLOYMENT,
                                     selfEmploymentTask.getPatruls() ) ); }
@@ -578,7 +590,7 @@ public final class TaskInspector extends SerDes {
                 patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
                 patrul.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() ); } }
 
-        if ( status.compareTo( CANCEL ) != 0 ) selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul );
+        if ( status.compareTo( CANCEL ) != 0 ) selfEmploymentTask.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
 
         if ( selfEmploymentTask.getTaskStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks
                 .getInstance()
@@ -586,6 +598,7 @@ public final class TaskInspector extends SerDes {
                 .accept( new ActiveTask(
                         patrul.getStatus(),
                         selfEmploymentTask,
+                        selfEmploymentTask.getUuid().toString(),
                         selfEmploymentTask.getUuid().toString(),
                         selfEmploymentTask.getTaskStatus(),
                         SELF_EMPLOYMENT,

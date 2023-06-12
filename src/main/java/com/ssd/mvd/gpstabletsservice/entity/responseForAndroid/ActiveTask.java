@@ -29,7 +29,8 @@ public class ActiveTask {
 
     private String type;
     private String title;
-    private String taskId;
+    private String cardId; // id from Asomiddin
+    private String taskId; // from service itself
     private String address;
     private String description;
 
@@ -55,9 +56,11 @@ public class ActiveTask {
     public ActiveTask (
             final Object object,
             final String taskId,
+            final String cardId,
             final Status status,
             final TaskTypes taskTypes,
             final Map< UUID, Patrul > patrulList ) {
+        this.setCardId( cardId );
         this.setStatus( status );
         this.setTaskId( taskId );
         this.setType( taskTypes.name() );
@@ -106,9 +109,11 @@ public class ActiveTask {
             final Status patrulStatus,
             final Object object,
             final String taskId,
+            final String cardId,
             final Status status,
             final TaskTypes taskTypes,
             final Map< UUID, Patrul > patrulList ) {
+        this.setCardId( cardId );
         this.setStatus( status );
         this.setTaskId( taskId );
         this.setType( taskTypes.name() );
