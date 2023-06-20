@@ -623,7 +623,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetTask()
                                 .apply( key )
-                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
+                                .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
                                 .map( card -> FinishedTask
                                         .builder()
                                         .taskTypes( CARD_102 )
@@ -646,7 +646,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetTask()
                                 .apply( key )
-                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
+                                .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                                 .map( carEvent -> FinishedTask
                                         .builder()
                                         .taskTypes( FIND_FACE_CAR )
@@ -673,7 +673,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetTask()
                                 .apply( key )
-                    .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
+                                .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                                 .map( faceEvent -> FinishedTask
                                         .builder()
                                         .taskTypes( FIND_FACE_PERSON )
@@ -700,7 +700,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetTask()
                                 .apply( key )
-                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
+                                .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                                 .map( eventCar -> FinishedTask
                                         .builder()
                                         .task( eventCar.getId() )
@@ -724,7 +724,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetTask()
                                 .apply( key )
-                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
+                                .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                                 .map( eventBody -> FinishedTask
                                         .builder()
                                         .task( eventBody.getId() )
@@ -748,7 +748,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetTask()
                                 .apply( key )
-                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
+                                .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                                 .map( eventFace -> FinishedTask
                                         .builder()
                                         .task( eventFace.getId() )
@@ -772,7 +772,7 @@ public final class TaskInspector extends SerDes {
                                 .getInstance()
                                 .getGetTask()
                                 .apply( key )
-                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
+                                .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
                                 .map( selfEmploymentTask -> FinishedTask
                                         .builder()
                                         .taskTypes( SELF_EMPLOYMENT )
@@ -807,6 +807,7 @@ public final class TaskInspector extends SerDes {
                     .compareTo( uuid ) == 0 ) return i;
             return 0; };
 
+    // сохраняет рапорт от патрульного
     private final BiFunction< Patrul, ReportForCard, Mono< ApiResponseModel > > saveReportForTask = ( patrul, reportForCard ) -> switch ( patrul.getTaskTypes() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()

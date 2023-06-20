@@ -2,22 +2,18 @@ package com.ssd.mvd.gpstabletsservice.task.sos_task;
 
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.datastax.driver.core.Row;
-
-import java.util.HashMap;
-import java.util.Date;
-import java.util.UUID;
-import java.util.Map;
+import java.util.*;
 
 @lombok.Data
 @lombok.NoArgsConstructor
-public class PatrulSos {
+public final class PatrulSos {
     private UUID uuid;
     private UUID patrulUUID;
 
     private String address;
 
-    private Date sosWasSendDate; // созраняет время когда запрос был отправлен
-    private Date sosWasClosed; // время когда сос был отменен
+    private Date sosWasSendDate; // сохраняет время когда запрос был отправлен
+    private Date sosWasClosed; // время когда сос был закрыт
 
     private Double latitude;
     private Double longitude;
@@ -30,18 +26,18 @@ public class PatrulSos {
 
     public UUID getUuid () { return uuid != null ? uuid : ( uuid = UUID.randomUUID() ); }
 
-    public PatrulSos ( final Row row ) {
-        this.setUuid( row.getUUID( "uuid" ) );
-        this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
+    public PatrulSos ( final Row row ) { Optional.ofNullable( row ).ifPresent( row1 -> {
+            this.setUuid( row.getUUID( "uuid" ) );
+            this.setPatrulUUID( row.getUUID( "patrulUUID" ) );
 
-        this.setAddress( row.getString( "address" ) );
+            this.setAddress( row.getString( "address" ) );
 
-        this.setSosWasClosed( row.getTimestamp( "sosWasClosed" ) );
-        this.setSosWasSendDate( row.getTimestamp( "sosWasSendDate" ) );
+            this.setSosWasClosed( row.getTimestamp( "sosWasClosed" ) );
+            this.setSosWasSendDate( row.getTimestamp( "sosWasSendDate" ) );
 
-        this.setLatitude( row.getDouble( "latitude" ) );
-        this.setLongitude( row.getDouble( "longitude" ) );
+            this.setLatitude( row.getDouble( "latitude" ) );
+            this.setLongitude( row.getDouble( "longitude" ) );
 
-        this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-        this.setPatrulStatuses( row.getMap( "patrulStatuses", UUID.class, String.class ) ); }
+            this.setStatus( Status.valueOf( row.getString( "status" ) ) );
+            this.setPatrulStatuses( row.getMap( "patrulStatuses", UUID.class, String.class ) ); } ); }
 }

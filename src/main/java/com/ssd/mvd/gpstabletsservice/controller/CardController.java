@@ -67,7 +67,10 @@ public class CardController extends SerDes {
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( final CardRequest< ? > request ) {
-        if ( request.getTaskType().compareTo( TaskTypes.CARD_102 ) == 0 ) {
+        final Optional< CardRequest > optional = Optional.of( request );
+        if ( optional
+                .filter( cardRequest -> cardRequest.getTaskType().compareTo( TaskTypes.CARD_102 ) == 0 )
+                .isPresent() ) {
             final Card card = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             card.setUuid( UUID.randomUUID() );
 
@@ -90,7 +93,9 @@ public class CardController extends SerDes {
                     .onErrorContinue( super::logging )
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
-        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 ) {
+        else if ( optional
+                .filter( cardRequest -> cardRequest.getTaskType().compareTo( TaskTypes.FIND_FACE_CAR ) == 0 )
+                .isPresent() ) {
             final CarEvent carEvents = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             carEvents.setUuid( UUID.randomUUID() );
             if ( carEvents.getCreated_date() == null ) carEvents.setCreated_date( new Date().toString() );
@@ -112,7 +117,9 @@ public class CardController extends SerDes {
                     .onErrorContinue( super::logging )
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
-        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 ) {
+        else if ( optional
+                .filter( cardRequest -> cardRequest.getTaskType().compareTo( TaskTypes.FIND_FACE_PERSON ) == 0 )
+                .isPresent() ) {
             final FaceEvent facePerson = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             facePerson.setUuid( UUID.randomUUID() );
             if ( facePerson.getCreated_date() == null && facePerson.getCreated_date().isEmpty() )
@@ -125,7 +132,7 @@ public class CardController extends SerDes {
                             .getGetPatrulByUUID()
                             .apply( s )
                             .flatMap( patrul -> super.getFunction().apply(
-                                    Map.of( "message", facePerson + " was linked to: "
+                                    Map.of( "message", facePerson.getUUID() + " was linked to: "
                                             + TaskInspector
                                             .getInstance()
                                             .changeTaskStatus( patrul, ATTACHED, facePerson )
@@ -135,7 +142,9 @@ public class CardController extends SerDes {
                     .onErrorContinue( super::logging )
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
-        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 ) {
+        else if ( optional
+                .filter( cardRequest -> cardRequest.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_FACE ) == 0 )
+                .isPresent() ) {
             final EventFace eventFace = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             eventFace.setUuid( UUID.randomUUID() );
             if ( eventFace.getCreated_date() == null ) eventFace.setCreated_date( new Date() );
@@ -157,7 +166,9 @@ public class CardController extends SerDes {
                     .onErrorContinue( super::logging )
                     .onErrorReturn( super.getErrorResponse().get() ); }
 
-        else if ( request.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 ) {
+        else if ( optional
+                .filter( cardRequest -> cardRequest.getTaskType().compareTo( TaskTypes.FIND_FACE_EVENT_BODY ) == 0 )
+                .isPresent() ) {
             final EventBody eventBody = this.objectMapper.convertValue( request.getCard(), new TypeReference<>() {} );
             eventBody.setUuid( UUID.randomUUID() );
             if ( eventBody.getCreated_date() == null ) eventBody.setCreated_date( new Date() );

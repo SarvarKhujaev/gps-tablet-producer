@@ -15,7 +15,7 @@ public class Archive {
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
 
-    protected <T> Mono< T > convert ( final T o ) { return Mono.justOrEmpty( o ); }
+    protected <T> Mono< T > convert ( final T o ) { return Optional.ofNullable( o ).isPresent() ? Mono.just( o ) : Mono.empty(); }
 
     private final Function< Map< String, ? >, Mono< ApiResponseModel > > function =
             map -> this.convert( ApiResponseModel

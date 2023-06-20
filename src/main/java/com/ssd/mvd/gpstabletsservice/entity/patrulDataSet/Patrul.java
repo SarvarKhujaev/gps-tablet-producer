@@ -14,7 +14,7 @@ import java.util.*;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class Patrul {
+public final class Patrul {
     private Date taskDate; // for registration of exact time when patrul started to deal with task
     private Date lastActiveDate; // shows when user was online lastly
     private Date startedToWorkDate; // the time
@@ -77,17 +77,14 @@ public class Patrul {
                 .getCheckDate()
                 .test( this.getTaskDate().toInstant() ); }; }
 
-    public String getSurnameNameFatherName () { return this.surnameNameFatherName != null
-            && this.surnameNameFatherName.contains( "NULL" )
-            && this.surnameNameFatherName.contains( "null" )
-            ? this.surnameNameFatherName
-            : ( this.surnameNameFatherName = this.getName() + " " + this.getSurname() + " " + this.getFatherName() ); }
+    public String getSurnameNameFatherName () {
+        return Optional.ofNullable( this.surnameNameFatherName )
+                .filter( s -> this.surnameNameFatherName != null
+                        && this.surnameNameFatherName.contains( "NULL" )
+                        && this.surnameNameFatherName.contains( "null" ) )
+                .orElse( ( this.surnameNameFatherName = String.join( " ", this.getName(), this.getSurname(), this.getFatherName() ) ) ); }
 
-    public Patrul ( final Row row ) {
-        if ( DataValidateInspector
-                .getInstance()
-                .checkParam
-                .test( row ) ) {
+    public Patrul ( final Row row ) { Optional.ofNullable( row ).ifPresent( row1 -> {
             this.setTaskDate( row.getTimestamp( "taskDate" ) );
             this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
             this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );
@@ -139,7 +136,7 @@ public class Patrul {
 
             this.setStatus( Status.valueOf( row.getString( "status" ) ) );
             this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
-            this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); } }
+            this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); } ); }
 
     public Patrul ( final UDTValue row ) {
         this.setTaskDate( row.getTimestamp( "taskDate" ) );

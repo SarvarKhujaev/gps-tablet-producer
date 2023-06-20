@@ -3,6 +3,7 @@ package com.ssd.mvd.gpstabletsservice.controller;
 import java.util.Map;
 import java.util.List;
 import java.util.UUID;
+import java.util.Collections;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -252,10 +253,14 @@ public class PatrulController extends SerDes {
                     .getListOfPatrulTasks(
                             patrul, (Integer) request.getObject(),
                             (Integer) request.getSubject() )
-                    : super.getFunction().apply( Map.of(
-                            "message", "You have not completed any task, so try to fix this problem please",
-                            "success", false,
-                            "code", 201 ) ) )
+                    : super.getFunction().apply(
+                            Map.of( "message", "You have not completed any task, so try to fix this problem please",
+                                    "success", false,
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( Collections.emptyList() )
+                                            .build(),
+                                    "code", 200 ) ) )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
