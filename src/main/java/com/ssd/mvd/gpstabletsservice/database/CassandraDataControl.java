@@ -1234,7 +1234,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     + " WHERE uuidOfPatrul = " + patrul.getUuid()
                     + " AND simCardNumber = '" + patrul.getSimCardNumber() + "';" ).one() )
                     .map( TabletUsage::new )
-                    .orElseGet( null );
+                    .orElse( null );
 
     private final BiConsumer< Patrul, Status > updateStatus = ( patrul, status ) ->
             Optional.ofNullable( this.getSession().execute ( "SELECT * FROM "
@@ -1303,7 +1303,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                         this.getUpdatePatrulActivity().accept( patrul );
 
                                         final Optional< TabletUsage > optional = Optional.ofNullable( this.getCheckTableUsage().apply( patrul ) );
-                                        if ( optional.isPresent() ) super.convert( new TabletUsage( patrul ) )
+                                        if ( optional.isEmpty() ) super.convert( new TabletUsage( patrul ) )
                                                 .subscribe( tabletUsage -> this.getSession().execute( "INSERT INTO "
                                                         + CassandraTables.TABLETS + "."
                                                         + CassandraTables.TABLETS_USAGE_TABLE
