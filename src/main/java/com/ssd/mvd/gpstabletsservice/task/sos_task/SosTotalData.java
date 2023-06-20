@@ -8,7 +8,7 @@ import java.util.UUID;
 import java.util.Date;
 
 @lombok.Data
-public class SosTotalData {
+public final class SosTotalData {
     private UUID uuid;
     private UUID patrulUUID;
 
@@ -44,5 +44,6 @@ public class SosTotalData {
                 .getInstance()
                 .checkParam
                 .test( patrulStatus )
-                ? Status.valueOf( patrulStatus ) : Status.ATTACHED ); }
+                ? Status.valueOf( patrulStatus )
+                : Status.ATTACHED ); }
 }

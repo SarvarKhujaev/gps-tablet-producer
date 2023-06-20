@@ -1,13 +1,13 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
-import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.datastax.driver.core.Row;
+import java.util.Optional;
 import java.util.UUID;
 
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class ReqCar {
+public final class ReqCar {
     private UUID uuid;
     private UUID lustraId;
 
@@ -25,11 +25,7 @@ public class ReqCar {
     private Double averageFuelSize; // средний расход топлива по документам
     private Double averageFuelConsumption = 0.0; // средний расход топлива исходя из стиля вождения водителя
 
-    public ReqCar ( final Row row ) {
-        if ( DataValidateInspector
-                .getInstance()
-                .checkParam
-                .test( row ) ) {
+    public ReqCar ( final Row row ) { Optional.ofNullable( row ).ifPresent( row1 -> {
             this.setUuid( row.getUUID( "uuid" ) );
             this.setLustraId( row.getUUID( "lustraId" ) );
 
@@ -45,5 +41,5 @@ public class ReqCar {
             this.setLatitude( row.getDouble( "latitude" ) );
             this.setLongitude( row.getDouble( "longitude" ) );
             this.setAverageFuelSize( row.getDouble( "averageFuelSize" ) );
-            this.setAverageFuelConsumption( row.getDouble( "averageFuelConsumption" ) ); } }
+            this.setAverageFuelConsumption( row.getDouble( "averageFuelConsumption" ) ); } ); }
 }

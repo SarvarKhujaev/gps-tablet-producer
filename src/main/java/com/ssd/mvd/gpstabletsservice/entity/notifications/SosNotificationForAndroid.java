@@ -5,7 +5,7 @@ import com.ssd.mvd.gpstabletsservice.task.sos_task.PatrulSos;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 @lombok.Data
-public class SosNotificationForAndroid {
+public final class SosNotificationForAndroid {
     private Status status;
     private Double latitude;
     private Double longitude;

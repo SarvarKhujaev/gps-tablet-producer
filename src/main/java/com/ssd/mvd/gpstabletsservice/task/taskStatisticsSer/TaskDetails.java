@@ -14,16 +14,16 @@ import java.util.UUID;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class TaskDetails {
+public final class TaskDetails {
     private String date;
     private String title;
-    private String fabula;
+    private String fabula; // описания задачи
 
-    private Long timeWastedToArrive;
-    private Long totalTimeConsumption;
+    private Long timeWastedToArrive; // время которое патрульный потратил чтобы дойти до цели
+    private Long totalTimeConsumption; // общее потраченное время на задачу
 
-    private ReportForCard reportForCardList;
-    private List< PositionInfo > positionInfoList;
+    private ReportForCard reportForCardList; // рапорт конкретного патрульного
+    private List< PositionInfo > positionInfoList; // история его маршрута до цели
 
     public TaskDetails ( final Object object,
                          final UUID patrulUUID,

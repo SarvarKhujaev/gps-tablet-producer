@@ -1,13 +1,14 @@
 package com.ssd.mvd.gpstabletsservice.entity.polygons;
 
 import com.datastax.driver.core.Row;
+import java.util.Optional;
 import java.util.List;
 import java.util.UUID;
 
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class Polygon {
+public final class Polygon {
     public UUID uuid;
     public UUID organ;
 
@@ -23,20 +24,20 @@ public class Polygon {
     public List< UUID > patrulList; // the list of all Patruls who works at this polygon
     public List< PolygonEntity > latlngs;
 
-    public Polygon ( final Row row ) {
-        this.setUuid( row.getUUID( "uuid" ) );
-        this.setOrgan( row.getUUID( "organ" ) );
+    public Polygon ( final Row row ) { Optional.ofNullable( row ).ifPresent( row1 -> {
+            this.setUuid( row.getUUID( "uuid" ) );
+            this.setOrgan( row.getUUID( "organ" ) );
 
-        this.setRegionId( row.getLong( "regionId" ) );
-        this.setMahallaId( row.getLong( "mahallaId" ) );
-        this.setDistrictId( row.getLong( "districtId" ) );
+            this.setRegionId( row.getLong( "regionId" ) );
+            this.setMahallaId( row.getLong( "mahallaId" ) );
+            this.setDistrictId( row.getLong( "districtId" ) );
 
-        this.setName( row.getString( "name" ) );
-        this.setColor( row.getString( "color" ) );
+            this.setName( row.getString( "name" ) );
+            this.setColor( row.getString( "color" ) );
 
-        this.setPatrulList( row.getList( "patrulList", UUID.class ) );
-        this.setLatlngs( row.getList( "latlngs", PolygonEntity.class ) );
-        this.setPolygonType( row.get( "polygonType", PolygonType.class ) ); }
+            this.setPatrulList( row.getList( "patrulList", UUID.class ) );
+            this.setLatlngs( row.getList( "latlngs", PolygonEntity.class ) );
+            this.setPolygonType( row.get( "polygonType", PolygonType.class ) ); } ); }
 
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 }
