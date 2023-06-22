@@ -103,8 +103,8 @@ public final class TaskInspector extends SerDes {
                     .getUpdateTotalTimeConsumption()
                     .apply( patrul, TimeInspector
                             .getInspector()
-                            .getGetTimeDifferenceInSeconds()
-                            .apply( patrul.getTaskDate().toInstant() ) );
+                            .getGetTimeDifference()
+                            .apply( patrul.getTaskDate().toInstant(), 0 ) );
             patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), taskTypes.name() ); };
 
     private final BiFunction< Patrul, TaskTypes, PatrulStatus > saveTaskTiming = ( patrul, taskTypes ) -> {
