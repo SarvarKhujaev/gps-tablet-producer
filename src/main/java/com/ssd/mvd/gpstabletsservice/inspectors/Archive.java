@@ -65,7 +65,18 @@ public class Archive {
                     .success( false )
                     .build() );
 
-    private final List< String > detailsList = List.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID",
+    protected final Supplier< Mono< ApiResponseModel > > getWrongLoginResponse = () -> this.convert(
+            ApiResponseModel
+                    .builder()
+                    .status( Status
+                            .builder()
+                            .message( "Wrong Login or password" )
+                            .code( 201 )
+                            .build() )
+                    .success( false )
+                    .build() );
+
+    private final Set< String > detailsList = Set.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID",
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
             "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
 

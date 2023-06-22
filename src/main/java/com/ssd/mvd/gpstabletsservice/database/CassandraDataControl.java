@@ -120,9 +120,9 @@ public final class CassandraDataControl extends CassandraConverter {
 
     private final BiConsumer< String, Class > createType = ( typeName, object ) -> this.getSession().execute(
             "CREATE TYPE IF NOT EXISTS "
-            + CassandraTables.TABLETS + "."
-            + typeName +
-            super.convertClassToCassandra.apply( object ) + " );" );
+                    + CassandraTables.TABLETS + "."
+                    + typeName
+                    + super.convertClassToCassandra.apply( object ) + " );" );
 
     private void createTable ( final String tableName, final Class object, final String prefix ) {
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
@@ -611,12 +611,19 @@ public final class CassandraDataControl extends CassandraConverter {
                             "code", 201 ) );
 
             if ( rowOptional.get().getUUID( "uuid" ).compareTo( patrul.getUuid() ) == 0 ) {
-                if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
-                if ( patrul.getName().contains( "'" ) ) patrul.setName( super.concatNames.apply( patrul.getName(), 2 ) );
-                if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( super.concatNames.apply( patrul.getSurname(), 2 ) );
-                if ( patrul.getOrganName().contains( "'" ) ) patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 2 ) );
-                if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 2 ) );
-                if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 2 ) );
+                final Optional< Patrul > optional = Optional.of( patrul );
+                optional.filter( patrul1 -> patrul.getLogin() == null )
+                        .ifPresent( patrul1 -> patrul.setLogin( patrul.getPassportNumber() ) );
+                optional.filter( patrul1 -> patrul.getName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setName( super.concatNames.apply( patrul.getName(), 2 ) ) );
+                optional.filter( patrul1 -> patrul.getSurname().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setSurname( super.concatNames.apply( patrul.getSurname(), 2 ) ) );
+                optional.filter( patrul1 -> patrul.getOrganName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 2 ) ) );
+                optional.filter( patrul1 -> patrul.getRegionName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 2 ) ) );
+                optional.filter( patrul1 -> patrul.getFatherName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 2 ) ) );
 
                 if ( rowOptional.get().getString( "login" ).compareTo( patrul.getLogin() ) == 0
                         && rowOptional.get().getString( "password" ).compareTo( patrul.getPassword() ) != 0 )
@@ -631,19 +638,27 @@ public final class CassandraDataControl extends CassandraConverter {
                                 + CassandraTables.TABLETS.name() + "."
                                 + CassandraTables.PATRULS.name() +
                                 super.getALlNames.apply( Patrul.class ) + " VALUES ('" +
-                                ( patrul.getTaskDate() != null ? patrul.getTaskDate().toInstant() : TimeInspector
+                                ( patrul.getTaskDate() != null
+                                        ? patrul.getTaskDate().toInstant()
+                                        : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
                                         .get().toInstant() ) + "', '" +
-                                ( patrul.getLastActiveDate() != null ? patrul.getLastActiveDate().toInstant() : TimeInspector
+                                ( patrul.getLastActiveDate() != null
+                                        ? patrul.getLastActiveDate().toInstant()
+                                        : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
                                         .get().toInstant() ) + "', '" +
-                                ( patrul.getStartedToWorkDate() != null ? patrul.getStartedToWorkDate().toInstant() : TimeInspector
+                                ( patrul.getStartedToWorkDate() != null
+                                        ? patrul.getStartedToWorkDate().toInstant()
+                                        : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
                                         .get().toInstant() ) + "', '" +
-                                ( patrul.getDateOfRegistration() != null ? patrul.getDateOfRegistration().toInstant() : TimeInspector
+                                ( patrul.getDateOfRegistration() != null
+                                        ? patrul.getDateOfRegistration().toInstant()
+                                        : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
                                         .get().toInstant() ) + "', " +
@@ -697,21 +712,21 @@ public final class CassandraDataControl extends CassandraConverter {
                         .wasApplied()
                         ? super.getFunction().apply( Map.of( "message", "Patrul was successfully updated" ) )
                         : super.getFunction().apply(
-                        Map.of( "message", "There is no such a patrul",
-                                "success", false,
-                                "code", 201 ) ); }
+                                Map.of( "message", "There is no such a patrul",
+                                        "success", false,
+                                        "code", 201 ) ); }
             else return super.getFunction().apply(
                     Map.of( "message", "There is no such a patrul",
                             "success", false,
                             "code", 201 ) ); };
 
     public void update ( final UUID uuidOfEscort, final UUID uuidForEscortCar, final UUID patrulUUID ) {
-        this.getSession().execute( "UPDATE "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS
-                + " SET uuidForEscortCar " + uuidForEscortCar
-                + ", uuidOfEscort = " + uuidOfEscort
-                + " WHERE uuid = " + patrulUUID + ";" ); }
+            this.getSession().execute( "UPDATE "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS
+                    + " SET uuidForEscortCar " + uuidForEscortCar
+                    + ", uuidOfEscort = " + uuidOfEscort
+                    + " WHERE uuid = " + patrulUUID + ";" ); }
 
     // обновляет фото патрульного
     private final Function< PatrulImageRequest, Mono< ApiResponseModel > > updatePatrulImage = request ->
@@ -754,15 +769,24 @@ public final class CassandraDataControl extends CassandraConverter {
                 patrul.setStartedToWorkDate( TimeInspector.getInspector().getGetNewDate().get() );
                 patrul.setDateOfRegistration( TimeInspector.getInspector().getGetNewDate().get() );
 
-                if ( patrul.getBatteryLevel() == null ) patrul.setBatteryLevel( 0 );
-                if ( patrul.getLogin() == null ) patrul.setLogin( patrul.getPassportNumber() );
-                if ( patrul.getPassword() == null ) patrul.setPassword( patrul.getPassportNumber() );
-                if ( patrul.getName().contains( "'" ) ) patrul.setName( super.concatNames.apply( patrul.getName(), 2 ) );
-                if ( patrul.getSurname().contains( "'" ) ) patrul.setSurname( super.concatNames.apply( patrul.getSurname(), 2 ) );
-                if ( patrul.getOrganName() != null && patrul.getOrganName().contains( "'" ) )
-                    patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 2 ) );
-                if ( patrul.getFatherName().contains( "'" ) ) patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 2 ) );
-                if ( patrul.getRegionName().contains( "'" ) ) patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 2 ) );
+                final Optional< Patrul > optional = Optional.of( patrul );
+                optional.filter( patrul1 -> patrul.getBatteryLevel() == null )
+                                .ifPresent( patrul1 -> patrul.setBatteryLevel( 0 ) );
+                optional.filter( patrul1 -> patrul.getLogin() == null )
+                        .ifPresent( patrul1 -> patrul.setLogin( patrul.getPassportNumber() ) );
+                optional.filter( patrul1 -> patrul.getPassword() == null )
+                        .ifPresent( patrul1 -> patrul.setPassword( patrul.getPassportNumber() ) );
+                optional.filter( patrul1 -> patrul.getName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setName( super.concatNames.apply( patrul.getName(), 2 ) ) );
+                optional.filter( patrul1 -> patrul.getSurname().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setSurname( super.concatNames.apply( patrul.getSurname(), 2 ) ) );
+                optional.filter( patrul1 -> patrul.getOrganName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 2 ) ) );
+                optional.filter( patrul1 -> patrul.getRegionName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 2 ) ) );
+                optional.filter( patrul1 -> patrul.getFatherName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 2 ) ) );
+
                 if ( this.getCheckLogin().apply( patrul.getLogin() ).isPresent() ) return super.getFunction().apply(
                         Map.of( "message", "Patrul with this login has already been inserted, choose another one",
                                 "success", false,
@@ -1250,10 +1274,11 @@ public final class CassandraDataControl extends CassandraConverter {
                             .getGetNewDate()
                             .get().toInstant() + "'"
                             + ( status.compareTo( LOGOUT ) == 0
-                            ? ", totalActivityTime = " + abs( TimeInspector
+                            ? ", totalActivityTime = "
+                            + abs( TimeInspector
                             .getInspector()
-                            .getGetTimeDifferenceInSeconds()
-                            .apply( row.getTimestamp( "startedToUse" ).toInstant() ) )
+                            .getGetTimeDifference()
+                            .apply( row.getTimestamp( "startedToUse" ).toInstant(), 0 ) )
                             : "" )
                             + " WHERE uuidOfPatrul = " + patrul.getUuid()
                             + " AND simCardNumber = '" + row.getString( "simCardNumber" ) + "';" ) );
@@ -1337,14 +1362,8 @@ public final class CassandraDataControl extends CassandraConverter {
                                                                 .type( patrul.getUuid().toString() )
                                                                 .data( patrul )
                                                                 .build() ) ); } )
-                                    .orElseGet( () -> super.getFunction().apply(
-                                            Map.of( "message", "Wrong Login or password",
-                                                    "code", 201,
-                                                    "success", false ) ) ) ) )
-                    .orElseGet( () -> super.getFunction().apply(
-                            Map.of( "message", "Wrong Login or password",
-                                    "code", 201,
-                                    "success", false ) ) );
+                                    .orElseGet( super.getWrongLoginResponse ) ) )
+                    .orElseGet( super.getWrongLoginResponse );
 
     private final BiFunction< String, Status, Mono< ApiResponseModel > > changeStatus = ( token, status ) -> this.getGetPatrulByUUID()
             .apply( this.getDecode().apply( token ) )

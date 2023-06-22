@@ -3,11 +3,8 @@ package com.ssd.mvd.gpstabletsservice.inspectors;
 import java.util.Date;
 import java.time.Instant;
 import java.time.Duration;
+import java.util.function.*;
 import java.text.SimpleDateFormat;
-
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.Predicate;
 
 @lombok.Data
 public class TimeInspector {
@@ -20,9 +17,9 @@ public class TimeInspector {
     private Integer startTimeForEvening = 16;
     private Integer startTimeForMorning = 0;
 
-    private static TimeInspector inspector = new TimeInspector();
+    private final static TimeInspector inspector = new TimeInspector();
 
-    public static TimeInspector getInspector () { return inspector != null ? inspector : ( inspector = new TimeInspector() ); }
+    public static TimeInspector getInspector () { return inspector; }
 
     private Date setDate () { return ( this.date = new Date() ); }
 
@@ -30,20 +27,20 @@ public class TimeInspector {
 
     private final Predicate< Instant > checkDate = instant -> this.getEndTimeForEvening() >= this.setDate().getHours()
             && this.getDate().getHours() >= this.getStartTimeForMorning()
-            ? ( this.getGetTimeDifference().apply( instant ) <= 10 )
-            : ( this.getGetTimeDifference().apply( instant ) <= 7 );
+            ? ( this.getGetTimeDifference().apply( instant, 2 ) <= 10 )
+            : ( this.getGetTimeDifference().apply( instant, 2 ) <= 7 );
 
     // for checking current time of task ending
     private final Function< String, Long > convertTimeToLong = time -> {
-        try { return time != null && !time.contains( "null" ) ?
-                new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
-                        .parse( time )
-                        .getTime() : 0L; }
-        catch ( Exception e ) { return 0L; } };
+            try { return time != null && !time.contains( "null" )
+                    ? new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
+                    .parse( time )
+                    .getTime()
+                    : 0L; }
+            catch ( final Exception e ) { return 0L; } };
 
-    private final Function< Instant, Long > getTimeDifference = instant -> Math.abs( Duration.between( Instant.now(), instant ).toMinutes() );
-
-    private final Function< Instant, Long > getTimeDifferenceInHours = instant -> Math.abs( Duration.between( Instant.now(), instant ).toHours() );
-
-    private final Function< Instant, Long > getTimeDifferenceInSeconds = instant -> Math.abs( Duration.between( Instant.now(), instant ).toSeconds() );
+    private final BiFunction< Instant, Integer, Long > getTimeDifference = ( instant, integer ) -> switch ( integer ) {
+            case 1 -> Math.abs( Duration.between( Instant.now(), instant ).toHours() );
+            case 2 -> Math.abs( Duration.between( Instant.now(), instant ).toMinutes() );
+            default -> Math.abs( Duration.between( Instant.now(), instant ).toSeconds() ); };
 }

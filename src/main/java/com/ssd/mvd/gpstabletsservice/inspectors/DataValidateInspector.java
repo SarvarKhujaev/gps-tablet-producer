@@ -67,8 +67,8 @@ public class DataValidateInspector extends Archive {
             case 4 -> ( (PatrulSos) o ).getPatrulStatuses() != null && ( (PatrulSos) o ).getPatrulStatuses().size() > 19;
             case 5 -> Math.abs( TimeInspector
                     .getInspector()
-                    .getGetTimeDifferenceInHours()
-                    .apply( ( (Date) o ).toInstant() ) ) >= 24;
+                    .getGetTimeDifference()
+                    .apply( ( (Date) o ).toInstant(), 1 ) ) >= 24;
             case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
             case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null && ( (AndroidVersionUpdate) o ).getLink() != null;
             case 8 -> ( (TaskTimingRequest) o ).getStartDate() != null && ( (TaskTimingRequest) o ).getEndDate() != null;
