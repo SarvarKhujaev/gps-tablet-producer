@@ -97,6 +97,7 @@ public final class TaskInspector extends SerDes {
                                     taskTypes ) ) );
             return patrul; }
 
+    // после завершения задачи, сохраняем данные об общем расходе времени на выполнение
     private final BiConsumer< Patrul, TaskTypes > updateTotalTimeConsumption = ( patrul, taskTypes ) -> {
             CassandraDataControlForTasks
                     .getInstance()
@@ -105,10 +106,14 @@ public final class TaskInspector extends SerDes {
                             .getInspector()
                             .getGetTimeDifference()
                             .apply( patrul.getTaskDate().toInstant(), 0 ) );
+            // сохраняем ID и тип задачи в список патрульного
             patrul.getListOfTasks().putIfAbsent( patrul.getTaskId(), taskTypes.name() ); };
 
+    // обрабатываем данные о передвижении патрульного пока он шел на задание
     private final BiFunction< Patrul, TaskTypes, PatrulStatus > saveTaskTiming = ( patrul, taskTypes ) -> {
             final PatrulStatus patrulStatus = new PatrulStatus( patrul );
+            // для начала сохраняем данные о том, сколько патрульный
+            // потратил времени и какой маршрут он прошел пока не достиг локации задачи
             CassandraDataControl
                     .getInstance()
                     .getGetHistory()
