@@ -6,14 +6,12 @@ import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.extern.jackson.Jacksonized;
 import java.util.*;
 
 @lombok.Data
-@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class SelfEmploymentTask {
+public final class SelfEmploymentTask {
     private Double lanOfPatrul; // in case if the accident is at Patrul place. then lan lat will be the same
     private Double latOfPatrul;
     private Double lanOfAccident;
@@ -24,7 +22,7 @@ public class SelfEmploymentTask {
     private String description; // info about incident
 
     private UUID uuid;
-    private Status taskStatus; // might be just arrived or finished
+    private Status taskStatus; // might be just arrived or attached
     private Date incidentDate; // the date when the task was created
 
     public UUID getUuid() { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
