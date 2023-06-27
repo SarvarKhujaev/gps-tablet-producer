@@ -101,7 +101,7 @@ public final class TaskInspector extends SerDes {
             CassandraDataControlForTasks
                     .getInstance()
                     .getUpdateTotalTimeConsumption()
-                    .apply( patrul, TimeInspector
+                    .accept( patrul, TimeInspector
                             .getInspector()
                             .getGetTimeDifference()
                             .apply( patrul.getTaskDate().toInstant(), 0 ) );
@@ -552,10 +552,16 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case ARRIVED -> {
+                if ( super.checkEquality.test( selfEmploymentTask.getTaskStatus(), ARRIVED ) )
+                    patrul.setTaskDate( TimeInspector
+                            .getInspector()
+                            .getGetNewDate()
+                            .get() );
                 patrul.setTaskTypes( SELF_EMPLOYMENT );
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
                 selfEmploymentTask.getPatrulStatuses().putIfAbsent(
-                        patrul.getPassportNumber(), this.getSaveTaskTiming().apply( patrul, SELF_EMPLOYMENT ) ); }
+                        patrul.getPassportNumber(),
+                        this.getSaveTaskTiming().apply( patrul, SELF_EMPLOYMENT ) ); }
             case CANCEL, FINISHED -> {
                 if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, SELF_EMPLOYMENT );
                 else selfEmploymentTask.getPatruls().remove(
@@ -585,6 +591,10 @@ public final class TaskInspector extends SerDes {
                 patrul.setStatus( FREE );
                 patrul.setTaskId( null ); }
             case ATTACHED, ACCEPTED -> {
+                patrul.setTaskDate( TimeInspector
+                        .getInspector()
+                        .getGetNewDate()
+                        .get() );
                 patrul.setTaskTypes( SELF_EMPLOYMENT );
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() ); // saving card id into patrul object
                 patrul.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
