@@ -266,7 +266,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             card,
                             taskDetailsRequest.getPatrulUUID(),
                             CARD_102,
-                            this.getGetTaskTimingInfo().apply( card.getCardId().toString(), taskDetailsRequest.getPatrulUUID() ),
+                            this.getGetTaskTimingInfo().apply( card.getUUID().toString(), taskDetailsRequest.getPatrulUUID() ),
                             card.getReportForCardList() ) );
 
             case FIND_FACE_CAR -> super.checkTable.test( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
@@ -276,7 +276,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             carEvent,
                             taskDetailsRequest.getPatrulUUID(),
                             FIND_FACE_CAR,
-                            this.getGetTaskTimingInfo().apply( carEvent.getId(), taskDetailsRequest.getPatrulUUID() ),
+                            this.getGetTaskTimingInfo().apply( carEvent.getUUID().toString(), taskDetailsRequest.getPatrulUUID() ),
                             carEvent.getReportForCardList() ) )
                     : this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
@@ -284,7 +284,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             eventCar,
                             taskDetailsRequest.getPatrulUUID(),
                             FIND_FACE_EVENT_CAR,
-                            this.getGetTaskTimingInfo().apply( eventCar.getId(), taskDetailsRequest.getPatrulUUID() ),
+                            this.getGetTaskTimingInfo().apply( eventCar.getUUID().toString(), taskDetailsRequest.getPatrulUUID() ),
                             eventCar.getReportForCardList() ) );
 
             case FIND_FACE_PERSON -> switch ( super.findTable.apply( taskDetailsRequest.getId() ) ) {
@@ -294,7 +294,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                 faceEvent,
                                 taskDetailsRequest.getPatrulUUID(),
                                 FIND_FACE_PERSON,
-                                this.getGetTaskTimingInfo().apply( faceEvent.getId(), taskDetailsRequest.getPatrulUUID() ),
+                                this.getGetTaskTimingInfo().apply( faceEvent.getUUID().toString(), taskDetailsRequest.getPatrulUUID() ),
                                 faceEvent.getReportForCardList() ) );
 
                 case EVENTBODY -> this.getGetTask().apply( taskDetailsRequest.getId() )
@@ -303,7 +303,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                 eventBody,
                                 taskDetailsRequest.getPatrulUUID(),
                                 FIND_FACE_EVENT_BODY,
-                                this.getGetTaskTimingInfo().apply( eventBody.getId(), taskDetailsRequest.getPatrulUUID() ),
+                                this.getGetTaskTimingInfo().apply( eventBody.getUUID().toString(), taskDetailsRequest.getPatrulUUID() ),
                                 eventBody.getReportForCardList() ) );
 
                 default -> this.getGetTask().apply( taskDetailsRequest.getId() )
@@ -312,7 +312,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                 eventFace,
                                 taskDetailsRequest.getPatrulUUID(),
                                 FIND_FACE_EVENT_FACE,
-                                this.getGetTaskTimingInfo().apply( eventFace.getId(), taskDetailsRequest.getPatrulUUID() ),
+                                this.getGetTaskTimingInfo().apply( eventFace.getUUID().toString(), taskDetailsRequest.getPatrulUUID() ),
                                 eventFace.getReportForCardList() ) ); };
 
             default -> this.getGetTask().apply( taskDetailsRequest.getId() )
