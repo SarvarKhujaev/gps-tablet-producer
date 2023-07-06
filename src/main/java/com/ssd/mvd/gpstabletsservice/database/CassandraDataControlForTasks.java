@@ -189,14 +189,13 @@ public final class CassandraDataControlForTasks extends SerDes {
 
     // обновляет время которое патрульный полностью потратил на выполнение задания
     // если патрульный завершил то обновляем общее время выполнения
-    private final BiConsumer< Patrul, Long > updateTotalTimeConsumption = ( patrul, timeConsumption ) -> {
-            super.logging( "timeConsumption: " + timeConsumption );
+    private final BiConsumer< Patrul, Long > updateTotalTimeConsumption = ( patrul, timeConsumption ) ->
             this.getSession().execute( "UPDATE "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.TASKS_TIMING_TABLE
                     + " SET totaltimeconsumption = " + timeConsumption
                     + " WHERE taskId = '" + patrul.getTaskId()
-                    + "' AND patruluuid = " + patrul.getUuid() + ";" ); };
+                    + "' AND patruluuid = " + patrul.getUuid() + ";" );
 
     private final Function< TaskTimingStatistics, Boolean > saveTaskTimeStatistics = taskTimingStatistics ->
             this.getSession().execute( "INSERT INTO " +

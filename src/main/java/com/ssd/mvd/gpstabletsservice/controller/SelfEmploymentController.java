@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 @RestController
-public class SelfEmploymentController extends SerDes {
+public final class SelfEmploymentController extends SerDes {
     @MessageMapping ( value = "getSelfEmployment" ) // returns the current Card
     public Mono< SelfEmploymentTask > getSelfEmployment ( final String uuid ) {
         return CassandraDataControlForTasks
@@ -54,7 +54,8 @@ public class SelfEmploymentController extends SerDes {
             .getGetPatrulByUUID()
             .apply( selfEmploymentTask.getPatruls().keySet().iterator().next() )
             .flatMap( patrul -> super.getFunction().apply(
-                    Map.of( "message", selfEmploymentTask + " was linked to: "
+                    Map.of( "message", selfEmploymentTask.getUuid()
+                            + " was linked to: "
                             + TaskInspector
                             .getInstance()
                             .changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask )

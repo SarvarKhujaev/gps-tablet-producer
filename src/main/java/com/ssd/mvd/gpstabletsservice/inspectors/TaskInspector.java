@@ -947,7 +947,8 @@ public final class TaskInspector extends SerDes {
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
                     .flatMap( eventCar -> super.getFunction().apply(
-                            Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, eventCar ).getPassportNumber()
+                            Map.of( "message", "Patrul: "
+                                            + this.changeTaskStatus( patrul, status, eventCar ).getPassportNumber()
                                             + " changed his status task to: " + status,
                                     "success", CassandraDataControl
                                             .getInstance()
@@ -960,7 +961,8 @@ public final class TaskInspector extends SerDes {
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
                     .flatMap( eventFace -> super.getFunction().apply(
-                            Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, eventFace ).getPassportNumber()
+                            Map.of( "message", "Patrul: "
+                                            + this.changeTaskStatus( patrul, status, eventFace ).getPassportNumber()
                                             + " changed his status task to: " + status,
                                         "success", CassandraDataControl
                                                 .getInstance()
@@ -973,8 +975,9 @@ public final class TaskInspector extends SerDes {
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
                     .flatMap( faceEvents -> super.getFunction().apply(
-                            Map.of( "message", "Patrul: " + this.changeTaskStatus( patrul, status, faceEvents )
-                                            .getPassportNumber() + " changed his status task to: " + status,
+                            Map.of( "message", "Patrul: "
+                                            + this.changeTaskStatus( patrul, status, faceEvents ).getPassportNumber()
+                                            + " changed his status task to: " + status,
                                     "success", CassandraDataControl
                                         .getInstance()
                                         .getUpdatePatrulStatus()
