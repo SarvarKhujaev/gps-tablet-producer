@@ -417,10 +417,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     + country.getUuid() + ", '"
                     + ( country.getFlag() != null && country.getFlag().length() > 0
                     ? country.getFlag() : Errors.DATA_NOT_FOUND ) + "', '"
-                    + super.concatNames.apply( country.getSymbol().toUpperCase(), 2 ) + "', '"
-                    + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 2 ) + "', '"
-                    + super.concatNames.apply( country.getCountryNameUz().toUpperCase(), 2 ) + "', '"
-                    + super.concatNames.apply( country.getCountryNameRu().toUpperCase(), 2 )
+                    + super.concatNames.apply( country.getSymbol().toUpperCase(), 3 ) + "', '"
+                    + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 3 ) + "', '"
+                    + super.concatNames.apply( country.getCountryNameUz().toUpperCase(), 3 ) + "', '"
+                    + super.concatNames.apply( country.getCountryNameRu().toUpperCase(), 3 )
                     + "') IF NOT EXISTS;" )
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", "Yangi davlat bazaga qoshildi" ) )
@@ -433,11 +433,11 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             "UPDATE "
                     + CassandraTables.ESCORT + "."
                     + CassandraTables.COUNTRIES +
-                    " SET countryNameUz = '" + super.concatNames.apply( country.getCountryNameUz().toUpperCase(), 2 ) + "', " +
-                    "countryNameRu = '" + super.concatNames.apply( country.getCountryNameRu().toUpperCase(), 2 ) + "', " +
+                    " SET countryNameUz = '" + super.concatNames.apply( country.getCountryNameUz().toUpperCase(), 3 ) + "', " +
+                    "countryNameRu = '" + super.concatNames.apply( country.getCountryNameRu().toUpperCase(), 3 ) + "', " +
                     "flag = '" + country.getFlag() + "', " +
-                    "symbol = '" + super.concatNames.apply( country.getSymbol().toUpperCase(), 2 ) +
-                    " countryNameEn = '" + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 2 ) +
+                    "symbol = '" + super.concatNames.apply( country.getSymbol().toUpperCase(), 3 ) +
+                    " countryNameEn = '" + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 3 ) +
                     "' WHERE uuid = " + country.getUuid() + " IF EXISTS;" )
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", country.getCountryNameEn() + " muvaffaqiyatli yangilandi" ) )
