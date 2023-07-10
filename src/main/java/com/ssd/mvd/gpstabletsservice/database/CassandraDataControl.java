@@ -615,15 +615,15 @@ public final class CassandraDataControl extends CassandraConverter {
                 optional.filter( patrul1 -> patrul.getLogin() == null )
                         .ifPresent( patrul1 -> patrul.setLogin( patrul.getPassportNumber() ) );
                 optional.filter( patrul1 -> patrul.getName().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setName( super.concatNames.apply( patrul.getName(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setName( super.concatNames.apply( patrul.getName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getSurname().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setSurname( super.concatNames.apply( patrul.getSurname(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setSurname( super.concatNames.apply( patrul.getSurname(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getOrganName().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getRegionName().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getFatherName().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 3 ) ) );
 
                 if ( rowOptional.get().getString( "login" ).compareTo( patrul.getLogin() ) == 0
                         && rowOptional.get().getString( "password" ).compareTo( patrul.getPassword() ) != 0 )
@@ -777,20 +777,21 @@ public final class CassandraDataControl extends CassandraConverter {
                 optional.filter( patrul1 -> patrul.getPassword() == null )
                         .ifPresent( patrul1 -> patrul.setPassword( patrul.getPassportNumber() ) );
                 optional.filter( patrul1 -> patrul.getName().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setName( super.concatNames.apply( patrul.getName(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setName( super.concatNames.apply( patrul.getName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getSurname().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setSurname( super.concatNames.apply( patrul.getSurname(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setSurname( super.concatNames.apply( patrul.getSurname(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getOrganName().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getRegionName().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getFatherName().contains( "'" ) )
-                        .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 2 ) ) );
+                        .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 3 ) ) );
 
                 if ( this.getCheckLogin().apply( patrul.getLogin() ).isPresent() ) return super.getFunction().apply(
                         Map.of( "message", "Patrul with this login has already been inserted, choose another one",
                                 "success", false,
                                 "code", 201 ) );
+
 
                 this.getSession().execute( "INSERT INTO "
                         + CassandraTables.TABLETS + "."
