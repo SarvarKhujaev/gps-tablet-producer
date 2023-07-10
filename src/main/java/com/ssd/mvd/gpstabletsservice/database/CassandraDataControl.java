@@ -628,15 +628,15 @@ public final class CassandraDataControl extends CassandraConverter {
                 if ( rowOptional.get().getString( "login" ).compareTo( patrul.getLogin() ) == 0
                         && rowOptional.get().getString( "password" ).compareTo( patrul.getPassword() ) != 0 )
                     this.getSession().execute( "UPDATE "
-                            + CassandraTables.TABLETS.name() + "."
-                            + CassandraTables.PATRULS_LOGIN_TABLE.name()
+                            + CassandraTables.TABLETS + "."
+                            + CassandraTables.PATRULS_LOGIN_TABLE
                             + " SET password = '" + patrul.getPassword()
                             + "' WHERE login = '" + patrul.getLogin()
                             + "' AND uuid = " + patrul.getUuid() + ";" );
 
                 return this.getSession().execute( "INSERT INTO "
-                                + CassandraTables.TABLETS.name() + "."
-                                + CassandraTables.PATRULS.name() +
+                                + CassandraTables.TABLETS + "."
+                                + CassandraTables.PATRULS +
                                 super.getALlNames.apply( Patrul.class ) + " VALUES ('" +
                                 ( patrul.getTaskDate() != null
                                         ? patrul.getTaskDate().toInstant()
@@ -806,6 +806,63 @@ public final class CassandraDataControl extends CassandraConverter {
                         .getCreateRowInPatrulSosListTable()
                         .accept( patrul.getUuid() );
 
+                super.logging( "INSERT INTO "
+                        + CassandraTables.TABLETS + "."
+                        + CassandraTables.PATRULS +
+                        super.getALlNames.apply( Patrul.class )
+                        + " VALUES ('" +
+                        patrul.getTaskDate().toInstant() + "', '" +
+                        patrul.getLastActiveDate().toInstant() + "', '" +
+                        patrul.getStartedToWorkDate().toInstant() + "', '" +
+                        patrul.getDateOfRegistration().toInstant() + "', '" +
+
+                        patrul.getDistance() + ", " +
+                        patrul.getLatitude() + ", " +
+                        patrul.getLongitude() + ", " +
+                        patrul.getLatitudeOfTask() + ", " +
+                        patrul.getLongitudeOfTask() + ", " +
+
+                        patrul.getUuid() + ", " +
+                        patrul.getOrgan() + ", " +
+                        patrul.getSos_id() + ", " +
+                        patrul.getUuidOfEscort() + ", " +
+                        patrul.getUuidForPatrulCar() + ", " +
+                        patrul.getUuidForEscortCar() + ", " +
+
+                        patrul.getRegionId() + ", " +
+                        patrul.getMahallaId() + ", " +
+                        patrul.getDistrictId() + ", " +
+                        patrul.getTotalActivityTime() + ", " +
+
+                        patrul.getBatteryLevel() + ", " +
+                        patrul.getInPolygon() + ", " +
+                        ( super.checkParam.test( patrul.getTuplePermission() ) ? patrul.getTuplePermission() : false ) + ", '" +
+
+                        patrul.getName() + "', '" +
+                        patrul.getRank() + "', '" +
+                        patrul.getEmail() + "', '" +
+                        patrul.getLogin() + "', '" +
+                        patrul.getTaskId() + "', '" +
+                        patrul.getCarType() + "', '" +
+                        patrul.getSurname() + "', '" +
+                        patrul.getPassword() + "', '" +
+                        patrul.getCarNumber() + "', '" +
+                        patrul.getOrganName() + "', '" +
+                        patrul.getRegionName() + "', '" +
+                        patrul.getPoliceType() + "', '" +
+                        patrul.getFatherName() + "', '" +
+                        patrul.getDateOfBirth() + "', '" +
+                        patrul.getPhoneNumber() + "', '" +
+                        patrul.getSpecialToken() + "', '" +
+                        patrul.getTokenForLogin() + "', '" +
+                        patrul.getSimCardNumber() + "', '" +
+                        patrul.getPassportNumber() + "', '" +
+                        patrul.getPatrulImageLink() + "', '" +
+                        patrul.getSurnameNameFatherName() + "', '" +
+                        patrul.getStatus() + "', '" +
+                        patrul.getTaskTypes() + "', " +
+                        super.convertMapToCassandra.apply( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;" );
+
                 return this.getSession().execute( "INSERT INTO "
                                 + CassandraTables.TABLETS + "."
                                 + CassandraTables.PATRULS +
@@ -814,7 +871,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                 patrul.getTaskDate().toInstant() + "', '" +
                                 patrul.getLastActiveDate().toInstant() + "', '" +
                                 patrul.getStartedToWorkDate().toInstant() + "', '" +
-                                patrul.getDateOfRegistration().toInstant() + "', '" +
+                                patrul.getDateOfRegistration().toInstant() + "', " +
 
                                 patrul.getDistance() + ", " +
                                 patrul.getLatitude() + ", " +
