@@ -806,63 +806,6 @@ public final class CassandraDataControl extends CassandraConverter {
                         .getCreateRowInPatrulSosListTable()
                         .accept( patrul.getUuid() );
 
-                super.logging( "INSERT INTO "
-                        + CassandraTables.TABLETS + "."
-                        + CassandraTables.PATRULS +
-                        super.getALlNames.apply( Patrul.class )
-                        + " VALUES ('" +
-                        patrul.getTaskDate().toInstant() + "', '" +
-                        patrul.getLastActiveDate().toInstant() + "', '" +
-                        patrul.getStartedToWorkDate().toInstant() + "', '" +
-                        patrul.getDateOfRegistration().toInstant() + "', '" +
-
-                        patrul.getDistance() + ", " +
-                        patrul.getLatitude() + ", " +
-                        patrul.getLongitude() + ", " +
-                        patrul.getLatitudeOfTask() + ", " +
-                        patrul.getLongitudeOfTask() + ", " +
-
-                        patrul.getUuid() + ", " +
-                        patrul.getOrgan() + ", " +
-                        patrul.getSos_id() + ", " +
-                        patrul.getUuidOfEscort() + ", " +
-                        patrul.getUuidForPatrulCar() + ", " +
-                        patrul.getUuidForEscortCar() + ", " +
-
-                        patrul.getRegionId() + ", " +
-                        patrul.getMahallaId() + ", " +
-                        patrul.getDistrictId() + ", " +
-                        patrul.getTotalActivityTime() + ", " +
-
-                        patrul.getBatteryLevel() + ", " +
-                        patrul.getInPolygon() + ", " +
-                        ( super.checkParam.test( patrul.getTuplePermission() ) ? patrul.getTuplePermission() : false ) + ", '" +
-
-                        patrul.getName() + "', '" +
-                        patrul.getRank() + "', '" +
-                        patrul.getEmail() + "', '" +
-                        patrul.getLogin() + "', '" +
-                        patrul.getTaskId() + "', '" +
-                        patrul.getCarType() + "', '" +
-                        patrul.getSurname() + "', '" +
-                        patrul.getPassword() + "', '" +
-                        patrul.getCarNumber() + "', '" +
-                        patrul.getOrganName() + "', '" +
-                        patrul.getRegionName() + "', '" +
-                        patrul.getPoliceType() + "', '" +
-                        patrul.getFatherName() + "', '" +
-                        patrul.getDateOfBirth() + "', '" +
-                        patrul.getPhoneNumber() + "', '" +
-                        patrul.getSpecialToken() + "', '" +
-                        patrul.getTokenForLogin() + "', '" +
-                        patrul.getSimCardNumber() + "', '" +
-                        patrul.getPassportNumber() + "', '" +
-                        patrul.getPatrulImageLink() + "', '" +
-                        patrul.getSurnameNameFatherName() + "', '" +
-                        patrul.getStatus() + "', '" +
-                        patrul.getTaskTypes() + "', " +
-                        super.convertMapToCassandra.apply( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;" );
-
                 return this.getSession().execute( "INSERT INTO "
                                 + CassandraTables.TABLETS + "."
                                 + CassandraTables.PATRULS +
@@ -922,9 +865,9 @@ public final class CassandraDataControl extends CassandraConverter {
                         .wasApplied()
                         ? super.getFunction().apply( Map.of( "message", "Patrul was successfully saved" ) )
                         : super.getFunction().apply(
-                        Map.of( "message", "Patrul has already been saved, choose another one",
-                                "success", false,
-                                "code", 201 ) ); }
+                                Map.of( "message", "Patrul has already been saved, choose another one",
+                                    "success", false,
+                                    "code", 201 ) ); }
             else return super.getFunction().apply(
                     Map.of( "message", "This patrul is already exists",
                             "success", false,
