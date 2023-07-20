@@ -34,11 +34,24 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 
 @RestController
-public class PatrulController extends SerDes {
+public final class PatrulController extends SerDes {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping ( value = "ping" )
-    public Mono< Boolean > ping () { return Mono.just( true ); }
+    public Mono< Boolean > ping () { return super.convert( true ); }
+
+    @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
+    public Mono< PatrulInRadiusList > getActivePatruls ( final Long regionId ) {
+        return CassandraDataControl
+                .getInstance()
+                .getGetAllEntities()
+                .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
+                .map( Patrul::new )
+                .filter( patrul -> regionId <= 0L || patrul.getRegionId().compareTo( regionId ) == 0 )
+                .sequential()
+                .publishOn( Schedulers.single() )
+                .collectList()
+                .map( patruls -> new PatrulInRadiusList( patruls, false ) ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( final String token ) { return CassandraDataControl

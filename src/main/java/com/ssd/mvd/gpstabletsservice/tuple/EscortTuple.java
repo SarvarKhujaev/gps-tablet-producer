@@ -11,7 +11,7 @@ import java.util.UUID;
 public final class EscortTuple {
     private UUID uuid; // own of id of each escortTuple
     private UUID uuidOfPolygon; // id of polygon
-    private String countries;
+    private String countries; // название страны к которой прикреплена машина
 
     private List< UUID > patrulList;
     private List< UUID > tupleOfCarsList;

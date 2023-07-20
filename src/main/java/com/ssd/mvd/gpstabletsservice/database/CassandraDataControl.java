@@ -1464,7 +1464,7 @@ public final class CassandraDataControl extends CassandraConverter {
             this.getFindTheClosestPatruls()
                     .apply( point, 2 )
                     .collectList()
-                    .map( PatrulInRadiusList::new );
+                    .map( patruls -> new PatrulInRadiusList( patruls, true ) );
 
     // проверяет последнюю версию андроид приложения
     private final Function< String, Mono< ApiResponseModel > > checkVersionForAndroid = version -> {

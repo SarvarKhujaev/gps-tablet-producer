@@ -24,10 +24,11 @@ public class Archive {
                             .builder()
                             .message( map.get( "message" ).toString() )
                             .code( map.containsKey( "code" )
-                                    ? Long.parseLong( map.get( "code" ).toString() ) : 200 )
+                                    ? Long.parseLong( map.get( "code" ).toString() )
+                                    : 200 )
                             .build() )
                     .data( map.containsKey( "data" )
-                            ? (com.ssd.mvd.gpstabletsservice.entity.Data) map.get( "data" )
+                            ? ( com.ssd.mvd.gpstabletsservice.entity.Data ) map.get( "data" )
                             : com.ssd.mvd.gpstabletsservice.entity.Data.builder().build() )
                     .success( !map.containsKey( "success" ) )
                     .build() );
