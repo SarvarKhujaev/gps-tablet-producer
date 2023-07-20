@@ -70,7 +70,7 @@ public final class UnirestController extends LogInspector {
             .build();
 
     private final Consumer< String > deleteUser = patrulId -> {
-            try { Mono.just( new Req() )
+            try { super.convert( new Req() )
                     .map( req -> {
                         req.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
                         return req; } )
@@ -87,7 +87,7 @@ public final class UnirestController extends LogInspector {
 
     private final Consumer< Patrul > updateUser = patrul -> {
             if ( patrul.getSpecialToken() == null ) return;
-            try { Mono.just( new Req() )
+            try { super.convert( new Req() )
                     .map( req -> {
                         req.setUsername( patrul.getSurnameNameFatherName() );
                         req.setId( patrul.getUuid() );
@@ -104,7 +104,7 @@ public final class UnirestController extends LogInspector {
             } catch ( Exception e ) { super.logging( e ); } };
 
     private final Consumer< Patrul > addUser = patrul -> {
-            try { Mono.just( new Req() )
+            try { super.convert( new Req() )
                     .map( req -> {
                         req.setUsername( patrul.getSurnameNameFatherName() );
                         req.setId( patrul.getUuid() );
