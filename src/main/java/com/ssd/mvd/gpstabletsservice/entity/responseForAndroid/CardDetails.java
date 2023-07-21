@@ -15,7 +15,7 @@ import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 
 @lombok.Data
-public class CardDetails {
+public final class CardDetails {
     private CarDetails carDetails;
     private PersonDetails personDetails;
     private Map< Details, List<Item> > details = new HashMap<>();

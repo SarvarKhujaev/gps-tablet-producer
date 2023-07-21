@@ -7,7 +7,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 
 @lombok.Data
-public class PersonDetails {
+public final class PersonDetails {
     private String ip;
     private String FIO;
     private String thumbnail;

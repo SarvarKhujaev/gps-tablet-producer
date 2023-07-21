@@ -6,7 +6,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 
 @lombok.Data
-public class CarDetails {
+public final class CarDetails {
     private String ip;
     private String carData;
     private String carNumber;
