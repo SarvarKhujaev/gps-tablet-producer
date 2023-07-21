@@ -6,7 +6,7 @@ import java.util.List;
 
 @lombok.Data
 @lombok.Builder
-public class TaskTimingRequest {
+public final class TaskTimingRequest {
     private List< TaskTypes > taskType;
     private Date startDate;
     private Date endDate;

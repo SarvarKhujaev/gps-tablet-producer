@@ -1,22 +1,18 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulImageRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulLoginRequest;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.ScheduleForPolygonPatrul;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulActivityStatistics;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulInRadiusList;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.entity.notifications.Notification;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.TabletUsage;
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonEntity;
 import com.ssd.mvd.gpstabletsservice.request.AndroidVersionUpdate;
 import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonType;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.*;
@@ -1273,8 +1269,9 @@ public final class CassandraDataControl extends CassandraConverter {
                             + " SET lastActiveDate = '" + TimeInspector
                             .getInspector()
                             .getGetNewDate()
-                            .get().toInstant() + "'"
-                            + ( status.compareTo( LOGOUT ) == 0
+                            .get()
+                            .toInstant() + "'"
+                            + ( super.checkEquality.test( status, LOGOUT )
                             ? ", totalActivityTime = "
                             + abs( TimeInspector
                             .getInspector()
@@ -1514,6 +1511,59 @@ public final class CassandraDataControl extends CassandraConverter {
                                             .one(),
                                     LAST ) )
                             .build() ) );
+
+    private final Function< PatrulActivityRequest, Mono< TabletUsageStatistics > > getTabletUsageStatistics = patrulActivityRequest ->
+            super.convert( new TabletUsageStatistics() )
+                    .flatMap( tabletUsageStatistics -> {
+                        if ( !super.checkRequest.test( patrulActivityRequest, 2 ) ) {
+                            final Date startOfYear = TimeInspector
+                                    .getInspector()
+                                    .getGetYearStartOrEnd()
+                                    .apply( true );
+
+                            final Date endOfYear = TimeInspector
+                                    .getInspector()
+                                    .getGetYearStartOrEnd()
+                                    .apply( false );
+
+                            tabletUsageStatistics.setMap();
+                            return Flux.fromStream( this.getSession().execute(
+                                    "SELECT * FROM "
+                                                + CassandraTables.TABLETS + "."
+                                                + CassandraTables.TABLETS_USAGE_TABLE
+                                                + " WHERE uuidofpatrul = " + patrulActivityRequest.getPatrulUUID() + ";" )
+                                            .all()
+                                            .stream()
+                                            .parallel() )
+                                    .parallel()
+                                    .runOn( Schedulers.parallel() )
+                                    .filter( row -> row.getTimestamp( "startedtouse" ).after( startOfYear )
+                                            && row.getTimestamp( "startedtouse" ).before( endOfYear ) )
+                                    .map( row -> tabletUsageStatistics.update( row.getTimestamp( "startedtouse" ), row.getLong( "totalactivitytime" ), true ) )
+                                    .sequential()
+                                    .publishOn( Schedulers.single() )
+                                    .collectList()
+                                    .map( longs -> tabletUsageStatistics ); }
+
+                        else return Flux.fromStream( this.getSession().execute(
+                                "SELECT * FROM "
+                                        + CassandraTables.TABLETS + "."
+                                        + CassandraTables.TABLETS_USAGE_TABLE
+                                        + " WHERE uuidofpatrul = " + patrulActivityRequest.getPatrulUUID() + ";" )
+                                        .all()
+                                        .stream()
+                                        .parallel() )
+                                .parallel( super.checkDifference.apply(
+                                        (int) Math.abs( Duration.between( patrulActivityRequest.getStartDate().toInstant(),
+                                                patrulActivityRequest.getEndDate().toInstant() ).toDays() ) ) )
+                                .runOn( Schedulers.single() )
+                                .filter( row -> row.getTimestamp( "startedtouse" ).after( patrulActivityRequest.getStartDate() )
+                                        && row.getTimestamp( "startedtouse" ).before( patrulActivityRequest.getEndDate() ) )
+                                .map( row -> tabletUsageStatistics.update( row.getTimestamp( "startedtouse" ), row.getLong( "totalactivitytime" ), false ) )
+                                .sequential()
+                                .publishOn( Schedulers.single() )
+                                .collectList()
+                                .map( longs -> tabletUsageStatistics ); } );
 
     private final BiFunction< CassandraTables, CassandraTables, ParallelFlux< Row > > getAllEntities =
             ( keyspace, table ) -> Flux.fromStream(
