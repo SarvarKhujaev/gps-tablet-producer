@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulImageRequest;
@@ -20,6 +19,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.Polygon;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.tuple.Points;
