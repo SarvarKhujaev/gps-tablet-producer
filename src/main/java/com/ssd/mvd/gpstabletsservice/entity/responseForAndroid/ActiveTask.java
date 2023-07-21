@@ -19,7 +19,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataI
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
 @lombok.Data
-public class ActiveTask {
+public final class ActiveTask {
     private Double latitude;
     private Double longitude;
 

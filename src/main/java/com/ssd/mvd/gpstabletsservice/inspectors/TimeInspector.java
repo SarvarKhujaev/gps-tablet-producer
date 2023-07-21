@@ -1,14 +1,20 @@
 package com.ssd.mvd.gpstabletsservice.inspectors;
 
-import java.util.Date;
+import java.time.Year;
+import java.time.Month;
 import java.time.Instant;
 import java.time.Duration;
+
+import java.util.Date;
+import java.util.Calendar;
 import java.util.function.*;
 import java.text.SimpleDateFormat;
 
 @lombok.Data
-public class TimeInspector {
+public final class TimeInspector {
     private Date date; // for comparing with current time
+    private final Calendar calendar = Calendar.getInstance();
+
     private Long timestamp = 30L; // time interval of how much time has to be matched to set User like offline 30 mins by default
     private Long timestampForArchive = 15L;
 
@@ -38,6 +44,19 @@ public class TimeInspector {
                     .getTime()
                     : 0L; }
             catch ( final Exception e ) { return 0L; } };
+
+    // возвращает данные о дате о начале года или конце
+    private final Function< Boolean, Date > getYearStartOrEnd = flag -> {
+            if ( flag ) {
+                this.getCalendar().set( Calendar.YEAR, Year.now().getValue() );
+                this.getCalendar().set( Calendar.DAY_OF_YEAR, 1 );
+                return this.getCalendar().getTime(); }
+            else {
+                calendar.set( Calendar.MONTH, 11 );
+                calendar.set( Calendar.DAY_OF_MONTH, 31 );
+                return this.getCalendar().getTime(); } };
+
+    private final Function< Date, Month > getMonthName = date1 -> Month.of( date1.getMonth() + 1 );
 
     private final BiFunction< Instant, Integer, Long > getTimeDifference = ( instant, integer ) -> switch ( integer ) {
             case 1 -> Math.abs( Duration.between( Instant.now(), instant ).toHours() );

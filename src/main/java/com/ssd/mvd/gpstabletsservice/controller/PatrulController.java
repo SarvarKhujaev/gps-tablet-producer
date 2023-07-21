@@ -18,14 +18,11 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.CardRequest;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.TabletUsage;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulInRadiusList;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulActivityStatistics;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulImageRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
@@ -321,4 +318,12 @@ public final class PatrulController extends SerDes {
                 .onErrorContinue( super::logging )
                 .onErrorReturn( new PatrulInRadiusList() )
                 : Mono.empty(); }
+
+    @MessageMapping ( value = "GET_TABLETS_USAGE_STATISTICS" )
+    public Mono< TabletUsageStatistics > getTabletsUsageStatistics ( final PatrulActivityRequest request ) {
+        return CassandraDataControl
+                .getInstance()
+                .getGetTabletUsageStatistics()
+                .apply( request )
+                .onErrorContinue( super::logging ); }
 }

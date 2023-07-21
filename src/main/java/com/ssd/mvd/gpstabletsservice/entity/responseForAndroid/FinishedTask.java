@@ -5,7 +5,7 @@ import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 
 @lombok.Data
 @lombok.Builder
-public class FinishedTask {
+public final class FinishedTask {
     private String task;
     private Long createdDate;
     private Long totalTimeConsumption; // показывает сколько времени Патрульный потратил на всю задачу от начала до конца

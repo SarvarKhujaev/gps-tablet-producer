@@ -4,7 +4,7 @@ import java.util.Date;
 
 @lombok.Data
 @lombok.Builder
-public class PatrulActivityRequest {
+public final class PatrulActivityRequest {
     private String patrulUUID;
     private Date startDate;
     private Date endDate;
