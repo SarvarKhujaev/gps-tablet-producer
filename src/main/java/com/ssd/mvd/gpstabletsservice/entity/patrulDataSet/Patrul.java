@@ -56,6 +56,7 @@ public final class Patrul {
     private String fatherName;
     private String dateOfBirth;
     private String phoneNumber;
+    private String districtName;
     private String specialToken;
     private String tokenForLogin;
     private String simCardNumber;
@@ -126,6 +127,7 @@ public final class Patrul {
             this.setFatherName( row.getString( "fatherName" ) );
             this.setDateOfBirth( row.getString( "dateOfBirth" ) );
             this.setPhoneNumber( row.getString( "phoneNumber" ) );
+            this.setDistrictName( row.getString( "districtName" ) );
             this.setSpecialToken( row.getString( "specialToken" ) );
             this.setTokenForLogin( row.getString( "tokenForLogin" ) );
             this.setSimCardNumber( row.getString( "simCardNumber" ) );
@@ -181,6 +183,7 @@ public final class Patrul {
         this.setDateOfBirth( row.getString( "dateOfBirth" ) );
         this.setPhoneNumber( row.getString( "phoneNumber" ) );
         this.setSpecialToken( row.getString( "specialToken" ) );
+        this.setDistrictName( row.getString( "districtName" ) );
         this.setTokenForLogin( row.getString( "tokenForLogin" ) );
         this.setSimCardNumber( row.getString( "simCardNumber" ) );
         this.setPassportNumber( row.getString( "passportNumber" ) );
