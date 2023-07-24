@@ -618,6 +618,8 @@ public final class CassandraDataControl extends CassandraConverter {
                         .ifPresent( patrul1 -> patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getRegionName().contains( "'" ) )
                         .ifPresent( patrul1 -> patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 3 ) ) );
+                optional.filter( patrul1 -> patrul.getDistrictName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setDistrictName( super.concatNames.apply( patrul.getDistrictName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getFatherName().contains( "'" ) )
                         .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 3 ) ) );
 
@@ -696,6 +698,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                 patrul.getFatherName() + "', '" +
                                 patrul.getDateOfBirth() + "', '" +
                                 patrul.getPhoneNumber() + "', '" +
+                                patrul.getDistrictName() + "', '" +
                                 patrul.getSpecialToken() + "', '" +
                                 patrul.getTokenForLogin() + "', '" +
                                 patrul.getSimCardNumber() + "', '" +
@@ -780,6 +783,8 @@ public final class CassandraDataControl extends CassandraConverter {
                         .ifPresent( patrul1 -> patrul.setOrganName( super.concatNames.apply( patrul.getOrganName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getRegionName().contains( "'" ) )
                         .ifPresent( patrul1 -> patrul.setRegionName( super.concatNames.apply( patrul.getRegionName(), 3 ) ) );
+                optional.filter( patrul1 -> patrul.getDistrictName().contains( "'" ) )
+                        .ifPresent( patrul1 -> patrul.setDistrictName( super.concatNames.apply( patrul.getDistrictName(), 3 ) ) );
                 optional.filter( patrul1 -> patrul.getFatherName().contains( "'" ) )
                         .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 3 ) ) );
 
@@ -849,6 +854,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                 patrul.getFatherName() + "', '" +
                                 patrul.getDateOfBirth() + "', '" +
                                 patrul.getPhoneNumber() + "', '" +
+                                patrul.getDistrictName() + "', '" +
                                 patrul.getSpecialToken() + "', '" +
                                 patrul.getTokenForLogin() + "', '" +
                                 patrul.getSimCardNumber() + "', '" +
