@@ -1,6 +1,7 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
+import com.ssd.mvd.gpstabletsservice.entity.RegionData;
 import com.datastax.driver.core.Row;
 
 @lombok.Data
@@ -9,13 +10,16 @@ public final class PatrulDivisionByRegions {
     private Long nonActivePatruls;
     private Long neverAuthorizedPatruls;
 
+    private final Long regionId;
     private final String regionName;
 
-    public PatrulDivisionByRegions ( final String regionName ) {
+    public PatrulDivisionByRegions ( final RegionData regionData ) {
+        this.regionName = regionData.getName();
+        this.regionId = regionData.getId();
+
         this.setNeverAuthorizedPatruls( 0L );
         this.setNonActivePatruls( 0L );
-        this.setActivePatruls( 0L );
-        this.regionName = regionName; }
+        this.setActivePatruls( 0L ); }
 
     public PatrulDivisionByRegions save ( final Row row ) {
         // сохраняем патрульных которые никогда не авторизовавались в системе
