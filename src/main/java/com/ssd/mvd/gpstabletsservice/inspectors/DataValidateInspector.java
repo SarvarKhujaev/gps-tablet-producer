@@ -165,6 +165,15 @@ public class DataValidateInspector extends Archive {
                     + CassandraTables.CARS +
                     " WHERE gosnumber = '" + carNumber + "';" ).one() == null;
 
+    protected final Predicate< UUID > checkPatrulActivity = uuid -> CassandraDataControl
+            .getInstance()
+            .getSession()
+            .execute( "SELECT * FROM "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.TABLETS_USAGE_TABLE
+                    + " WHERE uuidofpatrul = " + uuid + ";" )
+            .one() == null;
+
     protected final Predicate< Row > checkPatrulLocation = row -> row.getDouble( "latitude" ) > 0 && row.getDouble( "longitude" ) > 0;
 
     private static final Double p = PI / 180;

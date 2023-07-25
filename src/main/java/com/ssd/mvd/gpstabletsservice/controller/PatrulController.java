@@ -1,8 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import java.util.*;
-
-import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -18,6 +16,7 @@ import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
@@ -71,14 +70,22 @@ public final class PatrulController extends SerDes {
                 .filter( row -> row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
                         && row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) )
                         && switch ( Status.valueOf( params.get( "status" ) ) ) {
+                    // активные патрульные
                     case ACTIVE -> TimeInspector
                             .getInspector()
                             .getGetTimeDifference()
                             .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) <= 24;
 
-                    case IN_ACTIVE -> row.getString( "tokenForLogin" ).equals( "null" );
+                    // не активные патрульные
+                    case IN_ACTIVE -> TimeInspector
+                            .getInspector()
+                            .getGetTimeDifference()
+                            .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) > 24;
 
-                    default -> true; } )
+                    // патрульные которые которые никогда не заходили
+                    case FORCE -> super.checkPatrulActivity.test( row.getUUID( "uuid" ) );
+
+                    default -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) ); } )
                 .map( Patrul::new )
                 .sequential()
                 .publishOn( Schedulers.single() )
