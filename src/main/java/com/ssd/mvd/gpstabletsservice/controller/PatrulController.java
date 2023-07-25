@@ -20,6 +20,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
+import com.ssd.mvd.gpstabletsservice.response.PatrulActivityResponse;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulImageRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
@@ -35,19 +36,13 @@ public final class PatrulController extends SerDes {
     public Mono< Boolean > ping () { return super.convert( true ); }
 
     @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
-    public Mono< SortedMap > getActivePatruls ( final Map< String, Long > params ) {
+    public Mono< PatrulActivityResponse > getActivePatruls ( final Map< String, Long > params ) {
         final SortedMap< Long, PatrulDivisionByRegions > regions = new TreeMap<>();
-        if ( params.isEmpty() ) UnirestController
+        UnirestController
                 .getInstance()
                 .getGetRegions()
-                .apply( -1L )
-                .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData.getName() ) ) );
-
-        else UnirestController
-                .getInstance()
-                .getGetRegions()
-                .apply( params.get( "regionId" ) )
-                .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData.getName() ) ) );
+                .apply( params.isEmpty() ? -1L : params.get( "regionId" ) )
+                .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData ) ) );
 
         return CassandraDataControl
                 .getInstance()
@@ -59,7 +54,7 @@ public final class PatrulController extends SerDes {
                 .publishOn( Schedulers.single() )
                 .collectList()
                 .onErrorContinue( super::logging )
-                .map( patrulDivisionByRegions -> regions ); }
+                .map( patrulDivisionByRegions -> new PatrulActivityResponse( regions ) ); }
 
     @MessageMapping ( value = "GET_FILTERED_ACTIVE_PATRULS" )
     public Flux< Patrul > getFilteredActivePatruls ( final Map< String, String > params ) {

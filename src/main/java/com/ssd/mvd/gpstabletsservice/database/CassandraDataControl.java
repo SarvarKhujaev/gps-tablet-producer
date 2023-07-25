@@ -1580,15 +1580,6 @@ public final class CassandraDataControl extends CassandraConverter {
                     .parallel( super.checkDifference.apply( table.name().length() + keyspace.name().length() ) )
                     .runOn( Schedulers.parallel() );
 
-    public Boolean test ( final UUID uuid ) {
-        return this.getSession().execute(
-                "UPDATE "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS
-                + " SET districtId = 66"
-                + " WHERE uuid = " + uuid + " IF EXISTS;" )
-                .wasApplied(); }
-
     public void delete ( final Throwable throwable ) {
         INSTANCE = null;
         this.getSession().close();
