@@ -592,12 +592,13 @@ public final class CassandraDataControl extends CassandraConverter {
             this.getSession().execute( "UPDATE "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.PATRULS
-                    + " SET lastActiveDate = '" + TimeInspector
+                    + " SET lastActiveDate = '"
+                    + TimeInspector
                     .getInspector()
                     .getGetNewDate()
                     .get()
-                    .toInstant() + "'"
-                    + " WHERE uuid = " + patrul.getUuid() + ";" );
+                    .toInstant()
+                    + "' WHERE uuid = " + patrul.getUuid() + ";" );
 
     private final Function< Patrul, Mono< ApiResponseModel > > updatePatrul = patrul -> {
             final Optional< Row > rowOptional = Optional.ofNullable( this.getGetPatrulByPassportNumber().apply( patrul.getPassportNumber() ) );
@@ -1467,7 +1468,7 @@ public final class CassandraDataControl extends CassandraConverter {
             this.getFindTheClosestPatruls()
                     .apply( point, 2 )
                     .collectList()
-                    .map( patruls -> new PatrulInRadiusList( patruls, true ) );
+                    .map( PatrulInRadiusList::new );
 
     // проверяет последнюю версию андроид приложения
     private final Function< String, Mono< ApiResponseModel > > checkVersionForAndroid = version -> {
@@ -1578,6 +1579,15 @@ public final class CassandraDataControl extends CassandraConverter {
                             .stream() )
                     .parallel( super.checkDifference.apply( table.name().length() + keyspace.name().length() ) )
                     .runOn( Schedulers.parallel() );
+
+    public Boolean test ( final UUID uuid ) {
+        return this.getSession().execute(
+                "UPDATE "
+                + CassandraTables.TABLETS + "."
+                + CassandraTables.PATRULS
+                + " SET districtId = 66"
+                + " WHERE uuid = " + uuid + " IF EXISTS;" )
+                .wasApplied(); }
 
     public void delete ( final Throwable throwable ) {
         INSTANCE = null;

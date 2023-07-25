@@ -1,10 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import java.util.Map;
-import java.util.List;
-import java.util.UUID;
-import java.util.Collections;
+import java.util.*;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -38,17 +36,53 @@ public final class PatrulController extends SerDes {
     public Mono< Boolean > ping () { return super.convert( true ); }
 
     @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
-    public Mono< PatrulInRadiusList > getActivePatruls ( final Long regionId ) {
+    public Mono< SortedMap > getActivePatruls ( final Map< String, Long > params ) {
+        final SortedMap< Long, PatrulDivisionByRegions > regions = new TreeMap<>();
+        if ( params.isEmpty() ) UnirestController
+                .getInstance()
+                .getGetRegions()
+                .apply( -1L )
+                .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData.getName() ) ) );
+
+        else UnirestController
+                .getInstance()
+                .getGetRegions()
+                .apply( params.get( "regionId" ) )
+                .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData.getName() ) ) );
+
         return CassandraDataControl
                 .getInstance()
                 .getGetAllEntities()
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
-                .map( Patrul::new )
-                .filter( patrul -> regionId <= 0L || patrul.getRegionId().compareTo( regionId ) == 0 )
+                .filter( row -> params.isEmpty() || row.getLong( "regionId" ) == params.get( "regionId" ) )
+                .map( row -> regions.get( params.isEmpty() ? row.getLong( "regionId" ) : row.getLong( "districtId" ) ).save( row ) )
                 .sequential()
                 .publishOn( Schedulers.single() )
                 .collectList()
-                .map( patruls -> new PatrulInRadiusList( patruls, false ) ); }
+                .onErrorContinue( super::logging )
+                .map( patrulDivisionByRegions -> regions ); }
+
+    @MessageMapping ( value = "GET_FILTERED_ACTIVE_PATRULS" )
+    public Flux< Patrul > getFilteredActivePatruls ( final Map< String, String > params ) {
+        return CassandraDataControl
+                .getInstance()
+                .getGetAllEntities()
+                .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
+                .filter( row -> row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
+                        && row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) )
+                        && switch ( Status.valueOf( params.get( "status" ) ) ) {
+                    case ACTIVE -> TimeInspector
+                            .getInspector()
+                            .getGetTimeDifference()
+                            .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) <= 24;
+
+                    case IN_ACTIVE -> row.getString( "tokenForLogin" ).equals( "null" );
+
+                    default -> true; } )
+                .map( Patrul::new )
+                .sequential()
+                .publishOn( Schedulers.single() )
+                .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( final String token ) { return CassandraDataControl

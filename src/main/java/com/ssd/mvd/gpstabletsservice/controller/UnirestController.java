@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Arrays;
 import java.time.Duration;
-import reactor.core.publisher.Mono;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.BiFunction;
+import java.util.function.*;
+import java.util.Collections;
 
 import com.google.gson.Gson;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,7 +19,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
+import com.ssd.mvd.gpstabletsservice.entity.Regions;
 import com.ssd.mvd.gpstabletsservice.constants.Errors;
+import com.ssd.mvd.gpstabletsservice.entity.RegionData;
 import com.ssd.mvd.gpstabletsservice.task.sos_task.Address;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
@@ -46,9 +45,9 @@ public final class UnirestController extends LogInspector {
             .getProperty( "variables.UNIREST_VARIABLES.CHAT_SERVICE_PREFIX" );
 
     private final Gson gson = new Gson();
-    private static UnirestController serDes = new UnirestController();
+    private final static UnirestController serDes = new UnirestController();
 
-    public static UnirestController getInstance () { return serDes != null ? serDes : ( serDes = new UnirestController() ); }
+    public static UnirestController getInstance () { return serDes; }
 
     private UnirestController () { Unirest.setObjectMapper( new ObjectMapper() {
             private final com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
@@ -140,6 +139,20 @@ public final class UnirestController extends LogInspector {
             } catch ( final Exception e ) {
                 super.logging( e );
                 return Errors.DATA_NOT_FOUND.name(); } };
+
+    private final Function< Long, List< RegionData > > getRegions = regionId -> {
+            try { return this.getGson().fromJson(
+                    Unirest.get( regionId > 0
+                                    ? "http://10.254.1.1:1234/region-dictionary/api/v1/front/getDistrictByRegion/" + regionId
+                                    : "http://10.254.1.1:1234/region-dictionary/api/v1/front/getAllRegion" )
+                            .asJson()
+                            .getBody()
+                            .toString(),
+                            Regions.class )
+                    .getResData();
+            } catch ( final Exception e ) {
+                super.logging( e );
+                return Collections.emptyList(); } };
 
     @lombok.Data
     public static class Req {
