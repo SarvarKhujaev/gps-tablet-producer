@@ -49,7 +49,7 @@ public final class PatrulController extends SerDes {
                 .getGetAllEntities()
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
                 .filter( row -> params.isEmpty() || row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) ) )
-                .filter( row -> params.containsKey( "policeType" ) && row.getString( "policeType" ).contains( params.get( "policeType" ) ) )
+                .filter( row -> !params.containsKey( "policeType" ) || row.getString( "policeType" ).contains( params.get( "policeType" ) ) )
                 .map( row -> regions.get( params.isEmpty() ? row.getLong( "regionId" ) : row.getLong( "districtId" ) ).save( row ) )
                 .sequential()
                 .publishOn( Schedulers.single() )
