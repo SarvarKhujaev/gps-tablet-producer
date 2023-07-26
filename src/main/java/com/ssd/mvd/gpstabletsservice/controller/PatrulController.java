@@ -37,19 +37,23 @@ public final class PatrulController extends SerDes {
 
     @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
     public Mono< PatrulActivityResponse > getActivePatruls ( final Map< String, String > params ) {
+        final List< String > policeTypes = params.containsKey( "policeType" )
+                ? Arrays.asList( params.get( "policeType" ).split( "," ) )
+                : Collections.emptyList();
+
         final SortedMap< Long, PatrulDivisionByRegions > regions = new TreeMap<>();
         UnirestController
                 .getInstance()
                 .getGetRegions()
-                .apply( params.isEmpty() ? -1L : Long.parseLong( params.get( "regionId" ) ) )
+                .apply( params.isEmpty() ? -1L : Long.parseLong( String.valueOf( params.get( "regionId" ) ) ) )
                 .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData ) ) );
 
         return CassandraDataControl
                 .getInstance()
                 .getGetAllEntities()
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
-                .filter( row -> params.isEmpty() || row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) ) )
-                .filter( row -> !params.containsKey( "policeType" ) || row.getString( "policeType" ).contains( params.get( "policeType" ) ) )
+                .filter( row -> params.isEmpty() || row.getLong( "regionId" ) == Long.parseLong( String.valueOf( params.get( "regionId" ) ) ) )
+                .filter( row -> !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
                 .map( row -> regions.get( params.isEmpty() ? row.getLong( "regionId" ) : row.getLong( "districtId" ) ).save( row ) )
                 .sequential()
                 .publishOn( Schedulers.single() )
