@@ -17,7 +17,7 @@ import java.util.Comparator;
 import java.util.UUID;
 
 @RestController
-public class NotificationController extends LogInspector {
+public final class NotificationController extends LogInspector {
     @MessageMapping ( value = "getAllNotifications" )
     public Flux< Notification > getAllNotifications () { return CassandraDataControl
             .getInstance()

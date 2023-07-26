@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-public class CarController extends LogInspector {
+public final class CarController extends LogInspector {
     @MessageMapping( value = "carList" ) // the list of all cars
     public Flux< ReqCar > getAllCars () { return CassandraDataControl
             .getInstance()
