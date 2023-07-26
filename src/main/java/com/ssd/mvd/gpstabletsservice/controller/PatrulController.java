@@ -45,16 +45,20 @@ public final class PatrulController extends SerDes {
         UnirestController
                 .getInstance()
                 .getGetRegions()
-                .apply( params.isEmpty() ? -1L : Long.parseLong( String.valueOf( params.get( "regionId" ) ) ) )
+                .apply( !params.containsKey( "regionId" ) ? -1L : Long.parseLong( params.get( "regionId" ) ) )
                 .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData ) ) );
+
+        System.out.println( policeTypes );
 
         return CassandraDataControl
                 .getInstance()
                 .getGetAllEntities()
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
-                .filter( row -> params.isEmpty() || row.getLong( "regionId" ) == Long.parseLong( String.valueOf( params.get( "regionId" ) ) ) )
+                .filter( row -> !params.containsKey( "regionId" ) || row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) ) )
                 .filter( row -> !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
-                .map( row -> regions.get( params.isEmpty() ? row.getLong( "regionId" ) : row.getLong( "districtId" ) ).save( row ) )
+                .map( row -> regions.get( !params.containsKey( "regionId" )
+                        ? row.getLong( "regionId" )
+                        : row.getLong( "districtId" ) ).save( row ) )
                 .sequential()
                 .publishOn( Schedulers.single() )
                 .collectList()
