@@ -27,7 +27,6 @@ import com.ssd.mvd.gpstabletsservice.entity.Point;
 import com.ssd.mvd.gpstabletsservice.entity.*;
 
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
-import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.*;
 
@@ -114,13 +113,15 @@ public final class CassandraDataControl extends CassandraConverter {
                 0,
                 ViolationsInformation.class ); }
 
-    private final BiConsumer< String, Class > createType = ( typeName, object ) -> this.getSession().execute(
+    private final BiConsumer< CassandraTables, Class > createType = ( typeName, object ) -> this.getSession().execute(
             "CREATE TYPE IF NOT EXISTS "
                     + CassandraTables.TABLETS + "."
                     + typeName
                     + super.convertClassToCassandra.apply( object ) + " );" );
 
-    private void createTable ( final String tableName, final Class object, final String prefix ) {
+    private void createTable ( final CassandraTables tableName,
+                               final Class object,
+                               final String prefix ) {
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.TABLETS + "." + tableName +
                 super.convertClassToCassandra.apply( object ) + prefix ); }
@@ -141,14 +142,12 @@ public final class CassandraDataControl extends CassandraConverter {
                 .addContactPoints( "10.254.5.1, 10.254.5.2, 10.254.5.3".split( ", " ) )
                 .withProtocolVersion( ProtocolVersion.V4 )
                 .withCodecRegistry( this.getCodecRegistry() )
-                .withRetryPolicy( DefaultRetryPolicy.INSTANCE )
+                .withRetryPolicy( new CustomRetryPolicy( 3, 3, 2 ) )
                 .withQueryOptions( new QueryOptions()
                         .setDefaultIdempotence( true )
                         .setConsistencyLevel( ConsistencyLevel.QUORUM ) )
                 .withSocketOptions( options )
-                .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy
-                        .builder()
-                        .build() ) )
+                .withLoadBalancingPolicy( new TokenAwarePolicy( DCAwareRoundRobinPolicy.builder().build() ) )
                 .withPoolingOptions( new PoolingOptions()
                         .setCoreConnectionsPerHost( HostDistance.REMOTE,
                                 Integer.parseInt( GpsTabletsServiceApplication
@@ -174,45 +173,43 @@ public final class CassandraDataControl extends CassandraConverter {
                         .setMaxRequestsPerConnection( HostDistance.LOCAL, 256 )
                         .setPoolTimeoutMillis( 60000 ) ).build() ).connect() )
                 .execute( "CREATE KEYSPACE IF NOT EXISTS "
-                        + CassandraTables.TABLETS.name() +
-                        " WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy'," +
-                        "'datacenter1':3 } AND DURABLE_WRITES = false;" );
+                        + CassandraTables.TABLETS
+                        + " WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy',"
+                        + "'datacenter1':3 } AND DURABLE_WRITES = false;" );
 
-        this.createType.accept( CassandraTables.PATRUL_TYPE.name(), Patrul.class );
-        this.createType.accept( CassandraTables.POLICE_TYPE.name(), PoliceType.class );
-        this.createType.accept( CassandraTables.CAMERA_LIST.name(), CameraList.class );
-        this.createType.accept( CassandraTables.POLYGON_TYPE.name(), PolygonType.class );
-        this.createType.accept( CassandraTables.POSITION_INFO.name(), PositionInfo.class );
-        this.createType.accept( CassandraTables.POLYGON_ENTITY.name(), PolygonEntity.class );
-        this.createType.accept( CassandraTables.REPORT_FOR_CARD.name(), ReportForCard.class );
-        this.createType.accept( CassandraTables.VIOLATION_LIST_TYPE.name(), ViolationsInformation.class );
+        this.createType.accept( CassandraTables.PATRUL_TYPE, Patrul.class );
+        this.createType.accept( CassandraTables.POLICE_TYPE, PoliceType.class );
+        this.createType.accept( CassandraTables.CAMERA_LIST, CameraList.class );
+        this.createType.accept( CassandraTables.POLYGON_TYPE, PolygonType.class );
+        this.createType.accept( CassandraTables.POSITION_INFO, PositionInfo.class );
+        this.createType.accept( CassandraTables.POLYGON_ENTITY, PolygonEntity.class );
+        this.createType.accept( CassandraTables.REPORT_FOR_CARD, ReportForCard.class );
+        this.createType.accept( CassandraTables.VIOLATION_LIST_TYPE, ViolationsInformation.class );
 
-        this.createTable( CassandraTables.CARS.name(), ReqCar.class, ", PRIMARY KEY ( uuid ) );" );
-        this.createTable( CassandraTables.POLICE_TYPE.name(), PoliceType.class, ", PRIMARY KEY ( uuid ) );" );
-        this.createTable( CassandraTables.POLYGON_TYPE.name(), PolygonType.class, ", PRIMARY KEY ( uuid ) );" );
-        this.createTable( CassandraTables.TABLETS_USAGE_TABLE.name(),
-                TabletUsage.class, ", PRIMARY KEY ( uuidOfPatrul, simCardNumber ) );" );
-        this.createTable( CassandraTables.PATRULS.name(), Patrul.class,
-                ", status text, taskTypes text, listOfTasks map< text, text >, PRIMARY KEY ( uuid ) );" );
+        this.createTable( CassandraTables.CARS, ReqCar.class, ", PRIMARY KEY ( uuid ) );" );
+        this.createTable( CassandraTables.POLICE_TYPE, PoliceType.class, ", PRIMARY KEY ( uuid ) );" );
+        this.createTable( CassandraTables.POLYGON_TYPE, PolygonType.class, ", PRIMARY KEY ( uuid ) );" );
+        this.createTable( CassandraTables.TABLETS_USAGE_TABLE, TabletUsage.class, ", PRIMARY KEY ( uuidOfPatrul, simCardNumber ) );" );
+        this.createTable( CassandraTables.PATRULS, Patrul.class, ", status text, taskTypes text, listOfTasks map< text, text >, PRIMARY KEY ( uuid ) );" );
 
-        this.createTable( CassandraTables.POLYGON.name(), Polygon.class,
-                ", polygonType frozen< " + CassandraTables.POLYGON_TYPE.name() + " >, " +
+        this.createTable( CassandraTables.POLYGON, Polygon.class,
+                ", polygonType frozen< " + CassandraTables.POLYGON_TYPE + " >, " +
                         "patrulList list< uuid >, " +
-                        "latlngs list < frozen< " + CassandraTables.POLYGON_ENTITY.name() + " > >, " +
+                        "latlngs list < frozen< " + CassandraTables.POLYGON_ENTITY + " > >, " +
                         "PRIMARY KEY ( uuid ) );" );
 
-        this.createTable( CassandraTables.POLYGON_FOR_PATRUl.name(), Polygon.class,
-                ", polygonType frozen< " + CassandraTables.POLYGON_TYPE.name() + " >, " +
+        this.createTable( CassandraTables.POLYGON_FOR_PATRUl, Polygon.class,
+                ", polygonType frozen< " + CassandraTables.POLYGON_TYPE + " >, " +
                         "patrulList list< uuid >, " +
-                        "latlngs list < frozen< " + CassandraTables.POLYGON_ENTITY.name()+ " > >, " +
+                        "latlngs list < frozen< " + CassandraTables.POLYGON_ENTITY+ " > >, " +
                         "PRIMARY KEY ( uuid ) );" );
 
-        this.createTable( CassandraTables.LUSTRA.name(), AtlasLustra.class,
+        this.createTable( CassandraTables.LUSTRA, AtlasLustra.class,
                 ", cameraLists list< frozen< "
-                        + CassandraTables.CAMERA_LIST.name()
+                        + CassandraTables.CAMERA_LIST
                         + " > >, PRIMARY KEY (uuid) );" );
 
-        this.createTable ( CassandraTables.NOTIFICATION.name(), Notification.class,
+        this.createTable ( CassandraTables.NOTIFICATION, Notification.class,
                 ", taskTypes text, " +
                         "status text, " +
                         "taskStatus text, " +
