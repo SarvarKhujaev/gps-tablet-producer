@@ -48,8 +48,6 @@ public final class PatrulController extends SerDes {
                 .apply( !params.containsKey( "regionId" ) ? -1L : Long.parseLong( params.get( "regionId" ) ) )
                 .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData ) ) );
 
-        System.out.println( policeTypes );
-
         return CassandraDataControl
                 .getInstance()
                 .getGetAllEntities()
@@ -67,6 +65,9 @@ public final class PatrulController extends SerDes {
 
     @MessageMapping ( value = "GET_FILTERED_ACTIVE_PATRULS" )
     public Flux< Patrul > getFilteredActivePatruls ( final Map< String, String > params ) {
+        final List< String > policeTypes = params.containsKey( "policeType" )
+                ? Arrays.asList( params.get( "policeType" ).split( "," ) )
+                : Collections.emptyList();
         return CassandraDataControl
                 .getInstance()
                 .getGetAllEntities()
@@ -91,6 +92,7 @@ public final class PatrulController extends SerDes {
                     case FORCE -> super.checkPatrulActivity.test( row.getUUID( "uuid" ) );
 
                     default -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) ); } )
+                .filter( row -> !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
                 .map( Patrul::new )
                 .sequential()
                 .publishOn( Schedulers.single() )
