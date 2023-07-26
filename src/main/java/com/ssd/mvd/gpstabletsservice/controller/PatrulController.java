@@ -72,8 +72,6 @@ public final class PatrulController extends SerDes {
                 .getInstance()
                 .getGetAllEntities()
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
-                .sequential()
-                .publishOn( Schedulers.single() )
                 .filter( row -> row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
                         && ( !params.containsKey( "districtId" )
                         || row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) ) )
@@ -93,9 +91,11 @@ public final class PatrulController extends SerDes {
                     // патрульные которые которые никогда не заходили
                     case FORCE -> super.checkPatrulActivity.test( row.getUUID( "uuid" ) );
 
-                    default -> row.getString( "tokenForLogin" ).equals( "null" ); } )
-                .filter( row -> !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
+                    default -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) ); } )
+                .filter( row -> policeTypes.contains( row.getString( "policeType" ) ) )
                 .map( Patrul::new )
+                .sequential()
+                .publishOn( Schedulers.single() )
                 .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "ARRIVED" )

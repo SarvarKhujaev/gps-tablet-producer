@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.entity.RegionData;
 import com.datastax.driver.core.Row;
@@ -23,7 +24,10 @@ public final class PatrulDivisionByRegions {
 
     public PatrulDivisionByRegions save ( final Row row ) {
         // сохраняем патрульных которые никогда не авторизовавались в системе
-        if ( row.getString( "tokenForLogin" ).equals( "null" ) ) this.neverAuthorizedPatruls++;
+        if ( DataValidateInspector
+                .getInstance()
+                .checkPatrulActivity
+                .test( row.getUUID( "uuid" ) ) ) this.neverAuthorizedPatruls++;
         else {
             // сохраняем патрульных которые были активны последние 24 часа
             if ( TimeInspector

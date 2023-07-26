@@ -165,7 +165,7 @@ public class DataValidateInspector extends Archive {
                     + CassandraTables.CARS +
                     " WHERE gosnumber = '" + carNumber + "';" ).one() == null;
 
-    protected final Predicate< UUID > checkPatrulActivity = uuid -> CassandraDataControl
+    public final Predicate< UUID > checkPatrulActivity = uuid -> CassandraDataControl
             .getInstance()
             .getSession()
             .execute( "SELECT * FROM "
