@@ -72,7 +72,8 @@ public final class PatrulController extends SerDes {
                 .getGetAllEntities()
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
                 .filter( row -> row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
-                        && row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) )
+                        && ( !params.containsKey( "districtId" )
+                        || row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) ) )
                         && switch ( Status.valueOf( params.get( "status" ) ) ) {
                     // активные патрульные
                     case ACTIVE -> TimeInspector
