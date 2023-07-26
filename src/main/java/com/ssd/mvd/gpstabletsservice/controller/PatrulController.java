@@ -91,7 +91,7 @@ public final class PatrulController extends SerDes {
                     // патрульные которые которые никогда не заходили
                     case FORCE -> super.checkPatrulActivity.test( row.getUUID( "uuid" ) );
 
-                    default -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) ); } )
+                    default -> row.getString( "tokenForLogin" ).equals( "null" ); } )
                 .filter( row -> !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
                 .map( Patrul::new )
                 .sequential()
