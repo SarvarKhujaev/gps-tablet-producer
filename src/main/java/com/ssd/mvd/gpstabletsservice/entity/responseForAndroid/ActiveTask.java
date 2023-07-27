@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.entity.responseForAndroid;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Date;
 import java.util.UUID;
@@ -66,7 +65,7 @@ public final class ActiveTask {
         this.setStatus( status );
         this.setTaskId( taskId );
         this.setType( taskTypes.name() );
-        this.setPatrulList( Collections.emptyMap() );
+        this.setPatrulList( patrulList );
         this.setCreatedDate( TimeInspector.getInspector().getGetNewDate().get() );
 
         switch ( taskTypes ) {
