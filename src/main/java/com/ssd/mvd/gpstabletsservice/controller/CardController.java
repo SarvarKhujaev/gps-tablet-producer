@@ -450,11 +450,9 @@ public class CardController extends SerDes {
 
     @MessageMapping ( value = "getTaskTimingStatistics" )
     public Mono<TaskTimingStatisticsList> getTaskTimingStatistics ( final TaskTimingRequest request ) {
-        return super.checkRequest.test( request, 8 )
-                ? CassandraDataControlForTasks
+        return CassandraDataControlForTasks
                 .getInstance()
                 .getGetTaskTimingStatistics()
                 .apply( request )
-                .onErrorContinue( super::logging )
-                : Mono.empty(); }
+                .onErrorContinue( super::logging ); }
 }
