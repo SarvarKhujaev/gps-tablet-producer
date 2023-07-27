@@ -11,16 +11,13 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.extern.jackson.Jacksonized;
 import java.util.*;
 
 @lombok.Data
-@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
-public class FaceEvent {
+public final class FaceEvent {
     private String name;
     private String comment; // Ф.И.О
     private String dossier_photo;

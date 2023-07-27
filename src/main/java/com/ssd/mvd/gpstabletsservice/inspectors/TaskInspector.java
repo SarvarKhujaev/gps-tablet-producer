@@ -421,9 +421,9 @@ public final class TaskInspector extends SerDes {
                         && DataValidateInspector
                         .getInstance()
                         .checkParam
-                        .test( carEvents.getDataInfo().getData() ) ) {
-                    patrul.setLatitudeOfTask( carEvents.getDataInfo().getData().getLatitude() );
-                    patrul.setLongitudeOfTask( carEvents.getDataInfo().getData().getLongitude() ); } }
+                        .test( carEvents.getDataInfo().getCadaster() ) ) {
+                    patrul.setLatitudeOfTask( carEvents.getDataInfo().getCadaster().getLatitude() );
+                    patrul.setLongitudeOfTask( carEvents.getDataInfo().getCadaster().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( TimeInspector
                     .getInspector()
                     .getGetNewDate()
@@ -492,9 +492,9 @@ public final class TaskInspector extends SerDes {
                         && DataValidateInspector
                         .getInstance()
                         .checkParam
-                        .test( faceEvent.getDataInfo().getData() ) ) {
-                    patrul.setLatitudeOfTask( faceEvent.getDataInfo().getData().getLatitude() );
-                    patrul.setLongitudeOfTask( faceEvent.getDataInfo().getData().getLongitude() ); } }
+                        .test( faceEvent.getDataInfo().getCadaster() ) ) {
+                    patrul.setLatitudeOfTask( faceEvent.getDataInfo().getCadaster().getLatitude() );
+                    patrul.setLongitudeOfTask( faceEvent.getDataInfo().getCadaster().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( TimeInspector
                     .getInspector()
                     .getGetNewDate()

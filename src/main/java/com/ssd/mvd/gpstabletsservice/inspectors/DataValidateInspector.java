@@ -72,7 +72,7 @@ public class DataValidateInspector extends Archive {
             case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
             case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null && ( (AndroidVersionUpdate) o ).getLink() != null;
             case 8 -> ( (TaskTimingRequest) o ).getStartDate() != null && ( (TaskTimingRequest) o ).getEndDate() != null;
-            case 9 -> this.checkParam.test( o ) && this.checkParam.test( ( (DataInfo) o ).getData() );
+            case 9 -> this.checkParam.test( o ) && this.checkParam.test( ( (DataInfo) o ).getCadaster() );
             default -> ( (PatrulLoginRequest) o ).getLogin() != null
                     && ( (PatrulLoginRequest) o ).getPassword() != null
                     && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };

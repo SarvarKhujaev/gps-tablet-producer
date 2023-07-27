@@ -154,8 +154,8 @@ public final class PersonDetails {
                 && DataValidateInspector
                 .getInstance()
                 .checkParam
-                .test( faceEvent.getDataInfo().getData() )
-                ? faceEvent.getDataInfo().getData().getIp()
+                .test( faceEvent.getDataInfo().getCadaster() )
+                ? faceEvent.getDataInfo().getCadaster().getIp()
                 : null );
 
         // в случае если псих портрет отсутствует то возмем отсюда
