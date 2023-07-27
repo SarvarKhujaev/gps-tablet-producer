@@ -46,9 +46,9 @@ public class Notification {
                 .getInstance()
                 .checkRequest
                 .test( dataInfo, 9 ) ) {
-            this.setLongitudeOfTask( dataInfo.getData().getLongitude() );
-            this.setLatitudeOfTask( dataInfo.getData().getLatitude() );
-            this.setAddress( dataInfo.getData().getAddress() ); } }
+            this.setLongitudeOfTask( dataInfo.getCadaster().getLongitude() );
+            this.setLatitudeOfTask( dataInfo.getCadaster().getLatitude() );
+            this.setAddress( dataInfo.getCadaster().getAddress() ); } }
 
     public Notification ( final Row row ) {
         this.setId( row.getString( "id" ) );

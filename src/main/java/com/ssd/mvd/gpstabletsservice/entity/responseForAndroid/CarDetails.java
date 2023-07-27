@@ -90,8 +90,8 @@ public final class CarDetails {
                 && DataValidateInspector
                 .getInstance()
                 .checkParam
-                .test( carEvent.getDataInfo().getData() )
-                ? carEvent.getDataInfo().getData().getIp()
+                .test( carEvent.getDataInfo().getCadaster() )
+                ? carEvent.getDataInfo().getCadaster().getIp()
                 : null );
 
         this.setThumbnail( carEvent.getThumbnail() ); // short version of the image from camera

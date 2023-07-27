@@ -46,12 +46,13 @@ public final class ActiveTask {
                 .getInstance()
                 .checkRequest
                 .test( dataInfo, 9 ) ) {
-            this.setRegion( dataInfo.getData().getRegion() );
-            this.setAddress( dataInfo.getData().getAddress() );
-            this.setLatitude( dataInfo.getData().getLatitude() );
-            this.setDistrict( dataInfo.getData().getDistrict() );
-            this.setLongitude( dataInfo.getData().getLongitude() );
-            this.setCountryside( dataInfo.getData().getCountryside() ); } }
+            System.out.println( dataInfo.getCadaster() );
+            this.setRegion( dataInfo.getCadaster().getRegion() );
+            this.setAddress( dataInfo.getCadaster().getAddress() );
+            this.setLatitude( dataInfo.getCadaster().getLatitude() );
+            this.setDistrict( dataInfo.getCadaster().getDistrict() );
+            this.setLongitude( dataInfo.getCadaster().getLongitude() );
+            this.setCountryside( dataInfo.getCadaster().getCountryside() ); } }
 
     public ActiveTask (
             final Object object,

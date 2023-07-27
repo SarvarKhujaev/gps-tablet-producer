@@ -36,7 +36,7 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 
 @RestController
-public class CardController extends SerDes {
+public final class CardController extends SerDes {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping ( value = "getListOfCards" )
@@ -449,7 +449,7 @@ public class CardController extends SerDes {
                         return super.getFunction().apply( Map.of( "message", request.getCard() + " has got new patrul" ) ); } ); }; }
 
     @MessageMapping ( value = "getTaskTimingStatistics" )
-    public Mono<TaskTimingStatisticsList> getTaskTimingStatistics ( final TaskTimingRequest request ) {
+    public Mono< TaskTimingStatisticsList > getTaskTimingStatistics ( final TaskTimingRequest request ) {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getGetTaskTimingStatistics()
