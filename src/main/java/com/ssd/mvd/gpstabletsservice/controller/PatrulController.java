@@ -73,10 +73,9 @@ public final class PatrulController extends SerDes {
                 .getInstance()
                 .getGetAllEntities()
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
-                .filter( row -> policeTypes.contains( row.getString( "policeType" ) )
+                .filter( row -> ( !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
                         && row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
-                        && ( !params.containsKey( "districtId" )
-                        || row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) ) )
+                        && ( !params.containsKey( "districtId" ) || row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) ) )
                         && switch ( Status.valueOf( params.get( "status" ) ) ) {
                     // активные патрульные
                     case ACTIVE -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) )
@@ -95,6 +94,7 @@ public final class PatrulController extends SerDes {
                     // патрульные которые которые никогда не заходили
                     case FORCE -> super.checkPatrulActivity.test( row.getUUID( "uuid" ) );
 
+                    // патрульные которые которые заходили хотя бы раз
                     default -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) ); } )
                 .map( Patrul::new )
                 .sequential()
