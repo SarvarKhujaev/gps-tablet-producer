@@ -54,8 +54,8 @@ public final class PatrulController extends SerDes {
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
                 .sequential()
                 .publishOn( Schedulers.single() )
-                .filter( row -> !params.containsKey( "regionId" ) || row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) ) )
-                .filter( row -> !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
+                .filter( row -> ( !params.containsKey( "regionId" ) || row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) ) )
+                        && ( !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) ) )
                 .map( row -> regions.get( !params.containsKey( "regionId" )
                         ? row.getLong( "regionId" )
                         : row.getLong( "districtId" ) ).save( row ) )
@@ -68,22 +68,26 @@ public final class PatrulController extends SerDes {
         final List< String > policeTypes = params.containsKey( "policeType" )
                 ? Arrays.asList( params.get( "policeType" ).split( "," ) )
                 : Collections.emptyList();
+
         return CassandraDataControl
                 .getInstance()
                 .getGetAllEntities()
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
-                .filter( row -> row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
+                .filter( row -> policeTypes.contains( row.getString( "policeType" ) )
+                        && row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
                         && ( !params.containsKey( "districtId" )
                         || row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) ) )
                         && switch ( Status.valueOf( params.get( "status" ) ) ) {
                     // активные патрульные
-                    case ACTIVE -> TimeInspector
+                    case ACTIVE -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) )
+                            && TimeInspector
                             .getInspector()
                             .getGetTimeDifference()
                             .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) <= 24;
 
                     // не активные патрульные
-                    case IN_ACTIVE -> TimeInspector
+                    case IN_ACTIVE -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) )
+                            && TimeInspector
                             .getInspector()
                             .getGetTimeDifference()
                             .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) > 24;
@@ -92,7 +96,6 @@ public final class PatrulController extends SerDes {
                     case FORCE -> super.checkPatrulActivity.test( row.getUUID( "uuid" ) );
 
                     default -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) ); } )
-                .filter( row -> policeTypes.contains( row.getString( "policeType" ) ) )
                 .map( Patrul::new )
                 .sequential()
                 .publishOn( Schedulers.single() )
