@@ -12,7 +12,7 @@ import java.util.UUID;
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties ( ignoreUnknown = true )
-public class ReportForCard { // creates when some of Patrul from current Card has finished the work and has written the report about everything he has done
+public final class ReportForCard { // creates when some of Patrul from current Card has finished the work and has written the report about everything he has done
     private Double lan;
     private Double lat;
 

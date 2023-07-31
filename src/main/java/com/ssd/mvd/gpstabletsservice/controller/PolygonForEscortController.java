@@ -15,10 +15,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class PolygonForEscortController extends LogInspector {
+public final class PolygonForEscortController extends LogInspector {
 
     @MessageMapping ( value = "getAllPolygonForEscort" )
-    public Flux<PolygonForEscort> getAllPolygonForEscort () { return CassandraDataControl
+    public Flux< PolygonForEscort > getAllPolygonForEscort () { return CassandraDataControl
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.ESCORT, CassandraTables.POLYGON_FOR_ESCORT )
@@ -27,13 +27,13 @@ public class PolygonForEscortController extends LogInspector {
             .publishOn( Schedulers.single() ); }
 
     @MessageMapping ( value = "getCurrentPolygonForEscort" )
-    public Mono< PolygonForEscort > getAllPolygonForEscort ( String id ) { return CassandraDataControlForEscort
+    public Mono< PolygonForEscort > getAllPolygonForEscort ( final String id ) { return CassandraDataControlForEscort
             .getInstance()
             .getGetCurrentPolygonForEscort()
             .apply( id ); }
 
     @MessageMapping ( value = "deletePolygonForEscort" )
-    public Mono< ApiResponseModel > deletePolygonForEscort ( String id ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > deletePolygonForEscort ( final String id ) { return CassandraDataControlForEscort
             .getInstance()
             .getDeletePolygonForEscort()
             .apply( id )

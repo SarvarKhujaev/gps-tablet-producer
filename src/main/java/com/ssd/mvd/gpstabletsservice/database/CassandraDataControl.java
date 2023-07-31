@@ -441,14 +441,14 @@ public final class CassandraDataControl extends CassandraConverter {
     private final Function< ReqCar, Mono< ApiResponseModel > > updateCar = reqCar ->
             this.getGetCarByUUID().apply( reqCar.getUuid() )
                     .flatMap( reqCar1 -> {
-                        if ( Optional.ofNullable( reqCar )
+                        if ( Optional.of( reqCar )
                                 .filter( reqCar2 -> !reqCar.getTrackerId().equals( reqCar1.getTrackerId() )
                                         && !super.checkTracker.test( reqCar.getTrackerId() ) )
                                 .isPresent() ) return super.getFunction().apply(
                                         Map.of( "message", "Wrong TrackerId",
                                                 "success", false,
                                                 "code", 201 ) );
-                        if ( Optional.ofNullable( reqCar )
+                        if ( Optional.of( reqCar )
                                 .filter( reqCar2 -> !reqCar.getPatrulPassportSeries().equals( reqCar1.getPatrulPassportSeries() ) )
                                 .isPresent() ) {
                             this.getSession().execute ( "UPDATE "
@@ -1302,7 +1302,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                                 .getInspector()
                                                 .getGetNewDate()
                                                 .get() );
-                                        Optional.ofNullable( patrul )
+                                        Optional.of( patrul )
                                                 .filter( patrul2 -> !patrul.getSimCardNumber().equals( "null" )
                                                         && !patrul.getSimCardNumber().equals( patrulLoginRequest.getSimCardNumber() ) )
                                                 .ifPresent( patrul2 -> this.getUpdateStatus().accept( patrul, LOGOUT ) );
@@ -1395,12 +1395,12 @@ public final class CassandraDataControl extends CassandraConverter {
                         this.getUpdateStatus().accept( patrul, CANCEL );
                         return TaskInspector
                                 .getInstance()
-                                .getGetTaskData()
+                                .getTaskData
                                 .apply( patrul, TaskTypes.FREE )
                                 .flatMap( apiResponseModel -> super.errorResponseForLateComing.get() ); }
                     else return TaskInspector
                             .getInstance()
-                            .getChangeTaskStatus()
+                            .changeTaskStatus
                             .apply( patrul, ARRIVED ); }
 
                 else if ( super.checkEquality.test( status, LOGOUT ) ) {
@@ -1413,7 +1413,7 @@ public final class CassandraDataControl extends CassandraConverter {
 
                 else if ( super.checkEquality.test( status, ACCEPTED ) ) return TaskInspector
                         .getInstance()
-                        .getChangeTaskStatus()
+                        .changeTaskStatus
                         .apply( patrul, ACCEPTED );
 
                 else return super.getFunction().apply(

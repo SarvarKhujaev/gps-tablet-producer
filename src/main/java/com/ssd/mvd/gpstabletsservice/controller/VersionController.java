@@ -10,7 +10,7 @@ import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class VersionController extends LogInspector {
+public final class VersionController extends LogInspector {
     @MessageMapping ( value = "saveLastVersion" )
     public Mono< ApiResponseModel > saveLastVersion ( final AndroidVersionUpdate androidVersionUpdate ) {
         return super.checkRequest.test( androidVersionUpdate, 7 )

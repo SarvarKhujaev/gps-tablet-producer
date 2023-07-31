@@ -37,7 +37,7 @@ public final class SelfEmploymentController extends SerDes {
             .apply( reportForCard.getUuidOfPatrul() )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
-                    .getSaveReportForTask()
+                    .saveReportForTask
                     .apply( patrul, reportForCard ) )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }

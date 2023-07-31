@@ -31,7 +31,8 @@ public final class CodecRegistration extends TypeCodec< Object > {
         this.userType = (UserType)innerCodec.getCqlType(); }
 
     @Override
-    public ByteBuffer serialize ( final Object patrul, final ProtocolVersion protocolVersion ) throws InvalidTypeException { return innerCodec.serialize( this.toUDTValue( patrul ), protocolVersion ); }
+    public ByteBuffer serialize ( final Object o, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
+        return innerCodec.serialize( this.toUDTValue( o ), protocolVersion ); }
 
     @Override
     public Object deserialize ( final ByteBuffer bytes, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
@@ -40,7 +41,7 @@ public final class CodecRegistration extends TypeCodec< Object > {
     @Override
     public Object parse( final String value ) throws InvalidTypeException {
         return value == null || value.isEmpty() || value.equalsIgnoreCase("NULL" )
-                ? null : toAddress( innerCodec.parse( value ) ); }
+                ? null : this.toAddress( innerCodec.parse( value ) ); }
 
     @Override
     public String format( final Object o ) throws InvalidTypeException {

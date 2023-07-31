@@ -15,7 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class CountryController extends LogInspector {
+public final class CountryController extends LogInspector {
     @MessageMapping ( value = "getAllCountries" )
     public Flux< Country > getAllCountries () { return CassandraDataControl
             .getInstance()

@@ -1,8 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin;
 
 import java.util.*;
-import lombok.extern.jackson.Jacksonized;
-
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
@@ -13,11 +11,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @lombok.Data
-@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
-public class EventCar {
+public final class EventCar {
     private Status status = Status.CREATED;
     private Integer camera;
     private Boolean matched;

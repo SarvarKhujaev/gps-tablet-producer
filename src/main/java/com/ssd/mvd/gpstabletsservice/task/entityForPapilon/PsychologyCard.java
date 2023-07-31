@@ -8,7 +8,7 @@ import java.util.List;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class PsychologyCard {
+public final class PsychologyCard {
     @JsonDeserialize
     private Pinpp pinpp;
     private String personImage; // the image of the person

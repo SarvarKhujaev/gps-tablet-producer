@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 @RestController
-public class SosController extends LogInspector {
+public final class SosController extends LogInspector {
     @MessageMapping( value = "getAllSosEntities" )
     public Flux< PatrulSos > getAllSosEntities () { return CassandraDataControl
             .getInstance()

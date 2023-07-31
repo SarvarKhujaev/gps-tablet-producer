@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-public class PolygonController extends LogInspector {
+public final class PolygonController extends LogInspector {
 
     @MessageMapping( value = "deletePolygon" )
     public Mono< ApiResponseModel > deletePolygon ( final String uuid ) { return CassandraDataControl

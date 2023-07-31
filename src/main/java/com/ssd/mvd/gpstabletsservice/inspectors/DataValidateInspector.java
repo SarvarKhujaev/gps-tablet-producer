@@ -56,26 +56,31 @@ public class DataValidateInspector extends Archive {
             default -> String.valueOf( o ).replaceAll( "'", "" ); };
 
     public final BiPredicate< Object, Integer > checkRequest = ( o, value ) -> switch ( value ) {
-            case 1 -> ( (Point) o ).getLatitude() != null && ( (Point) o ).getLongitude() != null;
-            case 2 -> ( (PatrulActivityRequest) o ).getStartDate() != null && ( (PatrulActivityRequest) o ).getEndDate() != null;
+            case 1 -> this.checkParam.test( ( (Point) o ).getLatitude() )
+                    && this.checkParam.test( ( (Point) o ).getLongitude() );
+            case 2 -> this.checkParam.test( ( (PatrulActivityRequest) o ).getStartDate() )
+                    && this.checkParam.test( ( (PatrulActivityRequest) o ).getEndDate() );
             case 3 -> ( (Patrul) o ).getTaskId().equals( "null" )
                     && ( (Patrul) o ).getUuidOfEscort() == null
                     && ( (Patrul) o ).getUuidForPatrulCar() == null
                     && ( (Patrul) o ).getUuidForEscortCar() == null
                     && ( (Patrul) o ).getCarNumber().equals( "null" )
                     && ( (Patrul) o ).getTaskTypes().compareTo( TaskTypes.FREE ) == 0;
-            case 4 -> ( (PatrulSos) o ).getPatrulStatuses() != null && ( (PatrulSos) o ).getPatrulStatuses().size() > 19;
+            case 4 -> this.checkParam.test( ( (PatrulSos) o ).getPatrulStatuses() )
+                    && ( (PatrulSos) o ).getPatrulStatuses().size() > 19;
             case 5 -> Math.abs( TimeInspector
                     .getInspector()
                     .getGetTimeDifference()
                     .apply( ( (Date) o ).toInstant(), 1 ) ) >= 24;
-            case 6 -> o != null && ( ( List< ? > ) o ).size() > 0;
-            case 7 -> ( (AndroidVersionUpdate) o ).getVersion() != null && ( (AndroidVersionUpdate) o ).getLink() != null;
-            case 8 -> ( (TaskTimingRequest) o ).getStartDate() != null && ( (TaskTimingRequest) o ).getEndDate() != null;
+            case 6 -> o != null && !( ( List< ? > ) o ).isEmpty();
+            case 7 -> this.checkParam.test( ( (AndroidVersionUpdate) o ).getVersion() )
+                    && this.checkParam.test( ( (AndroidVersionUpdate) o ).getLink() );
+            case 8 -> this.checkParam.test( ( (TaskTimingRequest) o ).getStartDate() )
+                    && this.checkParam.test( ( (TaskTimingRequest) o ).getEndDate() );
             case 9 -> this.checkParam.test( o ) && this.checkParam.test( ( (DataInfo) o ).getCadaster() );
-            default -> ( (PatrulLoginRequest) o ).getLogin() != null
-                    && ( (PatrulLoginRequest) o ).getPassword() != null
-                    && ( (PatrulLoginRequest) o ).getSimCardNumber() != null; };
+            default -> this.checkParam.test( ( (PatrulLoginRequest) o ).getLogin() )
+                    && this.checkParam.test( ( (PatrulLoginRequest) o ).getPassword() )
+                    && this.checkParam.test( ( (PatrulLoginRequest) o ).getSimCardNumber() ); };
 
     protected final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
 
@@ -93,7 +98,7 @@ public class DataValidateInspector extends Archive {
 
     protected final BiPredicate< TaskTimingRequest, Row > checkTaskType = ( request, row ) ->
             request.getTaskType() == null
-            || request.getTaskType().size() == 0
+            || request.getTaskType().isEmpty()
             || request.getTaskType().contains( TaskTypes.valueOf( row.getString( "tasktypes" ) ) );
 
     protected final Predicate< UUID > checkSosTable = patrulUUID -> CassandraDataControl

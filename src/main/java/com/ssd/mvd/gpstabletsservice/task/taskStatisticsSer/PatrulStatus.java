@@ -4,7 +4,7 @@ import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 
 @lombok.Data
-public class PatrulStatus {
+public final class PatrulStatus {
     private Patrul patrul;
     private Boolean inTime; // показывает пришел ли Патрульный вовремя
     private Long totalTimeConsumption; // показывает сколько времени Патрульный потратил на всю задачу от начала до конца

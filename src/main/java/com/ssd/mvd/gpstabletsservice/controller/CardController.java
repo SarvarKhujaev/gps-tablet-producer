@@ -60,7 +60,7 @@ public final class CardController extends SerDes {
                     .apply( token ) )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
-                    .getGetTaskData()
+                    .getTaskData
                     .apply( patrul, TaskTypes.ACTIVE_TASK ) )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
@@ -259,7 +259,7 @@ public final class CardController extends SerDes {
                 .filter( patrul -> patrul.getTaskTypes().compareTo( TaskTypes.FREE ) != 0 )
                 .flatMap( patrul -> TaskInspector
                         .getInstance()
-                        .getGetTaskData()
+                        .getTaskData
                         .apply( patrul, TaskTypes.FREE ) )
                 .onErrorContinue( super::logging )
                 .onErrorReturn( super.getErrorResponse().get() ); }

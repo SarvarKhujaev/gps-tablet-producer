@@ -1,6 +1,5 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
-import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 
 @RestController
-public class PolygonForPatrulController extends LogInspector { // SAM - 76
+public final class PolygonForPatrulController extends LogInspector {
     @MessageMapping( value = "listOfPoligonsForPatrul" )
     public Flux< Polygon > listOfPoligonsForPatrul () { return CassandraDataControl
             .getInstance()
@@ -32,8 +31,8 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getPatrulsForPolygon" )
-    public Mono< List< Patrul > > getPatrulsForPolygon ( String uuid ) {
-        List< Patrul > patrulList = new ArrayList<>();
+    public Mono< List< Patrul > > getPatrulsForPolygon ( final String uuid ) {
+        final List< Patrul > patrulList = new ArrayList<>();
         CassandraDataControl
                 .getInstance()
                 .getGetPolygonForPatrul()
@@ -44,10 +43,10 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
                         .getGetPatrulByUUID()
                         .apply( uuid1 )
                         .subscribe( patrulList::add ) ) );
-        return Mono.just( patrulList ); }
+        return super.convert( patrulList ); }
 
     @MessageMapping ( value = "deletePolygonForPatrul" )
-    public Mono< ApiResponseModel > deletePolygonForPatrul ( String uuid ) { return CassandraDataControl
+    public Mono< ApiResponseModel > deletePolygonForPatrul ( final String uuid ) { return CassandraDataControl
             .getInstance()
             .getDeletePolygonForPatrul()
             .apply( uuid )
@@ -55,7 +54,7 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
             .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "addPolygonForPatrul" )
-    public Mono< ApiResponseModel > addPolygonForPatrul ( Polygon polygon ) {
+    public Mono< ApiResponseModel > addPolygonForPatrul ( final Polygon polygon ) {
         polygon.setName( polygon.getName().replaceAll( "'", "" ) );
         return CassandraDataControl
                 .getInstance()
@@ -65,7 +64,7 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
                 .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "updatePolygonForPatrul" )
-    public Mono< ApiResponseModel > updatePolygonForPatrul ( Polygon polygon ) {
+    public Mono< ApiResponseModel > updatePolygonForPatrul ( final Polygon polygon ) {
         polygon.setName( polygon.getName().replaceAll( "'", "" ) );
         return CassandraDataControl
                 .getInstance()
@@ -75,12 +74,9 @@ public class PolygonForPatrulController extends LogInspector { // SAM - 76
                 .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "addPatrulToPolygon" )
-    public Mono< ApiResponseModel > addPatrulToPolygon ( ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
+    public Mono< ApiResponseModel > addPatrulToPolygon ( final ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return super.checkRequest.test( scheduleForPolygonPatrul.getPatrulUUIDs(), 6 )
-                ? super.getFunction().apply(
-                        Map.of( "message", "Wrong params",
-                                "success", false,
-                                "code", 201 ) )
+                ? super.getErrorResponseForWrongParams().get()
                 : CassandraDataControl
                 .getInstance()
                 .getAddPatrulToPolygon()

@@ -17,9 +17,9 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-public class EscortController extends LogInspector {
+public final class EscortController extends LogInspector {
     @MessageMapping ( value = "getAllEscort" )
-    public Flux<EscortTuple> getAllTupleOfPatrul () { return CassandraDataControl
+    public Flux< EscortTuple > getAllTupleOfPatrul () { return CassandraDataControl
             .getInstance()
             .getGetAllEntities()
             .apply( CassandraTables.ESCORT, CassandraTables.TUPLE_OF_ESCORT )
@@ -28,7 +28,7 @@ public class EscortController extends LogInspector {
             .publishOn( Schedulers.single() ); }
 
     @MessageMapping ( value = "getTupleTotalData" )
-    public Mono<TupleTotalData> getTupleTotalData (final String uuid ) { return CassandraDataControlForEscort
+    public Mono<TupleTotalData> getTupleTotalData ( final String uuid ) { return CassandraDataControlForEscort
             .getInstance()
             .getGetTupleTotalData()
             .apply( uuid, new TupleTotalData() ); }

@@ -136,7 +136,7 @@ public final class PatrulController extends SerDes {
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< ApiResponseModel > getTaskDetails ( final Data data ) { return TaskInspector
             .getInstance()
-            .getGetTaskData()
+            .getTaskData
             .apply( this.objectMapper.convertValue( data.getData(), new TypeReference<>() {} ), TaskTypes.CARD_DETAILS )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
@@ -286,7 +286,7 @@ public final class PatrulController extends SerDes {
             .getInstance()
             .getGetPatrulByUUID()
             .apply( UUID.fromString( uuid ) )
-            .flatMap( patrul -> patrul.getListOfTasks().keySet().size() > 0
+            .flatMap( patrul -> super.checkRequest.test( patrul.getListOfTasks().keySet(), 6 )
                     ? TaskInspector
                             .getInstance()
                             .getListOfPatrulTasks( patrul,
@@ -308,7 +308,7 @@ public final class PatrulController extends SerDes {
                     .getInstance()
                     .getDecode()
                     .apply( request.getData() ) )
-            .flatMap( patrul -> patrul.getListOfTasks().keySet().size() > 0
+            .flatMap( patrul -> super.checkRequest.test( patrul.getListOfTasks().keySet(), 6 )
                     ? TaskInspector
                     .getInstance()
                     .getListOfPatrulTasks(
@@ -368,7 +368,7 @@ public final class PatrulController extends SerDes {
                 .apply( point )
                 .onErrorContinue( super::logging )
                 .onErrorReturn( new PatrulInRadiusList() )
-                : Mono.empty(); }
+                : super.convert( new PatrulInRadiusList() ); }
 
     @MessageMapping ( value = "GET_TABLETS_USAGE_STATISTICS" )
     public Mono< TabletUsageStatistics > getTabletsUsageStatistics ( final PatrulActivityRequest request ) {

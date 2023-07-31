@@ -6,16 +6,13 @@ import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import lombok.extern.jackson.Jacksonized;
 import java.util.List;
 
 @lombok.Data
-@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties ( ignoreUnknown = true )
-public class CarTotalData {
+public final class CarTotalData {
     private String gosNumber;
     private String cameraImage; // image which was made by camera
 
