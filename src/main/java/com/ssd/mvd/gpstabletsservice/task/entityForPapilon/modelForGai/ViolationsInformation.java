@@ -5,7 +5,7 @@ import com.datastax.driver.core.UDTValue;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class ViolationsInformation {
+public final class ViolationsInformation {
     private Integer decreeStatus;
     private Integer amount;
 
@@ -19,7 +19,7 @@ public class ViolationsInformation {
     private String model;
     private String bill;
 
-    public ViolationsInformation( UDTValue value ) {
+    public ViolationsInformation ( final UDTValue value ) {
         this.setAmount( value.getInt( "amount" ) );
         this.setDecreeStatus( value.getInt( "decreeStatus" ) );
 

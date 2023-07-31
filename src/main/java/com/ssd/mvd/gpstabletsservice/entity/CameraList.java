@@ -5,7 +5,7 @@ import com.datastax.driver.core.UDTValue;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class CameraList {
+public final class CameraList {
     private String rtspLink;
     private String cameraName;
 

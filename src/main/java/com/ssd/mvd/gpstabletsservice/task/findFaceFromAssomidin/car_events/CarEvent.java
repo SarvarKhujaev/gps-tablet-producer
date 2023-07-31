@@ -10,16 +10,13 @@ import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.card.VictimHumans;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-
-import lombok.extern.jackson.Jacksonized;
 import java.util.*;
 
 @lombok.Data
-@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
-public class CarEvent {
+public final class CarEvent {
     private String name;
     private String comment;
     private String dossier_photo;
@@ -142,5 +139,5 @@ public class CarEvent {
     @JsonDeserialize
     private List< ReportForCard > reportForCardList = new ArrayList<>(); // the list of reports for the current card
     @JsonDeserialize
-    private Map< String, PatrulStatus> patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
+    private Map< String, PatrulStatus > patrulStatuses = new HashMap<>(); // the final status with info the time and Statuses
 }

@@ -30,15 +30,12 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventFace;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForEscort;
-import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FIND_FACE_CAR;
-import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.SELF_EMPLOYMENT;
 import com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask.SelfEmploymentTask;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.TaskTimingStatistics;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulActivityRequest;
 
-@lombok.Data
 public final class TaskInspector extends SerDes {
     private final static TaskInspector taskInspector = new TaskInspector();
 
@@ -134,7 +131,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, CARD_102 );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.updateTotalTimeConsumption.accept( patrul, CARD_102 );
                 else card.getPatruls().remove( CassandraDataControlForTasks
                             .getInstance()
                             .getDeleteRowFromTaskTimingTable()
@@ -145,7 +142,7 @@ public final class TaskInspector extends SerDes {
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( card.getUUID().toString() );
-                    if ( card.getPatruls().size() != 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
+                    if ( !card.getPatruls().isEmpty() ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
@@ -160,8 +157,8 @@ public final class TaskInspector extends SerDes {
                 patrul.setTaskId( null ); }
             case ATTACHED -> {
                 patrul.setTaskTypes( CARD_102 );
-                patrul.setLatitudeOfTask( card.getLatitude() );
                 patrul.setTaskId( card.getUUID().toString() ); // saving card id into patrul object
+                patrul.setLatitudeOfTask( card.getLatitude() );
                 patrul.setLongitudeOfTask( card.getLongitude() ); }
             case ACCEPTED -> patrul.setTaskDate( TimeInspector
                     .getInspector()
@@ -169,7 +166,7 @@ public final class TaskInspector extends SerDes {
                     .get() ); // fixing time when patrul started this task
             case ARRIVED -> card.getPatrulStatuses().put(
                     patrul.getPassportNumber(),
-                    this.getSaveTaskTiming().apply( patrul, CARD_102 ) ); }
+                    this.saveTaskTiming.apply( patrul, CARD_102 ) ); }
 
         if ( status.compareTo( CANCEL ) != 0 ) card.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
 
@@ -197,7 +194,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_CAR );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.updateTotalTimeConsumption.accept( patrul, FIND_FACE_EVENT_CAR );
                 else eventCar.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -209,7 +206,7 @@ public final class TaskInspector extends SerDes {
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( eventCar.getUUID().toString() );
-                    if ( eventCar.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
+                    if ( !eventCar.getPatruls().isEmpty() ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
@@ -233,7 +230,7 @@ public final class TaskInspector extends SerDes {
                     .get() ); // fixing time when patrul started this task
             case ARRIVED -> eventCar.getPatrulStatuses().put(
                     patrul.getPassportNumber(),
-                    this.getSaveTaskTiming().apply( patrul, FIND_FACE_EVENT_CAR ) ); }
+                    this.saveTaskTiming.apply( patrul, FIND_FACE_EVENT_CAR ) ); }
 
         if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
                 .getInstance()
@@ -261,7 +258,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_FACE );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.updateTotalTimeConsumption.accept( patrul, FIND_FACE_EVENT_FACE );
                 else eventFace.getPatruls().remove( // убираем патрульного из задачи
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -273,10 +270,10 @@ public final class TaskInspector extends SerDes {
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( eventFace.getUUID().toString() );
-                    if ( eventFace.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
+                    if ( !eventFace.getPatruls().isEmpty() ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
-                            .accept( new ActiveTask(
+                            .accept( new ActiveTask (
                                     eventFace,
                                     eventFace.getUUID().toString(),
                                     eventFace.getId(),
@@ -297,7 +294,7 @@ public final class TaskInspector extends SerDes {
                     .get() ); // fixing time when patrul started this task
             case ARRIVED -> eventFace.getPatrulStatuses().putIfAbsent(
                     patrul.getPassportNumber(),
-                    this.getSaveTaskTiming().apply( patrul, FIND_FACE_PERSON ) ); }
+                    this.saveTaskTiming.apply( patrul, FIND_FACE_PERSON ) ); }
 
         if ( status.compareTo( CANCEL ) != 0 ) eventFace.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
 
@@ -325,7 +322,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_EVENT_BODY );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.updateTotalTimeConsumption.accept( patrul, FIND_FACE_EVENT_BODY );
                 else eventBody.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -337,7 +334,7 @@ public final class TaskInspector extends SerDes {
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( eventBody.getUUID().toString() );
-                    if ( eventBody.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
+                    if ( !eventBody.getPatruls().isEmpty() ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
@@ -360,7 +357,9 @@ public final class TaskInspector extends SerDes {
                     .getGetNewDate()
                     .get() ); // fixing time when patrul started this task
             case ARRIVED -> eventBody.getPatrulStatuses().putIfAbsent(
-                    patrul.getPassportNumber(), this.getSaveTaskTiming().apply( patrul, FIND_FACE_PERSON ) ); }
+                    patrul.getPassportNumber(),
+                    this.saveTaskTiming.apply( patrul, FIND_FACE_PERSON ) ); }
+
         if ( status.compareTo( CANCEL ) != 0 ) eventBody.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
         if ( eventBody.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
                 .getInstance()
@@ -386,7 +385,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_CAR );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.updateTotalTimeConsumption.accept( patrul, FIND_FACE_CAR );
                 else carEvents.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -398,7 +397,7 @@ public final class TaskInspector extends SerDes {
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( carEvents.getUUID().toString() );
-                    if ( carEvents.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
+                    if ( !carEvents.getPatruls().isEmpty() ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
@@ -414,14 +413,8 @@ public final class TaskInspector extends SerDes {
             case ATTACHED -> {
                 patrul.setTaskTypes( FIND_FACE_CAR );
                 patrul.setTaskId( carEvents.getUUID().toString() ); // saving card id into patrul object
-                if ( DataValidateInspector
-                        .getInstance()
-                        .checkParam
-                        .test( carEvents.getDataInfo() )
-                        && DataValidateInspector
-                        .getInstance()
-                        .checkParam
-                        .test( carEvents.getDataInfo().getCadaster() ) ) {
+                if ( super.checkParam.test( carEvents.getDataInfo() )
+                        && super.checkParam.test( carEvents.getDataInfo().getCadaster() ) ) {
                     patrul.setLatitudeOfTask( carEvents.getDataInfo().getCadaster().getLatitude() );
                     patrul.setLongitudeOfTask( carEvents.getDataInfo().getCadaster().getLongitude() ); } }
             case ACCEPTED -> patrul.setTaskDate( TimeInspector
@@ -429,7 +422,7 @@ public final class TaskInspector extends SerDes {
                     .getGetNewDate()
                     .get() ); // fixing time when patrul started this task
             case ARRIVED -> carEvents.getPatrulStatuses().putIfAbsent(
-                    patrul.getPassportNumber(), this.getSaveTaskTiming().apply( patrul, FIND_FACE_CAR ) ); }
+                    patrul.getPassportNumber(), this.saveTaskTiming.apply( patrul, FIND_FACE_CAR ) ); }
 
         if ( status.compareTo( CANCEL ) != 0 ) carEvents.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
 
@@ -457,7 +450,7 @@ public final class TaskInspector extends SerDes {
         patrul.setStatus( status );
         switch ( patrul.getStatus() ) {
             case CANCEL, FINISHED -> {
-                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, FIND_FACE_PERSON );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.updateTotalTimeConsumption.accept( patrul, FIND_FACE_PERSON );
                 else faceEvent.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -469,7 +462,7 @@ public final class TaskInspector extends SerDes {
                             .getInstance()
                             .getDeleteActiveTask()
                             .accept( faceEvent.getUUID().toString() );
-                    if ( faceEvent.getPatruls().size() > 0 ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
+                    if ( !faceEvent.getPatruls().isEmpty() ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
@@ -500,7 +493,7 @@ public final class TaskInspector extends SerDes {
                     .getGetNewDate()
                     .get() ); // fixing time when patrul started this task
             case ARRIVED -> faceEvent.getPatrulStatuses().putIfAbsent(
-                        patrul.getPassportNumber(), this.getSaveTaskTiming().apply( patrul, FIND_FACE_PERSON ) ); }
+                        patrul.getPassportNumber(), this.saveTaskTiming.apply( patrul, FIND_FACE_PERSON ) ); }
         if ( status.compareTo( CANCEL ) != 0 ) faceEvent.getPatruls().put( patrul.getUuid(), patrul ); // обновляем данные патрульного в списке патрульных задачи
         if ( faceEvent.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
                 .getInstance()
@@ -566,9 +559,9 @@ public final class TaskInspector extends SerDes {
                 patrul.setTaskId( selfEmploymentTask.getUuid().toString() );
                 selfEmploymentTask.getPatrulStatuses().putIfAbsent(
                         patrul.getPassportNumber(),
-                        this.getSaveTaskTiming().apply( patrul, SELF_EMPLOYMENT ) ); }
+                        this.saveTaskTiming.apply( patrul, SELF_EMPLOYMENT ) ); }
             case CANCEL, FINISHED -> {
-                if ( super.checkEquality.test( status, FINISHED ) ) this.getUpdateTotalTimeConsumption().accept( patrul, SELF_EMPLOYMENT );
+                if ( super.checkEquality.test( status, FINISHED ) ) this.updateTotalTimeConsumption.accept( patrul, SELF_EMPLOYMENT );
                 else selfEmploymentTask.getPatruls().remove(
                         CassandraDataControlForTasks
                                 .getInstance()
@@ -582,7 +575,7 @@ public final class TaskInspector extends SerDes {
                             .getDeleteActiveTask()
                             .accept( selfEmploymentTask.getUuid().toString() );
 
-                    if ( selfEmploymentTask.getPatruls().size() > 0 ) KafkaDataControl
+                    if ( !selfEmploymentTask.getPatruls().isEmpty() ) KafkaDataControl
                             .getInstance()
                             .getWriteActiveTaskToKafka()
                             .accept( new ActiveTask(
@@ -647,7 +640,7 @@ public final class TaskInspector extends SerDes {
                                         .cardDetails( new CardDetails( card, patrul, "ru" ) )
                                         .reportForCard( card
                                                 .getReportForCardList()
-                                                .get( this.getGetReportIndex().apply( card.getReportForCardList(), patrul.getUuid() ) ) )
+                                                .get( this.getReportIndex.apply( card.getReportForCardList(), patrul.getUuid() ) ) )
                                         .totalTimeConsumption( card
                                                 .getPatrulStatuses()
                                                 .containsKey( patrul.getPassportNumber() )
@@ -673,8 +666,7 @@ public final class TaskInspector extends SerDes {
                                         .cardDetails( new CardDetails( new CarDetails( carEvent ) ) )
                                         .reportForCard( carEvent
                                                 .getReportForCardList()
-                                                .get( this.getGetReportIndex().apply(
-                                                        carEvent.getReportForCardList(), patrul.getUuid() ) ) )
+                                                .get( this.getReportIndex.apply( carEvent.getReportForCardList(), patrul.getUuid() ) ) )
                                         .totalTimeConsumption( carEvent
                                                 .getPatrulStatuses()
                                                 .containsKey( patrul.getPassportNumber() )
@@ -700,8 +692,7 @@ public final class TaskInspector extends SerDes {
                                                 .apply( faceEvent.getCreated_date() ) )
                                         .reportForCard( faceEvent
                                                 .getReportForCardList()
-                                                .get( this.getGetReportIndex().apply(
-                                                        faceEvent.getReportForCardList(), patrul.getUuid() ) ) )
+                                                .get( this.getReportIndex.apply( faceEvent.getReportForCardList(), patrul.getUuid() ) ) )
                                         .totalTimeConsumption( faceEvent
                                                 .getPatrulStatuses()
                                                 .containsKey( patrul.getPassportNumber() )
@@ -724,8 +715,7 @@ public final class TaskInspector extends SerDes {
                                         .cardDetails( new CardDetails( new CarDetails( eventCar ) ) )
                                         .reportForCard( eventCar
                                                 .getReportForCardList()
-                                                .get( this.getGetReportIndex().apply(
-                                                        eventCar.getReportForCardList(), patrul.getUuid() ) ) )
+                                                .get( this.getReportIndex.apply( eventCar.getReportForCardList(), patrul.getUuid() ) ) )
                                         .totalTimeConsumption( eventCar
                                                 .getPatrulStatuses()
                                                 .containsKey( patrul.getPassportNumber() )
@@ -748,8 +738,7 @@ public final class TaskInspector extends SerDes {
                                         .cardDetails( new CardDetails( new PersonDetails( eventBody ) ) )
                                         .reportForCard( eventBody
                                                 .getReportForCardList()
-                                                .get( this.getGetReportIndex().apply(
-                                                        eventBody.getReportForCardList(), patrul.getUuid() ) ) )
+                                                .get( this.getReportIndex.apply( eventBody.getReportForCardList(), patrul.getUuid() ) ) )
                                         .totalTimeConsumption( eventBody
                                                 .getPatrulStatuses()
                                                 .containsKey( patrul.getPassportNumber() )
@@ -772,8 +761,7 @@ public final class TaskInspector extends SerDes {
                                         .cardDetails( new CardDetails( new PersonDetails( eventFace ) ) )
                                         .reportForCard( eventFace
                                                 .getReportForCardList()
-                                                .get( this.getGetReportIndex().apply(
-                                                        eventFace.getReportForCardList(), patrul.getUuid() ) ) )
+                                                .get( this.getReportIndex.apply( eventFace.getReportForCardList(), patrul.getUuid() ) ) )
                                         .totalTimeConsumption( eventFace
                                                 .getPatrulStatuses()
                                                 .containsKey( patrul.getPassportNumber() )
@@ -803,8 +791,7 @@ public final class TaskInspector extends SerDes {
                                                 .getTotalTimeConsumption() : 0 )
                                         .reportForCard( selfEmploymentTask
                                                 .getReportForCards()
-                                                .get( this.getGetReportIndex().apply(
-                                                        selfEmploymentTask.getReportForCards(), patrul.getUuid() ) ) )
+                                                .get( this.getReportIndex.apply( selfEmploymentTask.getReportForCards(), patrul.getUuid() ) ) )
                                         .build() ); } )
                 .sequential()
                 .publishOn( Schedulers.single() )
@@ -823,7 +810,7 @@ public final class TaskInspector extends SerDes {
             return 0; };
 
     // сохраняет рапорт от патрульного
-    private final BiFunction< Patrul, ReportForCard, Mono< ApiResponseModel > > saveReportForTask = ( patrul, reportForCard ) -> switch ( patrul.getTaskTypes() ) {
+    public final BiFunction< Patrul, ReportForCard, Mono< ApiResponseModel > > saveReportForTask = ( patrul, reportForCard ) -> switch ( patrul.getTaskTypes() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
                     .getGetTask()
@@ -912,7 +899,7 @@ public final class TaskInspector extends SerDes {
                             "code", 201,
                             "success", false ) ); };
 
-    private final BiFunction< Patrul, Status, Mono< ApiResponseModel > > changeTaskStatus = ( patrul, status ) -> switch ( patrul.getTaskTypes() ) {
+    public final BiFunction< Patrul, Status, Mono< ApiResponseModel > > changeTaskStatus = ( patrul, status ) -> switch ( patrul.getTaskTypes() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
                     .getGetTask()
@@ -1026,7 +1013,7 @@ public final class TaskInspector extends SerDes {
 
     // по запросу проверяет какая задача дана конкретному патрульному
     // после чего возвращает краткое ( ACTIVE_TASK ), полное ( CARD_DETAILS ) или же по дефолту убирает патрульного из задачи
-    private final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = ( patrul, taskTypes ) -> switch ( patrul.getTaskTypes() ) {
+    public final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = ( patrul, taskTypes ) -> switch ( patrul.getTaskTypes() ) {
             case CARD_102 -> CassandraDataControlForTasks
                     .getInstance()
                     .getGetTask()

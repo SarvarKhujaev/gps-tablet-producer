@@ -19,7 +19,7 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEv
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
 @lombok.Data
-public class Notification {
+public final class Notification {
     private String id; // id of any task
     private String type; // might be from 102 or Camera
     private String title; // description of Patrul action

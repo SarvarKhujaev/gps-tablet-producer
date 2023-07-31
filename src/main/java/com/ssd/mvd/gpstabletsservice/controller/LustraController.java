@@ -14,7 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class LustraController extends LogInspector {
+public final class LustraController extends LogInspector {
     @MessageMapping ( value = "updateLustra" )
     public Mono< ApiResponseModel > updateLustra ( final AtlasLustra atlasLustra ) { return CassandraDataControl
             .getInstance()

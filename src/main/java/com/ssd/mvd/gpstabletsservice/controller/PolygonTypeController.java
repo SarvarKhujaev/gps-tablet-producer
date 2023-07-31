@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @RestController
-public class PolygonTypeController extends LogInspector {
+public final class PolygonTypeController extends LogInspector {
 
     @MessageMapping ( value = "updatePolygonType" )
     public Mono< ApiResponseModel > updatePolygonType ( final PolygonType polygonType ) { return CassandraDataControl

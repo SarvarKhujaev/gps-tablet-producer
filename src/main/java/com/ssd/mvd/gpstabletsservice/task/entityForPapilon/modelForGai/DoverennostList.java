@@ -7,7 +7,7 @@ import java.util.List;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class DoverennostList {
+public final class DoverennostList {
     private ErrorResponse errorResponse;
     @JsonDeserialize
     private List< Doverennost > doverennostsList;

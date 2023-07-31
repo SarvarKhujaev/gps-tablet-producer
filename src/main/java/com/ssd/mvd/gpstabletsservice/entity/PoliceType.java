@@ -3,13 +3,11 @@ package com.ssd.mvd.gpstabletsservice.entity;
 import java.util.UUID;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.UDTValue;
-import lombok.extern.jackson.Jacksonized;
 
 @lombok.Data
-@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class PoliceType {
+public final class PoliceType {
     private UUID uuid;
     private String icon;
     private String icon2;

@@ -5,7 +5,7 @@ import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class ModelForCar {
+public final class ModelForCar {
     private String Stir;
     private String Year;
     private String Pinpp;

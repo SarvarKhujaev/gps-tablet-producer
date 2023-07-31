@@ -7,7 +7,7 @@ import java.util.UUID;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class AtlasLustra {
+public final class AtlasLustra {
     private UUID uuid;
     private String lustraName;
     private String carGosNumber; // choosing from dictionary

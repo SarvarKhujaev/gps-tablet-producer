@@ -14,7 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class PoliceTypeController extends LogInspector {
+public final class PoliceTypeController extends LogInspector {
     @MessageMapping ( value = "getPoliceTypeList" )
     public Flux< PoliceType > getPoliceTypeList () { return CassandraDataControl
             .getInstance()

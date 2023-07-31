@@ -2,7 +2,7 @@ package com.ssd.mvd.gpstabletsservice.constants;
 
 @lombok.Data
 @lombok.Builder
-public class ErrorResponse {
+public final class ErrorResponse {
     private String message;
     private Errors errors;
 }

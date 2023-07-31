@@ -8,16 +8,13 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import lombok.extern.jackson.Jacksonized;
 import java.util.*;
 
 @lombok.Data
-@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
-public class EventBody {
+public final class EventBody {
     private Status status = Status.CREATED;
     private Integer camera;
     private Boolean matched;

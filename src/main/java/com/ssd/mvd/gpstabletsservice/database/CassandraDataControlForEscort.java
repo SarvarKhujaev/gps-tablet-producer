@@ -415,7 +415,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     + super.getALlNames.apply( Country.class )
                     + " VALUES("
                     + country.getUuid() + ", '"
-                    + ( country.getFlag() != null && country.getFlag().length() > 0
+                    + ( country.getFlag() != null && !country.getFlag().isEmpty()
                     ? country.getFlag() : Errors.DATA_NOT_FOUND ) + "', '"
                     + super.concatNames.apply( country.getSymbol().toUpperCase(), 3 ) + "', '"
                     + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 3 ) + "', '"
