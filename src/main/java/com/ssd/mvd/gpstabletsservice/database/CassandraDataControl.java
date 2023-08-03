@@ -1474,7 +1474,9 @@ public final class CassandraDataControl extends CassandraConverter {
                     + CassandraTables.ANDROID_VERSION_CONTROL_TABLE
                     + " WHERE id = 'id';" ).one();
             byte check = 0;
-            final String[] first = version.split( "[.]" );
+            final String[] first = version.contains( "DEBUG" )
+                    ? ( version.split( "-DEBUG" )[ 0 ] ).split( "[.]" )
+                    : version.split( "[.]" );
             final String[] second = row.getString( "version" ).split( "[.]" );
             while ( check < first.length && Integer.parseInt( first[ check ] ) >= Integer.parseInt( second[ check ] ) ) check++;
             return check == first.length
