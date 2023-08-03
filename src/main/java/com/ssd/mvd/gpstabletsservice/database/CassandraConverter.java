@@ -93,5 +93,5 @@ public class CassandraConverter extends LogInspector {
             listOfTasks.keySet().forEach( key -> temp += key + " : '" + listOfTasks.get( key ) + "', ");
             return temp.length() == 1 ? temp + "}" : temp.substring( 0, temp.length() - 2 ) + "}"; };
 
-    private final Function< Class, Stream< Field > > getFields = object -> Arrays.stream( object.getDeclaredFields() ).toList().stream();
+    protected final Function< Class, Stream< Field > > getFields = object -> Arrays.stream( object.getDeclaredFields() ).toList().stream();
 }

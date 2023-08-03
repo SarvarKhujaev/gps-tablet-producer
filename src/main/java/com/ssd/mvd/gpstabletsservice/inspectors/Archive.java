@@ -17,7 +17,7 @@ public class Archive {
 
     protected <T> Mono< T > convert ( final T o ) { return Optional.ofNullable( o ).isPresent() ? Mono.just( o ) : Mono.empty(); }
 
-    private final Function< Map< String, ? >, Mono< ApiResponseModel > > function =
+    protected final Function< Map< String, ? >, Mono< ApiResponseModel > > function =
             map -> this.convert( ApiResponseModel
                     .builder() // in case of wrong login
                     .status( Status
@@ -33,7 +33,7 @@ public class Archive {
                     .success( !map.containsKey( "success" ) )
                     .build() );
 
-    private final Supplier< ApiResponseModel > errorResponse = () -> ApiResponseModel
+    protected final Supplier< ApiResponseModel > errorResponse = () -> ApiResponseModel
             .builder() // in case of wrong login
             .status( Status
                     .builder()
@@ -43,35 +43,16 @@ public class Archive {
             .success( false )
             .build();
 
-    private final Supplier< Mono< ApiResponseModel > > errorResponseForWrongParams = () -> this.convert(
-            ApiResponseModel
-                    .builder() // in case of wrong login
-                    .status( Status
-                            .builder()
-                            .message( "Wrong Params" )
-                            .code( 201 )
-                            .build() )
-                    .success( false )
-                    .build() );
-
-    // возвращает сообзение о слишком большой задержке прихода в точку назначения
-    protected final Supplier< Mono< ApiResponseModel > > errorResponseForLateComing = () -> this.convert(
-            ApiResponseModel
-                    .builder() // in case of wrong login
-                    .status( Status
-                            .builder()
-                            .message( "You were removed from task, due to fac that u r late for more then 24 hours" )
-                            .code( 201 )
-                            .build() )
-                    .success( false )
-                    .build() );
-
-    protected final Supplier< Mono< ApiResponseModel > > getWrongLoginResponse = () -> this.convert(
+    protected final Function< Integer, Mono< ApiResponseModel > > error = value -> this.convert(
             ApiResponseModel
                     .builder()
                     .status( Status
                             .builder()
-                            .message( "Wrong Login or password" )
+                            .message( switch ( value ) {
+                                case 0 -> "Wrong Login or password";
+                                case 1 -> "You were removed from task, due to fac that u r late for more then 24 hours";
+                                case 2 -> "Wrong Params";
+                                default -> "Server error"; } )
                             .code( 201 )
                             .build() )
                     .success( false )
@@ -81,7 +62,7 @@ public class Archive {
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
             "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
 
-    private final Supplier< String > generateToken = () -> {
+    protected final Supplier< String > generateToken = () -> {
             final byte[] bytes = new byte[ 24 ];
             this.getSecureRandom().nextBytes( bytes );
             return this.getEncoder().encodeToString( bytes ); };

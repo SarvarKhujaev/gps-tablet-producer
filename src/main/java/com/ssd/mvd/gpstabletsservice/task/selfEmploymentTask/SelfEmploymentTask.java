@@ -27,6 +27,10 @@ public final class SelfEmploymentTask {
 
     public UUID getUuid() { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
 
+    public SelfEmploymentTask save ( final ReportForCard reportForCard ) {
+        this.getReportForCards().add( reportForCard );
+        return this; }
+
     @JsonDeserialize
     private List< String > images;
     @JsonDeserialize

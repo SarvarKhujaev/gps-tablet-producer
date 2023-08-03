@@ -820,7 +820,7 @@ public final class TaskInspector extends SerDes {
                         card.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
                                 Map.of( "message", "Report from: "
-                                        + this.changeTaskStatus( patrul, Status.FINISHED, card ).getName()
+                                        + this.changeTaskStatus( patrul, FINISHED, card ).getName()
                                         + " was saved" ) ); } );
 
             case SELF_EMPLOYMENT -> CassandraDataControlForTasks
@@ -828,12 +828,10 @@ public final class TaskInspector extends SerDes {
                     .getGetTask()
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
-                    .flatMap( selfEmploymentTask -> {
-                        selfEmploymentTask.getReportForCards().add( reportForCard );
-                        return super.getFunction().apply(
+                    .flatMap( selfEmploymentTask -> super.getFunction().apply(
                                 Map.of( "message", "Report from: "
-                                        + this.changeTaskStatus( patrul, Status.FINISHED, selfEmploymentTask ).getName()
-                                        + " was saved" ) ); } );
+                                        + this.changeTaskStatus( patrul, FINISHED, selfEmploymentTask.save( reportForCard ) ).getName()
+                                        + " was saved" ) ) );
 
             case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
                     .getInstance()
@@ -844,7 +842,7 @@ public final class TaskInspector extends SerDes {
                         eventBody.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
                                 Map.of( "message", "Report from: "
-                                        + this.changeTaskStatus( patrul, Status.FINISHED, eventBody ).getName()
+                                        + this.changeTaskStatus( patrul, FINISHED, eventBody ).getName()
                                         + " was saved" ) ); } );
 
             case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
@@ -856,7 +854,7 @@ public final class TaskInspector extends SerDes {
                         eventFace.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
                                 Map.of( "message", "Report from: "
-                                        + this.changeTaskStatus( patrul, Status.FINISHED, eventFace ).getName()
+                                        + this.changeTaskStatus( patrul, FINISHED, eventFace ).getName()
                                         + " was saved" ) ); } );
 
             case FIND_FACE_CAR -> CassandraDataControlForTasks
@@ -868,7 +866,7 @@ public final class TaskInspector extends SerDes {
                         carEvents.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
                                 Map.of( "message", "Report from: "
-                                        + this.changeTaskStatus( patrul, Status.FINISHED, carEvents ).getName()
+                                        + this.changeTaskStatus( patrul, FINISHED, carEvents ).getName()
                                         + " was saved" ) ); } );
 
             case FIND_FACE_PERSON -> CassandraDataControlForTasks
@@ -880,7 +878,7 @@ public final class TaskInspector extends SerDes {
                         faceEvents.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
                                 Map.of( "message", "Report from: "
-                                        + this.changeTaskStatus( patrul, Status.FINISHED, faceEvents ).getName() + " was saved" ) ); } );
+                                        + this.changeTaskStatus( patrul, FINISHED, faceEvents ).getName() + " was saved" ) ); } );
 
             case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
                     .getInstance()
@@ -891,7 +889,7 @@ public final class TaskInspector extends SerDes {
                         eventCar.getReportForCardList().add( reportForCard );
                         return super.getFunction().apply(
                                 Map.of( "message", "Report from: "
-                                        + this.changeTaskStatus( patrul, Status.FINISHED, eventCar ).getName()
+                                        + this.changeTaskStatus( patrul, FINISHED, eventCar ).getName()
                                         + " was saved" ) ); } );
 
             default -> super.getFunction().apply(

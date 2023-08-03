@@ -268,7 +268,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             this.getGetTaskTimingInfo().apply( card.getUUID().toString(), taskDetailsRequest.getPatrulUUID() ),
                             card.getReportForCardList() ) );
 
-            case FIND_FACE_CAR -> super.checkTable.test( taskDetailsRequest.getId(), CassandraTables.FACECAR.name() )
+            case FIND_FACE_CAR -> super.checkTable.test( taskDetailsRequest.getId(), CassandraTables.FACECAR )
                     ? this.getGetTask().apply( taskDetailsRequest.getId() )
                     .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
                     .map( carEvent -> new TaskDetails(
