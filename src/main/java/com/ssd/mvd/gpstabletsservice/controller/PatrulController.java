@@ -1,8 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import java.util.*;
-
-import com.ssd.mvd.gpstabletsservice.inspectors.ExelInspector;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -18,6 +16,7 @@ import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
+import com.ssd.mvd.gpstabletsservice.inspectors.ExelInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
