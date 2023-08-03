@@ -21,15 +21,11 @@ import java.util.function.BiPredicate;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Function;
+import java.util.*;
 
 import com.datastax.driver.core.Row;
 import static java.lang.Math.cos;
 import static java.lang.Math.*;
-
-import java.util.Objects;
-import java.util.Date;
-import java.util.UUID;
-import java.util.List;
 
 public class DataValidateInspector extends Archive {
     private static final DataValidateInspector INSTANCE = new DataValidateInspector();
@@ -82,6 +78,36 @@ public class DataValidateInspector extends Archive {
                     && this.checkParam.test( ( (PatrulLoginRequest) o ).getPassword() )
                     && this.checkParam.test( ( (PatrulLoginRequest) o ).getSimCardNumber() ); };
 
+    public Boolean filterPatrul ( final Row row,
+                                     final Map< String, String > params,
+                                     final List< String > policeTypes,
+                                     final Integer value ) {
+        return value == 1 ? ( !params.containsKey( "regionId" ) || row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) ) )
+                && ( !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
+                : ( !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
+                && row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
+                && ( !params.containsKey( "districtId" ) || row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) ) )
+                && switch ( Status.valueOf( params.get( "status" ) ) ) {
+                    // активные патрульные
+                    case ACTIVE -> !this.checkPatrulActivity.test( row.getUUID( "uuid" ) )
+                            && TimeInspector
+                            .getInspector()
+                            .getGetTimeDifference()
+                            .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) <= 24;
+
+                    // не активные патрульные
+                    case IN_ACTIVE -> !this.checkPatrulActivity.test( row.getUUID( "uuid" ) )
+                            && TimeInspector
+                            .getInspector()
+                            .getGetTimeDifference()
+                            .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) > 24;
+
+                    // патрульные которые которые никогда не заходили
+                    case FORCE -> this.checkPatrulActivity.test( row.getUUID( "uuid" ) );
+
+                    // патрульные которые которые заходили хотя бы раз
+                    default -> !this.checkPatrulActivity.test( row.getUUID( "uuid" ) ); }; }
+
     protected final Function< Integer, Integer > checkDifference = integer -> integer > 0 && integer < 100 ? integer : 10;
 
     public final BiPredicate< Double, Double > checkDistance = ( distance, patrulDistance ) -> patrulDistance <= distance;
@@ -110,7 +136,7 @@ public class DataValidateInspector extends Archive {
                     + " WHERE patrulUUID = " + patrulUUID + ";" )
             .one() == null;
 
-    protected final BiPredicate< String, String > checkTable = ( id, tableName ) -> CassandraDataControl
+    protected final BiPredicate< String, CassandraTables > checkTable = ( id, tableName ) -> CassandraDataControl
             .getInstance()
             .getSession()
             .execute( "SELECT * FROM "
@@ -120,8 +146,8 @@ public class DataValidateInspector extends Archive {
 
     // определяет тип таска
     protected final Function< String, CassandraTables > findTable = id -> {
-            if ( this.checkTable.test( id, CassandraTables.FACEPERSON.name() ) ) return CassandraTables.FACEPERSON;
-            else if ( this.checkTable.test( id, CassandraTables.EVENTBODY.name() ) ) return CassandraTables.EVENTBODY;
+            if ( this.checkTable.test( id, CassandraTables.FACEPERSON ) ) return CassandraTables.FACEPERSON;
+            else if ( this.checkTable.test( id, CassandraTables.EVENTBODY ) ) return CassandraTables.EVENTBODY;
             else return CassandraTables.EVENTFACE; };
 
     // по статусу определяет какой параметр обновлять

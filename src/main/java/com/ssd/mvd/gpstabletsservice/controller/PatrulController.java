@@ -1,6 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.controller;
 
 import java.util.*;
+
+import com.ssd.mvd.gpstabletsservice.inspectors.ExelInspector;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -16,7 +18,6 @@ import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
 import com.ssd.mvd.gpstabletsservice.request.CardRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
-import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
@@ -33,7 +34,49 @@ public final class PatrulController extends SerDes {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping ( value = "ping" )
-    public Mono< Boolean > ping () { return super.convert( true ); }
+    public Mono< Boolean > ping () { return super.convert( Boolean.TRUE ); }
+
+    @MessageMapping ( value = "GET_FILTERED_ACTIVE_PATRULS" )
+    public Flux< Patrul > getFilteredActivePatruls ( final Map< String, String > params ) {
+        final List< String > policeTypes = params.containsKey( "policeType" )
+                ? Arrays.asList( params.get( "policeType" ).split( "," ) )
+                : Collections.emptyList();
+
+        return CassandraDataControl
+                .getInstance()
+                .getGetAllEntities()
+                .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
+                .filter( row -> super.filterPatrul( row, params, policeTypes, 0 ) )
+                .map( Patrul::new )
+                .sequential()
+                .publishOn( Schedulers.single() )
+                .onErrorContinue( super::logging ); }
+
+    @MessageMapping ( value = "GET_EXEL_FILE" )
+    public Mono< ApiResponseModel > GET_EXEL_FILE ( final Map< String, String > params ) {
+        final List< String > policeTypes = params.containsKey( "policeType" )
+                ? Arrays.asList( params.get( "policeType" ).split( "," ) )
+                : Collections.emptyList();
+
+        return CassandraDataControl
+                .getInstance()
+                .getGetAllEntities()
+                .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
+                .filter( row -> super.filterPatrul( row, params, policeTypes, 0 ) )
+                .map( Patrul::new )
+                .sequential()
+                .publishOn( Schedulers.single() )
+                .collectList()
+                .map( patruls -> ApiResponseModel
+                        .builder()
+                        .success( Boolean.TRUE )
+                        .status( com.ssd.mvd.gpstabletsservice.response.Status
+                                .builder()
+                                .code( 200 )
+                                .message( new ExelInspector().download( patruls, params, policeTypes ) )
+                                .build() )
+                        .build() )
+                .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
     public Mono< PatrulActivityResponse > getActivePatruls ( final Map< String, String > params ) {
@@ -54,52 +97,13 @@ public final class PatrulController extends SerDes {
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
                 .sequential()
                 .publishOn( Schedulers.single() )
-                .filter( row -> ( !params.containsKey( "regionId" ) || row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) ) )
-                        && ( !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) ) )
+                .filter( row -> super.filterPatrul( row, params, policeTypes, 1 ) )
                 .map( row -> regions.get( !params.containsKey( "regionId" )
                         ? row.getLong( "regionId" )
                         : row.getLong( "districtId" ) ).save( row ) )
                 .collectList()
                 .onErrorContinue( super::logging )
                 .map( patrulDivisionByRegions -> new PatrulActivityResponse( regions ) ); }
-
-    @MessageMapping ( value = "GET_FILTERED_ACTIVE_PATRULS" )
-    public Flux< Patrul > getFilteredActivePatruls ( final Map< String, String > params ) {
-        final List< String > policeTypes = params.containsKey( "policeType" )
-                ? Arrays.asList( params.get( "policeType" ).split( "," ) )
-                : Collections.emptyList();
-
-        return CassandraDataControl
-                .getInstance()
-                .getGetAllEntities()
-                .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
-                .filter( row -> ( !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
-                        && row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) )
-                        && ( !params.containsKey( "districtId" ) || row.getLong( "districtId" ) == Long.parseLong( params.get( "districtId" ) ) )
-                        && switch ( Status.valueOf( params.get( "status" ) ) ) {
-                    // активные патрульные
-                    case ACTIVE -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) )
-                            && TimeInspector
-                            .getInspector()
-                            .getGetTimeDifference()
-                            .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) <= 24;
-
-                    // не активные патрульные
-                    case IN_ACTIVE -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) )
-                            && TimeInspector
-                            .getInspector()
-                            .getGetTimeDifference()
-                            .apply( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) > 24;
-
-                    // патрульные которые которые никогда не заходили
-                    case FORCE -> super.checkPatrulActivity.test( row.getUUID( "uuid" ) );
-
-                    // патрульные которые которые заходили хотя бы раз
-                    default -> !super.checkPatrulActivity.test( row.getUUID( "uuid" ) ); } )
-                .map( Patrul::new )
-                .sequential()
-                .publishOn( Schedulers.single() )
-                .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "ARRIVED" )
     public Mono< ApiResponseModel > arrived ( final String token ) { return CassandraDataControl
@@ -174,7 +178,7 @@ public final class PatrulController extends SerDes {
                     .apply( patrulLoginRequest )
                     .onErrorContinue( super::logging )
                     .onErrorReturn( super.getErrorResponse().get() )
-                : super.getErrorResponseForWrongParams().get(); }
+                : super.error.apply( 2 ); }
 
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
     public Flux<Patrul> getAllUsersList () { return CassandraDataControl

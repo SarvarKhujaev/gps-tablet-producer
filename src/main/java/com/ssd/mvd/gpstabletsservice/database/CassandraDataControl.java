@@ -1364,8 +1364,8 @@ public final class CassandraDataControl extends CassandraConverter {
                                                                 .type( patrul.getUuid().toString() )
                                                                 .data( patrul )
                                                                 .build() ) ); } )
-                                    .orElseGet( super.getWrongLoginResponse ) ) )
-                    .orElseGet( super.getWrongLoginResponse );
+                                    .orElseGet( () -> super.error.apply( 0 ) ) ) )
+                    .orElseGet( () -> super.error.apply( 0 ) );
 
     private final BiFunction< String, Status, Mono< ApiResponseModel > > changeStatus = ( token, status ) -> this.getGetPatrulByUUID()
             .apply( this.getDecode().apply( token ) )
@@ -1397,7 +1397,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                 .getInstance()
                                 .getTaskData
                                 .apply( patrul, TaskTypes.FREE )
-                                .flatMap( apiResponseModel -> super.errorResponseForLateComing.get() ); }
+                                .flatMap( apiResponseModel -> super.error.apply( 1 ) ); }
                     else return TaskInspector
                             .getInstance()
                             .changeTaskStatus
