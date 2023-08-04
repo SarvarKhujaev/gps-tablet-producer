@@ -535,7 +535,8 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + CassandraTables.PATRUL_SOS_TABLE
                     + " WHERE uuid = " + uuid + ";" ).one() )
                     .filter( row -> super.checkParam.test( row )
-                            && super.checkEquality.test( Status.valueOf( row.getString( "status" ) ), Status.CREATED ) )
+                            && ( super.checkEquality.test( Status.valueOf( row.getString( "status" ) ), Status.CREATED )
+                            || super.checkEquality.test( Status.valueOf( row.getString( "status" ) ), Status.ACCEPTED ) ) )
                     .isPresent();
 
     // возвращает все сос сигналы для конкретного патрульного
