@@ -725,12 +725,14 @@ public final class CassandraDataControl extends CassandraConverter {
                     + ", uuidOfEscort = " + uuidOfEscort
                     + " WHERE uuid = " + patrulUUID + ";" ); }
 
-    // обновляет фото патрульного
-    private final Function< PatrulImageRequest, Mono< ApiResponseModel > > updatePatrulImage = request ->
+    // обновляет фото или номер патрульного
+    private final BiFunction< PatrulImageRequest, Integer, Mono< ApiResponseModel > > updatePatrulImage = ( request, integer ) ->
             this.getSession().execute( "UPDATE "
                             + CassandraTables.TABLETS + "."
                             + CassandraTables.PATRULS
-                            + " SET patrulImageLink = '" + request.getNewImage() + "'"
+                            + " SET "
+                            + ( integer == 0 ? "patrulImageLink" : "phoneNumber" )
+                            + " = '" + request.getNewImage() + "'"
                             + " WHERE uuid = " + request.getPatrulUUID() + " IF EXISTS;" )
                     .wasApplied()
                     ? super.getFunction().apply( Map.of( "message", "Image was updated successfully" ) )
