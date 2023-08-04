@@ -219,7 +219,14 @@ public final class PatrulController extends SerDes {
             return CassandraDataControl
                 .getInstance()
                 .getUpdatePatrulImage()
-                .apply( request ); }
+                .apply( request, 0 ); }
+
+    @MessageMapping ( value = "UPDATE_PATRUL_PHONE_NUMBER" )
+    public Mono< ApiResponseModel > updatePatrulPhoneNumber ( final PatrulImageRequest request ) {
+        return CassandraDataControl
+                .getInstance()
+                .getUpdatePatrulImage()
+                .apply( request, 1 ); }
 
     @MessageMapping ( value = "findTheClosestPatruls" )
     public Flux< Patrul > findTheClosestPatruls ( final Point point ) {
