@@ -1,14 +1,13 @@
 package com.ssd.mvd.gpstabletsservice.inspectors;
 
-import java.time.Year;
-import java.time.Month;
-import java.time.Instant;
-import java.time.Duration;
-
-import java.util.Date;
-import java.util.Calendar;
-import java.util.function.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
+import java.util.*;
+import java.util.function.*;
+
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 @lombok.Data
 public final class TimeInspector {
@@ -24,12 +23,24 @@ public final class TimeInspector {
     private Integer startTimeForMorning = 0;
 
     private final static TimeInspector inspector = new TimeInspector();
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "EEE MMM d H:mm:ss zzz yyyy", Locale.ENGLISH );
 
     public static TimeInspector getInspector () { return inspector; }
 
     private Date setDate () { return ( this.date = new Date() ); }
 
     private final Supplier< Date > getNewDate = Date::new;
+
+    private final Function< String, Date > convertDate = s -> {
+            try {
+                final List< String > words = Arrays.asList( s.split( " " ) );
+                return new SimpleDateFormat( words.get( 3 ).length() == 4 ? "EEE MMM dd yyyy kk:mm:ss" : "EEE MMM dd kk:mm:ss", Locale.US )
+                    .parse( words.get( 3 ).length() >= 4
+                            ? words.get( 0 ) + " " + words.get( 1 ) + " " + words.get( 2 ) + " " + words.get( 3 ) + " " + words.get( 4 )
+                            : words.get( 0 ) + " " + words.get( 1 ) + " " + words.get( 2 ) + " " + words.get( 3 ) );
+            } catch ( final ParseException e ) { throw new RuntimeException(e); } };
+
+    private final Function< Date, String > convertDateToString = s -> ZonedDateTime.parse( s.toString(), this.formatter ).format( DateTimeFormatter.ISO_LOCAL_DATE );
 
     private final Predicate< Instant > checkDate = instant -> this.getEndTimeForEvening() >= this.setDate().getHours()
             && this.getDate().getHours() >= this.getStartTimeForMorning()
@@ -49,12 +60,11 @@ public final class TimeInspector {
     private final Function< Boolean, Date > getYearStartOrEnd = flag -> {
             if ( flag ) {
                 this.getCalendar().set( Calendar.YEAR, Year.now().getValue() );
-                this.getCalendar().set( Calendar.DAY_OF_YEAR, 1 );
-                return this.getCalendar().getTime(); }
+                this.getCalendar().set( Calendar.DAY_OF_YEAR, 1 ); }
             else {
                 calendar.set( Calendar.MONTH, 11 );
-                calendar.set( Calendar.DAY_OF_MONTH, 31 );
-                return this.getCalendar().getTime(); } };
+                calendar.set( Calendar.DAY_OF_MONTH, 31 ); }
+            return this.getCalendar().getTime(); };
 
     private final Function< Date, Month > getMonthName = date1 -> Month.of( date1.getMonth() + 1 );
 
