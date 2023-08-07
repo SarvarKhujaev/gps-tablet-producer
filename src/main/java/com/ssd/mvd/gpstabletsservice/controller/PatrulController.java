@@ -66,15 +66,9 @@ public final class PatrulController extends SerDes {
                 .sequential()
                 .publishOn( Schedulers.single() )
                 .collectList()
-                .map( patruls -> ApiResponseModel
-                        .builder()
-                        .success( Boolean.TRUE )
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                .builder()
-                                .code( 200 )
-                                .message( new ExelInspector().download( patruls, params, policeTypes ) )
-                                .build() )
-                        .build() )
+                .flatMap( patruls -> super.getFunction().apply(
+                        Map.of( "message", "Exel is done",
+                                "data", new ExelInspector().download( patruls, params, policeTypes ) ) ) )
                 .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
