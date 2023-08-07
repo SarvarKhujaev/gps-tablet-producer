@@ -68,7 +68,10 @@ public final class PatrulController extends SerDes {
                 .collectList()
                 .flatMap( patruls -> super.getFunction().apply(
                         Map.of( "message", "Exel is done",
-                                "data", new ExelInspector().download( patruls, params, policeTypes ) ) ) )
+                                "data", Data
+                                        .builder()
+                                        .data( new ExelInspector().download( patruls, params, policeTypes ) )
+                                        .build() ) ) )
                 .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
