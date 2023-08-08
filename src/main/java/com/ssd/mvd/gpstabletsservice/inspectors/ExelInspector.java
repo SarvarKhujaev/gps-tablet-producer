@@ -23,19 +23,6 @@ public final class ExelInspector extends LogInspector {
     private Sheet sheet;
     private String absolutePath;
     private final XSSFWorkbook workbook = new XSSFWorkbook();
-    private final List< String > fields = List.of(
-            "F.I.O",
-            "Tug'ilgan sana",
-            "Telefon raqam",
-            "Unvon",
-            "Viloyat",
-            "Tuman/Shahar",
-            "Patrul turi",
-            "Oxirgi faollik vaqti",
-            "Ishlashni boshlagan vaqti",
-            "Ro'yxatdan o'tgan vaqti",
-            "Umumiy faollik vaqti",
-            "Planshet quvvati" );
 
     public ExelInspector () {}
 
@@ -72,7 +59,7 @@ public final class ExelInspector extends LogInspector {
             headerStyle.setFont( font );
 
             i = 0;
-            this.fields.forEach( s -> {
+            super.fields.forEach( s -> {
                 final Cell headerCell = header.createCell( i++ );
                 headerCell.setCellValue( s );
                 headerCell.setCellStyle( headerStyle ); } );
@@ -83,7 +70,7 @@ public final class ExelInspector extends LogInspector {
             i = 0;
             patruls.forEach( patrul -> {
                 final Row row = this.sheet.createRow( i + 1 );
-                this.fields.forEach( field -> {
+                super.fields.forEach( field -> {
                     Cell headerCell = row.createCell( 0 );
                     headerCell.setCellValue( patruls.get( i ).getSurnameNameFatherName() );
                     headerCell.setCellStyle( headerStyle );
