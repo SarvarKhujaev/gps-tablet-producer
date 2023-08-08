@@ -595,7 +595,12 @@ public final class CassandraDataControl extends CassandraConverter {
                     .getGetNewDate()
                     .get()
                     .toInstant()
-                    + "' WHERE uuid = " + patrul.getUuid() + ";" );
+                    + "', totalActivityTime = "
+                    + TimeInspector
+                    .getInspector()
+                    .getGetTimeDifference()
+                    .apply( patrul.getLastActiveDate().toInstant(), 3 )
+                    + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
 
     private final Function< Patrul, Mono< ApiResponseModel > > updatePatrul = patrul -> {
             final Optional< Row > rowOptional = Optional.ofNullable( this.getGetPatrulByPassportNumber().apply( patrul.getPassportNumber() ) );
@@ -997,7 +1002,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .patrul( patrul )
                                     .build() ) );
 
-    private final Function<ScheduleForPolygonPatrul, Mono< ApiResponseModel > > addPatrulToPolygon =
+    private final Function< ScheduleForPolygonPatrul, Mono< ApiResponseModel > > addPatrulToPolygon =
             scheduleForPolygonPatrul -> this.getGetPolygonForPatrul().apply( scheduleForPolygonPatrul.getUuid() )
                     .flatMap( polygon -> Flux.fromStream( scheduleForPolygonPatrul
                                     .getPatrulUUIDs()
@@ -1376,7 +1381,6 @@ public final class CassandraDataControl extends CassandraConverter {
                 this.getUpdatePatrulActivity().accept( patrul );
 
                 if ( super.checkEquality.test( status, START_TO_WORK ) ) {
-                    patrul.setTotalActivityTime( 0L ); // set to 0 every day
                     patrul.setStartedToWorkDate( TimeInspector
                             .getInspector()
                             .getGetNewDate()
