@@ -11,6 +11,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.codec.binary.Base64;
 
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -52,10 +54,16 @@ public final class ExelInspector extends LogInspector {
             headerStyle.setFillForegroundColor( IndexedColors.WHITE.getIndex() );
             headerStyle.setFillPattern( FillPatternType.SOLID_FOREGROUND );
 
+            final CellRangeAddress region = new CellRangeAddress(1,patruls.size(),1,super.fields.size() );
+            RegionUtil.setBorderBottom( BorderStyle.MEDIUM, region, sheet );
+            RegionUtil.setBorderRight( BorderStyle.MEDIUM, region, sheet );
+            RegionUtil.setBorderLeft( BorderStyle.MEDIUM, region, sheet );
+            RegionUtil.setBorderTop( BorderStyle.MEDIUM, region,sheet );
+
             final XSSFFont font = this.workbook.createFont();
-            font.setBold( true );
+            font.setBold( false );
             font.setFontName( "Arial" );
-            font.setFontHeightInPoints( (short) 16 );
+            font.setFontHeightInPoints( (short) 14 );
             headerStyle.setFont( font );
 
             i = 0;
@@ -136,7 +144,8 @@ public final class ExelInspector extends LogInspector {
             return new String( Base64.encodeBase64( FileUtils.readFileToByteArray( new File( this.absolutePath ) ) ), StandardCharsets.UTF_8 ); }
         catch ( final Exception e ) { super.logging( e ); }
         finally {
-            final File file = new File( this.absolutePath );
-            super.logging( "File is deleted: " + ( file.exists() && file.delete() ) ); }
+//            final File file = new File( this.absolutePath );
+//            super.logging( "File is deleted: " + ( file.exists() && file.delete() ) );
+        }
         return Errors.SERVICE_WORK_ERROR.name(); }
 }
