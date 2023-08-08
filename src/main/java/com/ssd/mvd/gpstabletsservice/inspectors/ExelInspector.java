@@ -11,8 +11,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.codec.binary.Base64;
 
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -21,8 +19,8 @@ import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 
 public final class ExelInspector extends LogInspector {
-    private static Integer i;
     private Sheet sheet;
+    private static Integer i;
     private String absolutePath;
     private final XSSFWorkbook workbook = new XSSFWorkbook();
 
@@ -53,12 +51,10 @@ public final class ExelInspector extends LogInspector {
             final CellStyle headerStyle = this.workbook.createCellStyle();
             headerStyle.setFillForegroundColor( IndexedColors.WHITE.getIndex() );
             headerStyle.setFillPattern( FillPatternType.SOLID_FOREGROUND );
-
-            final CellRangeAddress region = new CellRangeAddress(1,patruls.size(),1,super.fields.size() );
-            RegionUtil.setBorderBottom( BorderStyle.MEDIUM, region, sheet );
-            RegionUtil.setBorderRight( BorderStyle.MEDIUM, region, sheet );
-            RegionUtil.setBorderLeft( BorderStyle.MEDIUM, region, sheet );
-            RegionUtil.setBorderTop( BorderStyle.MEDIUM, region,sheet );
+            headerStyle.setBorderBottom( BorderStyle.THIN );
+            headerStyle.setBorderRight( BorderStyle.THIN );
+            headerStyle.setBorderLeft( BorderStyle.THIN );
+            headerStyle.setBorderTop( BorderStyle.THIN );
 
             final XSSFFont font = this.workbook.createFont();
             font.setBold( false );
@@ -144,8 +140,7 @@ public final class ExelInspector extends LogInspector {
             return new String( Base64.encodeBase64( FileUtils.readFileToByteArray( new File( this.absolutePath ) ) ), StandardCharsets.UTF_8 ); }
         catch ( final Exception e ) { super.logging( e ); }
         finally {
-//            final File file = new File( this.absolutePath );
-//            super.logging( "File is deleted: " + ( file.exists() && file.delete() ) );
-        }
+            final File file = new File( this.absolutePath );
+            super.logging( "File is deleted: " + ( file.exists() && file.delete() ) ); }
         return Errors.SERVICE_WORK_ERROR.name(); }
 }
