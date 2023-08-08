@@ -62,7 +62,7 @@ public class Archive {
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
             "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
 
-    protected final Set< String > fields = Set.of(
+    protected final List< String > fields = List.of(
             "F.I.O",
             "Tug'ilgan sana",
             "Telefon raqam",
