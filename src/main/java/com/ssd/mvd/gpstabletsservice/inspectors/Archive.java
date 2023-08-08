@@ -62,6 +62,20 @@ public class Archive {
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
             "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
 
+    protected final Set< String > fields = Set.of(
+            "F.I.O",
+            "Tug'ilgan sana",
+            "Telefon raqam",
+            "Unvon",
+            "Viloyat",
+            "Tuman/Shahar",
+            "Patrul turi",
+            "Oxirgi faollik vaqti",
+            "Ishlashni boshlagan vaqti",
+            "Ro'yxatdan o'tgan vaqti",
+            "Umumiy faollik vaqti",
+            "Planshet quvvati" );
+
     protected final Supplier< String > generateToken = () -> {
             final byte[] bytes = new byte[ 24 ];
             this.getSecureRandom().nextBytes( bytes );
