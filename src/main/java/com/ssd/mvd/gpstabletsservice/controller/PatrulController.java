@@ -192,7 +192,7 @@ public final class PatrulController extends SerDes {
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
             .map( Patrul::new )
-            .filter( patrul -> patrul.getSurnameNameFatherName.get().contains( name ) )
+            .filter( patrul -> patrul.getSurnameNameFatherName().contains( name ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
