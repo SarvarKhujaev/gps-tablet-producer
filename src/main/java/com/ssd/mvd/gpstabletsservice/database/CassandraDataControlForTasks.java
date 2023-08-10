@@ -443,8 +443,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                                 .apply( CassandraDataControl
                                                         .getInstance()
                                                         .getFindTheClosestPatrulsForSos()
-                                                        .apply( new Point( patrulSos.getLatitude(), patrulSos.getLongitude() ),
-                                                                patrul.getUuid() )
+                                                        .apply( new Point( patrulSos.getLatitude(), patrulSos.getLongitude() ), patrul.getUuid() )
                                                         .parallel( 20 )
                                                         .runOn( Schedulers.parallel() )
                                                         .map( patrul1 -> {
@@ -462,7 +461,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                         final PatrulSos patrulSos1 = this.getCurrentPatrulSos.apply( patrul.getSos_id() );
                                         this.getUpdatePatrulSos().accept( null, patrul.getUuid() );
 
-                                        // меняем статус сигнала на выолнено
+                                        // меняем статус сигнала на выполнено
                                         this.getSession().execute( "UPDATE "
                                                 + CassandraTables.TABLETS + "."
                                                 + CassandraTables.PATRUL_SOS_TABLE

@@ -980,7 +980,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .patrul( patrul )
                                     .build() ) );
 
-    private final Function<ScheduleForPolygonPatrul, Mono< ApiResponseModel > > addPatrulToPolygon =
+    private final Function< ScheduleForPolygonPatrul, Mono< ApiResponseModel > > addPatrulToPolygon =
             scheduleForPolygonPatrul -> this.getGetPolygonForPatrul().apply( scheduleForPolygonPatrul.getUuid() )
                     .flatMap( polygon -> Flux.fromStream( scheduleForPolygonPatrul
                                     .getPatrulUUIDs()
