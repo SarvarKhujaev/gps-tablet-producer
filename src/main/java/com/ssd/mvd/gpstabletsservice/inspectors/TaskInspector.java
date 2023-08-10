@@ -766,6 +766,50 @@ public final class TaskInspector extends SerDes {
                                         .type( FIND_FACE_PERSON.name() )
                                         .build() );
 
+    // по запросу проверяет какая задача дана конкретному патрульному
+    // после чего возвращает краткое ( ACTIVE_TASK ), полное ( CARD_DETAILS ) или же по дефолту убирает патрульного из задачи
+    public final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = ( patrul, taskTypes ) -> switch ( patrul.getTaskTypes() ) {
+            case CARD_102 -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getGetTask()
+                    .apply( patrul.getTaskId() )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
+                    .flatMap( card -> super.getFunction().apply( switch ( taskTypes ) {
+                            case CARD_DETAILS -> Map.of( "message", "Your task details",
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( new CardDetails( card, patrul, "ru", DataValidateInspector.getInstance() ) )
+                                            .type( CARD_102.name() )
+                                            .build() );
+
+                            case ACTIVE_TASK -> Map.of( "message", "U have " + CARD_102 + " Task",
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( new ActiveTask(
+                                                    card,
+                                                    CARD_102,
+                                                    patrul.getStatus(),
+                                                    card.getStatus(),
+                                                    card.getUUID().toString() ) )
+                                            .type( CARD_102.name() )
+                                            .build() );
+
+                            default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card ).getName()
+                                    + " was removed from " + card.getCardId() ); } ) );
+
+            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getGetTask()
+                    .apply( patrul.getTaskId() )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
+                    .flatMap( eventBody -> super.getFunction().apply( switch ( taskTypes ) {
+                        case CARD_DETAILS -> Map.of( "message", "Your task details ",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new CardDetails( new PersonDetails( eventBody, DataValidateInspector.getInstance() ) ) )
+                                        .type( FIND_FACE_PERSON.name() )
+                                        .build() );
+
                         case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_BODY + " Task",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()

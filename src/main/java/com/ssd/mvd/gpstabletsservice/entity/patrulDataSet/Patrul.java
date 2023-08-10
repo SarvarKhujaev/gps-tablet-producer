@@ -10,7 +10,6 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
 
-import java.util.function.Supplier;
 import java.time.Duration;
 import java.util.*;
 
@@ -86,7 +85,10 @@ public final class Patrul {
                 .filter( s -> this.surnameNameFatherName != null
                         && this.surnameNameFatherName.contains( "NULL" )
                         && this.surnameNameFatherName.contains( "null" ) )
-                .orElse( ( this.surnameNameFatherName = String.join( " ", this.getName(), this.getSurname(), this.getFatherName() ) ) ); }
+                .orElse( ( this.surnameNameFatherName = DataValidateInspector
+                        .getInstance()
+                        .concatNames
+                        .apply( this, 5 ) ) ); }
 
     // освобождаем патрульного от таска
     public void free () {
