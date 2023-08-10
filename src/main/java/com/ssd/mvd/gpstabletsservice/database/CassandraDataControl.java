@@ -35,9 +35,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import static java.lang.Math.*;
-
 import java.util.function.*;
 import java.time.Duration;
 import java.util.*;
@@ -644,25 +642,29 @@ public final class CassandraDataControl extends CassandraConverter {
                                         : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
-                                        .get().toInstant() ) + "', '" +
+                                        .get()
+                                        .toInstant() ) + "', '" +
                                 ( patrul.getLastActiveDate() != null
                                         ? patrul.getLastActiveDate().toInstant()
                                         : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
-                                        .get().toInstant() ) + "', '" +
+                                        .get()
+                                        .toInstant() ) + "', '" +
                                 ( patrul.getStartedToWorkDate() != null
                                         ? patrul.getStartedToWorkDate().toInstant()
                                         : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
-                                        .get().toInstant() ) + "', '" +
+                                        .get()
+                                        .toInstant() ) + "', '" +
                                 ( patrul.getDateOfRegistration() != null
                                         ? patrul.getDateOfRegistration().toInstant()
                                         : TimeInspector
                                         .getInspector()
                                         .getGetNewDate()
-                                        .get().toInstant() ) + "', " +
+                                        .get()
+                                        .toInstant() ) + "', " +
 
                                 patrul.getDistance() + ", " +
                                 patrul.getLatitude() + ", " +
@@ -707,7 +709,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                 patrul.getSimCardNumber() + "', '" +
                                 patrul.getPassportNumber() + "', '" +
                                 patrul.getPatrulImageLink() + "', '" +
-                                patrul.getSurnameNameFatherName() + "', '" +
+                                patrul.getSurnameNameFatherName.get() + "', '" +
                                 patrul.getStatus() + "', '" +
                                 patrul.getTaskTypes() + "', " +
                                 super.convertMapToCassandra.apply( patrul.getListOfTasks() ) + " );" )
@@ -762,16 +764,8 @@ public final class CassandraDataControl extends CassandraConverter {
 
     private final Function< Patrul, Mono< ApiResponseModel > > savePatrul = patrul -> {
             if ( !super.checkParam.test( this.getGetPatrulByPassportNumber().apply( patrul.getPassportNumber() ) ) ) {
-                patrul.setStatus( FREE );
-                patrul.setInPolygon( false );
-                patrul.setTotalActivityTime( 0L );
-                patrul.setTaskTypes( TaskTypes.FREE );
-                patrul.setListOfTasks( new HashMap<>() );
-
-                patrul.setTaskDate( TimeInspector.getInspector().getGetNewDate().get() );
-                patrul.setLastActiveDate( TimeInspector.getInspector().getGetNewDate().get() );
-                patrul.setStartedToWorkDate( TimeInspector.getInspector().getGetNewDate().get() );
-                patrul.setDateOfRegistration( TimeInspector.getInspector().getGetNewDate().get() );
+                patrul.begin();
+                patrul.update( 2 );
 
                 final Optional< Patrul > optional = Optional.of( patrul );
                 optional.filter( patrul1 -> patrul.getBatteryLevel() == null )
@@ -793,11 +787,7 @@ public final class CassandraDataControl extends CassandraConverter {
                 optional.filter( patrul1 -> patrul.getFatherName().contains( "'" ) )
                         .ifPresent( patrul1 -> patrul.setFatherName( super.concatNames.apply( patrul.getFatherName(), 3 ) ) );
 
-                if ( this.getCheckLogin().apply( patrul.getLogin() ).isPresent() ) return super.getFunction().apply(
-                        Map.of( "message", "Patrul with this login has already been inserted, choose another one",
-                                "success", false,
-                                "code", 201 ) );
-
+                if ( this.getCheckLogin().apply( patrul.getLogin() ).isPresent() ) return super.error.apply( 4 );
 
                 this.getSession().execute( "INSERT INTO "
                         + CassandraTables.TABLETS + "."
@@ -865,20 +855,14 @@ public final class CassandraDataControl extends CassandraConverter {
                                 patrul.getSimCardNumber() + "', '" +
                                 patrul.getPassportNumber() + "', '" +
                                 patrul.getPatrulImageLink() + "', '" +
-                                patrul.getSurnameNameFatherName() + "', '" +
+                                patrul.getSurnameNameFatherName.get() + "', '" +
                                 patrul.getStatus() + "', '" +
                                 patrul.getTaskTypes() + "', " +
                                 super.convertMapToCassandra.apply( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;" )
                         .wasApplied()
                         ? super.getFunction().apply( Map.of( "message", "Patrul was successfully saved" ) )
-                        : super.getFunction().apply(
-                                Map.of( "message", "Patrul has already been saved, choose another one",
-                                    "success", false,
-                                    "code", 201 ) ); }
-            else return super.getFunction().apply(
-                    Map.of( "message", "This patrul is already exists",
-                            "success", false,
-                            "code", 201 ) ); };
+                        : super.error.apply( 5 ); }
+            else return super.error.apply( 5 ); };
 
     private final Function< String, Mono< Polygon > > getPolygonForPatrul = id -> super.convert(
             new Polygon( this.getSession().execute( "SELECT * FROM "
@@ -892,8 +876,8 @@ public final class CassandraDataControl extends CassandraConverter {
                 polygon1.getPatrulList()
                         .parallelStream()
                         .forEach( uuid -> this.getSession().executeAsync( "UPDATE " +
-                                CassandraTables.TABLETS.name() + "."
-                                + CassandraTables.PATRULS.name() +
+                                CassandraTables.TABLETS + "."
+                                + CassandraTables.PATRULS +
                                 " SET inPolygon = " + false
                                 + " where uuid = " + uuid + ";" ) );
                 return polygon1; } )
@@ -927,10 +911,7 @@ public final class CassandraDataControl extends CassandraConverter {
                 super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() ) + ") IF NOT EXISTS;" )
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", "Polygon: " + polygon.getUuid() + " was saved successfully" ) )
-            : super.getFunction().apply(
-                    Map.of( "message", "This polygon has already been created",
-                            "success", false,
-                            "code", 201 ) )
+            : super.error.apply( 6 )
             .doOnError( this::delete );
 
     private final Function< Polygon, Mono< ApiResponseModel > > updatePolygonForPatrul = polygon -> this.getGetPolygonForPatrul()
@@ -968,10 +949,7 @@ public final class CassandraDataControl extends CassandraConverter {
                             super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() ) + " );" )
                     .wasApplied()
                     ? super.getFunction().apply( Map.of( "message", "Polygon: " + polygon.getUuid() + " was updated successfully" ) )
-                    : super.getFunction().apply(
-                            Map.of( "message", "This polygon has already been created",
-                                    "success", false,
-                                    "code", 201 ) )
+                    : super.error.apply( 6 )
                     .doOnError( this::delete ) );
 
     private final Function< PatrulActivityRequest, Mono< PatrulActivityStatistics > > getPatrulStatistics = request ->
@@ -1080,10 +1058,7 @@ public final class CassandraDataControl extends CassandraConverter {
                             + " WHERE uuid = " + uuid + ";" )
                     .wasApplied()
                     ? super.getFunction().apply( Map.of( "message", "Notification " + uuid + " was updated successfully" ) )
-                    : super.getFunction().apply(
-                            Map.of( "message", "Notification " + uuid + " was not updated",
-                                    "success", false,
-                                    "code", 201 ) );
+                    : super.error.apply( 7 );
 
     public Mono< ApiResponseModel > delete ( final String table,
                                              final String param,
@@ -1122,142 +1097,148 @@ public final class CassandraDataControl extends CassandraConverter {
                     .take( 20 );
 
     private final BiFunction< Patrul, Status, Boolean > updatePatrulStatus = ( patrul, status ) -> switch ( status ) {
-        // in case when Patrul wants to leave his account
-        case LOGOUT -> this.getSession().executeAsync( "INSERT INTO "
-                        + CassandraTables.TABLETS + "."
-                        + CassandraTables.PATRULS_STATUS_TABLE
-                        + "(uuid, date, status, message, totalActivityTime) VALUES("
-                        + patrul.getUuid() + ", '"
-                        + TimeInspector
-                        .getInspector()
-                        .getGetNewDate()
-                        .get().toInstant() + "', '"
-                        + status + "', 'log out at: "
-                        + TimeInspector
-                        .getInspector()
-                        .getGetNewDate()
-                        .get().toInstant() + "', "
-                        + patrul.getTotalActivityTime() + ");" )
-                .isDone();
+            // in case when Patrul wants to leave his account
+            case LOGOUT -> this.getSession().executeAsync( "INSERT INTO "
+                            + CassandraTables.TABLETS + "."
+                            + CassandraTables.PATRULS_STATUS_TABLE
+                            + "(uuid, date, status, message, totalActivityTime) VALUES("
+                            + patrul.getUuid() + ", '"
+                            + TimeInspector
+                            .getInspector()
+                            .getGetNewDate()
+                            .get()
+                            .toInstant() + "', '"
+                            + status + "', 'log out at: "
+                            + TimeInspector
+                            .getInspector()
+                            .getGetNewDate()
+                            .get()
+                            .toInstant() + "', "
+                            + patrul.getTotalActivityTime() + ");" )
+                    .isDone();
 
-        case ACCEPTED -> this.getSession().executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS_STATUS_TABLE
-                + " ( uuid, date, status, message, totalActivityTime ) VALUES("
-                + patrul.getUuid() + ", '"
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get().toInstant() + "', '"
-                + status + "', 'accepted new task at: "
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get().toInstant() + "', "
-                + patrul.getTotalActivityTime() + ");" ).isDone();
-        // when Patrul wants to set in pause his work
-        case SET_IN_PAUSE -> this.getSession().executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS_STATUS_TABLE
-                + "(date, status, message, totalActivityTime) VALUES("
-                + patrul.getUuid() + ", '"
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get().toInstant() + "', '"
-                + status + "', 'put in pause at: "
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get().toInstant() + "', "
-                + patrul.getTotalActivityTime() + ");" ).isDone();
-        // uses when at the end of the day User finishes his job
-        case STOP_TO_WORK -> this.getSession().executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS_STATUS_TABLE
-                + "(date, status, message, totalActivityTime) VALUES("
-                + patrul.getUuid() + ", '"
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', '"
-                + status + "', 'stopped to work at: "
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', "
-                + patrul.getTotalActivityTime() + ");" ).isDone();
-        // uses to when User wants to back to work after pause
-        case START_TO_WORK -> this.getSession().executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS_STATUS_TABLE
-                + "(date, status, message, totalActivityTime) VALUES("
-                + patrul.getUuid() + ", '"
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', '"
-                + status + "', 'started to work at: "
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', "
-                + patrul.getTotalActivityTime() + ");" ).isDone();
-        // uses to start to work every day in the morning
-        case RETURNED_TO_WORK -> this.getSession().executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS_STATUS_TABLE
-                + "(date, status, message, totalActivityTime) VALUES("
-                + patrul.getUuid() + ", '"
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', '"
-                + status + "', 'returned to work at: "
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', "
-                + patrul.getTotalActivityTime() + ");" ).isDone();
-        case ARRIVED -> this.getSession().executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS_STATUS_TABLE
-                + "(date, status, message, totalActivityTime) VALUES("
-                + patrul.getUuid() + ", '"
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', '"
-                + status + "', 'arrived to given task location at: "
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', "
-                + patrul.getTotalActivityTime() + ");" ).isDone();
-        // by default, it means t o log in to account
-        default -> this.getSession().executeAsync( "INSERT INTO "
-                + CassandraTables.TABLETS + "."
-                + CassandraTables.PATRULS_STATUS_TABLE
-                + "(date, status, message, totalActivityTime) VALUES ("
-                + patrul.getUuid() + ", '"
-                + TimeInspector
-                .getInspector()
-                .getGetNewDate()
-                .get()
-                .toInstant() + "', '"
-                + status + "', 'log in at: "
-                + patrul.getStartedToWorkDate().toInstant()
-                + " with simCard "
-                + patrul.getSimCardNumber() + "', "
-                + patrul.getTotalActivityTime() + ");" ).isDone(); };
+            case ACCEPTED -> this.getSession().executeAsync( "INSERT INTO "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS_STATUS_TABLE
+                    + " ( uuid, date, status, message, totalActivityTime ) VALUES("
+                    + patrul.getUuid() + ", '"
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', '"
+                    + status + "', 'accepted new task at: "
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', "
+                    + patrul.getTotalActivityTime() + ");" ).isDone();
+            // when Patrul wants to set in pause his work
+            case SET_IN_PAUSE -> this.getSession().executeAsync( "INSERT INTO "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS_STATUS_TABLE
+                    + "(date, status, message, totalActivityTime) VALUES("
+                    + patrul.getUuid() + ", '"
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', '"
+                    + status + "', 'put in pause at: "
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', "
+                    + patrul.getTotalActivityTime() + ");" ).isDone();
+            // uses when at the end of the day User finishes his job
+            case STOP_TO_WORK -> this.getSession().executeAsync( "INSERT INTO "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS_STATUS_TABLE
+                    + "(date, status, message, totalActivityTime) VALUES("
+                    + patrul.getUuid() + ", '"
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', '"
+                    + status + "', 'stopped to work at: "
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', "
+                    + patrul.getTotalActivityTime() + ");" ).isDone();
+            // uses to when User wants to back to work after pause
+            case START_TO_WORK -> this.getSession().executeAsync( "INSERT INTO "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS_STATUS_TABLE
+                    + "(date, status, message, totalActivityTime) VALUES("
+                    + patrul.getUuid() + ", '"
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', '"
+                    + status + "', 'started to work at: "
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', "
+                    + patrul.getTotalActivityTime() + ");" ).isDone();
+            // uses to start to work every day in the morning
+            case RETURNED_TO_WORK -> this.getSession().executeAsync( "INSERT INTO "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS_STATUS_TABLE
+                    + "(date, status, message, totalActivityTime) VALUES("
+                    + patrul.getUuid() + ", '"
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', '"
+                    + status + "', 'returned to work at: "
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', "
+                    + patrul.getTotalActivityTime() + ");" ).isDone();
+            case ARRIVED -> this.getSession().executeAsync( "INSERT INTO "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS_STATUS_TABLE
+                    + "(date, status, message, totalActivityTime) VALUES("
+                    + patrul.getUuid() + ", '"
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', '"
+                    + status + "', 'arrived to given task location at: "
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', "
+                    + patrul.getTotalActivityTime() + ");" ).isDone();
+            // by default, it means t o log in to account
+            default -> this.getSession().executeAsync( "INSERT INTO "
+                    + CassandraTables.TABLETS + "."
+                    + CassandraTables.PATRULS_STATUS_TABLE
+                    + "(date, status, message, totalActivityTime) VALUES ("
+                    + patrul.getUuid() + ", '"
+                    + TimeInspector
+                    .getInspector()
+                    .getGetNewDate()
+                    .get()
+                    .toInstant() + "', '"
+                    + status + "', 'log in at: "
+                    + patrul.getStartedToWorkDate().toInstant()
+                    + " with simCard "
+                    + patrul.getSimCardNumber() + "', "
+                    + patrul.getTotalActivityTime() + ");" ).isDone(); };
 
     private final Function< Patrul, TabletUsage > checkTableUsage = patrul ->
             Optional.ofNullable( this.getSession().execute( "SELECT * FROM "
@@ -1305,27 +1286,13 @@ public final class CassandraDataControl extends CassandraConverter {
                             .flatMap( patrul -> Optional.ofNullable( patrul )
                                     .filter( patrul1 -> patrul.getPassword().equals( patrulLoginRequest.getPassword() ) ) // проверяем правильность пароля
                                     .map( patrul1 -> {
-                                        patrul.setStartedToWorkDate( TimeInspector
-                                                .getInspector()
-                                                .getGetNewDate()
-                                                .get() );
+                                        patrul.update( 0 );
                                         Optional.of( patrul )
                                                 .filter( patrul2 -> !patrul.getSimCardNumber().equals( "null" )
                                                         && !patrul.getSimCardNumber().equals( patrulLoginRequest.getSimCardNumber() ) )
                                                 .ifPresent( patrul2 -> this.getUpdateStatus().accept( patrul, LOGOUT ) );
 
-                                        patrul.setSimCardNumber( patrulLoginRequest.getSimCardNumber() );
-                                        patrul.setTokenForLogin (
-                                                Base64
-                                                        .getEncoder()
-                                                        .encodeToString( (
-                                                                patrul.getUuid()
-                                                                        + "@" + patrul.getPassportNumber()
-                                                                        + "@" + patrul.getPassword()
-                                                                        + "@" + patrul.getSimCardNumber()
-                                                                        + "@" + super.getGenerateToken().get() )
-                                                                .getBytes( StandardCharsets.UTF_8 ) ) );
-
+                                        patrul.update( patrulLoginRequest.getSimCardNumber() );
                                         this.getSession().execute( "UPDATE "
                                                 + CassandraTables.TABLETS + "."
                                                 + CassandraTables.PATRULS
@@ -1375,16 +1342,13 @@ public final class CassandraDataControl extends CassandraConverter {
                     .orElseGet( () -> super.error.apply( 0 ) );
 
     private final BiFunction< String, Status, Mono< ApiResponseModel > > changeStatus = ( token, status ) -> this.getGetPatrulByUUID()
-            .apply( this.getDecode().apply( token ) )
+            .apply( super.getDecode().apply( token ) )
             .flatMap( patrul -> {
                 this.getUpdateStatus().accept( patrul, status );
                 this.getUpdatePatrulActivity().accept( patrul );
 
                 if ( super.checkEquality.test( status, START_TO_WORK ) ) {
-                    patrul.setStartedToWorkDate( TimeInspector
-                            .getInspector()
-                            .getGetNewDate()
-                            .get() ); // registration of time every day
+                    patrul.update( 0 ); // registration of time every day
 
                     this.getSession().execute( "UPDATE "
                             + CassandraTables.TABLETS + "."
@@ -1427,7 +1391,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                     "success", this.getUpdatePatrulStatus().apply( patrul, status ) ) ); } );
 
     private final Function< String, Mono< ApiResponseModel > > checkToken = token -> this.getGetPatrulByUUID()
-            .apply( this.getDecode().apply( token ) )
+            .apply( super.getDecode().apply( token ) )
             .flatMap( patrul -> super.getFunction().apply(
                     Map.of( "message", patrul.getUuid().toString(),
                             "success", this.getUpdatePatrulStatus().apply( patrul, Status.LOGIN ),
@@ -1459,12 +1423,6 @@ public final class CassandraDataControl extends CassandraConverter {
             .publishOn( Schedulers.single() )
             .collectList()
             .subscribe( new CustomSubscriber( 3, token ) );
-
-    private final Function< String, UUID > decode = token -> UUID.fromString(
-            new String( Base64
-                    .getDecoder()
-                    .decode( token ) )
-                    .split( "@" )[ 0 ] );
 
     // возвращает список патрульных которые макс близко к камере
     private final Function< Point, Mono< PatrulInRadiusList > > getPatrulInRadiusList = point ->
@@ -1509,7 +1467,7 @@ public final class CassandraDataControl extends CassandraConverter {
                             + "' WHERE id = 'id';" )
                     .wasApplied()
                     ? super.getFunction().apply( Map.of( "message", "Last version was saved" ) )
-                    : super.getFunction().apply( Map.of( "message", "Error during the saving of version", "code", 201 ) );
+                    : super.error.apply( 8 );
 
     private final Supplier< Mono< ApiResponseModel > > getLastVersion = () -> super.getFunction().apply(
             Map.of( "message", "you have to update to last version",

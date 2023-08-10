@@ -18,19 +18,17 @@ public final class CarDetails {
     private Long time;
     private Double confidence;
 
-    public CarDetails ( final EventCar eventCar ) {
+    public CarDetails ( final EventCar eventCar, final DataValidateInspector dataValidateInspector ) {
         this.setIp( eventCar.getCameraIp() );
         this.setConfidence( eventCar.getConfidence() );
 
-        this.setDate( DataValidateInspector
-                .getInstance()
+        this.setDate( dataValidateInspector
                 .checkParam
                 .test( eventCar.getCreated_date() )
                 ? eventCar.getCreated_date().getTime()
                 : null );
 
-        this.setTime( DataValidateInspector
-                .getInstance()
+        this.setTime( dataValidateInspector
                 .checkParam
                 .test( eventCar.getCreated_date() )
                 ? eventCar.getCreated_date().getTime()
@@ -40,16 +38,13 @@ public final class CarDetails {
         this.setCameraImage( eventCar.getFullframe() );
         this.setDossier_photo( eventCar.getMatched_dossier() );
 
-        if ( DataValidateInspector
-                .getInstance()
+        if ( dataValidateInspector
                 .checkParam
                 .test( eventCar.getCarTotalData() )
-                && DataValidateInspector
-                .getInstance()
+                && dataValidateInspector
                 .checkParam
                 .test( eventCar.getCarTotalData().getModelForCar() ) ) {
-            this.setCarNumber( DataValidateInspector
-                    .getInstance()
+            this.setCarNumber( dataValidateInspector
                     .checkParam
                     .test( eventCar
                             .getCarTotalData()
@@ -63,18 +58,16 @@ public final class CarDetails {
                     .getCarTotalData()
                     .getGosNumber() );
 
-            this.setCarData( DataValidateInspector
-                    .getInstance()
+            this.setCarData( dataValidateInspector
                     .concatNames
                     .apply( eventCar
                             .getCarTotalData()
                             .getModelForCar(), 1 ) ); } }
 
-    public CarDetails ( final CarEvent carEvent ) {
+    public CarDetails ( final CarEvent carEvent, final DataValidateInspector dataValidateInspector ) {
         this.setConfidence( carEvent.getConfidence() );
 
-        if ( DataValidateInspector
-                .getInstance()
+        if ( dataValidateInspector
                 .checkParam
                 .test( carEvent.getCreated_date() )
                 && !carEvent.getCreated_date().equals( "null" ) )
@@ -83,12 +76,10 @@ public final class CarDetails {
                     .getConvertTimeToLong()
                     .apply( carEvent.getCreated_date() ) ) );
 
-        this.setIp( DataValidateInspector
-                .getInstance()
+        this.setIp( dataValidateInspector
                 .checkParam
                 .test( carEvent.getDataInfo() )
-                && DataValidateInspector
-                .getInstance()
+                && dataValidateInspector
                 .checkParam
                 .test( carEvent.getDataInfo().getCadaster() )
                 ? carEvent.getDataInfo().getCadaster().getIp()
@@ -98,18 +89,15 @@ public final class CarDetails {
         this.setCameraImage( carEvent.getFullframe() ); // original version of the image from camera
         this.setDossier_photo( carEvent.getDossier_photo() );
 
-        if ( DataValidateInspector
-                .getInstance()
+        if ( dataValidateInspector
                 .checkParam
                 .test( carEvent.getCarTotalData() )
-                && DataValidateInspector
-                .getInstance()
+                && dataValidateInspector
                 .checkParam
                 .test( carEvent
                         .getCarTotalData()
                         .getModelForCar() ) ) {
-            this.setCarNumber( DataValidateInspector
-                    .getInstance()
+            this.setCarNumber( dataValidateInspector
                     .checkParam
                     .test( carEvent
                             .getCarTotalData()
@@ -123,8 +111,7 @@ public final class CarDetails {
                     .getCarTotalData()
                     .getGosNumber() );
 
-            this.setCarData( DataValidateInspector
-                    .getInstance()
+            this.setCarData( dataValidateInspector
                     .concatNames
                     .apply( carEvent
                             .getCarTotalData()

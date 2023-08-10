@@ -34,17 +34,13 @@ public final class SosController extends LogInspector {
     // используется планшетом чтобы проверить не отправлял ли он СОС раньше
     @MessageMapping ( value = "checkSosStatus" )
     public Mono< ApiResponseModel > checkSosStatus ( final String token ) {
-        return super.checkSosTable.test(
-                CassandraDataControl
-                        .getInstance()
-                        .getDecode()
-                        .apply( token ) )
+        return super.checkSosTable.test( super.getDecode().apply( token ) )
                 ? super.getFunction().apply(
                         Map.of( "message", "U did not send SOS signal",
-                        "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                .builder()
-                                .data( Status.IN_ACTIVE )
-                                .build() ) )
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( Status.IN_ACTIVE )
+                                        .build() ) )
                 : super.getFunction().apply(
                         Map.of( "message", "U have SOS signal",
                         "data", com.ssd.mvd.gpstabletsservice.entity.Data
@@ -58,10 +54,7 @@ public final class SosController extends LogInspector {
         return CassandraDataControlForTasks
                 .getInstance()
                 .getGetAllSosForCurrentPatrul()
-                .apply( CassandraDataControl
-                        .getInstance()
-                        .getDecode()
-                        .apply( token ) )
+                .apply( super.getDecode().apply( token ) )
                 .onErrorContinue( super::logging )
                 .onErrorReturn( super.getErrorResponse().get() ); }
 

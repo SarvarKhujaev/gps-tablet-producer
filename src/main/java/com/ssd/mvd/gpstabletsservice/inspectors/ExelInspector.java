@@ -27,8 +27,8 @@ public final class ExelInspector extends LogInspector {
     public ExelInspector () {}
 
     public String download ( final List< Patrul > patruls,
-                           final Map< String, String > params,
-                           final List< String > policeTypes ) {
+                             final Map< String, String > params,
+                             final List< String > policeTypes ) {
         try {
             final StringBuilder stringBuilder = new StringBuilder().append( switch ( Status.valueOf( params.get( "status" ) ) ) {
                 case ACTIVE -> "faol_patrullar";

@@ -3,14 +3,19 @@ package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.*;
 
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
+import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
+import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.CARD_102;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.FINISHED;
+import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.task.card.VictimHumans;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
-import java.util.*;
 
 @lombok.Data
 @lombok.NoArgsConstructor
@@ -128,6 +133,37 @@ public final class CarEvent {
     private UUID uuid;
 
     public UUID getUUID () { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
+
+    public void update ( final Patrul patrul, final PatrulStatus patrulStatus ) { this.getPatrulStatuses().put( patrul.getPassportNumber(), patrulStatus ); }
+
+    public CarEvent update ( final ReportForCard reportForCard ) {
+        this.getReportForCardList().add( reportForCard );
+        return this; }
+
+    public void update ( final Patrul patrul ) { this.getPatruls().put( patrul.getUuid(), patrul ); }
+
+    public void remove ( final Patrul patrul ) {
+        this.getPatruls().remove( CassandraDataControlForTasks
+                .getInstance()
+                .getDeleteRowFromTaskTimingTable()
+                .apply( patrul ) ); }
+
+    public void update () { if ( this.getPatruls().size() == this.getReportForCardList().size() ) { // в случае если количество патрульных равно количеству рапортов, то значит что таск закрыт
+        this.setStatus( FINISHED );
+        CassandraDataControlForTasks
+                .getInstance()
+                .getDeleteActiveTask()
+                .accept( this.getUUID().toString() );
+        if ( !this.getPatruls().isEmpty() ) KafkaDataControl // если таск закончен без удаления всех патрульных, то есть удачно завершен
+                .getInstance()
+                .getWriteActiveTaskToKafka()
+                .accept( new ActiveTask(
+                        this,
+                        this.getUUID().toString(),
+                        this.getId(),
+                        this.getStatus(),
+                        CARD_102,
+                        this.getPatruls() ) ); } }
 
     @JsonDeserialize
     private CarTotalData carTotalData;

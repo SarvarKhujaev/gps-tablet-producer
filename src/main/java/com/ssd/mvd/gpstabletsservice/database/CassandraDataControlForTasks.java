@@ -26,6 +26,7 @@ import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.*;
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.TaskDetails;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.TaskTotalData;
@@ -126,7 +127,8 @@ public final class CassandraDataControlForTasks extends SerDes {
                                                     + CassandraTables.CARTOTALDATA
                                                     + " WHERE gosnumber = '" + gosnumber + "';" )
                                             .one()
-                                            .getString( "object" ), CarTotalData.class ) ) )
+                                            .getString( "object" ), CarTotalData.class ),
+                                    DataValidateInspector.getInstance() ) )
                             .build() ) );
 
     // возвращает запись из БД для конкретной задачи

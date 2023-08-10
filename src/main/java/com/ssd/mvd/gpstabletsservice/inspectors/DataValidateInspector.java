@@ -17,6 +17,7 @@ import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.entity.Point;
 
+import java.nio.charset.StandardCharsets;
 import java.util.function.BiPredicate;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -48,6 +49,18 @@ public class DataValidateInspector extends Archive {
                     ( (ModelForCar) o ).getColor() );
 
             case 2 -> String.join( "", String.valueOf( o ).split( "[.]" ) );
+
+            case 4 -> Base64
+                    .getEncoder()
+                    .encodeToString( String.join( "@",
+                            ( (Patrul) o ).getUuid().toString(),
+                                    ( (Patrul) o ).getPassportNumber(),
+                                    ( (Patrul) o ).getPassword(),
+                                    ( (Patrul) o ).getSimCardNumber(),
+                                    super.getGenerateToken().get() )
+                            .getBytes( StandardCharsets.UTF_8 ) );
+
+            case 5 -> String.join( " ", ( (Patrul) o ).getName(), ( (Patrul) o ).getSurname(), ( (Patrul) o ).getFatherName() );
 
             default -> String.valueOf( o ).replaceAll( "'", "" ); };
 
