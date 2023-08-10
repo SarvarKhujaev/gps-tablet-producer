@@ -10,7 +10,6 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
 
-import java.util.function.Supplier;
 import java.time.Duration;
 import java.util.*;
 
@@ -74,21 +73,22 @@ public final class Patrul {
 
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    public Supplier< Boolean > check = () -> switch ( this.getPoliceType() ) {
+    public Boolean check () { return switch ( this.getPoliceType() ) {
         case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;
         default -> TimeInspector
                 .getInspector()
                 .getCheckDate()
-                .test( this.getTaskDate().toInstant() ); };
+                .test( this.getTaskDate().toInstant() ); }; }
 
-    public Supplier< String > getSurnameNameFatherName = () -> Optional.ofNullable( this.surnameNameFatherName )
-            .filter( s -> this.surnameNameFatherName != null
-                    && this.surnameNameFatherName.contains( "NULL" )
-                    && this.surnameNameFatherName.contains( "null" ) )
-            .orElse( ( this.surnameNameFatherName = DataValidateInspector
-                    .getInstance()
-                    .concatNames
-                    .apply( this, 5 ) ) );
+    public String getSurnameNameFatherName () {
+        return Optional.ofNullable( this.surnameNameFatherName )
+                .filter( s -> this.surnameNameFatherName != null
+                        && this.surnameNameFatherName.contains( "NULL" )
+                        && this.surnameNameFatherName.contains( "null" ) )
+                .orElse( ( this.surnameNameFatherName = DataValidateInspector
+                        .getInstance()
+                        .concatNames
+                        .apply( this, 5 ) ) ); }
 
     // освобождаем патрульного от таска
     public void free () {

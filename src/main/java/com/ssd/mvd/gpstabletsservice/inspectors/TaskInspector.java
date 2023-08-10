@@ -694,9 +694,176 @@ public final class TaskInspector extends SerDes {
 
     // по запросу проверяет какая задача дана конкретному патрульному
     // после чего возвращает краткое ( ACTIVE_TASK ), полное ( CARD_DETAILS ) или же по дефолту убирает патрульного из задачи
-    public final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = ( patrul, taskTypes ) ->
-            patrul.getTaskTypes().compareTo( ESCORT ) == 0
-                    ? CassandraDataControlForEscort
+    public final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = ( patrul, taskTypes ) -> switch ( patrul.getTaskTypes() ) {
+            case CARD_102 -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getGetTask()
+                    .apply( patrul.getTaskId() )
+                    .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
+                    .flatMap( card -> super.getFunction().apply( switch ( taskTypes ) {
+                            case CARD_DETAILS -> Map.of( "message", "Your task details",
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( new CardDetails( card, patrul, "ru", DataValidateInspector.getInstance() ) )
+                                            .type( CARD_102.name() )
+                                            .build() );
+
+                            case ACTIVE_TASK -> Map.of( "message", "U have " + CARD_102 + " Task",
+                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                            .builder()
+                                            .data( new ActiveTask(
+                                                    card,
+                                                    CARD_102,
+                                                    patrul.getStatus(),
+                                                    card.getStatus(),
+                                                    card.getUUID().toString() ) )
+                                            .type( CARD_102.name() )
+                                            .build() );
+
+                            default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card ).getName()
+                                    + " was removed from " + card.getCardId() ); } ) );
+
+            case FIND_FACE_EVENT_BODY -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getGetTask()
+                    .apply( patrul.getTaskId() )
+                    .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
+                    .flatMap( eventBody -> super.getFunction().apply( switch ( taskTypes ) {
+                        case CARD_DETAILS -> Map.of( "message", "Your task details ",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new CardDetails( new PersonDetails( eventBody, DataValidateInspector.getInstance() ) ) )
+                                        .type( FIND_FACE_PERSON.name() )
+                                        .build() );
+
+                        case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_BODY + " Task",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new ActiveTask(
+                                                eventBody,
+                                                FIND_FACE_EVENT_BODY,
+                                                patrul.getStatus(),
+                                                eventBody.getStatus(),
+                                                eventBody.getUUID().toString() ) )
+                                        .type( FIND_FACE_EVENT_BODY.name() )
+                                        .build() );
+
+                        default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, eventBody ).getName()
+                                + " was removed from " + eventBody.getId() ); } ) );
+
+            case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getGetTask()
+                    .apply( patrul.getTaskId() )
+                    .map( row -> super.deserialize( row.getString( "object" ), EventFace.class) )
+                    .flatMap( eventFace -> super.getFunction().apply( switch ( taskTypes ) {
+                        case CARD_DETAILS -> Map.of( "message", "Your task details",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new CardDetails( new PersonDetails( eventFace, DataValidateInspector.getInstance() ) ) )
+                                        .type( FIND_FACE_PERSON.name() )
+                                        .build() );
+
+                        case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_FACE + " Task",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new ActiveTask(
+                                                eventFace,
+                                                FIND_FACE_EVENT_FACE,
+                                                patrul.getStatus(),
+                                                eventFace.getStatus(),
+                                                eventFace.getUUID().toString() ) )
+                                        .type( FIND_FACE_EVENT_FACE.name() )
+                                        .build() );
+
+                        default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, eventFace ).getName()
+                                + " was removed from " + eventFace.getId() ); } ) );
+
+            case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getGetTask()
+                    .apply( patrul.getTaskId() )
+                    .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
+                    .flatMap( eventCar -> super.getFunction().apply( switch ( taskTypes ) {
+                        case CARD_DETAILS -> Map.of( "message", "Your task details",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new CardDetails( new CarDetails( eventCar, DataValidateInspector.getInstance() ) ) )
+                                        .type( FIND_FACE_CAR.name() )
+                                        .build() );
+
+                        case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_CAR + " Task",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new ActiveTask(
+                                                eventCar,
+                                                FIND_FACE_EVENT_CAR,
+                                                patrul.getStatus(),
+                                                eventCar.getStatus(),
+                                                eventCar.getUUID().toString() ) )
+                                        .type( FIND_FACE_EVENT_CAR.name() )
+                                        .build() );
+
+                        default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, eventCar ).getName()
+                                + " was removed from " + eventCar.getId() ); } ) );
+
+            case FIND_FACE_CAR -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getGetTask()
+                    .apply( patrul.getTaskId() )
+                    .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
+                    .flatMap( carEvent -> super.getFunction().apply( switch ( taskTypes ) {
+                        case CARD_DETAILS -> Map.of( "message", "Your task details",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new CardDetails( new CarDetails( carEvent, DataValidateInspector.getInstance() ) ) )
+                                        .type( FIND_FACE_CAR.name() )
+                                        .build() );
+
+                        case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_CAR + " Task",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new ActiveTask(
+                                                carEvent,
+                                                FIND_FACE_CAR,
+                                                patrul.getStatus(),
+                                                carEvent.getStatus(),
+                                                carEvent.getUUID().toString() ) )
+                                        .type( FIND_FACE_CAR.name() )
+                                        .build() );
+
+                        default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, carEvent ).getName()
+                                + " was removed from " + carEvent.getId() ); } ) );
+
+            case FIND_FACE_PERSON -> CassandraDataControlForTasks
+                    .getInstance()
+                    .getGetTask()
+                    .apply( patrul.getTaskId() )
+                    .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
+                    .flatMap( faceEvent -> super.getFunction().apply( switch ( taskTypes ) {
+                        case CARD_DETAILS -> Map.of( "message", "Your task details",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new CardDetails( new PersonDetails( faceEvent, DataValidateInspector.getInstance() ) ) )
+                                        .type( FIND_FACE_PERSON.name() )
+                                        .build() );
+
+                        case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_PERSON + " Task",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new ActiveTask(
+                                                faceEvent,
+                                                FIND_FACE_PERSON,
+                                                patrul.getStatus(),
+                                                faceEvent.getStatus(),
+                                                faceEvent.getUUID().toString() ) )
+                                        .type( FIND_FACE_PERSON.name() )
+                                        .build() );
+
+                        default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, faceEvent ).getName()
+                                + " was removed from " + faceEvent.getId() ); } ) );
+
+            case ESCORT -> CassandraDataControlForEscort
                     .getInstance()
                     .getGetCurrentTupleOfEscort()
                     .apply( patrul.getTaskId() )
@@ -712,178 +879,37 @@ public final class TaskInspector extends SerDes {
                                             "data", com.ssd.mvd.gpstabletsservice.entity.Data.builder()
                                                     .data( new CardDetails( escortTuple, "ru", tupleOfCar ) )
                                                     .type( ESCORT.name() )
-                                                    .build() ) ) ) )
-                    : CassandraDataControlForTasks
+                                                    .build() ) ) ) );
+
+            case SELF_EMPLOYMENT -> CassandraDataControlForTasks
                     .getInstance()
                     .getGetTask()
                     .apply( patrul.getTaskId() )
-                    .flatMap( row -> switch ( patrul.getTaskTypes() ) {
-                        case CARD_102 -> super.convert( super.deserialize( row.getString( "object" ), Card.class ) )
-                                .flatMap( card -> super.getFunction().apply( switch ( taskTypes ) {
-                                    case CARD_DETAILS -> Map.of( "message", "Your task details",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new CardDetails( card, patrul, "ru", DataValidateInspector.getInstance() ) )
-                                                    .type( CARD_102.name() )
-                                                    .build() );
+                    .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
+                    .flatMap( selfEmploymentTask -> super.getFunction().apply( switch ( taskTypes ) {
+                        case CARD_DETAILS -> Map.of( "message", "Your task details",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data.builder()
+                                        .data( new CardDetails( selfEmploymentTask, "ru", patrul ) )
+                                        .type( ESCORT.name() )
+                                        .build() );
 
-                                    case ACTIVE_TASK -> Map.of( "message", "U have " + CARD_102 + " Task",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new ActiveTask(
-                                                            card,
-                                                            CARD_102,
-                                                            patrul.getStatus(),
-                                                            card.getStatus(),
-                                                            card.getUUID().toString() ) )
-                                                    .type( CARD_102.name() )
-                                                    .build() );
+                        case ACTIVE_TASK -> Map.of( "message", "U have " + SELF_EMPLOYMENT + " Task",
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
+                                        .builder()
+                                        .data( new ActiveTask(
+                                                selfEmploymentTask,
+                                                SELF_EMPLOYMENT,
+                                                patrul.getStatus(),
+                                                selfEmploymentTask.getTaskStatus(),
+                                                selfEmploymentTask.getUuid().toString() ) )
+                                        .type( SELF_EMPLOYMENT.name() )
+                                        .build() );
 
-                                    default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, card ).getName()
-                                            + " was removed from " + card.getCardId() ); } ) );
+                        default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, selfEmploymentTask ).getName()
+                                + " was removed from " + selfEmploymentTask.getUuid() ); } ) );
 
-                        case SELF_EMPLOYMENT -> super.convert( super.deserialize( row.getString( "object" ), SelfEmploymentTask.class ) )
-                                .flatMap( selfEmploymentTask -> super.getFunction().apply( switch ( taskTypes ) {
-                                    case CARD_DETAILS -> Map.of( "message", "Your task details",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data.builder()
-                                                    .data( new CardDetails( selfEmploymentTask, "ru", patrul ) )
-                                                    .type( ESCORT.name() )
-                                                    .build() );
-
-                                    case ACTIVE_TASK -> Map.of( "message", "U have " + SELF_EMPLOYMENT + " Task",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new ActiveTask(
-                                                            selfEmploymentTask,
-                                                            SELF_EMPLOYMENT,
-                                                            patrul.getStatus(),
-                                                            selfEmploymentTask.getTaskStatus(),
-                                                            selfEmploymentTask.getUuid().toString() ) )
-                                                    .type( SELF_EMPLOYMENT.name() )
-                                                    .build() );
-
-                                    default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, selfEmploymentTask ).getName()
-                                            + " was removed from " + selfEmploymentTask.getUuid() ); } ) );
-
-                        case FIND_FACE_CAR -> super.convert( super.deserialize( row.getString( "object" ), CarEvent.class ) )
-                                .flatMap( carEvent -> super.getFunction().apply( switch ( taskTypes ) {
-                                    case CARD_DETAILS -> Map.of( "message", "Your task details",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new CardDetails( new CarDetails( carEvent, DataValidateInspector.getInstance() ) ) )
-                                                    .type( FIND_FACE_CAR.name() )
-                                                    .build() );
-
-                                    case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_CAR + " Task",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new ActiveTask(
-                                                            carEvent,
-                                                            FIND_FACE_CAR,
-                                                            patrul.getStatus(),
-                                                            carEvent.getStatus(),
-                                                            carEvent.getUUID().toString() ) )
-                                                    .type( FIND_FACE_CAR.name() )
-                                                    .build() );
-
-                                    default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, carEvent ).getName()
-                                            + " was removed from " + carEvent.getId() ); } ) );
-
-                        case FIND_FACE_PERSON -> super.convert( super.deserialize( row.getString( "object" ), FaceEvent.class ) )
-                                .flatMap( faceEvent -> super.getFunction().apply( switch ( taskTypes ) {
-                                    case CARD_DETAILS -> Map.of( "message", "Your task details",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new CardDetails( new PersonDetails( faceEvent, DataValidateInspector.getInstance() ) ) )
-                                                    .type( FIND_FACE_PERSON.name() )
-                                                    .build() );
-
-                                    case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_PERSON + " Task",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new ActiveTask(
-                                                            faceEvent,
-                                                            FIND_FACE_PERSON,
-                                                            patrul.getStatus(),
-                                                            faceEvent.getStatus(),
-                                                            faceEvent.getUUID().toString() ) )
-                                                    .type( FIND_FACE_PERSON.name() )
-                                                    .build() );
-
-                                    default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, faceEvent ).getName()
-                                            + " was removed from " + faceEvent.getId() ); } ) );
-
-                        case FIND_FACE_EVENT_CAR -> super.convert( super.deserialize( row.getString( "object" ), EventCar.class ) )
-                                .flatMap( eventCar -> super.getFunction().apply( switch ( taskTypes ) {
-                                    case CARD_DETAILS -> Map.of( "message", "Your task details",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new CardDetails( new CarDetails( eventCar, DataValidateInspector.getInstance() ) ) )
-                                                    .type( FIND_FACE_CAR.name() )
-                                                    .build() );
-
-                                    case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_CAR + " Task",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new ActiveTask(
-                                                            eventCar,
-                                                            FIND_FACE_EVENT_CAR,
-                                                            patrul.getStatus(),
-                                                            eventCar.getStatus(),
-                                                            eventCar.getUUID().toString() ) )
-                                                    .type( FIND_FACE_EVENT_CAR.name() )
-                                                    .build() );
-
-                                    default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, eventCar ).getName()
-                                            + " was removed from " + eventCar.getId() ); } ) );
-
-                        case FIND_FACE_EVENT_BODY -> super.convert( super.deserialize( row.getString( "object" ), EventBody.class ) )
-                                .flatMap( eventBody -> super.getFunction().apply( switch ( taskTypes ) {
-                                    case CARD_DETAILS -> Map.of( "message", "Your task details",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new CardDetails( new PersonDetails( eventBody, DataValidateInspector.getInstance() ) ) )
-                                                    .type( FIND_FACE_PERSON.name() )
-                                                    .build() );
-
-                                    case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_BODY + " Task",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new ActiveTask(
-                                                            eventBody,
-                                                            FIND_FACE_EVENT_BODY,
-                                                            patrul.getStatus(),
-                                                            eventBody.getStatus(),
-                                                            eventBody.getUUID().toString() ) )
-                                                    .type( FIND_FACE_EVENT_BODY.name() )
-                                                    .build() );
-
-                                    default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, eventBody ).getName()
-                                            + " was removed from " + eventBody.getId() ); } ) );
-
-                        case FIND_FACE_EVENT_FACE -> super.convert( super.deserialize( row.getString( "object" ), EventFace.class ) )
-                                .flatMap( eventFace -> super.getFunction().apply( switch ( taskTypes ) {
-                                    case CARD_DETAILS -> Map.of( "message", "Your task details",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new CardDetails( new PersonDetails( eventFace, DataValidateInspector.getInstance() ) ) )
-                                                    .type( FIND_FACE_PERSON.name() )
-                                                    .build() );
-
-                                    case ACTIVE_TASK -> Map.of( "message", "U have " + FIND_FACE_EVENT_FACE + " Task",
-                                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                                    .builder()
-                                                    .data( new ActiveTask(
-                                                            eventFace,
-                                                            FIND_FACE_EVENT_FACE,
-                                                            patrul.getStatus(),
-                                                            eventFace.getStatus(),
-                                                            eventFace.getUUID().toString() ) )
-                                                    .type( FIND_FACE_EVENT_FACE.name() )
-                                                    .build() );
-
-                                    default -> Map.of( "message", this.changeTaskStatus( patrul, CANCEL, eventFace ).getName()
-                                            + " was removed from " + eventFace.getId() ); } ) );
-
-                        default -> super.error.apply( 4 ); } );
+            default -> super.getFunction().apply(
+                    Map.of( "message", "U have no any Task",
+                            "code", 201,
+                            "success", false ) ); };
 }

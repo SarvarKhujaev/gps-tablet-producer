@@ -51,16 +51,18 @@ public final class CardController extends SerDes {
             .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getCurrentActiveTask" ) // for Android
-    public Mono< ApiResponseModel > getCurrentActiveTask ( final String token ) { return CassandraDataControl
+    public Mono< ApiResponseModel > getCurrentActiveTask ( final String token ) {
+        return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
             .apply( super.getDecode().apply( token ) )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
                     .getTaskData
-                    .apply( patrul, TaskTypes.ACTIVE_TASK ) )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+                    .apply( patrul, TaskTypes.ACTIVE_TASK ) );
+//            .onErrorContinue( super::logging )
+//            .onErrorReturn( super.getErrorResponse().get() );
+    }
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( final CardRequest< ? > request ) {

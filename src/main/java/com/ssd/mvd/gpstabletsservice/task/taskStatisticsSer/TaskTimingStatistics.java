@@ -60,7 +60,7 @@ public final class TaskTimingStatistics { // показывает все тас�
         this.setPhoneNumber( patrul.getPhoneNumber() );
         this.setPassportNumber( patrul.getPassportNumber() );
         this.setPatrulImageLink( patrul.getPatrulImageLink() );
-        this.setSurnameNameFatherName( patrul.getSurnameNameFatherName.get() );
+        this.setSurnameNameFatherName( patrul.getSurnameNameFatherName() );
 
         this.setBatteryLevel( patrul.getBatteryLevel() );
         this.setLastActiveDate( patrul.getLastActiveDate() );
