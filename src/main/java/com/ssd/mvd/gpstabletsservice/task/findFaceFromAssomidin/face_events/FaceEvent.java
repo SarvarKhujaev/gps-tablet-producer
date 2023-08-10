@@ -1,13 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events;
 
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
+import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FIND_FACE_PERSON;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
 import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
-import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.CARD_102;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FINISHED;
-import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FIND_FACE_PERSON;
 
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
