@@ -31,16 +31,19 @@ public final class SelfEmploymentController extends SerDes {
                 .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )
-    public Mono< ApiResponseModel > addReportForSelfEmployment ( final ReportForCard reportForCard ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addReportForSelfEmployment ( final ReportForCard reportForCard ) {
+        System.out.println( reportForCard );
+        return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
             .apply( reportForCard.getUuidOfPatrul() )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
                     .saveReportForTask
-                    .apply( patrul, reportForCard ) )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+                    .apply( patrul, reportForCard ) );
+//            .onErrorContinue( super::logging )
+//            .onErrorReturn( super.getErrorResponse().get() );
+    }
 
     @MessageMapping ( value = "addSelfEmployment" ) // saves new Task and link the Patrul who created it
     public Mono< ApiResponseModel > addSelfEmployment ( final SelfEmploymentTask selfEmploymentTask ) {
