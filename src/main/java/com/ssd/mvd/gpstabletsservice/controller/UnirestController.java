@@ -88,7 +88,7 @@ public final class UnirestController extends LogInspector {
             if ( patrul.getSpecialToken() == null ) return;
             try { super.convert( new Req() )
                     .map( req -> {
-                        req.setUsername( patrul.getSurnameNameFatherName.get() );
+                        req.setUsername( patrul.getSurnameNameFatherName() );
                         req.setId( patrul.getUuid() );
                         req.setRole( Role.USER );
                         return req; } )
@@ -105,7 +105,7 @@ public final class UnirestController extends LogInspector {
     private final Consumer< Patrul > addUser = patrul -> {
             try { super.convert( new Req() )
                     .map( req -> {
-                        req.setUsername( patrul.getSurnameNameFatherName.get() );
+                        req.setUsername( patrul.getSurnameNameFatherName() );
                         req.setId( patrul.getUuid() );
                         req.setRole( Role.USER );
                         return req; } )

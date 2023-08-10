@@ -105,7 +105,7 @@ public final class Notification {
         this.setTaskTypes( patrul.getTaskTypes() );
         this.setPoliceType( patrul.getPoliceType() );
         this.setPassportSeries( patrul.getPassportNumber() );
-        this.setNsfOfPatrul( patrul.getSurnameNameFatherName.get() );
+        this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
 
         switch ( taskTypes ) {
             case CARD_102 -> this.save( ( (Card) task ).getStatus(),

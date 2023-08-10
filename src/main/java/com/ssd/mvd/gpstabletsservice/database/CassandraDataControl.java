@@ -709,7 +709,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                 patrul.getSimCardNumber() + "', '" +
                                 patrul.getPassportNumber() + "', '" +
                                 patrul.getPatrulImageLink() + "', '" +
-                                patrul.getSurnameNameFatherName.get() + "', '" +
+                                patrul.getSurnameNameFatherName() + "', '" +
                                 patrul.getStatus() + "', '" +
                                 patrul.getTaskTypes() + "', " +
                                 super.convertMapToCassandra.apply( patrul.getListOfTasks() ) + " );" )
@@ -855,7 +855,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                 patrul.getSimCardNumber() + "', '" +
                                 patrul.getPassportNumber() + "', '" +
                                 patrul.getPatrulImageLink() + "', '" +
-                                patrul.getSurnameNameFatherName.get() + "', '" +
+                                patrul.getSurnameNameFatherName() + "', '" +
                                 patrul.getStatus() + "', '" +
                                 patrul.getTaskTypes() + "', " +
                                 super.convertMapToCassandra.apply( patrul.getListOfTasks() ) + " ) IF NOT EXISTS;" )
