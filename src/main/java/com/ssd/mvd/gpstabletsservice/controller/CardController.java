@@ -59,10 +59,9 @@ public final class CardController extends SerDes {
             .flatMap( patrul -> TaskInspector
                     .getInstance()
                     .getTaskData
-                    .apply( patrul, TaskTypes.ACTIVE_TASK ) );
-//            .onErrorContinue( super::logging )
-//            .onErrorReturn( super.getErrorResponse().get() );
-    }
+                    .apply( patrul, TaskTypes.ACTIVE_TASK ) )
+            .onErrorContinue( super::logging )
+            .onErrorReturn( super.getErrorResponse().get() ); }
 
     @MessageMapping ( value = "linkCardToPatrul" )
     public Flux< ApiResponseModel > linkCardToPatrul ( final CardRequest< ? > request ) {
