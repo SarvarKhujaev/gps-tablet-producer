@@ -1046,7 +1046,7 @@ public final class TaskInspector extends SerDes {
                     .apply( patrul.getTaskId() )
                     .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
                     .flatMap( eventBody -> super.getFunction().apply( switch ( taskTypes ) {
-                        case CARD_DETAILS -> Map.of( "message", "Your task details",
+                        case CARD_DETAILS -> Map.of( "message", "Your task details ",
                                 "data", com.ssd.mvd.gpstabletsservice.entity.Data
                                         .builder()
                                         .data( new CardDetails( new PersonDetails( eventBody ) ) )
