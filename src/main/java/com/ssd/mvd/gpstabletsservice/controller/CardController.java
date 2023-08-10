@@ -54,10 +54,7 @@ public final class CardController extends SerDes {
     public Mono< ApiResponseModel > getCurrentActiveTask ( final String token ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
-            .apply( CassandraDataControl
-                    .getInstance()
-                    .getDecode()
-                    .apply( token ) )
+            .apply( super.getDecode().apply( token ) )
             .flatMap( patrul -> TaskInspector
                     .getInstance()
                     .getTaskData

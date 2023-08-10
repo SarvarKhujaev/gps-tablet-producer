@@ -1,5 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -7,6 +10,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
 
+import java.util.function.Supplier;
 import java.time.Duration;
 import java.util.*;
 
@@ -70,19 +74,80 @@ public final class Patrul {
 
     public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    public Boolean check () { return switch ( this.getPoliceType() ) {
+    public Supplier< Boolean > check = () -> switch ( this.getPoliceType() ) {
         case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;
         default -> TimeInspector
                 .getInspector()
                 .getCheckDate()
-                .test( this.getTaskDate().toInstant() ); }; }
+                .test( this.getTaskDate().toInstant() ); };
 
-    public String getSurnameNameFatherName () {
-        return Optional.ofNullable( this.surnameNameFatherName )
-                .filter( s -> this.surnameNameFatherName != null
-                        && this.surnameNameFatherName.contains( "NULL" )
-                        && this.surnameNameFatherName.contains( "null" ) )
-                .orElse( ( this.surnameNameFatherName = String.join( " ", this.getName(), this.getSurname(), this.getFatherName() ) ) ); }
+    public Supplier< String > getSurnameNameFatherName = () -> Optional.ofNullable( this.surnameNameFatherName )
+            .filter( s -> this.surnameNameFatherName != null
+                    && this.surnameNameFatherName.contains( "NULL" )
+                    && this.surnameNameFatherName.contains( "null" ) )
+            .orElse( ( this.surnameNameFatherName = DataValidateInspector
+                    .getInstance()
+                    .concatNames
+                    .apply( this, 5 ) ) );
+
+    // освобождаем патрульного от таска
+    public void free () {
+        this.setTaskId( null );
+        this.setStatus( Status.FREE );
+        this.setTaskTypes( TaskTypes.FREE ); }
+
+    // присваиваем изначальные значения для нового патрульного
+    public void begin () {
+        this.setStatus( FREE );
+        this.setInPolygon( false );
+        this.setTotalActivityTime( 0L );
+        this.setTaskTypes( TaskTypes.FREE );
+        this.setListOfTasks( new HashMap<>() ); }
+
+    public void update ( final Integer value ) {
+        final Date date = TimeInspector.getInspector().getGetNewDate().get();
+        switch ( value ) {
+            case 2 -> {
+                this.setTaskDate( date );
+                this.setLastActiveDate( date );
+                this.setStartedToWorkDate( date );
+                this.setDateOfRegistration( date ); }
+            case 1 -> this.setTaskDate( date );
+            default -> this.setStartedToWorkDate( date ); } }
+
+    public void update ( final TaskTypes taskTypes ) { this.getListOfTasks().putIfAbsent( this.getTaskId(), taskTypes.name() ); }
+
+    public void update ( final String simCardNumber ) {
+        this.setSimCardNumber( simCardNumber );
+        this.setTokenForLogin ( DataValidateInspector
+                .getInstance()
+                .concatNames
+                .apply( this, 4 ) ); }
+
+    public void update ( final TaskTypes taskTypes,
+                         final Double latitudeOfTask,
+                         final Double longitudeOfTask,
+                         final String taskId ) {
+        this.setLongitudeOfTask( longitudeOfTask );
+        this.setLatitudeOfTask( latitudeOfTask );
+        this.setTaskTypes( taskTypes );
+        this.setTaskId( taskId ); }
+
+    public void update ( final TaskTypes taskTypes,
+                         final DataInfo dataInfo,
+                         final String taskId ) {
+        if ( DataValidateInspector
+                .getInstance()
+                .checkParam
+                .test( dataInfo )
+                && DataValidateInspector
+                .getInstance()
+                .checkParam
+                .test( dataInfo.getCadaster() ) ) {
+            this.setLongitudeOfTask( dataInfo.getCadaster().getLongitude() );
+            this.setLatitudeOfTask( dataInfo.getCadaster().getLatitude() ); }
+        this.setTaskTypes( taskTypes );
+        this.setTaskId( taskId ); }
 
     public Patrul ( final Row row ) { Optional.ofNullable( row ).ifPresent( row1 -> {
             this.setTaskDate( row.getTimestamp( "taskDate" ) );

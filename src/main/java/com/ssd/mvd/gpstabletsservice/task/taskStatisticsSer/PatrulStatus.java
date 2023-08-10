@@ -11,7 +11,7 @@ public final class PatrulStatus {
 
     public PatrulStatus ( final Patrul patrul ) {
         this.setPatrul( patrul );
-        this.setInTime( patrul.check() );
+        this.setInTime( patrul.check.get() );
         this.setTotalTimeConsumption( TimeInspector
                 .getInspector()
                 .getGetTimeDifference()
