@@ -610,6 +610,118 @@ public final class TaskInspector extends SerDes {
 
                 default -> super.getError().apply( 3 ); } );
 
+    public final BiFunction< Patrul, Status, Mono< ApiResponseModel > > changeTaskStatus = ( patrul, status ) -> switch ( patrul.getTaskTypes() ) {
+        case CARD_102 -> CassandraDataControlForTasks
+                .getInstance()
+                .getGetTask()
+                .apply( patrul.getTaskId() )
+                .map( row -> super.deserialize( row.getString( "object" ), Card.class ) )
+                .flatMap( card -> super.getFunction().apply(
+                        Map.of( "message", "Patrul: "
+                                        + this.changeTaskStatus( patrul, status, card ).getPassportNumber()
+                                        + " changed his status task to: " + status,
+                                "success", CassandraDataControl
+                                        .getInstance()
+                                        .getUpdatePatrulStatus()
+                                        .apply( patrul, status ) ) ) );
+
+        case SELF_EMPLOYMENT -> CassandraDataControlForTasks
+                .getInstance()
+                .getGetTask()
+                .apply( patrul.getTaskId() )
+                .map( row -> super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
+                .flatMap( selfEmploymentTask -> super.getFunction().apply(
+                        Map.of( "message", "Patrul: "
+                                        + this.changeTaskStatus( patrul, status, selfEmploymentTask ).getPassportNumber()
+                                        + " changed his status task to: " + status,
+                                "success", CassandraDataControl
+                                        .getInstance()
+                                        .getUpdatePatrulStatus()
+                                        .apply( patrul, status ) ) ) );
+
+        case FIND_FACE_EVENT_CAR -> CassandraDataControlForTasks
+                .getInstance()
+                .getGetTask()
+                .apply( patrul.getTaskId() )
+                .map( row -> super.deserialize( row.getString("object" ), EventCar.class ) )
+                .flatMap( eventCar -> super.getFunction().apply(
+                        Map.of( "message", "Patrul: "
+                                        + this.changeTaskStatus( patrul, status, eventCar ).getPassportNumber()
+                                        + " changed his status task to: " + status,
+                                "success", CassandraDataControl
+                                        .getInstance()
+                                        .getUpdatePatrulStatus()
+                                        .apply( patrul, status ) ) ) );
+
+        case FIND_FACE_EVENT_FACE -> CassandraDataControlForTasks
+                .getInstance()
+                .getGetTask()
+                .apply( patrul.getTaskId() )
+                .map( row -> super.deserialize( row.getString( "object" ), EventFace.class ) )
+                .flatMap( eventFace -> super.getFunction().apply(
+                        Map.of( "message", "Patrul: "
+                                        + this.changeTaskStatus( patrul, status, eventFace ).getPassportNumber()
+                                        + " changed his status task to: " + status,
+                                "success", CassandraDataControl
+                                        .getInstance()
+                                        .getUpdatePatrulStatus()
+                                        .apply( patrul, status ) ) ) );
+
+        case FIND_FACE_PERSON -> CassandraDataControlForTasks
+                .getInstance()
+                .getGetTask()
+                .apply( patrul.getTaskId() )
+                .map( row -> super.deserialize( row.getString("object" ), FaceEvent.class ) )
+                .flatMap( faceEvents -> super.getFunction().apply(
+                        Map.of( "message", "Patrul: "
+                                        + this.changeTaskStatus( patrul, status, faceEvents ).getPassportNumber()
+                                        + " changed his status task to: " + status,
+                                "success", CassandraDataControl
+                                        .getInstance()
+                                        .getUpdatePatrulStatus()
+                                        .apply( patrul, status ) ) ) );
+
+        case FIND_FACE_CAR -> CassandraDataControlForTasks
+                .getInstance()
+                .getGetTask()
+                .apply( patrul.getTaskId() )
+                .map( row -> super.deserialize( row.getString("object" ), CarEvent.class ) )
+                .flatMap( carEvents -> super.getFunction().apply(
+                        Map.of( "message", "Patrul: "
+                                        + this.changeTaskStatus( patrul, status, carEvents ).getPassportNumber()
+                                        + " changed his status task to: " + status,
+                                "success", CassandraDataControl
+                                        .getInstance()
+                                        .getUpdatePatrulStatus()
+                                        .apply( patrul, status ) ) ) );
+
+        case ESCORT -> CassandraDataControlForEscort
+                .getInstance()
+                .getGetCurrentTupleOfEscort()
+                .apply( patrul.getTaskId() )
+                .flatMap( escortTuple -> super.getFunction().apply(
+                        Map.of( "message", "Patrul: "
+                                        + this.changeTaskStatus( patrul, status, escortTuple ).getPassportNumber()
+                                        + " changed his status task to: " + status,
+                                "success", CassandraDataControl
+                                        .getInstance()
+                                        .getUpdatePatrulStatus()
+                                        .apply( patrul, status ) ) ) );
+
+        default -> CassandraDataControlForTasks
+                .getInstance()
+                .getGetTask()
+                .apply( patrul.getTaskId() )
+                .map( row -> super.deserialize( row.getString("object" ), EventBody.class ) )
+                .flatMap( eventBody -> super.getFunction().apply(
+                        Map.of( "message", "Patrul: "
+                                        + this.changeTaskStatus( patrul, status, eventBody ).getPassportNumber()
+                                        + " changed his status task to: " + status,
+                                "success", CassandraDataControl
+                                        .getInstance()
+                                        .getUpdatePatrulStatus()
+                                        .apply( patrul, status ) ) ) ); };
+
     // по запросу проверяет какая задача дана конкретному патрульному
     // после чего возвращает краткое ( ACTIVE_TASK ), полное ( CARD_DETAILS ) или же по дефолту убирает патрульного из задачи
     public final BiFunction< Patrul, TaskTypes, Mono< ApiResponseModel > > getTaskData = ( patrul, taskTypes ) -> switch ( patrul.getTaskTypes() ) {
