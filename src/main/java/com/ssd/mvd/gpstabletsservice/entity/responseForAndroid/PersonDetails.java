@@ -29,19 +29,17 @@ public final class PersonDetails {
                 temp[ 4 ] )
                 : String.join( " ", temp ); }
 
-    public PersonDetails ( final EventBody eventBody ) {
+    public PersonDetails ( final EventBody eventBody, final DataValidateInspector dataValidateInspector ) {
         this.setIp( eventBody.getCameraIp() );
         this.setConfidence( eventBody.getConfidence() );
 
-        this.setDate( DataValidateInspector
-                .getInstance()
+        this.setDate( dataValidateInspector
                 .checkParam
                 .test( eventBody.getCreated_date() )
                 ? eventBody.getCreated_date().getTime()
                 : null );
 
-        this.setTime( DataValidateInspector
-                .getInstance()
+        this.setTime( dataValidateInspector
                 .checkParam
                 .test( eventBody.getCreated_date() )
                 ? eventBody.getCreated_date().getTime()
@@ -51,12 +49,10 @@ public final class PersonDetails {
         this.setCameraImage( eventBody.getFullframe() );
         this.setDossier_photo( eventBody.getMatched_dossier() );
 
-        if ( DataValidateInspector
-                .getInstance()
+        if ( dataValidateInspector
                 .checkParam
                 .test( eventBody.getPsychologyCard() ) ) {
-            this.setFIO( DataValidateInspector
-                    .getInstance()
+            this.setFIO( dataValidateInspector
                     .checkRequest
                     .test( eventBody
                             .getPsychologyCard()
@@ -67,8 +63,7 @@ public final class PersonDetails {
                     .get( 0 )
                     .getName() )
                     : null );
-            this.setPassportSeries( DataValidateInspector
-                    .getInstance()
+            this.setPassportSeries( dataValidateInspector
                     .checkRequest
                     .test( eventBody
                             .getPsychologyCard()
@@ -81,19 +76,17 @@ public final class PersonDetails {
                     .split( " " )[0]
                     : null ); } }
 
-    public PersonDetails ( final EventFace eventFace ) {
+    public PersonDetails ( final EventFace eventFace, final DataValidateInspector dataValidateInspector ) {
         this.setIp( eventFace.getCameraIp() );
         this.setConfidence( eventFace.getConfidence() );
 
-        this.setDate( DataValidateInspector
-                .getInstance()
+        this.setDate( dataValidateInspector
                 .checkParam
                 .test( eventFace.getCreated_date() )
                 ? eventFace.getCreated_date().getTime()
                 : null );
 
-        this.setTime( DataValidateInspector
-                .getInstance()
+        this.setTime( dataValidateInspector
                 .checkParam
                 .test( eventFace.getCreated_date() )
                 ? eventFace.getCreated_date().getTime()
@@ -103,12 +96,10 @@ public final class PersonDetails {
         this.setCameraImage( eventFace.getFullframe() );
         this.setDossier_photo( eventFace.getMatched_dossier() );
 
-        if ( DataValidateInspector
-                .getInstance()
+        if ( dataValidateInspector
                 .checkParam
                 .test( eventFace.getPsychologyCard() ) ) {
-            this.setFIO( DataValidateInspector
-                    .getInstance()
+            this.setFIO( dataValidateInspector
                     .checkRequest
                     .test( eventFace
                             .getPsychologyCard()
@@ -120,8 +111,7 @@ public final class PersonDetails {
                     .getName() )
                     : null );
 
-            this.setPassportSeries( DataValidateInspector
-                    .getInstance()
+            this.setPassportSeries( dataValidateInspector
                     .checkRequest
                     .test( eventFace
                             .getPsychologyCard()
@@ -134,10 +124,9 @@ public final class PersonDetails {
                     .split( " " )[0]
                     : null ); } }
 
-    public PersonDetails ( final FaceEvent faceEvent ) {
+    public PersonDetails ( final FaceEvent faceEvent, final DataValidateInspector dataValidateInspector ) {
         this.setConfidence( faceEvent.getConfidence() );
-        this.setTime( DataValidateInspector
-                .getInstance()
+        this.setTime( dataValidateInspector
                 .checkParam
                 .test( faceEvent.getCreated_date() )
                 && !faceEvent.getCreated_date().equals( "null" )
@@ -147,12 +136,10 @@ public final class PersonDetails {
                 .apply( faceEvent.getCreated_date() )
                 : null );
 
-        this.setIp( DataValidateInspector
-                .getInstance()
+        this.setIp( dataValidateInspector
                 .checkParam
                 .test( faceEvent.getDataInfo() )
-                && DataValidateInspector
-                .getInstance()
+                && dataValidateInspector
                 .checkParam
                 .test( faceEvent.getDataInfo().getCadaster() )
                 ? faceEvent.getDataInfo().getCadaster().getIp()
@@ -164,12 +151,10 @@ public final class PersonDetails {
         this.setCameraImage( faceEvent.getFullframe() );
         this.setDossier_photo( faceEvent.getDossier_photo() );
 
-        if ( DataValidateInspector
-                .getInstance()
+        if ( dataValidateInspector
                 .checkParam
                 .test( faceEvent.getPsychologyCard() ) ) {
-            this.setFIO( DataValidateInspector
-                    .getInstance()
+            this.setFIO( dataValidateInspector
                     .checkRequest
                     .test( faceEvent.getPsychologyCard().getPapilonData(), 6 )
                     ? this.concat( faceEvent
@@ -179,8 +164,7 @@ public final class PersonDetails {
                     .getName() )
                     : null );
 
-            this.setPassportSeries( DataValidateInspector
-                    .getInstance()
+            this.setPassportSeries( dataValidateInspector
                     .checkRequest
                     .test( faceEvent.getPsychologyCard().getPapilonData(), 6 )
                     ? faceEvent

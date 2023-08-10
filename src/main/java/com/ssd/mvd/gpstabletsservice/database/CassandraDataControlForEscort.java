@@ -147,8 +147,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                 patrul.setUuidForEscortCar( escortTuple.getTupleOfCarsList().get( integer ) );
                                 TaskInspector
                                         .getInstance()
-                                        .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, escortTuple );
-                                return this.getGetCurrentTupleOfCar().apply( patrul.getUuidForEscortCar() )
+                                        .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, escortTuple )
+                                        .setUuidOfEscort( escortTuple.getUuid() );
+                                return this.getGetCurrentTupleOfCar()
+                                        .apply( patrul.getUuidForEscortCar() )
                                         .flatMap( tupleOfCar -> {
                                             tupleOfCar.setUuidOfPatrul( patrul.getUuid() );
                                             tupleOfCar.setUuidOfEscort( escortTuple.getUuid() );

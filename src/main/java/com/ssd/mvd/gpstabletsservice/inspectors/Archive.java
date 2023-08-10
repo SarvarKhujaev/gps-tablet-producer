@@ -52,7 +52,13 @@ public class Archive {
                                 case 0 -> "Wrong Login or password";
                                 case 1 -> "You were removed from task, due to fac that u r late for more then 24 hours";
                                 case 2 -> "Wrong Params";
-                                default -> "Server error"; } )
+                                case 3 -> "U have no tasks, thus u cannot send report";
+                                case 4 -> "Patrul with this login has already been inserted, choose another one";
+                                case 5 -> "Patrul has already been saved, choose another one";
+                                case 6 -> "This polygon has already been created";
+                                case 7 -> "Notification was not updated";
+                                case 8 -> "Error during the saving of version";
+                                default -> "U have no any Task"; } )
                             .code( 201 )
                             .build() )
                     .success( false )
@@ -61,6 +67,26 @@ public class Archive {
     private final Set< String > detailsList = Set.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID",
             "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
             "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
+
+    protected final List< String > fields = List.of(
+            "F.I.O",
+            "Tug'ilgan sana",
+            "Telefon raqam",
+            "Unvon",
+            "Viloyat",
+            "Tuman/Shahar",
+            "Patrul turi",
+            "Oxirgi faollik vaqti",
+            "Ishlashni boshlagan vaqti",
+            "Ro'yxatdan o'tgan vaqti",
+            "Umumiy faollik vaqti",
+            "Planshet quvvati" );
+
+    protected final Function< String, UUID > decode = token -> UUID.fromString(
+            new String( Base64
+                    .getDecoder()
+                    .decode( token ) )
+                    .split( "@" )[ 0 ] );
 
     protected final Supplier< String > generateToken = () -> {
             final byte[] bytes = new byte[ 24 ];

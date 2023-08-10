@@ -66,15 +66,12 @@ public final class PatrulController extends SerDes {
                 .sequential()
                 .publishOn( Schedulers.single() )
                 .collectList()
-                .map( patruls -> ApiResponseModel
-                        .builder()
-                        .success( Boolean.TRUE )
-                        .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                .builder()
-                                .code( 200 )
-                                .message( new ExelInspector().download( patruls, params, policeTypes ) )
-                                .build() )
-                        .build() )
+                .flatMap( patruls -> super.getFunction().apply(
+                        Map.of( "message", "Exel is done",
+                                "data", Data
+                                        .builder()
+                                        .data( new ExelInspector().download( patruls, params, policeTypes ) )
+                                        .build() ) ) )
                 .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
@@ -195,7 +192,7 @@ public final class PatrulController extends SerDes {
             .getGetAllEntities()
             .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
             .map( Patrul::new )
-            .filter( patrul -> patrul.getSurnameNameFatherName().contains( name ) )
+            .filter( patrul -> patrul.getSurnameNameFatherName.get().contains( name ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging ); }
@@ -314,10 +311,7 @@ public final class PatrulController extends SerDes {
     public Mono< ApiResponseModel > getListOfPatrulTasks ( final Request request ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
-            .apply( CassandraDataControl
-                    .getInstance()
-                    .getDecode()
-                    .apply( request.getData() ) )
+            .apply( super.getDecode().apply( request.getData() ) )
             .flatMap( patrul -> super.checkRequest.test( patrul.getListOfTasks().keySet(), 6 )
                     ? TaskInspector
                     .getInstance()

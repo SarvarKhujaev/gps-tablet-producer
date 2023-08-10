@@ -39,5 +39,5 @@ public final class SosNotificationForAndroid {
         this.setDateOfBirth( patrul.getDateOfBirth() );
         this.setPatrulPassportSeries( patrulPassportSeries );
         this.setPatrulImageLink( patrul.getPatrulImageLink() );
-        this.setSurnameNameFatherName( patrul.getSurnameNameFatherName() ); }
+        this.setSurnameNameFatherName( patrul.getSurnameNameFatherName.get() ); }
 }

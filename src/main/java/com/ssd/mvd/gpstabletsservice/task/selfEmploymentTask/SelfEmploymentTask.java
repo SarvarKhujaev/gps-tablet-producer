@@ -1,6 +1,11 @@
 package com.ssd.mvd.gpstabletsservice.task.selfEmploymentTask;
 
+import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.SELF_EMPLOYMENT;
+import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
+import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.FINISHED;
+import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -27,9 +32,38 @@ public final class SelfEmploymentTask {
 
     public UUID getUuid() { return this.uuid != null ? this.uuid : ( this.uuid = UUID.randomUUID() ); }
 
-    public SelfEmploymentTask save ( final ReportForCard reportForCard ) {
+    public void update ( final Patrul patrul, final PatrulStatus patrulStatus ) { this.getPatrulStatuses().putIfAbsent( patrul.getPassportNumber(), patrulStatus ); }
+
+    public SelfEmploymentTask update ( final ReportForCard reportForCard ) {
         this.getReportForCards().add( reportForCard );
         return this; }
+
+    public void update ( final Patrul patrul ) { this.getPatruls().put( patrul.getUuid(), patrul ); }
+
+    public void remove ( final Patrul patrul ) {
+        this.getPatruls().remove( CassandraDataControlForTasks
+                .getInstance()
+                .getDeleteRowFromTaskTimingTable()
+                .apply( patrul ) ); }
+
+    public void update () { if ( this.getPatruls().size() == this.getReportForCards().size() ) {
+        this.setTaskStatus( FINISHED );
+
+        CassandraDataControlForTasks
+                .getInstance()
+                .getDeleteActiveTask()
+                .accept( this.getUuid().toString() );
+
+        if ( !this.getPatruls().isEmpty() ) KafkaDataControl
+                .getInstance()
+                .getWriteActiveTaskToKafka()
+                .accept( new ActiveTask(
+                        this,
+                        this.getUuid().toString(),
+                        this.getUuid().toString(),
+                        this.getTaskStatus(),
+                        SELF_EMPLOYMENT,
+                        this.getPatruls() ) ); } }
 
     @JsonDeserialize
     private List< String > images;
