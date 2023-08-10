@@ -6,6 +6,8 @@ import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.PsychologyCard;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.CARD_102;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FINISHED;
+import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FIND_FACE_EVENT_BODY;
+
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
@@ -87,7 +89,7 @@ public final class EventBody {
                         this.getUUID().toString(),
                         this.getId(),
                         this.getStatus(),
-                        CARD_102,
+                        FIND_FACE_EVENT_BODY,
                         this.getPatruls() ) ); } }
 
     @JsonDeserialize
