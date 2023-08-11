@@ -41,27 +41,14 @@ public final class Notification {
     private TaskTypes taskTypes;
     private Date notificationWasCreated; // the date when this current notification was created
 
-    private void save ( final DataInfo dataInfo,
-                        final Status status,
-                        final String taskId,
-                        final DataValidateInspector dataValidateInspector ) {
-        this.setId( taskId );
-        this.setTaskStatus( status );
-        if (  dataValidateInspector.checkRequest.test( dataInfo, 9 ) ) {
+    private void save ( final DataInfo dataInfo ) {
+        if (  DataValidateInspector
+                .getInstance()
+                .checkRequest
+                .test( dataInfo, 9 ) ) {
             this.setLongitudeOfTask( dataInfo.getCadaster().getLongitude() );
             this.setLatitudeOfTask( dataInfo.getCadaster().getLatitude() );
             this.setAddress( dataInfo.getCadaster().getAddress() ); } }
-
-    private void save( final Status status,
-                       final String taskId,
-                       final Double latitude,
-                       final Double longitude,
-                       final String address ) {
-        this.setLongitudeOfTask( longitude );
-        this.setLatitudeOfTask( latitude );
-        this.setTaskStatus( status );
-        this.setAddress( address );
-        this.setId( taskId ); }
 
     public Notification ( final Row row ) {
         this.setId( row.getString( "id" ) );
@@ -92,11 +79,10 @@ public final class Notification {
                           final Status status,
                           final Object task,
                           final String text,
-                          final TaskTypes taskTypes,
-                          final DataValidateInspector dataValidateInspector ) {
+                          final TaskTypes taskTypes ) {
+        this.setTitle( text );
         this.setStatus( status );
         this.setType( taskTypes.name() );
-        this.setTitle( text + new Date() );
 
         this.setUuid( UUID.randomUUID() );
         this.setNotificationWasCreated( new Date() );
@@ -108,53 +94,72 @@ public final class Notification {
         this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
 
         switch ( taskTypes ) {
-            case CARD_102 -> this.save( ( (Card) task ).getStatus(),
-                    ( (Card) task ).getUUID().toString(),
-                    ( (Card) task ).getLatitude(),
-                    ( (Card) task ).getLongitude(),
-                    dataValidateInspector.checkParam.test( ( (Card) task ).getAddress() )
-                            ? ( (Card) task ).getAddress()
-                            : Errors.DATA_NOT_FOUND.name() );
+            case CARD_102 -> {
+                this.setTaskStatus( ( (Card) task ).getStatus() );
+                this.setId( ( (Card) task ).getUUID().toString() );
+                this.setLatitudeOfTask( ( (Card) task ).getLatitude() );
+                this.setLongitudeOfTask( ( (Card) task ).getLongitude() );
+                this.setAddress( DataValidateInspector
+                        .getInstance()
+                        .checkParam
+                        .test( ( (Card) task ).getAddress() )
+                        ? ( (Card) task ).getAddress()
+                        : Errors.DATA_NOT_FOUND.name() ); }
 
-            case FIND_FACE_EVENT_CAR -> this.save( ( (EventCar) task ).getStatus(),
-                    ( (EventCar) task ).getUUID().toString(),
-                    ( (EventCar) task ).getLatitude(),
-                    ( (EventCar) task ).getLongitude(),
-                    dataValidateInspector.checkParam.test( ( (EventCar) task ).getAddress() )
-                            ? ( (EventCar) task ).getAddress()
-                            : Errors.DATA_NOT_FOUND.name() );
+            case FIND_FACE_EVENT_CAR -> {
+                this.setTaskStatus( ( (EventCar) task ).getStatus() );
+                this.setId( ( (EventCar) task ).getUUID().toString() );
+                this.setLatitudeOfTask( ( (EventCar) task ).getLatitude() );
+                this.setLongitudeOfTask( ( (EventCar) task ).getLongitude() );
+                this.setAddress( DataValidateInspector
+                        .getInstance()
+                        .checkParam
+                        .test( ( (EventCar) task ).getAddress() )
+                        ? ( (EventCar) task ).getAddress()
+                        : Errors.DATA_NOT_FOUND.name() ); }
+            case FIND_FACE_EVENT_FACE -> {
+                this.setTaskStatus( ( (EventFace) task ).getStatus() );
+                this.setId( ( (EventFace) task ).getUUID().toString() );
+                this.setLatitudeOfTask( ( (EventFace) task ).getLatitude() );
+                this.setLongitudeOfTask( ( (EventFace) task ).getLongitude() );
+                this.setAddress( DataValidateInspector
+                        .getInstance()
+                        .checkParam
+                        .test( ( (EventFace) task ).getAddress() )
+                        ? ( (EventFace) task ).getAddress()
+                        : Errors.DATA_NOT_FOUND.name() ); }
+            case FIND_FACE_EVENT_BODY -> {
+                this.setTaskStatus( ( (EventBody) task ).getStatus() );
+                this.setId( ( (EventBody) task ).getUUID().toString() );
+                this.setLatitudeOfTask( ( (EventBody) task ).getLatitude() );
+                this.setLongitudeOfTask( ( (EventBody) task ).getLongitude() );
+                this.setAddress( DataValidateInspector
+                        .getInstance()
+                        .checkParam
+                        .test( ( (EventBody) task ).getAddress() )
+                        ? ( (EventBody) task ).getAddress()
+                        : Errors.DATA_NOT_FOUND.name() ); }
 
-            case FIND_FACE_EVENT_FACE -> this.save( ( (EventFace) task ).getStatus(),
-                    ( (EventFace) task ).getUUID().toString(),
-                    ( (EventFace) task ).getLatitude(),
-                    ( (EventFace) task ).getLongitude(),
-                    dataValidateInspector.checkParam.test( ( (EventFace) task ).getAddress() )
-                            ? ( (EventFace) task ).getAddress()
-                            : Errors.DATA_NOT_FOUND.name() );
+            case FIND_FACE_CAR -> {
+                this.save( ( (CarEvent) task ).getDataInfo() );
+                this.setTaskStatus( ( (CarEvent) task ).getStatus() );
+                this.setId( ( (CarEvent) task ).getUUID().toString() ); }
+            case FIND_FACE_PERSON -> {
+                this.save( ( (FaceEvent) task ).getDataInfo() );
+                this.setTaskStatus( ( (FaceEvent) task ).getStatus() );
+                this.setId( ( (FaceEvent) task ).getUUID().toString() ); }
 
-            case FIND_FACE_EVENT_BODY -> this.save( ( (EventBody) task ).getStatus(),
-                    ( (EventBody) task ).getUUID().toString(),
-                    ( (EventBody) task ).getLatitude(),
-                    ( (EventBody) task ).getLongitude(),
-                    dataValidateInspector.checkParam.test( ( (EventBody) task ).getAddress() )
-                            ? ( (EventFace) task ).getAddress()
-                            : Errors.DATA_NOT_FOUND.name() );
+            default -> {
+                this.setId( ( (SelfEmploymentTask) task ).getUuid().toString() );
+                this.setTaskStatus( ( (SelfEmploymentTask) task ).getTaskStatus() );
+                this.setLatitudeOfTask( ( (SelfEmploymentTask) task ).getLatOfAccident() );
+                this.setLongitudeOfTask( ( (SelfEmploymentTask) task ).getLanOfAccident() );
 
-            case FIND_FACE_CAR -> this.save( ( (CarEvent) task ).getDataInfo(),
-                    ( (CarEvent) task ).getStatus(),
-                    ( (CarEvent) task ).getUUID().toString(),
-                    dataValidateInspector );
+                this.setAddress( DataValidateInspector
+                        .getInstance()
+                        .checkParam
+                        .test( ( (SelfEmploymentTask) task ).getAddress() )
+                        ? ( (SelfEmploymentTask) task ).getAddress()
+                        : Errors.DATA_NOT_FOUND.name() ); } } }
 
-            case FIND_FACE_PERSON -> this.save( ( (FaceEvent) task ).getDataInfo(),
-                    ( (FaceEvent) task ).getStatus(),
-                    ( (FaceEvent) task ).getUUID().toString(),
-                    dataValidateInspector );
-
-            default -> this.save( ( (SelfEmploymentTask) task ).getTaskStatus(),
-                    ( (SelfEmploymentTask) task ).getUuid().toString(),
-                    ( (SelfEmploymentTask) task ).getLatOfAccident(),
-                    ( (SelfEmploymentTask) task ).getLanOfAccident(),
-                    dataValidateInspector.checkParam.test( ( (SelfEmploymentTask) task ).getAddress() )
-                            ? ( (SelfEmploymentTask) task ).getAddress()
-                            : Errors.DATA_NOT_FOUND.name() ); } }
 }
