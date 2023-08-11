@@ -73,8 +73,7 @@ public final class TaskInspector extends SerDes {
                                         case ATTACHED -> patrul.getName() + " got new task: " + patrul.getTaskId() + " " + patrul.getTaskTypes();
                                         case FINISHED -> patrul.getName() + " completed his task at: ";
                                         default -> patrul.getName() + " has been canceled from task at: "; }, // составляем сообщение для уведомления
-                                    taskTypes,
-                                    DataValidateInspector.getInstance() ) ) );
+                                    taskTypes ) ) );
             return patrul; }
 
     // после завершения задачи, сохраняем данные об общем расходе времени на выполнение
