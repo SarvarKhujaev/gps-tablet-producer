@@ -595,10 +595,10 @@ public final class CassandraDataControl extends CassandraConverter {
                     .toInstant()
                     + "', totalActivityTime = "
                     + Math.abs( patrul.getTotalActivityTime()
-                                    + TimeInspector
-                                    .getInspector()
-                                    .getGetTimeDifference()
-                                    .apply( patrul.getLastActiveDate().toInstant(), 3 ) )
+                    + TimeInspector
+                    .getInspector()
+                    .getGetTimeDifference()
+                    .apply( patrul.getLastActiveDate().toInstant(), 3 ) )
                     + " WHERE uuid = " + patrul.getUuid() + " IF EXISTS;" );
 
     private final Function< Patrul, Mono< ApiResponseModel > > updatePatrul = patrul -> {
