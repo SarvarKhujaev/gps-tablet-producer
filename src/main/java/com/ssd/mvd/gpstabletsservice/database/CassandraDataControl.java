@@ -757,10 +757,7 @@ public final class CassandraDataControl extends CassandraConverter {
 
                     return this.delete( CassandraTables.PATRULS.name(), "uuid", patrul.getUuid().toString() ); }
 
-                else return super.getFunction().apply(
-                        Map.of( "message", "You cannot delete this patrul",
-                                "success", false,
-                                "code", 201 ) ); } )
+                else return super.error.apply( 9 ); } )
             .doOnError( this::delete );
 
     private final Function< Patrul, Mono< ApiResponseModel > > savePatrul = patrul -> {

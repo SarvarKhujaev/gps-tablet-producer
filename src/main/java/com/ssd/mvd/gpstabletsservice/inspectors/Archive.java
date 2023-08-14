@@ -58,6 +58,7 @@ public class Archive {
                                 case 6 -> "This polygon has already been created";
                                 case 7 -> "Notification was not updated";
                                 case 8 -> "Error during the saving of version";
+                                case 9 -> "You cannot delete this patrul";
                                 default -> "U have no any Task"; } )
                             .code( 201 )
                             .build() )
