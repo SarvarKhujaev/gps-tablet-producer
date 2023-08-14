@@ -35,10 +35,15 @@ public final class SelfEmploymentController extends SerDes {
             .getInstance()
             .getGetPatrulByUUID()
             .apply( reportForCard.getUuidOfPatrul() )
-            .flatMap( patrul -> TaskInspector
-                    .getInstance()
-                    .saveReportForTask
-                    .apply( patrul, reportForCard ) )
+            .flatMap( patrul -> {
+                CassandraDataControl
+                        .getInstance()
+                        .getUpdatePatrulActivity()
+                        .accept( patrul );
+                return TaskInspector
+                        .getInstance()
+                        .saveReportForTask
+                        .apply( patrul, reportForCard ); } )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
