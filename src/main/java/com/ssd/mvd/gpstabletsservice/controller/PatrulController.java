@@ -174,7 +174,7 @@ public final class PatrulController extends SerDes {
                     .apply( patrulLoginRequest )
                     .onErrorContinue( super::logging )
                     .onErrorReturn( super.getErrorResponse().get() )
-                : super.error.apply( 2 ); }
+                : super.error.apply( "Wrong Params" ); }
 
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
     public Flux<Patrul> getAllUsersList () { return CassandraDataControl
@@ -296,36 +296,21 @@ public final class PatrulController extends SerDes {
             .flatMap( patrul -> super.checkRequest.test( patrul.getListOfTasks().keySet(), 6 )
                     ? TaskInspector
                             .getInstance()
-                            .getListOfPatrulTasks( patrul,
-                                    0,
-                                    patrul.getListOfTasks().keySet().size() * 2 )
+                            .getListOfPatrulTasks( patrul, 0, patrul.getListOfTasks().keySet().size() * 2 )
                             .onErrorContinue( super::logging )
                             .onErrorReturn( super.getErrorResponse().get() )
-                    : super.getFunction().apply(
-                            Map.of( "message", "You have not completed any task, so try to fix this problem please",
-                            "success", false,
-                            "code", 200,
-                            "data", Data.builder().build() ) ) ); }
+                    : super.error.apply( "You have not completed any task, so try to fix this problem please" ) ); }
 
     @MessageMapping ( value = "getListOfPatrulTasks" )
     public Mono< ApiResponseModel > getListOfPatrulTasks ( final Request request ) { return CassandraDataControl
             .getInstance()
             .getGetPatrulByUUID()
             .apply( super.getDecode().apply( request.getData() ) )
-            .flatMap( patrul -> super.checkRequest.test( patrul.getListOfTasks().keySet(), 6 )
+            .flatMap( patrul -> super.checkRequest.test( patrul.getListOfTasks().keySet(), 10 )
                     ? TaskInspector
                     .getInstance()
-                    .getListOfPatrulTasks(
-                            patrul, (Integer) request.getObject(),
-                            (Integer) request.getSubject() )
-                    : super.getFunction().apply(
-                            Map.of( "message", "You have not completed any task, so try to fix this problem please",
-                                    "success", false,
-                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                            .builder()
-                                            .data( Collections.emptyList() )
-                                            .build(),
-                                    "code", 200 ) ) )
+                    .getListOfPatrulTasks( patrul, (Integer) request.getObject(), (Integer) request.getSubject() )
+                    : super.error.apply( "You have not completed any task, so try to fix this problem please" ) )
             .onErrorContinue( super::logging )
             .onErrorReturn( super.getErrorResponse().get() ); }
 
@@ -338,13 +323,13 @@ public final class PatrulController extends SerDes {
         return super.getFunction().apply( Map.of( "message", "Successfully added to chat service" ) ); }
 
     @MessageMapping ( value = "getListOfPatrulsByUUID" )
-    public Flux< Patrul > getListOfPatrulsByUUID ( final CardRequest< ? > cardRequest ) { return Flux.fromStream(
-            cardRequest.getPatruls().stream() )
-            .flatMap( uuid -> CassandraDataControl
-                    .getInstance()
-                    .getGetPatrulByUUID()
-                    .apply( uuid ) )
-            .onErrorContinue( super::logging ); }
+    public Flux< Patrul > getListOfPatrulsByUUID ( final CardRequest< ? > cardRequest ) {
+        return Flux.fromStream ( cardRequest.getPatruls().stream() )
+                .flatMap( uuid -> CassandraDataControl
+                        .getInstance()
+                        .getGetPatrulByUUID()
+                        .apply( uuid ) )
+                .onErrorContinue( super::logging ); }
 
     @MessageMapping ( value = "getPatrulStatistics" )
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( final PatrulActivityRequest request ) {

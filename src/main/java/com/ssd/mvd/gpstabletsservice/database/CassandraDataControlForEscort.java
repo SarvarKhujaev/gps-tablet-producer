@@ -193,15 +193,15 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                         .code( 200 )
                                         .build() )
                                 .build() )
-                                : Flux.just( ApiResponseModel
-                                .builder()
-                                .success( false )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                        .builder()
-                                        .message( "Such a tuple has already been created" )
-                                        .code( 201 )
-                                        .build() )
-                                .build() ); };
+                    : Flux.just( ApiResponseModel
+                    .builder()
+                    .success( false )
+                    .status( com.ssd.mvd.gpstabletsservice.response.Status
+                            .builder()
+                            .message( "Such a tuple has already been created" )
+                            .code( 201 )
+                            .build() )
+                    .build() ); };
 
     private final Function< EscortTuple, Mono< ApiResponseModel > > updateEscortTuple = escortTuple -> {
             if ( super.checkParam.test( escortTuple.getUuidOfPolygon() ) ) this.getGetCurrentTupleOfEscort()
@@ -230,10 +230,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             + super.convertListToCassandra.apply( escortTuple.getPatrulList() ) + " );" )
                     .wasApplied()
                     ? super.getFunction().apply( Map.of( "message", escortTuple.getUuid() + " was updated successfully" ) )
-                    : super.getFunction().apply(
-                            Map.of( "message", escortTuple.getUuid() + " does not exists",
-                                    "code", 201,
-                                    "success", false ) ); };
+                    : super.error.apply( "This car does not exist, choose another one" ); };
 
     private final Function<PolygonForEscort, Mono< ApiResponseModel > > savePolygonForEscort = polygon ->
             this.getSession().execute( "INSERT INTO "
@@ -266,10 +263,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                     .builder()
                                     .type( polygon.getUuid().toString() )
                                     .build() ) )
-                    : super.getFunction().apply(
-                            Map.of( "message", "This polygon has already been saved",
-                            "code", 201,
-                            "success", false ) );
+                    : super.error.apply( "This polygon has already been saved" );
 
     private final Function< String, Mono< PolygonForEscort > > getCurrentPolygonForEscort = id -> super.convert(
             new PolygonForEscort( this.getSession().execute( "SELECT * FROM "
@@ -287,10 +281,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                                     + CassandraTables.POLYGON_FOR_ESCORT
                                                     + " WHERE uuid = " + UUID.fromString( id ) + ";" )
                                             .wasApplied() ) )
-                            : super.getFunction().apply(
-                                    Map.of( "message", id + " cannot be removed. cause it is linked to Escort",
-                                            "code", 201,
-                                            "success", false ) ) );
+                            : super.error.apply( "polygon cannot be removed. cause it is linked to Escort" ) );
 
     private final Function< PolygonForEscort, Mono< ApiResponseModel > > updatePolygonForEscort = polygon ->
             this.checkPolygonForEscort.test( polygon )
@@ -322,14 +313,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                             .builder()
                                             .type( polygon.getUuid().toString() )
                                             .build() ) )
-                    : super.getFunction().apply(
-                            Map.of( "message", "This polygon has already been saved",
-                                    "code", 201,
-                                    "success", false ) )
-                    : super.getFunction().apply(
-                            Map.of( "message", "This polygon does not exists. so u cannot update it",
-                                    "code", 201,
-                                    "success", false ) );
+                    : super.error.apply( "This polygon has already been saved" )
+                    : super.error.apply( "This polygon does not exists. so u cannot update it" );
 
     private final Consumer< TupleOfCar > unlinkTupleOfCarFromPatrul = tupleOfCar ->
             this.getSession().execute( "UPDATE "
@@ -357,12 +342,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             + tupleOfCar.getLongitude() + ", " +
                             tupleOfCar.getAverageFuelConsumption() + ");" )
                     .wasApplied()
-                    ? super.getFunction().apply(
-                            Map.of( "message", "Car" + tupleOfCar.getGosNumber() + " was updated successfully" ) )
-                    : super.getFunction().apply(
-                            Map.of( "message", "This car does not exists",
-                                    "code", 201,
-                                    "success", false ) );
+                    ? super.getFunction().apply( Map.of( "message", "Car" + tupleOfCar.getGosNumber() + " was updated successfully" ) )
+                    : super.error.apply( "This car does not exists" );
 
     private final BiFunction< String, TupleTotalData, Mono< TupleTotalData > > getTupleTotalData = ( uuid, tupleTotalData ) ->
             this.getGetCurrentTupleOfEscort().apply( uuid )
@@ -426,10 +407,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     + "') IF NOT EXISTS;" )
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", "Yangi davlat bazaga qoshildi" ) )
-            : super.getFunction().apply(
-                    Map.of( "message", "This country has already been inserted",
-                            "code", 201,
-                            "success", false ) );
+            : super.error.apply( "This country has already been inserted" );
 
     private final Function< Country, Mono< ApiResponseModel > > update = country -> this.getSession().execute(
             "UPDATE "
@@ -443,8 +421,5 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     "' WHERE uuid = " + country.getUuid() + " IF EXISTS;" )
             .wasApplied()
             ? super.getFunction().apply( Map.of( "message", country.getCountryNameEn() + " muvaffaqiyatli yangilandi" ) )
-            : super.getFunction().apply(
-                    Map.of( "message", "This country has not been inserted yet",
-                            "code", 201,
-                            "success", false ) );
+            : super.error.apply( "This country has not been inserted yet" );
 }

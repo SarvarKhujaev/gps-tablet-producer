@@ -18,7 +18,7 @@ public final class VersionController extends LogInspector {
                 .getInstance()
                 .getSaveLastVersion()
                 .apply( androidVersionUpdate )
-                : super.error.apply( 2 ); }
+                : super.error.apply( "Wrong Params" ); }
 
     @MessageMapping ( value = "checkVersionForAndroid" )
     public Mono< ApiResponseModel > checkVersionForAndroid ( final String version ) {
@@ -27,7 +27,7 @@ public final class VersionController extends LogInspector {
                 .getInstance()
                 .getCheckVersionForAndroid()
                 .apply( version )
-                : super.error.apply( 2 ); }
+                : super.error.apply( "Wrong Params" ); }
 
     @MessageMapping ( value = "getLastAndroidVersion" )
     public Mono< ApiResponseModel > getLastAndroidVersio () {

@@ -43,23 +43,12 @@ public class Archive {
             .success( false )
             .build();
 
-    protected final Function< Integer, Mono< ApiResponseModel > > error = value -> this.convert(
+    protected final Function< String, Mono< ApiResponseModel > > error = message -> this.convert(
             ApiResponseModel
                     .builder()
                     .status( Status
                             .builder()
-                            .message( switch ( value ) {
-                                case 0 -> "Wrong Login or password";
-                                case 1 -> "You were removed from task, due to fac that u r late for more then 24 hours";
-                                case 2 -> "Wrong Params";
-                                case 3 -> "U have no tasks, thus u cannot send report";
-                                case 4 -> "Patrul with this login has already been inserted, choose another one";
-                                case 5 -> "Patrul has already been saved, choose another one";
-                                case 6 -> "This polygon has already been created";
-                                case 7 -> "Notification was not updated";
-                                case 8 -> "Error during the saving of version";
-                                case 9 -> "You cannot delete this patrul";
-                                default -> "U have no any Task"; } )
+                            .message( message )
                             .code( 201 )
                             .build() )
                     .success( false )

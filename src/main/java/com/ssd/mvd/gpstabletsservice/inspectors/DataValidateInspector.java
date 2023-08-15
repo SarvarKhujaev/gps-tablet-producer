@@ -87,6 +87,7 @@ public class DataValidateInspector extends Archive {
             case 8 -> this.checkParam.test( ( (TaskTimingRequest) o ).getStartDate() )
                     && this.checkParam.test( ( (TaskTimingRequest) o ).getEndDate() );
             case 9 -> this.checkParam.test( o ) && this.checkParam.test( ( (DataInfo) o ).getCadaster() );
+            case 10 -> o != null && !( ( Set< ? > ) o ).isEmpty();
             default -> this.checkParam.test( ( (PatrulLoginRequest) o ).getLogin() )
                     && this.checkParam.test( ( (PatrulLoginRequest) o ).getPassword() )
                     && this.checkParam.test( ( (PatrulLoginRequest) o ).getSimCardNumber() ); };

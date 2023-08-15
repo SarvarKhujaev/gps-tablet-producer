@@ -18,6 +18,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.request.SosRequest;
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.SerDes;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.request.TaskTimingRequest;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
@@ -115,7 +116,9 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.CARTOTALDATA
                     + " WHERE gosnumber = '" + gosnumber + "';" ).one();
-            return super.checkParam.test( row ) ? row.getList( "violationsInformationsList", ViolationsInformation.class ) : new ArrayList<>(); };
+            return super.checkParam.test( row )
+                    ? row.getList( "violationsInformationsList", ViolationsInformation.class )
+                    : Collections.emptyList(); };
 
     private final Function< String, Mono< ApiResponseModel > > getWarningCarDetails = gosnumber -> super.getFunction().apply(
             Map.of( "message", "Warning car details",
@@ -164,7 +167,8 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + "( gosnumber, cameraImage, violationsInformationsList, object ) VALUES('"
                     + carTotalData.getGosNumber() + "', '"
                     + carTotalData.getCameraImage() + "', "
-                    + super.convertListOfPointsToCassandra.apply( carTotalData
+                    + super.convertListOfPointsToCassandra.apply(
+                            carTotalData
                             .getViolationsList()
                             .getViolationsInformationsList() ) + ", '"
                     + super.serialize( carTotalData ) + "');" )
@@ -218,7 +222,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     Math.abs( taskTimingStatistics.getTimeWastedToArrive() ) + ", '" +
                     ( super.checkParam.test( taskTimingStatistics.getDateOfComing() )
                             ? taskTimingStatistics.getDateOfComing().toInstant()
-                            : new Date().toInstant() ) + "', '" +
+                            : TimeInspector.getInspector().getGetNewDate().get().toInstant() ) + "', '" +
                     taskTimingStatistics.getStatus() + "', '" +
                     taskTimingStatistics.getTaskTypes() + "', " +
                     taskTimingStatistics.getInTime() + ", " +
@@ -332,7 +336,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + CassandraTables.SOS_TABLE
                     + "( sosWasSendDate, patruluuid, longitude, latitude )"
                     + " VALUES ('"
-                    + new Date().toInstant() + "', "
+                    + TimeInspector.getInspector().getGetNewDate().get().toInstant() + "', "
                     + patrulSos.getPatrulUUID() + ", "
                     + patrulSos.getLongitude() + ", "
                     + patrulSos.getLatitude() + ") IF NOT EXISTS;" )
@@ -402,8 +406,8 @@ public final class CassandraDataControlForTasks extends SerDes {
 
                             + patrulSos.getAddress() + "', '"
 
-                            + new Date().toInstant() + "', '"
-                            + new Date().toInstant() + "', "
+                            + TimeInspector.getInspector().getGetNewDate().get().toInstant() + "', '"
+                            + TimeInspector.getInspector().getGetNewDate().get().toInstant() + "', "
 
                             + patrulSos.getLatitude() + ", "
                             + patrulSos.getLongitude() + ", '"
@@ -466,7 +470,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                                 + CassandraTables.TABLETS + "."
                                                 + CassandraTables.PATRUL_SOS_TABLE
                                                 + " SET status = '" + Status.FINISHED + "',"
-                                                + " sosWasClosed = '" + new Date().toInstant() + "'"
+                                                + " sosWasClosed = '" + TimeInspector.getInspector().getGetNewDate().get().toInstant() + "'"
                                                 + " WHERE uuid = " + patrulSos1.getUuid() + " IF EXISTS;" );
                                         return KafkaDataControl
                                                 .getInstance()

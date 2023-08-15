@@ -76,7 +76,7 @@ public final class PolygonForPatrulController extends LogInspector {
     @MessageMapping ( value = "addPatrulToPolygon" )
     public Mono< ApiResponseModel > addPatrulToPolygon ( final ScheduleForPolygonPatrul scheduleForPolygonPatrul ) {
         return super.checkRequest.test( scheduleForPolygonPatrul.getPatrulUUIDs(), 6 )
-                ? super.error.apply( 2 )
+                ? super.error.apply( "Wrong Params" )
                 : CassandraDataControl
                 .getInstance()
                 .getAddPatrulToPolygon()

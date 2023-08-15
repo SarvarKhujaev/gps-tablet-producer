@@ -607,7 +607,7 @@ public final class TaskInspector extends SerDes {
                                 + this.changeTaskStatus( patrul, FINISHED, super.deserialize( row.getString( "object" ), EventBody.class ).update( reportForCard ) ).getName()
                                 + " was saved" ) );
 
-                default -> super.getError().apply( 3 ); } );
+                default -> super.getError().apply( "U have no tasks, thus u cannot send report" ); } );
 
     public final BiFunction< Patrul, Status, Mono< ApiResponseModel > > changeTaskStatus = ( patrul, status ) ->
             patrul.getTaskTypes().compareTo( ESCORT ) == 0

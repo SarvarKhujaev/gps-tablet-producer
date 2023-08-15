@@ -32,13 +32,13 @@ public final class TimeInspector {
     private final Supplier< Date > getNewDate = Date::new;
 
     private final Function< String, Date > convertDate = s -> {
-        try {
-            final List< String > words = Arrays.asList( s.split( " " ) );
-            return new SimpleDateFormat( words.get( 3 ).length() == 4 ? "EEE MMM dd yyyy kk:mm:ss" : "EEE MMM dd kk:mm:ss", Locale.US )
-                    .parse( words.get( 3 ).length() >= 4
-                            ? words.get( 0 ) + " " + words.get( 1 ) + " " + words.get( 2 ) + " " + words.get( 3 ) + " " + words.get( 4 )
-                            : words.get( 0 ) + " " + words.get( 1 ) + " " + words.get( 2 ) + " " + words.get( 3 ) );
-        } catch ( final ParseException e ) { throw new RuntimeException(e); } };
+            try {
+                final List< String > words = Arrays.asList( s.split( " " ) );
+                return new SimpleDateFormat( words.get( 3 ).length() == 4 ? "EEE MMM dd yyyy kk:mm:ss" : "EEE MMM dd kk:mm:ss", Locale.US )
+                        .parse( words.get( 3 ).length() >= 4
+                                ? words.get( 0 ) + " " + words.get( 1 ) + " " + words.get( 2 ) + " " + words.get( 3 ) + " " + words.get( 4 )
+                                : words.get( 0 ) + " " + words.get( 1 ) + " " + words.get( 2 ) + " " + words.get( 3 ) );
+            } catch ( final ParseException e ) { throw new RuntimeException( e ); } };
 
     private final Function< Date, String > convertDateToString = s -> ZonedDateTime.parse( s.toString(), this.formatter ).format( DateTimeFormatter.ISO_LOCAL_DATE );
 
