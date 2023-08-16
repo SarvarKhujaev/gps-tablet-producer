@@ -8,29 +8,29 @@ import com.google.gson.annotations.SerializedName;
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public final class FindFaceRegions {
-    @SerializedName( "address" )
+    @SerializedName( value = "address" )
     private String address;
 
-    @SerializedName( "ip" )
+    @SerializedName( value = "ip" )
     private String ip;
 
     private String camera_name;
 
-    @SerializedName( "region" )
+    @SerializedName( value = "region" )
     private Integer region;
 
-    @SerializedName( "findFaceId" )
+    @SerializedName( value = "findFaceId" )
     private Integer findFaceId;
 
-    @SerializedName( "district" )
+    @SerializedName( value = "district" )
     private Integer district;
 
-    @SerializedName( "countryside" )
+    @SerializedName( value = "countryside" )
     private Integer countryside;
 
-    @SerializedName( "latitude" )
+    @SerializedName( value = "latitude" )
     private Double latitude;
 
-    @SerializedName( "longitude" )
+    @SerializedName( value = "longitude" )
     private Double longitude;
 }

@@ -5,7 +5,7 @@ import com.ssd.mvd.gpstabletsservice.constants.ErrorResponse;
 @lombok.Data
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class Pinpp {
+public final class Pinpp {
     private String Data;
     private String Name;
     private String Pinpp;

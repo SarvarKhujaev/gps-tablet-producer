@@ -19,8 +19,8 @@ public final class CarDetails {
     private Double confidence;
 
     public CarDetails ( final EventCar eventCar, final DataValidateInspector dataValidateInspector ) {
-        this.setIp( eventCar.getCameraIp() );
-        this.setConfidence( eventCar.getConfidence() );
+        this.setConfidence( 100.0 );
+        this.setIp( eventCar.getDataInfo().getCadaster().getIp() );
 
         this.setDate( dataValidateInspector
                 .checkParam
@@ -36,7 +36,7 @@ public final class CarDetails {
 
         this.setThumbnail( eventCar.getThumbnail() );
         this.setCameraImage( eventCar.getFullframe() );
-        this.setDossier_photo( eventCar.getMatched_dossier() );
+        this.setDossier_photo( eventCar.getDossier_photo() );
 
         if ( dataValidateInspector
                 .checkParam

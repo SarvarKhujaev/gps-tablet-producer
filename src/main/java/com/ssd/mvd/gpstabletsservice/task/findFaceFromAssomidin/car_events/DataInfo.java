@@ -9,12 +9,6 @@ import com.google.gson.annotations.SerializedName;
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
 public final class DataInfo {
-    @SerializedName( "code" )
-    private int code;
-
-    @SerializedName( "message" )
-    private String message;
-
     @JsonDeserialize
     @SerializedName( "cadaster" )
     private FindFaceRegions cadaster;

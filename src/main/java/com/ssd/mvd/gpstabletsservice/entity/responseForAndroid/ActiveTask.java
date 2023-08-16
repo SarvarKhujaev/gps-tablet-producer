@@ -105,7 +105,9 @@ public final class ActiveTask {
 
             case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
 
-            case FIND_FACE_EVENT_CAR -> this.save( TaskTypes.FIND_FACE_CAR.name(), null, ( (EventCar) object ).getLatitude(), ( (EventCar) object ).getLongitude() );
+            case FIND_FACE_EVENT_CAR -> this.save( TaskTypes.FIND_FACE_CAR.name(), null,
+                    ( (EventCar) object ).getDataInfo().getCadaster().getLatitude(),
+                    ( (EventCar) object ).getDataInfo().getCadaster().getLongitude() );
 
             case FIND_FACE_EVENT_FACE -> this.save( TaskTypes.FIND_FACE_PERSON.name(), null, ( (EventFace) object ).getLatitude(), ( (EventFace) object ).getLongitude() );
 
@@ -149,7 +151,7 @@ public final class ActiveTask {
 
             case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
 
-            case FIND_FACE_EVENT_CAR -> this.save( TaskTypes.FIND_FACE_CAR.name(), null, ( (EventCar) object ).getLatitude(), ( (EventCar) object ).getLongitude() );
+            case FIND_FACE_EVENT_CAR -> this.save( TaskTypes.FIND_FACE_CAR.name(), null, ( (EventCar) object ).getDataInfo().getCadaster().getLatitude(), ( (EventCar) object ).getDataInfo().getCadaster().getLongitude() );
 
             case FIND_FACE_EVENT_FACE -> this.save( TaskTypes.FIND_FACE_PERSON.name(), null, ( (EventFace) object ).getLatitude(), ( (EventFace) object ).getLongitude() );
 
@@ -184,9 +186,9 @@ public final class ActiveTask {
             case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
 
             case FIND_FACE_EVENT_CAR -> this.save( TaskTypes.FIND_FACE_CAR.name(),
-                    ( (EventCar) object ).getAddress(),
-                    ( (EventCar) object ).getLatitude(),
-                    ( (EventCar) object ).getLongitude() );
+                    ( (EventCar) object ).getDataInfo().getCadaster().getAddress(),
+                    ( (EventCar) object ).getDataInfo().getCadaster().getLatitude(),
+                    ( (EventCar) object ).getDataInfo().getCadaster().getLongitude() );
 
             case FIND_FACE_EVENT_FACE -> this.save( TaskTypes.FIND_FACE_PERSON.name(),
                     ( (EventFace) object ).getAddress(),

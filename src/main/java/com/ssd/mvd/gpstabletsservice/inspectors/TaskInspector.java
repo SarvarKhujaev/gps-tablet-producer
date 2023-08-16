@@ -153,7 +153,10 @@ public final class TaskInspector extends SerDes {
                 patrul.free(); }
             case ACCEPTED -> patrul.update( 1 ); // fixing time when patrul started this task
             case ARRIVED -> eventCar.update( patrul, this.saveTaskTiming.apply( patrul, FIND_FACE_EVENT_CAR ) );
-            case ATTACHED -> patrul.update( FIND_FACE_EVENT_CAR, eventCar.getLatitude(), eventCar.getLongitude(), eventCar.getUUID().toString() ); }
+            case ATTACHED -> patrul.update( FIND_FACE_EVENT_CAR,
+                    eventCar.getDataInfo().getCadaster().getLatitude(),
+                    eventCar.getDataInfo().getCadaster().getLongitude(),
+                    eventCar.getUUID().toString() ); }
 
         if ( eventCar.getStatus().compareTo( FINISHED ) != 0 ) CassandraDataControlForTasks // обновляем данные о текущей задаче, если она еще не завершена
                 .getInstance()
