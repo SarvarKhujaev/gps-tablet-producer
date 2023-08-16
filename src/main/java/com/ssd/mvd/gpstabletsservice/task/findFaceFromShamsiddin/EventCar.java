@@ -10,7 +10,6 @@ import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
 import static com.ssd.mvd.gpstabletsservice.constants.Status.FINISHED;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
-import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
