@@ -125,7 +125,7 @@ public final class PersonDetails {
                     : null ); } }
 
     public PersonDetails ( final FaceEvent faceEvent, final DataValidateInspector dataValidateInspector ) {
-        this.setConfidence( faceEvent.getConfidence() );
+        this.setConfidence( 100.0 );
         this.setTime( dataValidateInspector
                 .checkParam
                 .test( faceEvent.getCreated_date() )

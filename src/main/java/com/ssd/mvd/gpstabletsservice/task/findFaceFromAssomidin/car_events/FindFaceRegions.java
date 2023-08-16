@@ -2,25 +2,19 @@ package com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.annotations.SerializedName;
-import lombok.extern.jackson.Jacksonized;
 
 @lombok.Data
-@Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
 @JsonIgnoreProperties( ignoreUnknown = true )
-public class FindFaceRegions {
+public final class FindFaceRegions {
     @SerializedName( "address" )
     private String address;
 
     @SerializedName( "ip" )
     private String ip;
 
-    @SerializedName( "objectId" )
-    private String objectId;
-
-    @SerializedName( "type" )
-    private String type;
+    private String camera_name;
 
     @SerializedName( "region" )
     private Integer region;

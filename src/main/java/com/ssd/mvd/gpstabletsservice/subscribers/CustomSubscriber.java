@@ -54,36 +54,28 @@ public final class CustomSubscriber extends LogInspector implements Subscriber< 
     public void onNext( final Object o ) {
         switch ( this.value ) {
             case 1 -> {
-                super.logging( "TupleOfCar: " + ( (TupleOfCar) o ).getUuid() );
                 ( (TupleOfCar) o ).setUuidOfPatrul( null );
                 CassandraDataControlForEscort
                         .getInstance()
                         .getUnlinkTupleOfCarFromPatrul()
                         .accept( ( (TupleOfCar) o ) ); }
-            case 2 -> super.logging( "Subscriber got TaskTimingStatistics: "
-                    + ( ( TaskTimingStatistics ) o ).getTimeWastedToArrive()
-                    + " was applied: "
-                    + CassandraDataControlForTasks
+            case 2 -> CassandraDataControlForTasks
                     .getInstance()
                     .getSaveTaskTimeStatistics()
-                    .apply( ( TaskTimingStatistics ) o ) );
-            case 3 -> {
-                super.logging( "Subscriber got patruls list: " + ( ( List< Patrul > ) o ).size() );
-                ( ( List< Patrul > ) o )
+                    .apply( ( TaskTimingStatistics ) o );
+            case 3 -> ( ( List< Patrul > ) o )
                         .parallelStream()
                         .forEach( patrul -> {
                             patrul.setSpecialToken( this.token );
                             UnirestController
                                     .getInstance()
                                     .getAddUser()
-                                    .accept( patrul ); } ); }
-            case 4 -> {
-                super.logging( "Updating patrul's policeType: " + this.token );
-                this.session.execute( "UPDATE "
+                                    .accept( patrul ); } );
+            case 4 -> this.session.execute( "UPDATE "
                         + CassandraTables.TABLETS.name() + "."
                         + CassandraTables.PATRULS.name()
                         + " SET policeType = '" + this.token + "'"
-                        + " WHERE uuid = " + ( (Row) o ).getUUID( "uuid" ) + ";" ); }
+                        + " WHERE uuid = " + ( (Row) o ).getUUID( "uuid" ) + ";" );
             case 5 -> super.logging( "ResultSet: " + ( (ResultSet) o ).wasApplied() );
             case 6 -> this.tupleTotalData.setPolygonForEscort( ( PolygonForEscort ) o );
             case 7 -> this.tupleTotalData.getPatrulList().add( ( Patrul ) o );

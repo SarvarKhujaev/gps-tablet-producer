@@ -65,7 +65,7 @@ public final class CarDetails {
                             .getModelForCar(), 1 ) ); } }
 
     public CarDetails ( final CarEvent carEvent, final DataValidateInspector dataValidateInspector ) {
-        this.setConfidence( carEvent.getConfidence() );
+        this.setConfidence( 100.0 );
 
         if ( dataValidateInspector
                 .checkParam
