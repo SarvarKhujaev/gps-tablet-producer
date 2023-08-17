@@ -20,7 +20,7 @@ public final class CarDetails {
 
     public CarDetails ( final EventCar eventCar, final DataValidateInspector dataValidateInspector ) {
         this.setConfidence( 100.0 );
-        this.setIp( eventCar.getDataInfo().getData().getIp() );
+        this.setIp( eventCar.getDataInfo().getCadaster().getIp() );
 
         this.setDate( dataValidateInspector
                 .checkParam

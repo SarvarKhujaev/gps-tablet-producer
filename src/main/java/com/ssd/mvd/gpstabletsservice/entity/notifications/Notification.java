@@ -109,13 +109,13 @@ public final class Notification {
             case FIND_FACE_EVENT_CAR -> {
                 this.setTaskStatus( ( (EventCar) task ).getStatus() );
                 this.setId( ( (EventCar) task ).getUUID().toString() );
-                this.setLatitudeOfTask( ( (EventCar) task ).getDataInfo().getData().getLatitude() );
-                this.setLongitudeOfTask( ( (EventCar) task ).getDataInfo().getData().getLongitude() );
+                this.setLatitudeOfTask( ( (EventCar) task ).getDataInfo().getCadaster().getLatitude() );
+                this.setLongitudeOfTask( ( (EventCar) task ).getDataInfo().getCadaster().getLongitude() );
                 this.setAddress( DataValidateInspector
                         .getInstance()
                         .checkParam
-                        .test( ( (EventCar) task ).getDataInfo().getData().getAddress() )
-                        ? ( (EventCar) task ).getDataInfo().getData().getAddress()
+                        .test( ( (EventCar) task ).getDataInfo().getCadaster().getAddress() )
+                        ? ( (EventCar) task ).getDataInfo().getCadaster().getAddress()
                         : Errors.DATA_NOT_FOUND.name() ); }
             case FIND_FACE_EVENT_FACE -> {
                 this.setTaskStatus( ( (EventFace) task ).getStatus() );
