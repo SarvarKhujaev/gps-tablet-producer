@@ -25,7 +25,7 @@ import java.util.*;
 public final class CarEvent {
     private String name;
     private String comment;
-    private String confidence;
+    private Double confidence;
     private String dossier_photo;
 
     @JsonProperty( value = "id" )

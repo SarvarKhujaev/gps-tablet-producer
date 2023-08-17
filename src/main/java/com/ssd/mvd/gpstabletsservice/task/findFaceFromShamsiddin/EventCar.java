@@ -24,11 +24,11 @@ public final class EventCar {
     private Status status = Status.CREATED;
     private Boolean matched;
     private Date created_date;
+    private Double confidence;
 
     private String id;
     private String fullframe;
     private String thumbnail;
-    private String confidence;
     private String dossier_photo;
 
     @JsonDeserialize

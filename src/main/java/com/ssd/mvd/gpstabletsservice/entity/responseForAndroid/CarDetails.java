@@ -19,7 +19,7 @@ public final class CarDetails {
     private Double confidence;
 
     public CarDetails ( final EventCar eventCar, final DataValidateInspector dataValidateInspector ) {
-        this.setConfidence( 100.0 );
+        this.setConfidence( eventCar.getConfidence() );
         this.setIp( eventCar.getDataInfo().getCadaster().getIp() );
 
         this.setDate( dataValidateInspector
@@ -61,7 +61,7 @@ public final class CarDetails {
                     .apply( eventCar.getCarTotalData().getModelForCar(), 1 ) ); } }
 
     public CarDetails ( final CarEvent carEvent, final DataValidateInspector dataValidateInspector ) {
-        this.setConfidence( 100.0 );
+        this.setConfidence( carEvent.getConfidence() );
 
         if ( dataValidateInspector
                 .checkParam

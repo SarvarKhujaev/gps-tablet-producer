@@ -28,6 +28,8 @@ public final class FaceEvent {
     private String comment; // Ф.И.О
     private String dossier_photo;
 
+    private Double confidence;
+
     @JsonProperty( "id" )
     private String id;
 
