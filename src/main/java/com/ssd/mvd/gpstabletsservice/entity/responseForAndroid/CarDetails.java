@@ -46,10 +46,6 @@ public final class CarDetails {
                 .test( eventCar.getCarTotalData().getModelForCar() ) ) {
             this.setCarNumber( dataValidateInspector
                     .checkParam
-                    .test( eventCar.getConfidence() )
-                    ? eventCar.getConfidence()
-                    : dataValidateInspector
-                    .checkParam
                     .test( eventCar
                             .getCarTotalData()
                             .getModelForCar()
@@ -58,15 +54,11 @@ public final class CarDetails {
                             .getCarTotalData()
                             .getModelForCar()
                             .getPlateNumber()
-                    : eventCar
-                    .getCarTotalData()
-                    .getGosNumber() );
+                    : eventCar.getCarTotalData().getGosNumber() );
 
             this.setCarData( dataValidateInspector
                     .concatNames
-                    .apply( eventCar
-                            .getCarTotalData()
-                            .getModelForCar(), 1 ) ); } }
+                    .apply( eventCar.getCarTotalData().getModelForCar(), 1 ) ); } }
 
     public CarDetails ( final CarEvent carEvent, final DataValidateInspector dataValidateInspector ) {
         this.setConfidence( 100.0 );
@@ -98,14 +90,8 @@ public final class CarDetails {
                 .test( carEvent.getCarTotalData() )
                 && dataValidateInspector
                 .checkParam
-                .test( carEvent
-                        .getCarTotalData()
-                        .getModelForCar() ) ) {
+                .test( carEvent.getCarTotalData().getModelForCar() ) ) {
             this.setCarNumber( dataValidateInspector
-                    .checkParam
-                    .test( carEvent.getConfidence() )
-                    ? carEvent.getConfidence()
-                    : dataValidateInspector
                     .checkParam
                     .test( carEvent
                             .getCarTotalData()
@@ -115,13 +101,9 @@ public final class CarDetails {
                             .getCarTotalData()
                             .getModelForCar()
                             .getPlateNumber()
-                    : carEvent
-                    .getCarTotalData()
-                    .getGosNumber() );
+                    : carEvent.getCarTotalData().getGosNumber() );
 
             this.setCarData( dataValidateInspector
                     .concatNames
-                    .apply( carEvent
-                            .getCarTotalData()
-                            .getModelForCar(), 1 ) ); } }
+                    .apply( carEvent.getCarTotalData().getModelForCar(), 1 ) ); } }
 }
