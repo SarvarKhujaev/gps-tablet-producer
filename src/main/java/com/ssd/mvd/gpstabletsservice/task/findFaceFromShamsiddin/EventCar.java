@@ -21,13 +21,13 @@ import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FIND_FACE_EVENT_
 @JsonIgnoreProperties( ignoreUnknown = true )
 public final class EventCar {
     private Status status = Status.CREATED;
-    private Integer camera;
     private Boolean matched;
     private Date created_date;
 
     private String id;
     private String fullframe;
     private String thumbnail;
+    private String confidence;
     private String dossier_photo;
 
     @JsonDeserialize

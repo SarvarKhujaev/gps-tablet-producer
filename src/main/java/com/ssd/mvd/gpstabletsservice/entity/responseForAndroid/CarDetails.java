@@ -46,6 +46,10 @@ public final class CarDetails {
                 .test( eventCar.getCarTotalData().getModelForCar() ) ) {
             this.setCarNumber( dataValidateInspector
                     .checkParam
+                    .test( eventCar.getConfidence() )
+                    ? eventCar.getConfidence()
+                    : dataValidateInspector
+                    .checkParam
                     .test( eventCar
                             .getCarTotalData()
                             .getModelForCar()
@@ -98,6 +102,10 @@ public final class CarDetails {
                         .getCarTotalData()
                         .getModelForCar() ) ) {
             this.setCarNumber( dataValidateInspector
+                    .checkParam
+                    .test( carEvent.getConfidence() )
+                    ? carEvent.getConfidence()
+                    : dataValidateInspector
                     .checkParam
                     .test( carEvent
                             .getCarTotalData()
