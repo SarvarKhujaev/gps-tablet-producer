@@ -8,7 +8,7 @@ import java.util.List;
 @Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class Address {
+public final class Address {
     private Long osm_id;
     private Long place_id;
 

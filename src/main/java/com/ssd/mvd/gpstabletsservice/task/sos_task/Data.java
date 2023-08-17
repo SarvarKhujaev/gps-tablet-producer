@@ -6,7 +6,7 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 @lombok.NoArgsConstructor
 @lombok.AllArgsConstructor
-public class Data {
+public final class Data {
     private String road;
     private String city;
     private String county;

@@ -32,9 +32,6 @@ public final class EventFace {
     private Double longitude;
     private Double confidence;
 
-    private byte[] fullframebytes;
-    private byte[] thumbnailbytes;
-
     private String id;
     private String address; // coming from front end
     private String cameraIp; // coming from front end
@@ -44,15 +41,6 @@ public final class EventFace {
 
     @JsonDeserialize
     private PsychologyCard psychologyCard;
-
-    @JsonDeserialize
-    private Map< String, String > beard;
-    @JsonDeserialize
-    private Map< String, String > gender;
-    @JsonDeserialize
-    private Map< String, String > glasses;
-    @JsonDeserialize
-    private Map< String, String > medmask;
 
     private UUID uuid;
 

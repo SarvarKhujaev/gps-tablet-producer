@@ -13,6 +13,7 @@ import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulStatus;
 import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
 import com.ssd.mvd.gpstabletsservice.database.CassandraDataControlForTasks;
+import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import static com.ssd.mvd.gpstabletsservice.constants.TaskTypes.FIND_FACE_EVENT_CAR;
 
 @lombok.Data

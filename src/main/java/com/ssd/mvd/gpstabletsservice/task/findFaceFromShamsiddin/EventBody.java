@@ -37,24 +37,8 @@ public final class EventBody {
     private String thumbnail;
     private String matched_dossier;
 
-    private byte[] fullframebytes;
-    private byte[] thumbnailbytes;
-
     @JsonDeserialize
     private PsychologyCard psychologyCard;
-
-    @JsonDeserialize
-    private Map< String, String > headwear;
-    @JsonDeserialize
-    private Map< String, String > top_color;
-    @JsonDeserialize
-    private Map< String, String > bottom_color;
-    @JsonDeserialize
-    private Map< String, String > lower_clothes;
-    @JsonDeserialize
-    private Map< String, String > upper_clothes;
-    @JsonDeserialize
-    private Map< String, String > detailed_upper_clothes;
 
     private UUID uuid;
 
