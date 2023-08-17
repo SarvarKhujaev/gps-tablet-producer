@@ -4,6 +4,6 @@ package com.ssd.mvd.gpstabletsservice.entity;
 @lombok.Builder
 public final class Data< T, V > {
     private String type;
-    private V subject;
+    private V total;
     private T data;
 }

@@ -1446,7 +1446,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                     LAST ) )
                             .build() ) );
 
-    private final Function< PatrulActivityRequest, Mono< TabletUsageStatistics > > getTabletUsageStatistics = patrulActivityRequest ->
+    private final Function< PatrulActivityRequest, Mono< ApiResponseModel > > getTabletUsageStatistics = patrulActivityRequest ->
             super.convert( new TabletUsageStatistics() )
                     .flatMap( tabletUsageStatistics -> {
                         if ( !super.checkRequest.test( patrulActivityRequest, 2 ) ) {
@@ -1477,7 +1477,18 @@ public final class CassandraDataControl extends CassandraConverter {
                                     .sequential()
                                     .publishOn( Schedulers.single() )
                                     .collectList()
-                                    .map( longs -> tabletUsageStatistics ); }
+                                    .map( longs -> {
+                                        final List< TabletUsageData > tabletUsageDataList = new ArrayList<>();
+                                        tabletUsageStatistics.getTabletUsageStatisticsForYear()
+                                                .forEach( ( key, value ) -> tabletUsageDataList.add( new TabletUsageData( value, key.toString() ) ) );
+                                        return ApiResponseModel
+                                                .builder()
+                                                .data( Data
+                                                        .builder()
+                                                        .data( tabletUsageDataList )
+                                                        .total( tabletUsageStatistics.getTotalCount() )
+                                                        .build() )
+                                                .build(); } ); }
 
                         else return Flux.fromStream( this.getSession().execute(
                                 "SELECT * FROM "
@@ -1497,7 +1508,18 @@ public final class CassandraDataControl extends CassandraConverter {
                                 .sequential()
                                 .publishOn( Schedulers.single() )
                                 .collectList()
-                                .map( longs -> tabletUsageStatistics ); } );
+                                .map( longs -> {
+                                    final List< TabletUsageData > tabletUsageDataList = new ArrayList<>();
+                                    tabletUsageStatistics.getTabletUsageStatisticsForEachDay()
+                                            .forEach( ( key, value ) -> tabletUsageDataList.add( new TabletUsageData( value, key.toString() ) ) );
+                                    return ApiResponseModel
+                                            .builder()
+                                            .data( Data
+                                                    .builder()
+                                                    .data( tabletUsageDataList )
+                                                    .total( tabletUsageStatistics.getTotalCount() )
+                                                    .build() )
+                                            .build(); } ); } );
 
     private final BiFunction< CassandraTables, CassandraTables, ParallelFlux< Row > > getAllEntities =
             ( keyspace, table ) -> Flux.fromStream(

@@ -49,27 +49,27 @@ public final class TimeInspector {
 
     // for checking current time of task ending
     private final Function< String, Long > convertTimeToLong = time -> {
-        try { return time != null && !time.contains( "null" )
-                ? new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
-                .parse( time )
-                .getTime()
-                : 0L; }
-        catch ( final Exception e ) { return 0L; } };
+            try { return time != null && !time.contains( "null" )
+                    ? new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
+                    .parse( time )
+                    .getTime()
+                    : 0L; }
+            catch ( final Exception e ) { return 0L; } };
 
     // возвращает данные о дате о начале года или конце
     private final Function< Boolean, Date > getYearStartOrEnd = flag -> {
-        if ( flag ) {
-            this.getCalendar().set( Calendar.YEAR, Year.now().getValue() );
-            this.getCalendar().set( Calendar.DAY_OF_YEAR, 1 ); }
-        else {
-            calendar.set( Calendar.MONTH, 11 );
-            calendar.set( Calendar.DAY_OF_MONTH, 31 ); }
-        return this.getCalendar().getTime(); };
+            if ( flag ) {
+                this.getCalendar().set( Calendar.YEAR, Year.now().getValue() );
+                this.getCalendar().set( Calendar.DAY_OF_YEAR, 1 ); }
+            else {
+                calendar.set( Calendar.MONTH, 11 );
+                calendar.set( Calendar.DAY_OF_MONTH, 31 ); }
+            return this.getCalendar().getTime(); };
 
     private final Function< Date, Month > getMonthName = date1 -> Month.of( date1.getMonth() + 1 );
 
     private final BiFunction< Instant, Integer, Long > getTimeDifference = ( instant, integer ) -> switch ( integer ) {
-        case 1 -> Math.abs( Duration.between( Instant.now(), instant ).toHours() );
-        case 2 -> Math.abs( Duration.between( Instant.now(), instant ).toMinutes() );
-        default -> Math.abs( Duration.between( Instant.now(), instant ).toSeconds() ); };
+            case 1 -> Math.abs( Duration.between( Instant.now(), instant ).toHours() );
+            case 2 -> Math.abs( Duration.between( Instant.now(), instant ).toMinutes() );
+            default -> Math.abs( Duration.between( Instant.now(), instant ).toSeconds() ); };
 }

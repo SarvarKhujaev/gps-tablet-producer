@@ -360,7 +360,7 @@ public final class PatrulController extends SerDes {
                 : super.convert( new PatrulInRadiusList() ); }
 
     @MessageMapping ( value = "GET_TABLETS_USAGE_STATISTICS" )
-    public Mono< TabletUsageStatistics > getTabletsUsageStatistics ( final PatrulActivityRequest request ) {
+    public Mono< ApiResponseModel > getTabletsUsageStatistics ( final PatrulActivityRequest request ) {
         return CassandraDataControl
                 .getInstance()
                 .getGetTabletUsageStatistics()

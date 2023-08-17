@@ -174,14 +174,13 @@ public final class CassandraDataControlForTasks extends SerDes {
                     + super.serialize( carTotalData ) + "');" )
                     .wasApplied();
 
-    private final Consumer< ActiveTask > saveActiveTask = activeTask -> {
-            activeTask.getPatrulList().values().forEach( patrul -> System.out.println( patrul.getStatus() ) );
+    private final Consumer< ActiveTask > saveActiveTask = activeTask ->
             this.getSession().execute( "INSERT INTO "
                     + CassandraTables.TABLETS + "."
                     + CassandraTables.ACTIVE_TASK
                     + "(id, object) VALUES ('"
                     + activeTask.getTaskId() + "', '"
-                    + super.serialize( activeTask ) + "');" ); };
+                    + super.serialize( activeTask ) + "');" );
 
     // если патрульному отменили задание то нужно удалить запись о времени затраченное на задачу
     private final Function< Patrul, UUID > deleteRowFromTaskTimingTable = patrul -> {

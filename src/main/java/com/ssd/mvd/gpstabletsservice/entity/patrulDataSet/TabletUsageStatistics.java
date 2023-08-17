@@ -1,11 +1,13 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
 import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
+
 import java.time.Month;
 import java.util.*;
 
 @lombok.Data
 public final class TabletUsageStatistics {
+    private Long totalCount = 0L;
     // хранит данные о том, сколько часов патрульный использовал в каждом месяце
     private final SortedMap< Month, Long > tabletUsageStatisticsForYear = new TreeMap<>();
     // хранит данные о том, сколько часов патрульный использовал каждый день в течении месяца
@@ -23,5 +25,6 @@ public final class TabletUsageStatistics {
                     .apply( date );
             this.getTabletUsageStatisticsForYear().put( month, this.getTabletUsageStatisticsForYear().get( month ) + usage ); }
         else this.getTabletUsageStatisticsForEachDay().put( date, usage );
+        this.setTotalCount( this.getTotalCount() + usage );
         return this; }
 }

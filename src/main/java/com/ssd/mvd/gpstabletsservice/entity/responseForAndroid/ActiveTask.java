@@ -127,7 +127,6 @@ public final class ActiveTask {
             final Status status,
             final TaskTypes taskTypes,
             final Map< UUID, Patrul > patrulList ) {
-        patrulList.values().forEach( patrul -> System.out.println( patrul.getStatus() ) );
         this.setCardId( cardId );
         this.setStatus( status );
         this.setTaskId( taskId );
