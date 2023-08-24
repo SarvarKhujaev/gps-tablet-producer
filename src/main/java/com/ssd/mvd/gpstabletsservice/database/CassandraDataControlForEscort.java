@@ -46,10 +46,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
         this.getSession().execute("CREATE TYPE IF NOT EXISTS "
                 + CassandraTables.ESCORT + "."
                 + CassandraTables.POINTS_ENTITY
-                + "( lat double, "
-                + "lng double, " +
-                "pointId uuid, " +
-                "pointName text );" );
+                + "( lat double, lng double, pointId uuid, pointName text );" );
 
         this.getSession().execute("CREATE TYPE IF NOT EXISTS "
                 + CassandraTables.ESCORT + "."
@@ -65,10 +62,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                 "totalTime int, " +
                 "routeIndex int, " +
                 "totalDistance int, " +
-                "pointsList list< frozen < "
-                + CassandraTables.POINTS_ENTITY + " > >, " +
-                "latlngs list< frozen < "
-                + CassandraTables.POLYGON_ENTITY + " > > );" );
+                "pointsList list< frozen < " + CassandraTables.POINTS_ENTITY + " > >, " +
+                "latlngs list< frozen < " + CassandraTables.POLYGON_ENTITY + " > > );" );
 
         this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
                 + CassandraTables.ESCORT + "."
@@ -184,24 +179,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             + super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ) + ", "
                             + super.convertListToCassandra.apply( escortTuple.getPatrulList() ) + " ) IF NOT EXISTS;" )
                     .wasApplied()
-                    ? Flux.just( ApiResponseModel
-                                .builder()
-                                .success( true )
-                                .status( com.ssd.mvd.gpstabletsservice.response.Status
-                                        .builder()
-                                        .message( "Tuple was successfully created" )
-                                        .code( 200 )
-                                        .build() )
-                                .build() )
-                    : Flux.just( ApiResponseModel
-                    .builder()
-                    .success( false )
-                    .status( com.ssd.mvd.gpstabletsservice.response.Status
-                            .builder()
-                            .message( "Such a tuple has already been created" )
-                            .code( 201 )
-                            .build() )
-                    .build() ); };
+                    ? Flux.just( super.getFunction().apply( Map.of( "message", "Tuple was successfully created" ) ).block() )
+                    : Flux.just( super.error.apply( "Such a tuple has already been created" ).block() ); };
 
     private final Function< EscortTuple, Mono< ApiResponseModel > > updateEscortTuple = escortTuple -> {
             if ( super.checkParam.test( escortTuple.getUuidOfPolygon() ) ) this.getGetCurrentTupleOfEscort()
@@ -398,7 +377,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     + super.getALlNames.apply( Country.class )
                     + " VALUES("
                     + country.getUuid() + ", '"
-                    + ( country.getFlag() != null && !country.getFlag().isEmpty()
+                    + ( super.checkParam.test( country.getFlag() ) && !country.getFlag().isEmpty()
                     ? country.getFlag() : Errors.DATA_NOT_FOUND ) + "', '"
                     + super.concatNames.apply( country.getSymbol().toUpperCase(), 3 ) + "', '"
                     + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 3 ) + "', '"

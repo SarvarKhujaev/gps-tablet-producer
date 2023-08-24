@@ -84,9 +84,6 @@ public final class Notification {
         this.setStatus( status );
         this.setType( taskTypes.name() );
 
-        this.setUuid( UUID.randomUUID() );
-        this.setNotificationWasCreated( new Date() );
-
         this.setCarNumber( patrul.getCarNumber() );
         this.setTaskTypes( patrul.getTaskTypes() );
         this.setPoliceType( patrul.getPoliceType() );
