@@ -3,9 +3,13 @@ package com.ssd.mvd.gpstabletsservice.entity.notifications;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import java.util.UUID;
 
-@lombok.Data
 @lombok.Builder
-public final class SosNotification { // тспользуется для уведомления фронта
+// используется для уведомления фронта
+public final class SosNotification {
+    public UUID getPatrulUUID() {
+        return patrulUUID;
+    }
+
     private UUID patrulUUID;
     private Status status;
 }

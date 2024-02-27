@@ -19,41 +19,50 @@ public final class CountryController extends LogInspector {
     @MessageMapping ( value = "getAllCountries" )
     public Flux< Country > getAllCountries () { return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.ESCORT, CassandraTables.COUNTRIES )
             .map( Country::new )
             .sequential()
             .publishOn( Schedulers.single() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "getCurrentCountry" )
-    public Mono< Country > getCurrentCountry ( final String countryName ) { return CassandraDataControlForEscort
+    public Mono< Country > getCurrentCountry ( final String countryName ) {
+        return CassandraDataControlForEscort
             .getInstance()
             .getGetCurrentCountry()
             .apply( countryName )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping( value = "addNewCountry" )
-    public Mono< ApiResponseModel > addNewCountry ( final Country country ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > addNewCountry ( final Country country ) {
+        return CassandraDataControlForEscort
             .getInstance()
             .getSaveNewCountry()
             .apply( country )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "updateCountry" )
-    public Mono< ApiResponseModel > updateCountry ( final Country country ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > updateCountry ( final Country country ) {
+        return CassandraDataControlForEscort
             .getInstance()
             .getUpdate()
             .apply( country )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "deleteCountry" )
-    public Mono< ApiResponseModel > deleteCountry ( final String countryName ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > deleteCountry ( final String countryName ) {
+        return CassandraDataControlForEscort
             .getInstance()
             .getDeleteCountry()
             .apply( countryName )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 }

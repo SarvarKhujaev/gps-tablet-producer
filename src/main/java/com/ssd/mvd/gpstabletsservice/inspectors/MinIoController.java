@@ -32,7 +32,7 @@ public final class MinIoController extends LogInspector {
 
     public static MinIoController getInstance() { return INSTANCE; }
 
-    public void test ( final String fileName, final StringBuilder stringBuilder ) {
+    public void sendFileToMinio ( final String fileName, final StringBuilder stringBuilder ) {
         try {
             if ( !this.minioClient.bucketExists( BucketExistsArgs.builder().bucket( this.BUCKET_NAME ).build() ) )
                 this.minioClient.makeBucket( MakeBucketArgs.builder().bucket( this.BUCKET_NAME ).build() );

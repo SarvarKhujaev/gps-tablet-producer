@@ -5,9 +5,9 @@ import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonEntity;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonType;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.datastax.driver.core.exceptions.InvalidTypeException;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.entity.CameraList;
 import com.ssd.mvd.gpstabletsservice.entity.PoliceType;
 import com.ssd.mvd.gpstabletsservice.tuple.Points;
@@ -20,107 +20,90 @@ import java.nio.ByteBuffer;
 public final class CodecRegistration extends TypeCodec< Object > {
     private final TypeCodec< UDTValue > innerCodec;
     private final UserType userType;
-    private final Integer value;
+    private final byte value;
 
-    public CodecRegistration ( final TypeCodec< UDTValue > innerCodec,
-                               final Class< Object > javaType,
-                               final Integer value ) {
+    public CodecRegistration (
+            final TypeCodec< UDTValue > innerCodec,
+            final Class< Object > javaType,
+            final byte value ) {
         super( innerCodec.getCqlType(), javaType );
         this.value = value;
         this.innerCodec = innerCodec;
-        this.userType = (UserType)innerCodec.getCqlType(); }
+        this.userType = (UserType) innerCodec.getCqlType();
+    }
 
     @Override
     public ByteBuffer serialize ( final Object o, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
-        return innerCodec.serialize( this.toUDTValue( o ), protocolVersion ); }
+        return innerCodec.serialize( this.toUDTValue( o ), protocolVersion );
+    }
 
     @Override
     public Object deserialize ( final ByteBuffer bytes, final ProtocolVersion protocolVersion ) throws InvalidTypeException {
-        return this.toAddress( innerCodec.deserialize( bytes, protocolVersion ) ); }
+        return this.toAddress( innerCodec.deserialize( bytes, protocolVersion ) );
+    }
 
     @Override
     public Object parse( final String value ) throws InvalidTypeException {
         return value == null || value.isEmpty() || value.equalsIgnoreCase("NULL" )
-                ? null : this.toAddress( innerCodec.parse( value ) ); }
+                ? null : this.toAddress( innerCodec.parse( value ) );
+    }
 
     @Override
     public String format( final Object o ) throws InvalidTypeException {
         return DataValidateInspector
                 .getInstance()
-                .checkParam
-                .test( o )
-                ? innerCodec.format( this.toUDTValue( o ) ) : "NULL"; }
+                .objectIsNotNull( o )
+                ? innerCodec.format( this.toUDTValue( o ) ) : "NULL";
+    }
 
-    private Object toAddress ( final UDTValue udtValue ) { return DataValidateInspector
-            .getInstance()
-            .checkParam
-            .test( udtValue )
-            ? switch ( this.value ) {
-                    case 1 -> new Patrul( udtValue );
-                    case 2 -> new CameraList( udtValue );
-                    case 3 -> new Points ( udtValue );
-                    case 4 -> new PositionInfo ( udtValue );
-                    case 5 -> new ReportForCard ( udtValue );
-                    case 6 -> new PolygonEntity( udtValue.getDouble("lat" ), udtValue.getDouble("lng" ) );
-                    case 7 -> new PolygonType( udtValue );
-                    case 8 -> new PoliceType( udtValue );
-                    default -> new ViolationsInformation ( udtValue ); }
-            : null; }
+    private Object toAddress ( final UDTValue udtValue ) {
+        return DataValidateInspector
+                .getInstance()
+                .objectIsNotNull( udtValue )
+                ? switch ( this.value ) {
+                        case 1 -> new Patrul( udtValue );
+                        case 2 -> new CameraList( udtValue );
+                        case 3 -> new Points ( udtValue );
+                        case 4 -> new PositionInfo ( udtValue );
+                        case 5 -> new ReportForCard ( udtValue );
+                        case 6 -> PolygonEntity.generate( udtValue );
+                        case 7 -> new PolygonType( udtValue );
+                        case 8 -> new PoliceType( udtValue );
+                        case 9 -> PatrulCarInfo.generate( udtValue );
+                        case 10 -> PatrulFIOData.generate( udtValue );
+                        case 11 -> PatrulTaskInfo.generate( udtValue );
+                        case 12 -> PatrulDateData.generate( udtValue );
+                        case 13 -> PatrulAuthData.generate( udtValue );
+                        case 14 -> PatrulTokenInfo.generate( udtValue );
+                        case 15 -> PatrulRegionData.generate( udtValue );
+                        case 16 -> PatrulMobileAppInfo.generate( udtValue );
+                        case 17 -> PatrulUniqueValues.generate( udtValue );
+                        case 18 -> PatrulLocationData.generate( udtValue );
+                        default -> new ViolationsInformation ( udtValue );
+        }
+                : null;
+    }
 
     private UDTValue toUDTValue ( final Object o ) {
         return DataValidateInspector
                 .getInstance()
-                .checkParam
-                .test( o )
+                .objectIsNotNull( o )
                 ? switch ( this.value ) {
                     case 1 -> userType.newValue()
-                                .setTimestamp( "taskDate", ( (Patrul) o ).getTaskDate() )
-                                .setTimestamp( "lastActiveDate", ( (Patrul) o ).getLastActiveDate() )
-                                .setTimestamp( "startedToWorkDate", ( (Patrul) o ).getStartedToWorkDate() )
-                                .setTimestamp( "dateOfRegistration", ( (Patrul) o ).getDateOfRegistration() )
-
-                                .setDouble( "distance", ( (Patrul) o ).getDistance() )
-                                .setDouble( "latitude", ( (Patrul) o ).getLatitude() )
-                                .setDouble( "longitude", ( (Patrul) o ).getLongitude() )
-                                .setDouble( "latitudeOfTask", ( (Patrul) o ).getLatitudeOfTask() )
-                                .setDouble( "longitudeOfTask", ( (Patrul) o ).getLongitudeOfTask() )
-
                                 .setUUID( "uuid", ( (Patrul) o ).getUuid() )
-                                .setUUID( "organ", ( (Patrul) o ).getOrgan() )
-                                .setUUID( "uuidOfEscort", ( (Patrul) o ).getUuidOfEscort() )
 
-                                .setLong( "regionId", ( (Patrul) o ).getRegionId() )
-                                .setLong( "mahallaId", ( (Patrul) o ).getMahallaId() )
-                                .setLong( "districtId", ( (Patrul) o ).getDistrictId() )
                                 .setLong( "totalActivityTime", ( (Patrul) o ).getTotalActivityTime() )
 
                                 .setBool( "inPolygon", ( (Patrul) o ).getInPolygon() )
                                 .setBool( "tuplePermission", ( (Patrul) o ).getTuplePermission() )
 
-                                .setString( "name", ( (Patrul) o ).getName() )
                                 .setString( "rank", ( (Patrul) o ).getRank() )
                                 .setString( "email", ( (Patrul) o ).getEmail() )
-                                .setString( "login", ( (Patrul) o ).getLogin() )
-                                .setString( "taskId", ( (Patrul) o ).getTaskId() )
-                                .setString( "carType", ( (Patrul) o ).getCarType() )
-                                .setString( "surname", ( (Patrul) o ).getSurname() )
-                                .setString( "password", ( (Patrul) o ).getPassword() )
-                                .setString( "carNumber", ( (Patrul) o ).getCarNumber() )
                                 .setString( "organName", ( (Patrul) o ).getOrganName() )
-                                .setString( "regionName", ( (Patrul) o ).getRegionName() )
                                 .setString( "policeType", ( (Patrul) o ).getPoliceType() )
-                                .setString( "fatherName", ( (Patrul) o ).getFatherName() )
                                 .setString( "dateOfBirth", ( (Patrul) o ).getDateOfBirth() )
-                                .setString( "phoneNumber", ( (Patrul) o ).getPhoneNumber() )
-                                .setString( "specialToken", ( (Patrul) o ).getSpecialToken() )
-                                .setString( "tokenForLogin", ( (Patrul) o ).getTokenForLogin() )
-                                .setString( "simCardNumber", ( (Patrul) o ).getSimCardNumber() )
                                 .setString( "passportNumber", ( (Patrul) o ).getPassportNumber() )
-                                .setString( "patrulImageLink", ( (Patrul) o ).getPatrulImageLink() )
-
-                                .setString( "status", ( (Patrul) o ).getStatus().name() )
-                                .setMap( "listOfTasks", ( (Patrul) o ).getListOfTasks() )
-                                .setString( "taskTypes", ( (Patrul) o ).getTaskTypes().name() );
+                                .setString( "patrulImageLink", ( (Patrul) o ).getPatrulImageLink() );
 
                     case 2 -> userType.newValue()
                             .setString ("rtspLink", ( (CameraList) o ).getRtspLink() )
@@ -159,6 +142,60 @@ public final class CodecRegistration extends TypeCodec< Object > {
                             .setString( "icon2", ( (PoliceType) o ).getIcon2() )
                             .setString( "policeType", ( (PoliceType) o ).getPoliceType() );
 
+                    case 9 -> userType.newValue()
+                            .setString( "carType", ( (PatrulCarInfo) o ).getCarType()  )
+                            .setString( "carNumber", ( (PatrulCarInfo) o ).getCarNumber() );
+
+                    case 10 -> userType.newValue()
+                            .setString( "name", ( (PatrulFIOData) o ).getName() )
+                            .setString( "surname", ( (PatrulFIOData) o ).getSurname() )
+                            .setString( "fatherName", ( (PatrulFIOData) o ).getFatherName() )
+                            .setString( "surnameNameFatherName", ( (PatrulFIOData) o ).getSurnameNameFatherName() );
+
+                    case 11 -> userType.newValue()
+                            .setString( "taskId", ( (PatrulTaskInfo) o ).getTaskId() )
+                            .setString( "status", ( (PatrulTaskInfo) o ).getStatus().name() )
+                            .setString( "taskTypes", ( (PatrulTaskInfo) o ).getTaskTypes().name() )
+                            .setMap( "listOfTasks", ( (PatrulTaskInfo) o ).getListOfTasks() );
+
+                    case 12 -> userType.newValue()
+                            .setTimestamp( "taskDate", ( (PatrulDateData) o ).getTaskDate() )
+                            .setTimestamp( "lastActiveDate", ( (PatrulDateData) o ).getLastActiveDate() )
+                            .setTimestamp( "startedToWorkDate", ( (PatrulDateData) o ).getStartedToWorkDate() )
+                            .setTimestamp( "dateOfRegistration", ( (PatrulDateData) o ).getDateOfRegistration() );
+
+                    case 13 -> userType.newValue()
+                            .setString( "login", ( (PatrulAuthData) o ).getLogin() )
+                            .setString( "password", ( (PatrulAuthData) o ).getPassword() );
+
+                    case 14 -> userType.newValue()
+                            .setString( "specialToken", ( ( (PatrulTokenInfo) o ).getSpecialToken() ) )
+                            .setString( "tokenForLogin", ( ( (PatrulTokenInfo) o ).getTokenForLogin() ) );
+
+                    case 15 -> userType.newValue()
+                            .setLong( "regionId", ( (PatrulRegionData) o ).getRegionId() )
+                            .setLong( "mahallaId", ( (PatrulRegionData) o ).getMahallaId() )
+                            .setLong( "districtId", ( (PatrulRegionData) o ).getDistrictId() )
+                            .setString( "regionName", ( (PatrulRegionData) o ).getRegionName() )
+                            .setString( "districtName", ( (PatrulRegionData) o ).getDistrictName() );
+
+                    case 16 -> userType.newValue()
+                            .setString( "phoneNumber", ( (PatrulMobileAppInfo) o ).getPhoneNumber() )
+                            .setString( "simCardNumber", ( (PatrulMobileAppInfo) o ).getSimCardNumber() )
+                            .setByte( "batteryLevel", ( (PatrulMobileAppInfo) o ).getBatteryLevel() );
+
+                    case 17 -> userType.newValue()
+                            .setUUID( "organ", ( (PatrulUniqueValues) o ).getOrgan() )
+                            .setUUID( "sos_id", ( (PatrulUniqueValues) o ).getSos_id() )
+                            .setUUID( "uuidOfEscort", ( (PatrulUniqueValues) o ).getUuidOfEscort() )
+                            .setUUID( "uuidForPatrulCar", ( (PatrulUniqueValues) o ).getUuidForPatrulCar() )
+                            .setUUID( "uuidForEscortCar", ( (PatrulUniqueValues) o ).getUuidForEscortCar() );
+
+                    case 18 -> userType.newValue()
+                            .setDouble( "distance", ( (PatrulLocationData) o ).getDistance() )
+                            .setDouble( "latitude", ( (PatrulLocationData) o ).getLatitude() )
+                            .setDouble( "longitude", ( (PatrulLocationData) o ).getLongitude() );
+
                     default -> userType.newValue()
                             .setInt ( "amount", ( (ViolationsInformation) o ).getAmount() )
                             .setInt( "decreeStatus", ( (ViolationsInformation) o ).getDecreeStatus() )
@@ -170,6 +207,8 @@ public final class CodecRegistration extends TypeCodec< Object > {
                             .setString( "payDate", ( (ViolationsInformation) o ).getPayDate() )
                             .setString( "division", ( (ViolationsInformation) o ).getDivision() )
                             .setString( "violation", ( (ViolationsInformation) o ).getViolation() )
-                            .setString( "decreeSerialNumber", ( (ViolationsInformation) o ).getDecreeSerialNumber() ); }
-                : null; }
+                            .setString( "decreeSerialNumber", ( (ViolationsInformation) o ).getDecreeSerialNumber() );
+        }
+                : null;
+    }
 }

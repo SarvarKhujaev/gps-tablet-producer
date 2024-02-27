@@ -17,54 +17,65 @@ import java.util.UUID;
 @RestController
 public final class CarController extends LogInspector {
     @MessageMapping( value = "carList" ) // the list of all cars
-    public Flux< ReqCar > getAllCars () { return CassandraDataControl
+    public Flux< ReqCar > getAllCars () {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.CARS )
             .map( ReqCar::new )
             .sequential()
             .publishOn( Schedulers.single() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "getCurrentCar" )
-    public Mono< ReqCar > getCurrentCar ( final String gosno ) { return CassandraDataControl
+    public Mono< ReqCar > getCurrentCar ( final String gosno ) {
+        return CassandraDataControl
             .getInstance()
-            .getGetCarByUUID()
-            .apply( UUID.fromString( gosno ) ); }
+            .getCarByUUID
+            .apply( UUID.fromString( gosno ) );
+    }
 
     @MessageMapping( value = "searchByGosnoCar" )
-    public Flux< ReqCar > searchByGosno ( final String gosno ) { return CassandraDataControl
+    public Flux< ReqCar > searchByGosno ( final String gosno ) {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.CARS )
             .filter( row -> row.getString( "gosNumber" ).equals( gosno ) )
             .map( ReqCar::new )
             .sequential()
             .publishOn( Schedulers.single() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping( value = "addCar" )
-    public Mono< ApiResponseModel > addCar ( final ReqCar reqCar ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addCar ( final ReqCar reqCar ) {
+        return CassandraDataControl
             .getInstance()
-            .getSaveCar()
+            .saveCar
             .apply( reqCar )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping( value = "deleteCar" )
     public Mono< ApiResponseModel > deleteCar ( final String gosno ) {
         return CassandraDataControl
                 .getInstance()
-                .getDeleteCar()
+                .deleteCar
                 .apply( gosno )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "updateCar" )
-    public Mono< ApiResponseModel > updateCar ( final ReqCar reqCar ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updateCar ( final ReqCar reqCar ) {
+        return CassandraDataControl
             .getInstance()
-            .getUpdateCar()
+            .updateCar
             .apply( reqCar )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 }

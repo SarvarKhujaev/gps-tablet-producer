@@ -2,10 +2,8 @@ package com.ssd.mvd.gpstabletsservice.controller;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.Arrays;
 import java.time.Duration;
 import java.util.function.*;
-import java.util.Collections;
 
 import com.google.gson.Gson;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,9 +24,10 @@ import com.ssd.mvd.gpstabletsservice.task.sos_task.Address;
 import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
+import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
 
 @lombok.Data
-public final class UnirestController extends LogInspector {
+public class UnirestController extends LogInspector {
     private final String ADDRESS_LOCATION_API = GpsTabletsServiceApplication
             .context
             .getEnvironment()
@@ -47,20 +46,34 @@ public final class UnirestController extends LogInspector {
     private final Gson gson = new Gson();
     private final static UnirestController serDes = new UnirestController();
 
-    public static UnirestController getInstance () { return serDes; }
+    public static UnirestController getInstance () {
+        return serDes;
+    }
 
-    private UnirestController () { Unirest.setObjectMapper( new ObjectMapper() {
+    private UnirestController () {
+        Unirest.setObjectMapper( new ObjectMapper() {
             private final com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
             @Override
             public String writeValue( Object o ) {
-                try { return this.objectMapper.writeValueAsString( o ); }
-                catch ( JsonProcessingException e ) { throw new RuntimeException(e); } }
+                try {
+                    return this.objectMapper.writeValueAsString( o );
+                }
+                catch ( JsonProcessingException e ) {
+                    throw new RuntimeException(e);
+                } }
 
             @Override
             public <T> T readValue( String s, Class<T> aClass ) {
-                try { return this.objectMapper.readValue( s, aClass ); }
-                catch ( JsonProcessingException e ) { throw new RuntimeException(e); } } } ); }
+                try {
+                    return this.objectMapper.readValue( s, aClass );
+                }
+                catch ( JsonProcessingException e ) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } );
+    }
 
     private final Function< String, RestTemplate > restTemplate = token -> new RestTemplateBuilder()
             .setConnectTimeout( Duration.ofSeconds( 10 ) )
@@ -69,64 +82,80 @@ public final class UnirestController extends LogInspector {
             .build();
 
     private final Consumer< String > deleteUser = patrulId -> {
-            try { super.convert( new Req() )
-                    .map( req -> {
-                        req.setId( UUID.fromString( patrulId.split( "@" )[0] ) );
-                        return req; } )
+            try {
+                super.convert( new Req( UUID.fromString( patrulId.split( "@" )[0] ) ) )
                     .onErrorContinue( super::logging )
-                    .subscribe( req -> this.getRestTemplate()
-                            .apply( patrulId.split( "@" )[1] )
-                            .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
-                                    + this.getCHAT_SERVICE_PREFIX()
-                                    + "/delete-user",
-                                    HttpMethod.POST,
-                                    new HttpEntity<>( req, null ),
-                                    String.class ) );
-            } catch ( Exception e ) { super.logging( e ); } };
+                    .subscribe(
+                            new CustomSubscriber<>(
+                                req -> this.getRestTemplate()
+                                        .apply( patrulId.split( "@" )[1] )
+                                        .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
+                                                        + this.getCHAT_SERVICE_PREFIX()
+                                                        + "/delete-user",
+                                                HttpMethod.POST,
+                                                new HttpEntity<>( req, null ),
+                                                String.class )
+                    ) );
+            } catch ( final Exception e ) {
+                super.logging( e );
+            }
+    };
 
     private final Consumer< Patrul > updateUser = patrul -> {
-            if ( patrul.getSpecialToken() == null ) return;
-            try { super.convert( new Req() )
-                    .map( req -> {
-                        req.setUsername( patrul.getSurnameNameFatherName() );
-                        req.setId( patrul.getUuid() );
-                        req.setRole( Role.USER );
-                        return req; } )
+            if ( !super.objectIsNotNull( patrul.getPatrulTokenInfo().getSpecialToken() ) ) {
+                return;
+            }
+
+            try {
+                super.convert( new Req( patrul ) )
                     .onErrorContinue( super::logging )
-                    .subscribe( req -> this.getRestTemplate().apply( patrul.getSpecialToken() )
-                            .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
-                                            + this.getCHAT_SERVICE_PREFIX()
-                                            + "/edit-user",
-                                    HttpMethod.POST,
-                                    new HttpEntity<>( req, null ),
-                                    String.class ) );
-            } catch ( Exception e ) { super.logging( e ); } };
+                    .subscribe(
+                            new CustomSubscriber<>(
+                                    req -> this.getRestTemplate().apply( patrul.getPatrulTokenInfo().getSpecialToken() )
+                                            .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
+                                                            + this.getCHAT_SERVICE_PREFIX()
+                                                            + "/edit-user",
+                                                    HttpMethod.POST,
+                                                    new HttpEntity<>( req, null ),
+                                                    String.class )
+                            )
+                    );
+            } catch ( final Exception e ) {
+                super.logging( e );
+            }
+    };
 
     private final Consumer< Patrul > addUser = patrul -> {
-            try { super.convert( new Req() )
-                    .map( req -> {
-                        req.setUsername( patrul.getSurnameNameFatherName() );
-                        req.setId( patrul.getUuid() );
-                        req.setRole( Role.USER );
-                        return req; } )
+            try {
+                super.convert( new Req( patrul ) )
                     .onErrorContinue( super::logging )
                     .onErrorStop()
-                    .subscribe( req -> this.getRestTemplate()
-                            .apply( patrul.getSpecialToken() )
-                            .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
-                                            + this.getCHAT_SERVICE_PREFIX()
-                                            + "/add-user",
-                                    HttpMethod.POST,
-                                    new HttpEntity<>( req, null ),
-                                    String.class ) );
-                patrul.setSpecialToken( null );
-            } catch ( HttpClientErrorException e ) { super.logging( e ); } };
+                    .subscribe( new CustomSubscriber<>(
+                            req -> this.getRestTemplate()
+                                    .apply( patrul.getPatrulTokenInfo().getSpecialToken() )
+                                    .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
+                                                    + this.getCHAT_SERVICE_PREFIX()
+                                                    + "/add-user",
+                                            HttpMethod.POST,
+                                            new HttpEntity<>( req, null ),
+                                            String.class )
+                    ) );
 
-    private <T> List<T> stringToArrayList ( final String object, final Class< T[] > clazz ) { return Arrays.asList( this.getGson().fromJson( object, clazz ) ); }
+                patrul.getPatrulTokenInfo().setSpecialToken( null );
+            } catch ( final HttpClientErrorException e ) {
+                super.logging( e );
+            }
+    };
+
+    private <T> List<T> stringToArrayList ( final String object, final Class< T[] > clazz ) {
+        return super.convertArrayToList( this.getGson().fromJson( object, clazz ) );
+    }
 
     private final BiFunction< Double, Double, String > getAddressByLocation = ( latitude, longitude ) -> {
-            try { return this.stringToArrayList(
-                    Unirest.get( this.getADDRESS_LOCATION_API()
+            try {
+                return this.stringToArrayList(
+                    Unirest.get(
+                            this.getADDRESS_LOCATION_API()
                                 + latitude + "," + longitude
                                 + "&limit=5&format=json&addressdetails=1" )
                             .asJson()
@@ -138,27 +167,58 @@ public final class UnirestController extends LogInspector {
                 .getDisplay_name();
             } catch ( final Exception e ) {
                 super.logging( e );
-                return Errors.DATA_NOT_FOUND.name(); } };
+                return Errors.DATA_NOT_FOUND.name();
+            }
+    };
 
     private final Function< Long, List< RegionData > > getRegions = regionId -> {
-            try { return this.getGson().fromJson(
-                    Unirest.get( regionId > 0
+            try {
+                return this.getGson().fromJson(
+                        Unirest.get( regionId > 0
                                     ? "http://10.254.1.1:1234/region-dictionary/api/v1/front/getDistrictByRegion/" + regionId
                                     : "http://10.254.1.1:1234/region-dictionary/api/v1/front/getAllRegion" )
                             .asJson()
                             .getBody()
                             .toString(),
                             Regions.class )
-                    .getResData();
+                        .getResData();
             } catch ( final Exception e ) {
                 super.logging( e );
-                return Collections.emptyList(); } };
+                return super.emptyList();
+            }
+    };
 
-    @lombok.Data
     public static class Req {
+        public UUID getId() {
+            return id;
+        }
+
+        public void setId(UUID id) {
+            this.id = id;
+        }
+
+        public void setRole(Role role) {
+            this.role = role;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
         private UUID id;
         private Role role;
-        private String username; }
+        private String username;
+
+        public Req ( final UUID uuid ) {
+            this.setId( uuid );
+        }
+
+        public Req ( final Patrul patrul ) {
+            this.setUsername( patrul.getPatrulFIOData().getSurnameNameFatherName() );
+            this.setId( patrul.getUuid() );
+            this.setRole( Role.USER );
+        }
+    }
 
     public enum Role {
         OPERATOR,

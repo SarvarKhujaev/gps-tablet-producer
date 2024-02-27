@@ -16,36 +16,43 @@ import reactor.core.publisher.Mono;
 @RestController
 public final class LustraController extends LogInspector {
     @MessageMapping ( value = "updateLustra" )
-    public Mono< ApiResponseModel > updateLustra ( final AtlasLustra atlasLustra ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updateLustra ( final AtlasLustra atlasLustra ) {
+        return CassandraDataControl
             .getInstance()
-            .getSaveLustra()
+            .saveLustra
             .apply( atlasLustra, false )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping( value = "addLustra" ) // saving new AtlasLustra
-    public Mono< ApiResponseModel > addLustra ( final AtlasLustra atlasLustra ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addLustra ( final AtlasLustra atlasLustra ) {
+        return CassandraDataControl
             .getInstance()
-            .getSaveLustra()
+            .saveLustra
             .apply( atlasLustra, true )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "deleteLustra" )
-    public Mono< ApiResponseModel > deleteLustra ( final String uuid ) { return CassandraDataControl
+    public Mono< ApiResponseModel > deleteLustra ( final String uuid ) {
+        return CassandraDataControl
             .getInstance()
             .delete( CassandraTables.LUSTRA.name(), "uuid", uuid )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping( value = "searchByNameLustra" ) // filters by name
     public Flux< AtlasLustra > searchByName ( final String name ) { return this.getAllLustra()
             .filter( atlasLustra -> atlasLustra.getLustraName().contains( name ) ); }
 
     @MessageMapping( value = "allLustra" ) // the list of all created camera
-    public Flux< AtlasLustra > getAllLustra () { return CassandraDataControl
+    public Flux< AtlasLustra > getAllLustra () {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.LUSTRA )
             .map( AtlasLustra::new )
             .sequential()

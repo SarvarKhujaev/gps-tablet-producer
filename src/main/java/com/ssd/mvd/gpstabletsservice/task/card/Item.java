@@ -1,9 +1,16 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
 @lombok.Data
-@lombok.NoArgsConstructor
-@lombok.AllArgsConstructor
-public class Item< T > {
+public class Item {
     private String key;
-    private T value;
+    private Object value;
+
+    public static <T> Item generate( final String key, final T object ) {
+        return new Item( key, object );
+    }
+
+    private <T> Item ( final String key, final T object ) {
+        this.value = object;
+        this.key = key;
+    }
 }

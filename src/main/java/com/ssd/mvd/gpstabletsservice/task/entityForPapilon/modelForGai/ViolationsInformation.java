@@ -2,12 +2,97 @@ package com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai;
 
 import com.datastax.driver.core.UDTValue;
 
-@lombok.Data
-@lombok.NoArgsConstructor
-@lombok.AllArgsConstructor
 public final class ViolationsInformation {
-    private Integer decreeStatus;
-    private Integer amount;
+    public int getDecreeStatus() {
+        return this.decreeStatus;
+    }
+
+    public void setDecreeStatus ( final int decreeStatus ) {
+        this.decreeStatus = decreeStatus;
+    }
+
+    public int getAmount() {
+        return this.amount;
+    }
+
+    public void setAmount ( final int amount ) {
+        this.amount = amount;
+    }
+
+    public String getDecreeSerialNumber() {
+        return this.decreeSerialNumber;
+    }
+
+    public void setDecreeSerialNumber ( final String decreeSerialNumber ) {
+        this.decreeSerialNumber = decreeSerialNumber;
+    }
+
+    public String getViolation() {
+        return this.violation;
+    }
+
+    public void setViolation ( final String violation ) {
+        this.violation = violation;
+    }
+
+    public String getDivision() {
+        return this.division;
+    }
+
+    public void setDivision ( final String division ) {
+        this.division = division;
+    }
+
+    public String getPayDate() {
+        return this.payDate;
+    }
+
+    public void setPayDate ( final String payDate ) {
+        this.payDate = payDate;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress ( final String address ) {
+        this.address = address;
+    }
+
+    public String getArticle() {
+        return this.article;
+    }
+
+    public void setArticle ( final String article ) {
+        this.article = article;
+    }
+
+    public String getOwner() {
+        return this.owner;
+    }
+
+    public void setOwner ( final String owner ) {
+        this.owner = owner;
+    }
+
+    public String getModel() {
+        return this.model;
+    }
+
+    public void setModel ( final String model ) {
+        this.model = model;
+    }
+
+    public String getBill() {
+        return this.bill;
+    }
+
+    public void setBill ( final String bill ) {
+        this.bill = bill;
+    }
+
+    private int decreeStatus;
+    private int amount;
 
     private String decreeSerialNumber;
     private String violation;

@@ -1,37 +1,56 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
-import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
+import com.ssd.mvd.gpstabletsservice.inspectors.CollectionsInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-
-import java.util.ArrayList;
 import java.util.List;
 
-@lombok.Data
-@lombok.NoArgsConstructor
-@lombok.AllArgsConstructor
 // используется когда нужно найти патрульных рядом с камерой
 // максимум 5 не занятых патрульных
-public final class PatrulInRadiusList {
+public final class PatrulInRadiusList extends CollectionsInspector {
+    public void setMaxDistance(Double maxDistance) {
+        this.maxDistance = maxDistance;
+    }
+
     private Double maxDistance;
-    private final List< Patrul > freePatrulList = new ArrayList<>(); // максимум 5 не занятых патрульных
-    private final List < Patrul > busyPatrulListInRadius = new ArrayList<>();
-    private final List < Patrul > busyPatrulListOutOfRadius = new ArrayList<>();
-    private final List < Patrul > freePatrulListOutOfRadius = new ArrayList<>(); // список патрульных которые не входят в радиус
+    private List< Patrul > freePatrulList; // максимум 5 не занятых патрульных
+    private List< Patrul > busyPatrulListInRadius;
+    private List< Patrul > busyPatrulListOutOfRadius;
+    private List< Patrul > freePatrulListOutOfRadius; // список патрульных которые не входят в радиус
+
+    public PatrulInRadiusList () {}
 
     public PatrulInRadiusList ( final List< Patrul > patruls ) {
-        for ( int i = 0; i < patruls.size() && freePatrulList.size() < 5; i++ )
-            if ( patruls.get( i ).getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) freePatrulList.add( patruls.get( i ) );
+        this.freePatrulList = super.newList();
+        this.busyPatrulListInRadius = super.newList();
+        this.busyPatrulListOutOfRadius = super.newList();
+        this.freePatrulListOutOfRadius = super.newList();
+
+        for ( int i = 0; i < patruls.size() && this.freePatrulList.size() < 5; i++ ) {
+            if ( patruls.get( i ).getPatrulTaskInfo().getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) {
+                this.freePatrulList.add( patruls.get( i ) );
+            }
+        }
 
         // чтобы не было дупликатов, убираем патрульных из топ 5 списка
-        patruls.removeAll( freePatrulList );
-        this.setMaxDistance( freePatrulList.get( 4 ).getDistance() );
+        patruls.removeAll( this.freePatrulList );
+        this.setMaxDistance( this.freePatrulList.get( 4 ).getPatrulLocationData().getDistance() );
 
-        for ( final Patrul patrul : patruls ) {
-            if ( patrul.getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) freePatrulListOutOfRadius.add( patrul );
+        super.analyze(
+                patruls,
+                patrul -> {
+                    if ( patrul.getPatrulTaskInfo().getTaskTypes().compareTo( TaskTypes.FREE ) == 0 ) {
+                        this.freePatrulListOutOfRadius.add( patrul );
+                    }
 
-            else { if ( DataValidateInspector
-                    .getInstance()
-                    .checkDistance
-                    .test( maxDistance, patrul.getDistance() ) ) busyPatrulListInRadius.add( patrul );
-            else busyPatrulListOutOfRadius.add( patrul ); } } }
+                    else {
+                        if ( maxDistance <= patrul.getPatrulLocationData().getDistance() ) {
+                            this.busyPatrulListInRadius.add( patrul );
+                        }
+                        else {
+                            this.busyPatrulListOutOfRadius.add( patrul );
+                        }
+                    }
+                }
+        );
+    }
 }

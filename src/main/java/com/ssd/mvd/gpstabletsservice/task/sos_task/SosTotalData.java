@@ -7,8 +7,47 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import java.util.UUID;
 import java.util.Date;
 
-@lombok.Data
 public final class SosTotalData {
+    public void setUuid( final UUID uuid ) {
+        this.uuid = uuid;
+    }
+
+    public void setPatrulUUID( final UUID patrulUUID ) {
+        this.patrulUUID = patrulUUID;
+    }
+
+    public void setAddress( final String address ) {
+        this.address = address;
+    }
+
+    public void setSosWasSendDate( final Date sosWasSendDate ) {
+        this.sosWasSendDate = sosWasSendDate;
+    }
+
+    public void setSosWasClosed( final Date sosWasClosed ) {
+        this.sosWasClosed = sosWasClosed;
+    }
+
+    public void setLatitude( final Double latitude ) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude( final Double longitude ) {
+        this.longitude = longitude;
+    }
+
+    public void setPatrulStatus( final Status patrulStatus ) {
+        this.patrulStatus = patrulStatus;
+    }
+
+    public void setStatus( final Status status ) {
+        this.status = status;
+    }
+
+    public void setSosNotificationForAndroid( final SosNotificationForAndroid sosNotificationForAndroid ) {
+        this.sosNotificationForAndroid = sosNotificationForAndroid;
+    }
+
     private UUID uuid;
     private UUID patrulUUID;
 
@@ -25,9 +64,10 @@ public final class SosTotalData {
 
     private SosNotificationForAndroid sosNotificationForAndroid;
 
-    public SosTotalData ( final PatrulSos patrulSos,
-                          final String patrulStatus,
-                          final SosNotificationForAndroid sosNotificationForAndroid ) {
+    public SosTotalData (
+            final PatrulSos patrulSos,
+            final String patrulStatus,
+            final SosNotificationForAndroid sosNotificationForAndroid ) {
         this.setUuid( patrulSos.getUuid() );
         this.setPatrulUUID( patrulSos.getPatrulUUID() );
 
@@ -38,12 +78,12 @@ public final class SosTotalData {
         this.setLatitude( patrulSos.getLatitude() );
         this.setLongitude( patrulSos.getLongitude() );
 
-        this.setStatus( Status.CREATED );
         this.setSosNotificationForAndroid( sosNotificationForAndroid );
-        this.setPatrulStatus( DataValidateInspector
+        this.setPatrulStatus(
+                DataValidateInspector
                 .getInstance()
-                .checkParam
-                .test( patrulStatus )
+                .objectIsNotNull( patrulStatus )
                 ? Status.valueOf( patrulStatus )
-                : Status.ATTACHED ); }
+                : Status.ATTACHED );
+    }
 }

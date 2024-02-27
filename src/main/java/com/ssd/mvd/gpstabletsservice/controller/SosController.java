@@ -22,41 +22,39 @@ public final class SosController extends LogInspector {
     @MessageMapping( value = "getAllSosEntities" )
     public Flux< PatrulSos > getAllSosEntities () { return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.PATRUL_SOS_TABLE )
             .filter( row -> Status.valueOf( row.getString( "status" ) ).compareTo( Status.FINISHED ) != 0 )
             .map( PatrulSos::new )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging )
-            .onErrorReturn( new PatrulSos() ); }
+            .onErrorReturn( new PatrulSos() );
+    }
 
     // используется планшетом чтобы проверить не отправлял ли он СОС раньше
     @MessageMapping ( value = "checkSosStatus" )
     public Mono< ApiResponseModel > checkSosStatus ( final String token ) {
-        return super.checkSosTable.test( super.getDecode().apply( token ) )
-                ? super.getFunction().apply(
+        return super.checkSosTable( super.decode( token ) )
+                ? super.function(
                         Map.of( "message", "U did not send SOS signal",
-                                "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                        .builder()
-                                        .data( Status.IN_ACTIVE )
-                                        .build() ) )
-                : super.getFunction().apply(
+                                "data", com.ssd.mvd.gpstabletsservice.entity.Data.from( Status.IN_ACTIVE ) ) )
+
+                : super.function(
                         Map.of( "message", "U have SOS signal",
-                        "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                .builder()
-                                .data( Status.ACTIVE )
-                                .build() ) ); }
+                        "data", com.ssd.mvd.gpstabletsservice.entity.Data.from( Status.ACTIVE ) ) );
+    }
 
     // возвращает список из сос сигналов которые еще не были закрыты и привязаны к данному патрульному
     @MessageMapping ( value = "getAllSosForCurrentPatrul" )
     public Mono< ApiResponseModel > getAllSosForCurrentPatrul ( final String token ) {
         return CassandraDataControlForTasks
                 .getInstance()
-                .getGetAllSosForCurrentPatrul()
-                .apply( super.getDecode().apply( token ) )
+                .getAllSosForCurrentPatrul
+                .apply( super.decode( token ) )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 
     // в случае возникновения какой - либо опасности, патрульный модет отправить сигнал СОС
     // метод перехватывает этот сигнал и вносит в базу и шлет оповещение на фронт
@@ -64,17 +62,19 @@ public final class SosController extends LogInspector {
     public Mono< ApiResponseModel > saveSosFromPatrul ( final PatrulSos patrulSos ) {
         return CassandraDataControlForTasks
                 .getInstance()
-                .getSavePatrulSos()
+                .savePatrulSos
                 .apply( patrulSos )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "updatePatrulStatusInSosTable" )
     public Mono< ApiResponseModel > updatePatrulStatusInSosTable ( final SosRequest sosRequest ) {
         return CassandraDataControlForTasks
                 .getInstance()
-                .getUpdatePatrulStatusInSosTable()
+                .updatePatrulStatusInSosTable
                 .apply( sosRequest )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 }

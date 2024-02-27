@@ -1,75 +1,126 @@
 package com.ssd.mvd.gpstabletsservice.inspectors;
 
+import java.util.*;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
-import java.util.*;
-import java.util.function.*;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
-@lombok.Data
-public final class TimeInspector {
+public class TimeInspector extends StringOperations {
+    public static int DAY_IN_SECOND = 86400;
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public Calendar getCalendar() {
+        return calendar;
+    }
+
+    public static long getTimestamp() {
+        return timestamp;
+    }
+
     private Date date; // for comparing with current time
     private final Calendar calendar = Calendar.getInstance();
 
-    private Long timestamp = 30L; // time interval of how much time has to be matched to set User like offline 30 mins by default
-    private Long timestampForArchive = 15L;
+    private static long timestamp = 30L; // time interval of how much time has to be matched to set User like offline 30 mins by default
+    private static long timestampForArchive = 15L;
 
-    private Integer endTimeForEvening = 24;
-    private Integer endTimeForMorning = 16;
-    private Integer startTimeForEvening = 16;
-    private Integer startTimeForMorning = 0;
+    private static byte endTimeForEvening = 24;
+    private static byte endTimeForMorning = 16;
 
-    private final static TimeInspector inspector = new TimeInspector();
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "EEE MMM d H:mm:ss zzz yyyy", Locale.ENGLISH );
+    private static byte startTimeForMorning = 0;
+    private static byte startTimeForEvening = 16;
 
-    public static TimeInspector getInspector () { return inspector; }
+    private final DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern( "EEE MMM d H:mm:ss zzz yyyy", Locale.ENGLISH );
 
-    private Date setDate () { return ( this.date = new Date() ); }
+    private Date setDate () {
+        return ( this.date = new Date() );
+    }
 
-    private final Supplier< Date > getNewDate = Date::new;
+    public Date newDate () {
+        return new Date();
+    }
 
-    private final Function< String, Date > convertDate = s -> {
-            try {
-                final List< String > words = Arrays.asList( s.split( " " ) );
-                return new SimpleDateFormat( words.get( 3 ).length() == 4 ? "EEE MMM dd yyyy kk:mm:ss" : "EEE MMM dd kk:mm:ss", Locale.US )
-                        .parse( words.get( 3 ).length() >= 4
-                                ? words.get( 0 ) + " " + words.get( 1 ) + " " + words.get( 2 ) + " " + words.get( 3 ) + " " + words.get( 4 )
-                                : words.get( 0 ) + " " + words.get( 1 ) + " " + words.get( 2 ) + " " + words.get( 3 ) );
-            } catch ( final ParseException e ) { throw new RuntimeException( e ); } };
+    protected Date convertDate( final String s ) {
+        try {
+            final List< String > words = Arrays.asList( s.split( " " ) );
+            return new SimpleDateFormat(
+                    words.get( 3 ).length() == 4
+                            ? "EEE MMM dd yyyy kk:mm:ss"
+                            : "EEE MMM dd kk:mm:ss", Locale.US )
+                    .parse( words.get( 3 ).length() >= 4
+                            ? String.join( " ", words.get( 0 ), words.get( 1 ), words.get( 2 ), words.get( 3 ), words.get( 4 ) )
+                            : String.join( " ", words.get( 0 ), words.get( 1 ), words.get( 2 ), words.get( 3 ) ) );
+        } catch ( final ParseException e ) { throw new RuntimeException( e ); }
+    }
 
-    private final Function< Date, String > convertDateToString = s -> ZonedDateTime.parse( s.toString(), this.formatter ).format( DateTimeFormatter.ISO_LOCAL_DATE );
+    protected String convertDateToString ( final Date date ) {
+        return ZonedDateTime.parse(
+                date.toString(), this.formatter
+        ).format( DateTimeFormatter.ISO_LOCAL_DATE );
+    }
 
-    private final Predicate< Instant > checkDate = instant -> this.getEndTimeForEvening() >= this.setDate().getHours()
-            && this.getDate().getHours() >= this.getStartTimeForMorning()
-            ? ( this.getGetTimeDifference().apply( instant, 2 ) <= 10 )
-            : ( this.getGetTimeDifference().apply( instant, 2 ) <= 7 );
+    public boolean checkDate ( final Instant instant ) {
+        return endTimeForEvening >= this.setDate().getHours()
+                && this.getDate().getHours() >= startTimeForMorning
+                ? ( this.getTimeDifference( instant, 2 ) <= 10 )
+                : ( this.getTimeDifference( instant, 2 ) <= 7 );
+    }
 
     // for checking current time of task ending
-    private final Function< String, Long > convertTimeToLong = time -> {
-            try { return time != null && !time.contains( "null" )
+    public long convertTimeToLong ( final String time ) {
+        try {
+            return time != null && !time.contains( "null" )
                     ? new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
                     .parse( time )
                     .getTime()
-                    : 0L; }
-            catch ( final Exception e ) { return 0L; } };
+                    : 0L;
+        } catch ( final Exception e ) { return 0L; }
+    }
 
     // возвращает данные о дате о начале года или конце
-    private final Function< Boolean, Date > getYearStartOrEnd = flag -> {
-            if ( flag ) {
-                this.getCalendar().set( Calendar.YEAR, Year.now().getValue() );
-                this.getCalendar().set( Calendar.DAY_OF_YEAR, 1 ); }
-            else {
-                calendar.set( Calendar.MONTH, 11 );
-                calendar.set( Calendar.DAY_OF_MONTH, 31 ); }
-            return this.getCalendar().getTime(); };
+    protected Date getYearStartOrEnd ( final boolean flag ) {
+        if ( flag ) {
+            this.getCalendar().set( Calendar.YEAR, Year.now().getValue() );
+            this.getCalendar().set( Calendar.DAY_OF_YEAR, 1 );
+        }
 
-    private final Function< Date, Month > getMonthName = date1 -> Month.of( date1.getMonth() + 1 );
+        else {
+            calendar.set( Calendar.MONTH, 11 );
+            calendar.set( Calendar.DAY_OF_MONTH, 31 );
+        }
 
-    private final BiFunction< Instant, Integer, Long > getTimeDifference = ( instant, integer ) -> switch ( integer ) {
+        return this.getCalendar().getTime();
+    }
+
+    public Month getMonthName ( final Date date ) {
+        return Month.of( date.getMonth() + 1 );
+    }
+
+    public long getTimeDifference (
+            final Instant instant,
+            final int integer
+    ) {
+        return switch ( integer ) {
             case 1 -> Math.abs( Duration.between( Instant.now(), instant ).toHours() );
             case 2 -> Math.abs( Duration.between( Instant.now(), instant ).toMinutes() );
-            default -> Math.abs( Duration.between( Instant.now(), instant ).toSeconds() ); };
+            default -> Math.abs( Duration.between( Instant.now(), instant ).toSeconds() );
+        };
+    }
+
+    /*
+    проверяем что патрульный добрался до пункта назначения менее чем за 24 часа
+    */
+    protected boolean checkPatrulCameInTime ( final Date date ) {
+        return Math.abs( this.getTimeDifference( date.toInstant(), 1 ) ) >= 24;
+    }
 }

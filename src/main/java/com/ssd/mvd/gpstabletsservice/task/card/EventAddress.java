@@ -14,9 +14,9 @@ public class EventAddress {
 	private String house;
 	private String street;
 
-	private Integer sRegionId;
-	private Integer sOblastiId;
-	private Integer sMahallyaId;
-	private Integer sCountriesId;
-	private Integer sSettlementId;
+	private int sRegionId;
+	private int sOblastiId;
+	private int sMahallyaId;
+	private int sCountriesId;
+	private int sSettlementId;
 }

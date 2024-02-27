@@ -2,7 +2,9 @@ package com.ssd.mvd.gpstabletsservice.entity.notifications;
 
 import java.util.Date;
 import java.util.UUID;
+
 import com.datastax.driver.core.Row;
+import java.util.function.BiFunction;
 
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
@@ -18,39 +20,312 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataI
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEvent;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
-@lombok.Data
-public final class Notification {
-    private String id; // id of any task
-    private String type; // might be from 102 or Camera
-    private String title; // description of Patrul action
+public final class Notification extends DataValidateInspector {
+    public String getId() {
+        return this.id;
+    }
+
+    public void setId ( final String id ) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public void setType ( final String type ) {
+        this.type = type;
+    }
+
+    public String getTitle() {
+        return this.title;
+    }
+
+    public void setTitle ( final String title ) {
+        this.title = title;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress ( final String address ) {
+        this.address = address;
+    }
+
+    public String getCarNumber() {
+        return this.carNumber;
+    }
+
+    public void setCarNumber ( final String carNumber ) {
+        this.carNumber = carNumber;
+    }
+
+    public String getPoliceType() {
+        return this.policeType;
+    }
+
+    public void setPoliceType ( final String policeType ) {
+        this.policeType = policeType;
+    }
+
+    public String getNsfOfPatrul() {
+        return this.nsfOfPatrul;
+    }
+
+    public void setNsfOfPatrul ( final String nsfOfPatrul ) {
+        this.nsfOfPatrul = nsfOfPatrul;
+    }
+
+    public String getPassportSeries() {
+        return this.passportSeries;
+    }
+
+    public void setPassportSeries ( final String passportSeries ) {
+        this.passportSeries = passportSeries;
+    }
+
+    public void setLatitudeOfTask ( final Double latitudeOfTask ) {
+        this.latitudeOfTask = latitudeOfTask;
+    }
+
+    public double getLongitudeOfTask() {
+        return this.longitudeOfTask;
+    }
+
+    public void setLongitudeOfTask ( final double longitudeOfTask ) {
+        this.longitudeOfTask = longitudeOfTask;
+    }
+
+    public UUID getUuid() {
+        return this.uuid;
+    }
+
+    public void setUuid ( final UUID uuid ) {
+        this.uuid = uuid;
+    }
+
+    public Status getStatus() {
+        return this.status;
+    }
+
+    public void setStatus ( final Status status ) {
+        this.status = status;
+    }
+
+    public Status getTaskStatus() {
+        return this.taskStatus;
+    }
+
+    public void setTaskStatus ( final Status taskStatus ) {
+        this.taskStatus = taskStatus;
+    }
+
+    public void setWasRead ( final boolean wasRead ) {
+        this.wasRead = wasRead;
+    }
+
+    public TaskTypes getTaskTypes() {
+        return this.taskTypes;
+    }
+
+    public void setTaskTypes ( final TaskTypes taskTypes ) {
+        this.taskTypes = taskTypes;
+    }
+
+    public Date getNotificationWasCreated() {
+        return this.notificationWasCreated;
+    }
+
+    public void setNotificationWasCreated ( final Date notificationWasCreated ) {
+        this.notificationWasCreated = notificationWasCreated;
+    }
+
+    // id задачи
+    private String id;
+    // тип задачи
+    private String type;
+    // оглавление уведомления
+    private String title;
     private String address;
     private String carNumber;
     private String policeType;
     private String nsfOfPatrul;
     private String passportSeries;
 
-    private Double latitudeOfTask;
-    private Double longitudeOfTask;
+    private double latitudeOfTask;
+    private double longitudeOfTask;
 
     private UUID uuid;
 
     private Status status;
     private Status taskStatus;
 
-    private Boolean wasRead;
+    // показывает прочитано ли уведомление
+    private boolean wasRead;
     private TaskTypes taskTypes;
-    private Date notificationWasCreated; // the date when this current notification was created
+    // дата создания уведомления
+    private Date notificationWasCreated;
+
+    /*
+    в зависимости от статуса генерирует различное сообщения для уведомления
+    */
+    private final BiFunction< Status, Patrul, String > generateAndSaveMessage = ( status, patrul ) ->
+        switch ( status ) {
+            case ACCEPTED -> String.join(
+                    " ",
+                    patrul.getPatrulFIOData().getName(),
+                            status.name(),
+                            "his task:",
+                            patrul.getPatrulTaskInfo().getTaskId(),
+                            patrul.getPatrulTaskInfo().getTaskTypes().name(),
+                            "at:",
+                    super.newDate().toString()
+            );
+
+            case ARRIVED -> String.join(
+                    " ",
+                    patrul.getPatrulFIOData().getName(),
+                            status.name(),
+                            patrul.getPatrulTaskInfo().getTaskTypes().name(),
+                            "task location at:",
+                    super.newDate().toString()
+            );
+
+            case ATTACHED -> String.join(
+                    " ",
+                    patrul.getPatrulFIOData().getName(),
+                            "got new task:",
+                            patrul.getPatrulTaskInfo().getTaskId(),
+                            patrul.getPatrulTaskInfo().getTaskTypes().name()
+            );
+
+            case FINISHED -> String.join(
+                    " ",
+                    patrul.getPatrulFIOData().getName(),
+                    "completed his task at:",
+                    super.newDate().toString()
+            );
+
+            default -> String.join(
+                    " ",
+                    patrul.getPatrulFIOData().getName(),
+                    "has been canceled from task at:",
+                    super.newDate().toString()
+            );
+    };
 
     private void save ( final DataInfo dataInfo ) {
-        if (  DataValidateInspector
-                .getInstance()
-                .checkRequest
-                .test( dataInfo, 9 ) ) {
+        if (  super.objectIsNotNull( dataInfo.getCadaster() ) ) {
             this.setLongitudeOfTask( dataInfo.getCadaster().getLongitude() );
             this.setLatitudeOfTask( dataInfo.getCadaster().getLatitude() );
-            this.setAddress( dataInfo.getCadaster().getAddress() ); } }
+            this.setAddress( dataInfo.getCadaster().getAddress() );
+        }
+    }
 
-    public Notification ( final Row row ) {
+    private void save ( final Patrul patrul ) {
+        this.setPoliceType( patrul.getPoliceType() );
+        this.setPassportSeries( patrul.getPassportNumber() );
+        this.setCarNumber( patrul.getPatrulCarInfo().getCarNumber() );
+        this.setTaskTypes( patrul.getPatrulTaskInfo().getTaskTypes() );
+        this.setNsfOfPatrul( patrul.getPatrulFIOData().getSurnameNameFatherName() );
+    }
+
+    private void save ( final Card card ) {
+        this.setLatitudeOfTask( card.getLatitude() );
+        this.setLongitudeOfTask( card.getLongitude() );
+
+        this.setTaskStatus( card.getTaskCommonParams().getStatus() );
+        this.setId( card.getTaskCommonParams().getUuid().toString() );
+
+        this.setAddress(
+                super.objectIsNotNull( card.getAddress() )
+                ? card.getAddress()
+                : Errors.DATA_NOT_FOUND.name() );
+    }
+
+    private void save ( final EventCar eventCar ) {
+        this.setTaskStatus( eventCar.getTaskCommonParams().getStatus() );
+        this.setId( eventCar.getTaskCommonParams().getUuid().toString() );
+
+        this.setLatitudeOfTask( eventCar.getDataInfo().getCadaster().getLatitude() );
+        this.setLongitudeOfTask( eventCar.getDataInfo().getCadaster().getLongitude() );
+        this.setAddress(
+                super.objectIsNotNull( eventCar.getDataInfo().getCadaster().getAddress() )
+                ? eventCar.getDataInfo().getCadaster().getAddress()
+                : Errors.DATA_NOT_FOUND.name() );
+    }
+
+    private void save ( final EventFace eventFace ) {
+        this.setLatitudeOfTask( eventFace.getLatitude() );
+        this.setLongitudeOfTask( eventFace.getLongitude() );
+
+        this.setTaskStatus( eventFace.getTaskCommonParams().getStatus() );
+        this.setId( eventFace.getTaskCommonParams().getUuid().toString() );
+
+        this.setAddress(
+                super.objectIsNotNull( eventFace.getAddress() )
+                ? eventFace.getAddress()
+                : Errors.DATA_NOT_FOUND.name() );
+    }
+
+    private void save ( final EventBody eventBody ) {
+        this.setLatitudeOfTask( eventBody.getLatitude() );
+        this.setLongitudeOfTask( eventBody.getLongitude() );
+
+        this.setTaskStatus( eventBody.getTaskCommonParams().getStatus() );
+        this.setId( eventBody.getTaskCommonParams().getUuid().toString() );
+
+        this.setAddress(
+                super.objectIsNotNull( eventBody.getAddress() )
+                ? eventBody.getAddress()
+                : Errors.DATA_NOT_FOUND.name() );
+    }
+
+    private void save ( final CarEvent carEvent ) {
+        this.save( carEvent.getDataInfo() );
+        this.setTaskStatus( carEvent.getTaskCommonParams().getStatus() );
+        this.setId( carEvent.getTaskCommonParams().getUuid().toString() );
+    }
+
+    private void save ( final FaceEvent faceEvent ) {
+        this.save( faceEvent.getDataInfo() );
+        this.setTaskStatus( faceEvent.getTaskCommonParams().getStatus() );
+        this.setId( faceEvent.getTaskCommonParams().getUuid().toString() );
+    }
+
+    private void save ( final SelfEmploymentTask selfEmploymentTask ) {
+        this.setLatitudeOfTask( selfEmploymentTask.getLatOfAccident() );
+        this.setLongitudeOfTask( selfEmploymentTask.getLanOfAccident() );
+
+        this.setTaskStatus( selfEmploymentTask.getTaskCommonParams().getStatus() );
+        this.setId( selfEmploymentTask.getTaskCommonParams().getUuid().toString() );
+
+        this.setAddress(
+                super.objectIsNotNull( selfEmploymentTask.getAddress() )
+                        ? selfEmploymentTask.getAddress()
+                        : Errors.DATA_NOT_FOUND.name()
+        );
+    }
+
+    public static Notification generate (
+            final Patrul patrul,
+            final Status status,
+            final Object task,
+            final TaskTypes taskTypes ) {
+        return new Notification(
+                patrul,
+                status,
+                task,
+                taskTypes
+        );
+    }
+
+    public static Notification generate ( final Row row ) {
+        return new Notification( row );
+    }
+
+    private Notification ( final Row row ) {
         this.setId( row.getString( "id" ) );
         this.setType( row.getString( "type" ) );
         this.setTitle( row.getString( "title" ) );
@@ -66,97 +341,40 @@ public final class Notification {
         this.setUuid( row.getUUID( "uuid" ) );
         this.setWasRead( row.getBool( "wasRead" ) );
         this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-        this.setTaskStatus( DataValidateInspector
-                .getInstance()
-                .checkParam
-                .test( row.getString( "taskStatus" ) )
+        this.setTaskStatus( super.objectIsNotNull( row.getString( "taskStatus" ) )
                 ? Status.valueOf( row.getString( "taskStatus" ) )
                 : Status.CREATED );
         this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
-        this.setNotificationWasCreated( row.getTimestamp( "notificationWasCreated" ) ); }
+        this.setNotificationWasCreated( row.getTimestamp( "notificationWasCreated" ) );
+    }
 
-    public Notification ( final Patrul patrul,
-                          final Status status,
-                          final Object task,
-                          final String text,
-                          final TaskTypes taskTypes ) {
-        this.setTitle( text );
+    private Notification (
+            final Patrul patrul,
+            final Status status,
+            final Object task,
+            final TaskTypes taskTypes ) {
+        // сохраняем данные патрульного
+        this.save( patrul );
         this.setStatus( status );
         this.setType( taskTypes.name() );
 
-        this.setCarNumber( patrul.getCarNumber() );
-        this.setTaskTypes( patrul.getTaskTypes() );
-        this.setPoliceType( patrul.getPoliceType() );
-        this.setPassportSeries( patrul.getPassportNumber() );
-        this.setNsfOfPatrul( patrul.getSurnameNameFatherName() );
+        // составляем сообщение для уведомления
+        this.setTitle( this.generateAndSaveMessage.apply( status, patrul ) );
 
         switch ( taskTypes ) {
-            case CARD_102 -> {
-                this.setTaskStatus( ( (Card) task ).getStatus() );
-                this.setId( ( (Card) task ).getUUID().toString() );
-                this.setLatitudeOfTask( ( (Card) task ).getLatitude() );
-                this.setLongitudeOfTask( ( (Card) task ).getLongitude() );
-                this.setAddress( DataValidateInspector
-                        .getInstance()
-                        .checkParam
-                        .test( ( (Card) task ).getAddress() )
-                        ? ( (Card) task ).getAddress()
-                        : Errors.DATA_NOT_FOUND.name() ); }
+            case CARD_102 -> this.save( ( Card ) task );
 
-            case FIND_FACE_EVENT_CAR -> {
-                this.setTaskStatus( ( (EventCar) task ).getStatus() );
-                this.setId( ( (EventCar) task ).getUUID().toString() );
-                this.setLatitudeOfTask( ( (EventCar) task ).getDataInfo().getCadaster().getLatitude() );
-                this.setLongitudeOfTask( ( (EventCar) task ).getDataInfo().getCadaster().getLongitude() );
-                this.setAddress( DataValidateInspector
-                        .getInstance()
-                        .checkParam
-                        .test( ( (EventCar) task ).getDataInfo().getCadaster().getAddress() )
-                        ? ( (EventCar) task ).getDataInfo().getCadaster().getAddress()
-                        : Errors.DATA_NOT_FOUND.name() ); }
-            case FIND_FACE_EVENT_FACE -> {
-                this.setTaskStatus( ( (EventFace) task ).getStatus() );
-                this.setId( ( (EventFace) task ).getUUID().toString() );
-                this.setLatitudeOfTask( ( (EventFace) task ).getLatitude() );
-                this.setLongitudeOfTask( ( (EventFace) task ).getLongitude() );
-                this.setAddress( DataValidateInspector
-                        .getInstance()
-                        .checkParam
-                        .test( ( (EventFace) task ).getAddress() )
-                        ? ( (EventFace) task ).getAddress()
-                        : Errors.DATA_NOT_FOUND.name() ); }
-            case FIND_FACE_EVENT_BODY -> {
-                this.setTaskStatus( ( (EventBody) task ).getStatus() );
-                this.setId( ( (EventBody) task ).getUUID().toString() );
-                this.setLatitudeOfTask( ( (EventBody) task ).getLatitude() );
-                this.setLongitudeOfTask( ( (EventBody) task ).getLongitude() );
-                this.setAddress( DataValidateInspector
-                        .getInstance()
-                        .checkParam
-                        .test( ( (EventBody) task ).getAddress() )
-                        ? ( (EventBody) task ).getAddress()
-                        : Errors.DATA_NOT_FOUND.name() ); }
+            case FIND_FACE_EVENT_CAR -> this.save( (EventCar) task );
 
-            case FIND_FACE_CAR -> {
-                this.save( ( (CarEvent) task ).getDataInfo() );
-                this.setTaskStatus( ( (CarEvent) task ).getStatus() );
-                this.setId( ( (CarEvent) task ).getUUID().toString() ); }
-            case FIND_FACE_PERSON -> {
-                this.save( ( (FaceEvent) task ).getDataInfo() );
-                this.setTaskStatus( ( (FaceEvent) task ).getStatus() );
-                this.setId( ( (FaceEvent) task ).getUUID().toString() ); }
+            case FIND_FACE_EVENT_FACE -> this.save( (EventFace) task );
 
-            default -> {
-                this.setId( ( (SelfEmploymentTask) task ).getUuid().toString() );
-                this.setTaskStatus( ( (SelfEmploymentTask) task ).getTaskStatus() );
-                this.setLatitudeOfTask( ( (SelfEmploymentTask) task ).getLatOfAccident() );
-                this.setLongitudeOfTask( ( (SelfEmploymentTask) task ).getLanOfAccident() );
+            case FIND_FACE_EVENT_BODY -> this.save( (EventBody) task );
 
-                this.setAddress( DataValidateInspector
-                        .getInstance()
-                        .checkParam
-                        .test( ( (SelfEmploymentTask) task ).getAddress() )
-                        ? ( (SelfEmploymentTask) task ).getAddress()
-                        : Errors.DATA_NOT_FOUND.name() ); } } }
+            case FIND_FACE_CAR -> this.save( (CarEvent) task );
 
+            case FIND_FACE_PERSON -> this.save( (FaceEvent) task );
+
+            default -> this.save( (SelfEmploymentTask) task );
+        }
+    }
 }

@@ -19,37 +19,45 @@ import java.util.UUID;
 @RestController
 public final class NotificationController extends LogInspector {
     @MessageMapping ( value = "getAllNotifications" )
-    public Flux< Notification > getAllNotifications () { return CassandraDataControl
+    public Flux< Notification > getAllNotifications () {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.NOTIFICATION )
-            .map( Notification::new )
+            .map( Notification::generate )
             .sequential()
             .publishOn( Schedulers.single() )
             .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "getUnreadNotifications" )
-    public Flux< Notification > getUnreadNotifications () { return CassandraDataControl
+    public Flux< Notification > getUnreadNotifications () {
+        return CassandraDataControl
             .getInstance()
-            .getGetUnreadNotifications()
+            .getUnreadNotifications
             .get()
             .sort( Comparator.comparing( Notification::getNotificationWasCreated ).reversed() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "setAsRead" )
-    public Mono< ApiResponseModel > setAsRead ( final String id ) { return CassandraDataControl
+    public Mono< ApiResponseModel > setAsRead ( final String id ) {
+        return CassandraDataControl
             .getInstance()
-            .getSetNotificationAsRead()
+            .setNotificationAsRead
             .apply( UUID.fromString( id ) )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "getUnreadNotificationQuantity" )
-    public Mono< Long > getUnreadNotificationQuantity () { return CassandraDataControl
-            .getInstance()
-            .getGetUnreadNotificationQuantity()
-            .get()
-            .onErrorContinue( super::logging )
-            .onErrorReturn( -1L ); }
+    public Mono< Long > getUnreadNotificationQuantity () {
+        return CassandraDataControl
+                .getInstance()
+                .getUnreadNotificationQuantity
+                .get()
+                .onErrorContinue( super::logging )
+                .onErrorReturn( -1L );
+    }
 }

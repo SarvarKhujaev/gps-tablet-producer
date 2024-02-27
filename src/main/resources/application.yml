@@ -1,12 +1,12 @@
 server:
-    port: ${SERVER_PORT}
-    address: ${SERVER_ADDR}
+    port: ${SERVER_PORT:9090}
+    address: ${SERVER_ADDR:localhost}
 
 spring:
     data:
         cassandra:
             port: ${CASSANDRA_PORT:9942}
-            keyspace-name: ${KEYSPACE_NAME}
+            keyspace-name: ${KEYSPACE_NAME:SSD.TABLETS}
             contact-points: ${CASSANDRA_HOST:10.254.5.1, 10.254.5.2, 10.254.5.3}
             local-datacenter: ${CASSANDRA_DC:datacenter1}
             schema-action: CREATE_IF_NOT_EXISTS
@@ -21,8 +21,8 @@ spring:
 
     rsocket:
         server:
-            port: ${RSOCKET_PORT}
-            address: ${SERVER_ADDR}
+            port: ${RSOCKET_PORT:6060}
+            address: ${SERVER_ADDR:localhost}
 
 variables:
     MINIO_VARIABLES:
@@ -32,8 +32,8 @@ variables:
         BUCKET_NAME: ${BUCKET_NAME:miniocontroller}
 
     KAFKA_VARIABLES:
-        KAFKA_BROKER : ${KAFKA_BROKER:10.254.6.1:9092, 10.254.6.2:9092, 10.254.6.3:9092}
-        GROUP_ID_FOR_KAFKA : ${GROUP_ID_FOR_KAFKA:SSD.GPS.TABLETS_DEV}
+        KAFKA_BROKER : ${KAFKA_BROKER:localhost:9092}
+        GROUP_ID_FOR_KAFKA : ${GROUP_ID_FOR_KAFKA:SSD.GPS.TABLETS_DEV_TEST}
 
         KAFKA_TOPICS:
             SOS_TOPIC: ${SOS_TOPIC:SOS_TOPIC_DEV}
@@ -43,7 +43,7 @@ variables:
             SOS_TOPIC_FOR_ANDROID_NOTIFICATION: ${SOS_TOPIC_FOR_ANDROID_NOTIFICATION:SOS_TOPIC_FOR_ANDROID_NOTIFICATION_DEV}
 
     CASSANDRA_VARIABLES:
-        CASSANDRA_PORT: ${CASSANDRA_PORT:9942}
+        CASSANDRA_PORT: ${CASSANDRA_PORT:9042}
         CASSANDRA_HOST: ${CASSANDRA_HOST:10.254.5.1, 10.254.5.2, 10.254.5.3}
 
         CASSANDRA_MAX_REQ: ${CASSANDRA_MAX_REQ:1000}

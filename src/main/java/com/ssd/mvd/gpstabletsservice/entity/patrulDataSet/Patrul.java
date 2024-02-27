@@ -2,10 +2,7 @@ package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
-import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
-import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.constants.Status;
 
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
@@ -13,249 +10,323 @@ import com.datastax.driver.core.Row;
 import java.time.Duration;
 import java.util.*;
 
-@lombok.Data
-@lombok.NoArgsConstructor
-@lombok.AllArgsConstructor
-public final class Patrul {
-    private Date taskDate; // for registration of exact time when patrul started to deal with task
-    private Date lastActiveDate; // shows when user was online lastly
-    private Date startedToWorkDate; // the time
-    private Date dateOfRegistration;
+public final class Patrul extends DataValidateInspector {
+    public UUID getUuid () {
+        return this.uuid;
+    }
 
-    private Double distance;
-    private Double latitude; // the current location of the user
-    private Double longitude; // the current location of the user
-    private Double latitudeOfTask;
-    private Double longitudeOfTask;
+    public void setUuid ( final UUID uuid ) {
+        this.uuid = uuid;
+    }
 
-    private UUID uuid; // own id of the patrul
-    private UUID organ; // choosing from dictionary
-    private UUID sos_id; // choosing from dictionary
-    private UUID uuidOfEscort; // UUID of the Escort which this car is linked to
-    private UUID uuidForPatrulCar; // choosing from dictionary
-    private UUID uuidForEscortCar; // choosing from dictionary
+    public long getTotalActivityTime() {
+        return this.totalActivityTime;
+    }
 
-    private Long regionId;
-    private Long mahallaId;
-    private Long districtId; // choosing from dictionary
-    private Long totalActivityTime;
+    public void setTotalActivityTime( final long totalActivityTime ) {
+        this.totalActivityTime = totalActivityTime;
+    }
 
-    private Integer batteryLevel;
-    private Boolean inPolygon;
-    private Boolean tuplePermission; // показывает можно ли патрульному участвовать в кортеже
+    public boolean getInPolygon() {
+        return this.inPolygon;
+    }
 
-    private String name;
+    public void setInPolygon( final boolean inPolygon ) {
+        this.inPolygon = inPolygon;
+    }
+
+    public boolean getTuplePermission() {
+        return this.tuplePermission;
+    }
+
+    public void setTuplePermission( final boolean tuplePermission ) {
+        this.tuplePermission = tuplePermission;
+    }
+
+    public String getRank() {
+        return this.rank;
+    }
+
+    public void setRank( final String rank ) {
+        this.rank = rank;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public void setEmail( final String email ) {
+        this.email = email;
+    }
+
+    public String getOrganName() {
+        return this.organName;
+    }
+
+    public void setOrganName( final String organName ) {
+        this.organName = organName;
+    }
+
+    public String getPoliceType() {
+        return this.policeType;
+    }
+
+    public void setPoliceType( final String policeType ) {
+        this.policeType = policeType;
+    }
+
+    public String getDateOfBirth() {
+        return this.dateOfBirth;
+    }
+
+    public void setDateOfBirth( final String dateOfBirth ) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getPassportNumber() {
+        return this.passportNumber;
+    }
+
+    public void setPassportNumber( final String passportNumber ) {
+        this.passportNumber = passportNumber;
+    }
+
+    public String getPatrulImageLink() {
+        return this.patrulImageLink;
+    }
+
+    public void setPatrulImageLink( final String patrulImageLink ) {
+        this.patrulImageLink = patrulImageLink;
+    }
+
+    public PatrulFIOData getPatrulFIOData() {
+        return this.patrulFIOData;
+    }
+
+    public void setPatrulFIOData( final PatrulFIOData patrulFIOData ) {
+        this.patrulFIOData = patrulFIOData;
+    }
+
+    public PatrulCarInfo getPatrulCarInfo() {
+        return this.patrulCarInfo;
+    }
+
+    public void setPatrulCarInfo( final PatrulCarInfo patrulCarInfo ) {
+        this.patrulCarInfo = patrulCarInfo;
+    }
+
+    public PatrulDateData getPatrulDateData() {
+        return this.patrulDateData;
+    }
+
+    public void setPatrulDateData( final PatrulDateData patrulDateData ) {
+        this.patrulDateData = patrulDateData;
+    }
+
+    public PatrulAuthData getPatrulAuthData() {
+        return this.patrulAuthData;
+    }
+
+    public void setPatrulAuthData( final PatrulAuthData patrulAuthData ) {
+        this.patrulAuthData = patrulAuthData;
+    }
+
+    public PatrulTaskInfo getPatrulTaskInfo() {
+        return this.patrulTaskInfo;
+    }
+
+    public void setPatrulTaskInfo( final PatrulTaskInfo patrulTaskInfo ) {
+        this.patrulTaskInfo = patrulTaskInfo;
+    }
+
+    public PatrulTokenInfo getPatrulTokenInfo() {
+        return this.patrulTokenInfo;
+    }
+
+    public void setPatrulTokenInfo( final PatrulTokenInfo patrulTokenInfo ) {
+        this.patrulTokenInfo = patrulTokenInfo;
+    }
+
+    public PatrulRegionData getPatrulRegionData() {
+        return this.patrulRegionData;
+    }
+
+    public void setPatrulRegionData( final PatrulRegionData patrulRegionData ) {
+        this.patrulRegionData = patrulRegionData;
+    }
+
+    public PatrulLocationData getPatrulLocationData() {
+        return this.patrulLocationData;
+    }
+
+    public void setPatrulLocationData( final PatrulLocationData patrulLocationData ) {
+        this.patrulLocationData = patrulLocationData;
+    }
+
+    public PatrulUniqueValues getPatrulUniqueValues() {
+        return this.patrulUniqueValues;
+    }
+
+    public void setPatrulUniqueValues( final PatrulUniqueValues patrulUniqueValues ) {
+        this.patrulUniqueValues = patrulUniqueValues;
+    }
+
+    public PatrulMobileAppInfo getPatrulMobileAppInfo() {
+        return this.patrulMobileAppInfo;
+    }
+
+    public void setPatrulMobileAppInfo(PatrulMobileAppInfo patrulMobileAppInfo) {
+        this.patrulMobileAppInfo = patrulMobileAppInfo;
+    }
+
+    // уникальное ID патрульного
+    private UUID uuid;
+
+    private long totalActivityTime;
+
+    private boolean inPolygon;
+    private boolean tuplePermission; // показывает можно ли патрульному участвовать в кортеже
+
     private String rank;
     private String email;
-    private String login;
-    private String taskId;
-    private String carType; // модель машины
-    private String surname;
-    private String password;
-    private String carNumber;
     private String organName;
-    private String regionName;
     private String policeType; // choosing from dictionary
-    private String fatherName;
     private String dateOfBirth;
-    private String phoneNumber;
-    private String districtName;
-    private String specialToken;
-    private String tokenForLogin;
-    private String simCardNumber;
     private String passportNumber;
     private String patrulImageLink;
-    private String surnameNameFatherName; // Ф.И.О
 
-    private Status status; // busy, free by default, available or not available
-    private TaskTypes taskTypes; // task type which was attached to the current patrul
-    private Map< String, String > listOfTasks = new HashMap<>(); // the list which will store ids of all tasks which have been completed by Patrul
+    private PatrulFIOData patrulFIOData;
+    private PatrulCarInfo patrulCarInfo;
+    private PatrulDateData patrulDateData;
+    private PatrulAuthData patrulAuthData;
+    private PatrulTaskInfo patrulTaskInfo;
+    private PatrulTokenInfo patrulTokenInfo;
+    private PatrulRegionData patrulRegionData;
+    private PatrulLocationData patrulLocationData;
+    private PatrulUniqueValues patrulUniqueValues;
+    private PatrulMobileAppInfo patrulMobileAppInfo;
 
-    public UUID getUuid () { return this.uuid != null ? uuid : ( this.uuid = UUID.randomUUID() ); }
+    public boolean check () {
+        return switch ( this.getPoliceType() ) {
+            case "TTG", "PI" -> Duration.between(
+                    super.newDate().toInstant(),
+                    this.getPatrulDateData().getTaskDate().toInstant()
+            ).toMinutes() <= 30;
 
-    public Boolean check () { return switch ( this.getPoliceType() ) {
-        case "TTG", "PI" -> Duration.between( new Date().toInstant(), this.getTaskDate().toInstant() ).toMinutes() <= 30;
-        default -> TimeInspector
-                .getInspector()
-                .getCheckDate()
-                .test( this.getTaskDate().toInstant() ); }; }
+            default -> super.checkDate( this.getPatrulDateData().getTaskDate().toInstant() );
+        };
+    }
 
-    public String getSurnameNameFatherName () {
-        return Optional.ofNullable( this.surnameNameFatherName )
-                .filter( s -> this.surnameNameFatherName != null
-                        && this.surnameNameFatherName.contains( "NULL" )
-                        && this.surnameNameFatherName.contains( "null" ) )
-                .orElse( ( this.surnameNameFatherName = DataValidateInspector
-                        .getInstance()
-                        .concatNames
-                        .apply( this, 5 ) ) ); }
-
-    // освобождаем патрульного от таска
-    public void free () {
-        this.setTaskId( null );
-        this.setStatus( Status.FREE );
-        this.setTaskTypes( TaskTypes.FREE ); }
+    /*
+        отвязываем патрульного от Эскорта
+    */
+    public void linkWithEscortCar (
+            final UUID uuidOfEscort,
+            final UUID uuidForEscortCar
+    ) {
+        this.getPatrulUniqueValues().setUuidForEscortCar( uuidForEscortCar );
+        this.getPatrulUniqueValues().setUuidOfEscort( uuidOfEscort );
+    }
 
     // присваиваем изначальные значения для нового патрульного
-    public void begin () {
-        this.setStatus( FREE );
+    public void setDefaultValuesInTheBeginning () {
         this.setInPolygon( false );
         this.setTotalActivityTime( 0L );
-        this.setTaskTypes( TaskTypes.FREE );
-        this.setListOfTasks( new HashMap<>() ); }
+        this.setUuid( UUID.randomUUID() );
+        this.setPatrulTokenInfo( PatrulTokenInfo.empty() );
+        this.setPatrulLocationData( PatrulLocationData.empty() );
+        this.setPatrulUniqueValues( PatrulUniqueValues.empty() );
+        this.setPatrulMobileAppInfo( PatrulMobileAppInfo.empty() );
+        this.getPatrulAuthData().setInitialPasswordAndLogin( this );
+        this.setPatrulTaskInfo( PatrulTaskInfo.generateWithInitialValues() );
+        this.setPatrulDateData( PatrulDateData.generateWithInitialValues() );
+        this.getPatrulFIOData().setSurnameNameFatherName( this.getPatrulFIOData().getSurnameNameFatherName() );
+    }
 
-    public void update ( final Integer value ) {
-        final Date date = TimeInspector.getInspector().getGetNewDate().get();
-        switch ( value ) {
-            case 2 -> {
-                this.setTaskDate( date );
-                this.setLastActiveDate( date );
-                this.setStartedToWorkDate( date );
-                this.setDateOfRegistration( date ); }
-            case 1 -> this.setTaskDate( date );
-            default -> this.setStartedToWorkDate( date ); } }
-
-    public void update ( final TaskTypes taskTypes ) { this.getListOfTasks().putIfAbsent( this.getTaskId(), taskTypes.name() ); }
+    /*
+    когда патрульный выходит из системы, то обнуляем его данные
+    о сим карте и токен
+    */
+    public void update () {
+        this.getPatrulTokenInfo().setTokenForLogin( null );
+        this.getPatrulMobileAppInfo().setSimCardNumber( null );
+    }
 
     public void update ( final String simCardNumber ) {
-        this.setSimCardNumber( simCardNumber );
-        this.setTokenForLogin ( DataValidateInspector
-                .getInstance()
-                .concatNames
-                .apply( this, 4 ) ); }
+        this.getPatrulMobileAppInfo().setSimCardNumber( simCardNumber );
+        this.getPatrulTokenInfo().setTokenForLogin ( super.concatNames( this ) );
+    }
 
-    public void update ( final TaskTypes taskTypes,
-                         final Double latitudeOfTask,
-                         final Double longitudeOfTask,
-                         final String taskId ) {
-        this.setLongitudeOfTask( longitudeOfTask );
-        this.setLatitudeOfTask( latitudeOfTask );
-        this.setTaskTypes( taskTypes );
-        this.setTaskId( taskId ); }
+    public void update (
+            final TaskTypes taskTypes,
+            final Double latitudeOfTask,
+            final Double longitudeOfTask,
+            final String taskId ) {
+        this.getPatrulTaskInfo().setTaskId( taskId );
+        this.getPatrulTaskInfo().setTaskTypes( taskTypes );
+        this.getPatrulLocationData().setLatitudeOfTask( latitudeOfTask );
+        this.getPatrulLocationData().setLongitudeOfTask( longitudeOfTask );
+    }
 
-    public void update ( final TaskTypes taskTypes,
-                         final DataInfo dataInfo,
-                         final String taskId ) {
-        if ( DataValidateInspector
-                .getInstance()
-                .checkParam
-                .test( dataInfo )
-                && DataValidateInspector
-                .getInstance()
-                .checkParam
-                .test( dataInfo.getCadaster() ) ) {
-            this.setLongitudeOfTask( dataInfo.getCadaster().getLongitude() );
-            this.setLatitudeOfTask( dataInfo.getCadaster().getLatitude() ); }
-        this.setTaskTypes( taskTypes );
-        this.setTaskId( taskId ); }
+    public void update (
+            final TaskTypes taskTypes,
+            final DataInfo dataInfo,
+            final String taskId ) {
+        this.getPatrulTaskInfo().setTaskId( taskId );
+        this.getPatrulTaskInfo().setTaskTypes( taskTypes );
+        this.getPatrulLocationData().changeLocationFromCadastre( dataInfo );
+    }
 
-    public Patrul ( final Row row ) { Optional.ofNullable( row ).ifPresent( row1 -> {
-            this.setTaskDate( row.getTimestamp( "taskDate" ) );
-            this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
-            this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );
-            this.setDateOfRegistration( row.getTimestamp( "dateOfRegistration" ) );
-
-            this.setDistance( row.getDouble( "distance" ) );
-            this.setLatitude( row.getDouble( "latitude" ) );
-            this.setLongitude( row.getDouble( "longitude" ) );
-            this.setLatitudeOfTask( row.getDouble( "latitudeOfTask" ) );
-            this.setLongitudeOfTask( row.getDouble( "longitudeOfTask" ) );
-
+    public Patrul ( final Row row ) {
+        Optional.ofNullable( row ).ifPresent( row1 -> {
             this.setUuid( row.getUUID( "uuid" ) );
-            this.setOrgan( row.getUUID( "organ" ) );
-            this.setSos_id( row.getUUID( "sos_id" ) );
-            this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );
-            this.setUuidForPatrulCar( row.getUUID( "uuidForPatrulCar" ) );
-            this.setUuidForEscortCar( row.getUUID( "uuidForEscortCar" ) );
-
-            this.setRegionId( row.getLong( "regionId" ) );
-            this.setMahallaId( row.getLong( "mahallaId" ) );
-            this.setDistrictId( row.getLong( "districtId" ) );
+            this.setInPolygon( row.getBool( "inPolygon" ) );
+            this.setTuplePermission( row.getBool( "tuplePermission" ) );
             this.setTotalActivityTime( row.getLong( "totalActivityTime" ) );
 
-            this.setInPolygon( row.getBool( "inPolygon" ) );
-            this.setBatteryLevel( row.getInt( "batteryLevel" ) );
-            this.setTuplePermission( row.getBool( "tuplePermission" ) );
-
-            this.setName( row.getString( "name" ) );
             this.setRank( row.getString( "rank" ) );
             this.setEmail( row.getString( "email" ) );
-            this.setLogin( row.getString( "login" ) );
-            this.setTaskId( row.getString( "taskId" ) );
-            this.setCarType( row.getString( "carType" ) );
-            this.setSurname( row.getString( "surname" ) );
-            this.setPassword( row.getString( "password" ) );
-            this.setCarNumber( row.getString( "carNumber" ) );
             this.setOrganName( row.getString( "organName" ) );
-            this.setRegionName( row.getString( "regionName" ) );
             this.setPoliceType( row.getString( "policeType" ) );
-            this.setFatherName( row.getString( "fatherName" ) );
             this.setDateOfBirth( row.getString( "dateOfBirth" ) );
-            this.setPhoneNumber( row.getString( "phoneNumber" ) );
-            this.setDistrictName( row.getString( "districtName" ) );
-            this.setSpecialToken( row.getString( "specialToken" ) );
-            this.setTokenForLogin( row.getString( "tokenForLogin" ) );
-            this.setSimCardNumber( row.getString( "simCardNumber" ) );
             this.setPassportNumber( row.getString( "passportNumber" ) );
             this.setPatrulImageLink( row.getString( "patrulImageLink" ) );
-            this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) );
 
-            this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-            this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
-            this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); } ); }
+            this.setPatrulFIOData( PatrulFIOData.generate( row.getUDTValue( "patrulFIOData" ) ) );
+            this.setPatrulCarInfo( PatrulCarInfo.generate( row.getUDTValue( "patrulCarInfo" ) ) );
+            this.setPatrulDateData( PatrulDateData.generate( row.getUDTValue( "patrulDateData" ) ) );
+            this.setPatrulTaskInfo( PatrulTaskInfo.generate( row.getUDTValue( "patrulTaskInfo" ) ) );
+            this.setPatrulAuthData( PatrulAuthData.generate( row.getUDTValue( "patrulAuthData" ) ) );
+            this.setPatrulTokenInfo( PatrulTokenInfo.generate( row.getUDTValue( "patrulTokenInfo" ) ) );
+            this.setPatrulRegionData( PatrulRegionData.generate( row.getUDTValue( "patrulRegionData" ) ) );
+            this.setPatrulLocationData( PatrulLocationData.generate( row.getUDTValue( "patrulLocationData" ) ) );
+            this.setPatrulUniqueValues( PatrulUniqueValues.generate( row.getUDTValue( "patrulUniqueValues" ) ) );
+            this.setPatrulMobileAppInfo( PatrulMobileAppInfo.generate( row.getUDTValue( "patrulMobileAppInfo" ) ) );
+        } );
+    }
 
-    public Patrul ( final UDTValue row ) {
-        this.setTaskDate( row.getTimestamp( "taskDate" ) );
-        this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
-        this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );
-        this.setDateOfRegistration( row.getTimestamp( "dateOfRegistration" ) );
+    public Patrul ( final UDTValue udtValue ) {
+        this.setUuid( udtValue.getUUID( "uuid" ) );
+        this.setInPolygon( udtValue.getBool( "inPolygon" ) );
+        this.setTuplePermission( udtValue.getBool( "tuplePermission" ) );
+        this.setTotalActivityTime( udtValue.getLong( "totalActivityTime" ) );
 
-        this.setDistance( row.getDouble( "distance" ) );
-        this.setLatitude( row.getDouble( "latitude" ) );
-        this.setLongitude( row.getDouble( "longitude" ) );
-        this.setLatitudeOfTask( row.getDouble( "latitudeOfTask" ) );
-        this.setLongitudeOfTask( row.getDouble( "longitudeOfTask" ) );
+        this.setRank( udtValue.getString( "rank" ) );
+        this.setEmail( udtValue.getString( "email" ) );
+        this.setOrganName( udtValue.getString( "organName" ) );
+        this.setPoliceType( udtValue.getString( "policeType" ) );
+        this.setDateOfBirth( udtValue.getString( "dateOfBirth" ) );
+        this.setPassportNumber( udtValue.getString( "passportNumber" ) );
+        this.setPatrulImageLink( udtValue.getString( "patrulImageLink" ) );
 
-        this.setUuid( row.getUUID( "uuid" ) );
-        this.setOrgan( row.getUUID( "organ" ) );
-        this.setSos_id( row.getUUID( "sos_id" ) );
-        this.setUuidOfEscort( row.getUUID( "uuidOfEscort" ) );
-        this.setUuidForPatrulCar( row.getUUID( "uuidForPatrulCar" ) );
-        this.setUuidForEscortCar( row.getUUID( "uuidForEscortCar" ) );
-
-        this.setRegionId( row.getLong( "regionId" ) );
-        this.setMahallaId( row.getLong( "mahallaId" ) );
-        this.setDistrictId( row.getLong( "districtId" ) );
-        this.setTotalActivityTime( row.getLong( "totalActivityTime" ) );
-
-        this.setInPolygon( row.getBool( "inPolygon" ) );
-        this.setBatteryLevel( row.getInt( "batteryLevel" ) );
-        this.setTuplePermission( row.getBool( "tuplePermission" ) );
-
-        this.setName( row.getString( "name" ) );
-        this.setRank( row.getString( "rank" ) );
-        this.setEmail( row.getString( "email" ) );
-        this.setLogin( row.getString( "login" ) );
-        this.setTaskId( row.getString( "taskId" ) );
-        this.setCarType( row.getString( "carType" ) );
-        this.setSurname( row.getString( "surname" ) );
-        this.setPassword( row.getString( "password" ) );
-        this.setCarNumber( row.getString( "carNumber" ) );
-        this.setOrganName( row.getString( "organName" ) );
-        this.setRegionName( row.getString( "regionName" ) );
-        this.setPoliceType( row.getString( "policeType" ) );
-        this.setFatherName( row.getString( "fatherName" ) );
-        this.setDateOfBirth( row.getString( "dateOfBirth" ) );
-        this.setPhoneNumber( row.getString( "phoneNumber" ) );
-        this.setSpecialToken( row.getString( "specialToken" ) );
-        this.setDistrictName( row.getString( "districtName" ) );
-        this.setTokenForLogin( row.getString( "tokenForLogin" ) );
-        this.setSimCardNumber( row.getString( "simCardNumber" ) );
-        this.setPassportNumber( row.getString( "passportNumber" ) );
-        this.setPatrulImageLink( row.getString( "patrulImageLink" ) );
-        this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) );
-
-        this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-        this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
-        this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) ); }
+        this.setPatrulFIOData( PatrulFIOData.generate( udtValue ) );
+        this.setPatrulCarInfo( PatrulCarInfo.generate( udtValue ) );
+        this.setPatrulDateData( PatrulDateData.generate( udtValue ) );
+        this.setPatrulTaskInfo( PatrulTaskInfo.generate( udtValue ) );
+        this.setPatrulAuthData( PatrulAuthData.generate( udtValue ) );
+        this.setPatrulTokenInfo( PatrulTokenInfo.generate( udtValue ) );
+        this.setPatrulRegionData( PatrulRegionData.generate( udtValue ) );
+        this.setPatrulLocationData( PatrulLocationData.generate( udtValue ) );
+        this.setPatrulUniqueValues( PatrulUniqueValues.generate( udtValue ) );
+    }
 }

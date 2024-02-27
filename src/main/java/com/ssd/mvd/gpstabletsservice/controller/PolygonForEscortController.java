@@ -18,27 +18,33 @@ import reactor.core.publisher.Mono;
 public final class PolygonForEscortController extends LogInspector {
 
     @MessageMapping ( value = "getAllPolygonForEscort" )
-    public Flux< PolygonForEscort > getAllPolygonForEscort () { return CassandraDataControl
+    public Flux< PolygonForEscort > getAllPolygonForEscort () {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.ESCORT, CassandraTables.POLYGON_FOR_ESCORT )
             .map( PolygonForEscort::new )
             .sequential()
-            .publishOn( Schedulers.single() ); }
+            .publishOn( Schedulers.single() );
+    }
 
     @MessageMapping ( value = "getCurrentPolygonForEscort" )
-    public Mono< PolygonForEscort > getAllPolygonForEscort ( final String id ) { return CassandraDataControlForEscort
+    public Mono< PolygonForEscort > getAllPolygonForEscort ( final String id ) {
+        return CassandraDataControlForEscort
             .getInstance()
             .getGetCurrentPolygonForEscort()
-            .apply( id ); }
+            .apply( id );
+    }
 
     @MessageMapping ( value = "deletePolygonForEscort" )
-    public Mono< ApiResponseModel > deletePolygonForEscort ( final String id ) { return CassandraDataControlForEscort
+    public Mono< ApiResponseModel > deletePolygonForEscort ( final String id ) {
+        return CassandraDataControlForEscort
             .getInstance()
             .getDeletePolygonForEscort()
             .apply( id )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "updatePolygonForEscort" )
     public Mono< ApiResponseModel > updatePolygonForEscort ( final PolygonForEscort polygon ) {
@@ -48,7 +54,8 @@ public final class PolygonForEscortController extends LogInspector {
                 .getUpdatePolygonForEscort()
                 .apply( polygon )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "addNewPolygonForEscort" )
     public Mono< ApiResponseModel > addNewPolygonForEscort ( final PolygonForEscort polygon ) {
@@ -58,5 +65,6 @@ public final class PolygonForEscortController extends LogInspector {
                 .getSavePolygonForEscort()
                 .apply( polygon )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 }

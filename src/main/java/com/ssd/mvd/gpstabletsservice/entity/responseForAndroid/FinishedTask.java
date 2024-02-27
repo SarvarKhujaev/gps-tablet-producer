@@ -3,7 +3,6 @@ package com.ssd.mvd.gpstabletsservice.entity.responseForAndroid;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 
-@lombok.Data
 @lombok.Builder
 public final class FinishedTask {
     private String task;

@@ -18,44 +18,54 @@ import java.util.UUID;
 public final class PolygonController extends LogInspector {
 
     @MessageMapping( value = "deletePolygon" )
-    public Mono< ApiResponseModel > deletePolygon ( final String uuid ) { return CassandraDataControl
+    public Mono< ApiResponseModel > deletePolygon ( final String uuid ) {
+        return CassandraDataControl
             .getInstance()
             .delete( CassandraTables.POLYGON.name(),
                     "uuid",
                     uuid )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "addNewPolygon" )
-    public Mono< ApiResponseModel > addNewPolygon ( final Polygon polygon ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addNewPolygon ( final Polygon polygon ) {
+        return CassandraDataControl
             .getInstance()
-            .getSavePolygon()
+            .savePolygon
             .apply( polygon )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "updatePolygon" )
-    public Mono< ApiResponseModel > updatePolygon ( final Polygon polygon ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updatePolygon ( final Polygon polygon ) {
+        return CassandraDataControl
             .getInstance()
-            .getUpdatePolygon()
+            .updatePolygon
             .apply( polygon )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping( value = "getPolygonList" )
-    public Flux< Polygon > getPolygonList () { return CassandraDataControl
+    public Flux< Polygon > getPolygonList () {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.POLYGON )
             .map( Polygon::new )
             .sequential()
             .publishOn( Schedulers.single() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "getCurrentPolygon" )
-    public Mono< Polygon > getCurrentPolygon ( final UUID uuid ) { return CassandraDataControl
+    public Mono< Polygon > getCurrentPolygon ( final UUID uuid ) {
+        return CassandraDataControl
             .getInstance()
-            .getGetPolygonByUUID()
+            .getPolygonByUUID
             .apply( uuid )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 }

@@ -7,8 +7,8 @@ import java.util.UUID;
 import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
-import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
+import com.ssd.mvd.gpstabletsservice.inspectors.TaskCommonParams;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
@@ -18,14 +18,97 @@ import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.CarEv
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 
-@lombok.Data
-public final class ActiveTask {
-    private Double latitude;
-    private Double longitude;
+public final class ActiveTask extends DataValidateInspector {
+    public double getLatitude() {
+        return this.latitude;
+    }
 
-    private Integer region;
-    private Integer district;
-    private Integer countryside;
+    public void setLatitude( final double latitude ) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return this.longitude;
+    }
+
+    public void setLongitude( final double longitude ) {
+        this.longitude = longitude;
+    }
+
+    public void setRegion( final int region ) {
+        this.region = region;
+    }
+
+    public void setDistrict( final int district ) {
+        this.district = district;
+    }
+
+    public void setCountryside( final int countryside ) {
+        this.countryside = countryside;
+    }
+
+    public void setType( final String type ) {
+        this.type = type;
+    }
+
+    public void setTitle( final String title ) {
+        this.title = title;
+    }
+
+    public void setCardId( final String cardId ) {
+        this.cardId = cardId;
+    }
+
+    public String getTaskId() {
+        return this.taskId;
+    }
+
+    public void setTaskId( final String taskId ) {
+        this.taskId = taskId;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress( final String address ) {
+        this.address = address;
+    }
+
+    public void setDescription( final String description ) {
+        this.description = description;
+    }
+
+    public Date getCreatedDate() {
+        return this.createdDate;
+    }
+
+    public void setCreatedDate() {
+        this.createdDate = super.newDate();
+    }
+
+    public Status getStatus() {
+        return this.status;
+    }
+
+    public void setStatus( final Status status ) {
+        this.status = status;
+    }
+
+    public void setPatrulStatus( final Status patrulStatus ) {
+        this.patrulStatus = patrulStatus;
+    }
+
+    public void setPatrulList( final Map< UUID, Patrul > patrulList ) {
+        this.patrulList = patrulList;
+    }
+
+    private double latitude;
+    private double longitude;
+
+    private int region;
+    private int district;
+    private int countryside;
 
     private String type;
     private String title;
@@ -41,168 +124,127 @@ public final class ActiveTask {
 
     private Map< UUID, Patrul > patrulList;
 
+    private void save ( final Card card ) {
+        this.setAddress( card.getAddress() );
+        this.setLatitude( card.getLatitude() );
+        this.setDescription( card.getFabula() );
+        this.setLongitude( card.getLongitude() );
+        this.setRegion( card.getEventAddress().getSOblastiId() );
+        this.setDistrict( card.getEventAddress().getSRegionId() );
+        this.setCountryside( card.getEventAddress().getSMahallyaId() );
+    }
+
     private void save ( final DataInfo dataInfo ) {
-        if (  DataValidateInspector
-                .getInstance()
-                .checkRequest
-                .test( dataInfo, 9 ) ) {
+        if (  super.objectIsNotNull( dataInfo.getCadaster() ) ) {
             this.setRegion( dataInfo.getCadaster().getRegion() );
             this.setAddress( dataInfo.getCadaster().getAddress() );
             this.setLatitude( dataInfo.getCadaster().getLatitude() );
             this.setDistrict( dataInfo.getCadaster().getDistrict() );
             this.setLongitude( dataInfo.getCadaster().getLongitude() );
-            this.setCountryside( dataInfo.getCadaster().getCountryside() ); } }
+            this.setCountryside( dataInfo.getCadaster().getCountryside() );
+        }
+    }
 
-    private void save ( final String taskType,
-                        final String address,
-                        final Double latitude,
-                        final Double longitude ) {
-        this.setLongitude( longitude );
-        this.setLatitude( latitude );
-        this.setAddress( address );
-        this.setType( taskType ); }
+    private void save ( final EventCar eventCar ) {
+        this.setLongitude( eventCar.getDataInfo().getCadaster().getLongitude() );
+        this.setLatitude( eventCar.getDataInfo().getCadaster().getLatitude() );
+        this.setType( TaskTypes.FIND_FACE_CAR.name() );
+        this.setAddress( null );
+    }
 
-    private void save ( final Card card ) {
-        this.setRegion( card.getEventAddress().getSOblastiId() );
-        this.setDistrict( card.getEventAddress().getSRegionId() );
-        this.setCountryside( card.getEventAddress().getSMahallyaId() ); }
+    private void save ( final EventFace eventFace ) {
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+        this.setLongitude( eventFace.getLongitude() );
+        this.setLatitude( eventFace.getLatitude() );
+        this.setAddress( eventFace.getAddress() );
+    }
 
-    private ActiveTask save ( final String title,
-                              final String address,
-                              final String description,
-                              final Double latitude,
-                              final Double longitude ) {
-        this.setDescription( description );
-        this.setLongitude( longitude );
-        this.setLatitude( latitude );
-        this.setAddress( address );
-        this.setTitle( title );
-        return this; }
+    private void save ( final EventBody eventBody ) {
+        this.setType( TaskTypes.FIND_FACE_PERSON.name() );
+        this.setLongitude( eventBody.getLongitude() );
+        this.setLatitude( eventBody.getLatitude() );
+        this.setAddress( null );
+    }
 
-    public ActiveTask (
+    private void save ( final SelfEmploymentTask selfEmploymentTask ) {
+        this.setTitle( selfEmploymentTask.getTitle() );
+        this.setAddress( selfEmploymentTask.getAddress() );
+        this.setDescription( selfEmploymentTask.getDescription() );
+
+        this.setLatitude( selfEmploymentTask.getLatOfAccident() );
+        this.setLongitude( selfEmploymentTask.getLanOfAccident() );
+    }
+
+    private void save (
             final Object object,
-            final String taskId,
-            final String cardId,
-            final Status status,
-            final TaskTypes taskTypes,
-            final Map< UUID, Patrul > patrulList ) {
-        this.setCardId( cardId );
-        this.setStatus( status );
-        this.setTaskId( taskId );
-        this.setType( taskTypes.name() );
-        this.setPatrulList( patrulList );
-        this.setCreatedDate( TimeInspector.getInspector().getGetNewDate().get() );
+            final TaskCommonParams taskCommonParams
+    ) {
+        this.setStatus( taskCommonParams.getStatus() );
+        this.setTaskId( taskCommonParams.getTaskId() );
+        this.setPatrulList( taskCommonParams.getPatruls() );
+        this.setType( taskCommonParams.getTaskTypes().name() );
+        this.setCardId( taskCommonParams.getUuid().toString() );
 
-        switch ( taskTypes ) {
-            case CARD_102 -> this.save( null,
-                    ( (Card) object ).getAddress(),
-                    ( (Card) object ).getFabula(),
-                    ( (Card) object ).getLatitude(),
-                    ( (Card) object ).getLongitude() )
-                    .save( (Card) object );
+        switch ( taskCommonParams.getTaskTypes() ) {
+            case CARD_102 -> this.save( (Card) object );
 
             case FIND_FACE_CAR -> this.save( ( (CarEvent) object ).getDataInfo() );
 
             case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
 
-            case FIND_FACE_EVENT_CAR -> this.save( TaskTypes.FIND_FACE_CAR.name(), null,
-                    ( (EventCar) object ).getDataInfo().getCadaster().getLatitude(),
-                    ( (EventCar) object ).getDataInfo().getCadaster().getLongitude() );
+            case FIND_FACE_EVENT_CAR -> this.save( ( (EventCar) object ) );
 
-            case FIND_FACE_EVENT_FACE -> this.save( TaskTypes.FIND_FACE_PERSON.name(), null, ( (EventFace) object ).getLatitude(), ( (EventFace) object ).getLongitude() );
+            case FIND_FACE_EVENT_FACE -> this.save( (EventFace) object );
 
-            case FIND_FACE_EVENT_BODY -> this.save( TaskTypes.FIND_FACE_PERSON.name(), null, ( (EventBody) object ).getLatitude(), ( (EventBody) object ).getLongitude() );
+            case FIND_FACE_EVENT_BODY -> this.save( (EventBody) object );
 
-            case SELF_EMPLOYMENT -> this.save( ( (SelfEmploymentTask) object ).getTitle(),
-                    ( (SelfEmploymentTask) object ).getAddress(),
-                    ( (SelfEmploymentTask) object ).getDescription(),
-                    ( (SelfEmploymentTask) object ).getLatOfAccident(),
-                    ( (SelfEmploymentTask) object ).getLanOfAccident() ); } }
+            case SELF_EMPLOYMENT -> this.save( (SelfEmploymentTask) object );
+        }
+    }
 
-    public ActiveTask (
+    public static ActiveTask generate (
+            final Object object,
+            final TaskCommonParams taskCommonParams ) {
+        return new ActiveTask( object, taskCommonParams );
+    }
+
+    private ActiveTask (
+            final Object object,
+            final TaskCommonParams taskCommonParams ) {
+        this.setCreatedDate();
+        this.save( object, taskCommonParams );
+    }
+
+    public static ActiveTask generate (
+            final TaskCommonParams taskCommonParams,
             final Status patrulStatus,
-            final Object object,
-            final String taskId,
-            final String cardId,
-            final Status status,
-            final TaskTypes taskTypes,
-            final Map< UUID, Patrul > patrulList ) {
-        this.setCardId( cardId );
-        this.setStatus( status );
-        this.setTaskId( taskId );
-        this.setType( taskTypes.name() );
-        this.setPatrulList( patrulList );
+            final Object object
+    ) {
+        return new ActiveTask( taskCommonParams, patrulStatus, object );
+    }
+
+    private ActiveTask (
+            final TaskCommonParams taskCommonParams,
+            final Status patrulStatus,
+            final Object object ) {
+        this.setCreatedDate();
         this.setPatrulStatus( patrulStatus );
-        this.setCreatedDate( TimeInspector.getInspector().getGetNewDate().get() );
+        this.save( object, taskCommonParams );
+    }
 
-        switch ( taskTypes ) {
-            case CARD_102 -> {
-                this.setLatitude( ( (Card) object ).getLatitude() );
-                this.setLongitude( ( (Card) object ).getLongitude() );
+    public static ActiveTask generate (
+            final Object object,
+            final Status patrulStatus,
+            final TaskCommonParams taskCommonParams ) {
+        return new ActiveTask( object, patrulStatus, taskCommonParams );
+    }
 
-                this.setAddress( ( (Card) object ).getAddress() );
-                this.setDescription( ( (Card) object ).getFabula() );
-
-                this.setRegion( ( (Card) object ).getEventAddress().getSOblastiId() );
-                this.setDistrict( ( (Card) object ).getEventAddress().getSRegionId() );
-                this.setCountryside( ( (Card) object ).getEventAddress().getSMahallyaId() ); }
-
-            case FIND_FACE_CAR -> this.save( ( (CarEvent) object ).getDataInfo() );
-
-            case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
-
-            case FIND_FACE_EVENT_CAR -> this.save( TaskTypes.FIND_FACE_CAR.name(), null, ( (EventCar) object ).getDataInfo().getCadaster().getLatitude(), ( (EventCar) object ).getDataInfo().getCadaster().getLongitude() );
-
-            case FIND_FACE_EVENT_FACE -> this.save( TaskTypes.FIND_FACE_PERSON.name(), null, ( (EventFace) object ).getLatitude(), ( (EventFace) object ).getLongitude() );
-
-            case FIND_FACE_EVENT_BODY -> this.save( TaskTypes.FIND_FACE_PERSON.name(), null, ( (EventBody) object ).getLatitude(), ( (EventBody) object ).getLongitude() );
-
-            case SELF_EMPLOYMENT -> this.save( ( (SelfEmploymentTask) object ).getTitle(),
-                    ( (SelfEmploymentTask) object ).getAddress(),
-                    ( (SelfEmploymentTask) object ).getDescription(),
-                    ( (SelfEmploymentTask) object ).getLatOfAccident(),
-                    ( (SelfEmploymentTask) object ).getLanOfAccident() ); } }
-
-    public ActiveTask ( final Object object,
-                        final TaskTypes taskTypes,
-                        final Status status,
-                        final Status taskStatus,
-                        final String taskId ) {
-        this.setTaskId( taskId );
-        this.setStatus( taskStatus );
-        this.setPatrulStatus( status );
-        this.setType( taskTypes.name() );
-        this.setCreatedDate( TimeInspector.getInspector().getGetNewDate().get() );
-
-        switch ( taskTypes ) {
-            case CARD_102 -> this.save( null,
-                            ( (Card) object ).getAddress(),
-                            ( (Card) object ).getFabula(),
-                            ( (Card) object ).getLatitude(),
-                            ( (Card) object ).getLongitude() )
-                    .save( (Card) object );
-
-            case FIND_FACE_CAR -> this.save( ( (CarEvent) object ).getDataInfo() );
-            case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
-
-            case FIND_FACE_EVENT_CAR -> this.save( TaskTypes.FIND_FACE_CAR.name(),
-                    ( (EventCar) object ).getDataInfo().getCadaster().getAddress(),
-                    ( (EventCar) object ).getDataInfo().getCadaster().getLatitude(),
-                    ( (EventCar) object ).getDataInfo().getCadaster().getLongitude() );
-
-            case FIND_FACE_EVENT_FACE -> this.save( TaskTypes.FIND_FACE_PERSON.name(),
-                    ( (EventFace) object ).getAddress(),
-                    ( (EventFace) object ).getLatitude(),
-                    ( (EventFace) object ).getLongitude() );
-
-            case FIND_FACE_EVENT_BODY -> this.save( TaskTypes.FIND_FACE_PERSON.name(),
-                    ( (EventBody) object ).getAddress(),
-                    ( (EventBody) object ).getLatitude(),
-                    ( (EventBody) object ).getLongitude() );
-
-            case SELF_EMPLOYMENT -> this.save( ( (SelfEmploymentTask) object ).getTitle(),
-                    ( (SelfEmploymentTask) object ).getAddress(),
-                    ( (SelfEmploymentTask) object ).getDescription(),
-                    ( (SelfEmploymentTask) object ).getLatOfAccident(),
-                    ( (SelfEmploymentTask) object ).getLanOfAccident() ); } }
+    private ActiveTask (
+            final Object object,
+            final Status patrulStatus,
+            final TaskCommonParams taskCommonParams ) {
+        this.setCreatedDate();
+        this.setPatrulStatus( patrulStatus );
+        this.save( object, taskCommonParams );
+    }
 }

@@ -1,9 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.inspectors;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import java.security.SecureRandom;
 import reactor.core.publisher.Mono;
 
@@ -11,75 +8,71 @@ import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 
 @lombok.Data
-public class Archive {
+public class Archive extends CollectionsInspector {
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder();
 
-    protected <T> Mono< T > convert ( final T o ) { return Optional.ofNullable( o ).isPresent() ? Mono.just( o ) : Mono.empty(); }
+    protected Archive () {}
 
-    protected final Function< Map< String, ? >, Mono< ApiResponseModel > > function =
-            map -> this.convert( ApiResponseModel
-                    .builder() // in case of wrong login
-                    .status( Status
-                            .builder()
-                            .message( map.get( "message" ).toString() )
-                            .code( map.containsKey( "code" )
-                                    ? Long.parseLong( map.get( "code" ).toString() )
-                                    : 200 )
-                            .build() )
-                    .data( map.containsKey( "data" )
-                            ? ( com.ssd.mvd.gpstabletsservice.entity.Data ) map.get( "data" )
-                            : com.ssd.mvd.gpstabletsservice.entity.Data.builder().build() )
-                    .success( !map.containsKey( "success" ) )
-                    .build() );
+    protected <T> Mono< T > convert ( final T o ) {
+        return Optional.ofNullable( o ).isPresent() ? Mono.just( o ) : Mono.empty();
+    }
 
-    protected final Supplier< ApiResponseModel > errorResponse = () -> ApiResponseModel
-            .builder() // in case of wrong login
-            .status( Status
-                    .builder()
-                    .message( "Server error" )
-                    .code( 201 )
-                    .build() )
-            .success( false )
-            .build();
+    protected Mono< ApiResponseModel > function (
+            final Map< String, ? > map
+    ) {
+        return this.convert( ApiResponseModel
+                .builder() // in case of wrong login
+                .status( Status
+                        .builder()
+                        .message( map.get( "message" ).toString() )
+                        .code( map.containsKey( "code" )
+                                ? Long.parseLong( map.get( "code" ).toString() )
+                                : 200 )
+                        .build() )
+                .data( map.containsKey( "data" )
+                        ? ( com.ssd.mvd.gpstabletsservice.entity.Data ) map.get( "data" )
+                        : com.ssd.mvd.gpstabletsservice.entity.Data.builder().build() )
+                .success( !map.containsKey( "success" ) )
+                .build() );
+    }
 
-    protected final Function< String, Mono< ApiResponseModel > > error = message -> this.convert(
-            ApiResponseModel
-                    .builder()
-                    .status( Status
-                            .builder()
-                            .message( message )
-                            .code( 201 )
-                            .build() )
-                    .success( false )
-                    .build() );
+    protected ApiResponseModel errorResponse () {
+        return ApiResponseModel
+                .builder() // in case of wrong login
+                .status( Status
+                        .builder()
+                        .message( "Server error" )
+                        .code( 201 )
+                        .build() )
+                .success( false )
+                .build();
+    }
 
-    private final Set< String > detailsList = Set.of( "Ф.И.О", "", "ПОДРАЗДЕЛЕНИЕ", "ДАТА И ВРЕМЯ", "ID",
-            "ШИРОТА", "ДОЛГОТА", "ВИД ПРОИСШЕСТВИЯ", "НАЧАЛО СОБЫТИЯ", "КОНЕЦ СОБЫТИЯ",
-            "КОЛ.СТВО ПОСТРАДАВШИХ", "КОЛ.СТВО ПОГИБШИХ", "ФАБУЛА" );
+    protected Mono< ApiResponseModel > errorResponse ( final String message ) {
+        return this.convert(
+                ApiResponseModel
+                        .builder()
+                        .status( Status
+                                .builder()
+                                .message( message )
+                                .code( 201 )
+                                .build() )
+                        .success( false )
+                        .build() );
+    }
 
-    protected final List< String > fields = List.of(
-            "F.I.O",
-            "Tug'ilgan sana",
-            "Telefon raqam",
-            "Unvon",
-            "Viloyat",
-            "Tuman/Shahar",
-            "Patrul turi",
-            "Oxirgi faollik vaqti",
-            "Ishlashni boshlagan vaqti",
-            "Ro'yxatdan o'tgan vaqti",
-            "Umumiy faollik vaqti",
-            "Planshet quvvati" );
+    protected UUID decode ( final String token ) {
+        return UUID.fromString(
+                new String( Base64
+                        .getDecoder()
+                        .decode( token ) )
+                        .split( "@" )[ 0 ] );
+    }
 
-    protected final Function< String, UUID > decode = token -> UUID.fromString(
-            new String( Base64
-                    .getDecoder()
-                    .decode( token ) )
-                    .split( "@" )[ 0 ] );
-
-    protected final Supplier< String > generateToken = () -> {
-            final byte[] bytes = new byte[ 24 ];
-            this.getSecureRandom().nextBytes( bytes );
-            return this.getEncoder().encodeToString( bytes ); };
+    protected String generateToken () {
+        final byte[] bytes = new byte[ 24 ];
+        this.getSecureRandom().nextBytes( bytes );
+        return this.getEncoder().encodeToString( bytes );
+    }
 }

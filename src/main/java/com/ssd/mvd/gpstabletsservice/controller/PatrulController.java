@@ -33,63 +33,67 @@ public final class PatrulController extends SerDes {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping ( value = "ping" )
-    public Mono< Boolean > ping () { return super.convert( Boolean.TRUE ); }
+    public Mono< Boolean > ping () {
+        return super.convert( Boolean.TRUE );
+    }
 
     @MessageMapping ( value = "GET_FILTERED_ACTIVE_PATRULS" )
     public Flux< Patrul > getFilteredActivePatruls ( final Map< String, String > params ) {
         final List< String > policeTypes = params.containsKey( "policeType" )
                 ? Arrays.asList( params.get( "policeType" ).split( "," ) )
-                : Collections.emptyList();
+                : super.emptyList();
 
         return CassandraDataControl
                 .getInstance()
-                .getGetAllEntities()
+                .getAllEntities
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
                 .filter( row -> super.filterPatrul( row, params, policeTypes, 0 ) )
                 .map( Patrul::new )
                 .sequential()
                 .publishOn( Schedulers.single() )
-                .onErrorContinue( super::logging ); }
+                .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "GET_EXEL_FILE" )
     public Mono< ApiResponseModel > GET_EXEL_FILE ( final Map< String, String > params ) {
         final List< String > policeTypes = params.containsKey( "policeType" )
-                ? Arrays.asList( params.get( "policeType" ).split( "," ) )
-                : Collections.emptyList();
+                ? super.convertArrayToList( params.get( "policeType" ).split( "," ) )
+                : super.emptyList();
 
         return CassandraDataControl
                 .getInstance()
-                .getGetAllEntities()
+                .getAllEntities
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
                 .filter( row -> super.filterPatrul( row, params, policeTypes, 0 ) )
                 .map( Patrul::new )
                 .sequential()
                 .publishOn( Schedulers.single() )
                 .collectList()
-                .flatMap( patruls -> super.getFunction().apply(
+                .flatMap( patruls -> super.function(
                         Map.of( "message", "Exel is done",
-                                "data", Data
-                                        .builder()
-                                        .data( new ExelInspector().download( patruls, params, policeTypes ) )
-                                        .build() ) ) )
-                .onErrorContinue( super::logging ); }
+                                "data", Data.from( new ExelInspector().download( patruls, params, policeTypes ) ) ) ) )
+                .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "GET_ACTIVE_PATRULS" )
     public Mono< PatrulActivityResponse > getActivePatruls ( final Map< String, String > params ) {
         final List< String > policeTypes = params.containsKey( "policeType" )
-                ? Arrays.asList( params.get( "policeType" ).split( "," ) )
-                : Collections.emptyList();
+                ? super.convertArrayToList( params.get( "policeType" ).split( "," ) )
+                : super.emptyList();
 
-        final SortedMap< Long, PatrulDivisionByRegions > regions = new TreeMap<>();
-        UnirestController
-                .getInstance()
-                .getGetRegions()
-                .apply( !params.containsKey( "regionId" ) ? -1L : Long.parseLong( params.get( "regionId" ) ) )
-                .forEach( regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData ) ) );
+        final SortedMap< Long, PatrulDivisionByRegions > regions = super.newTreeMap();
+
+        super.analyze(
+                UnirestController
+                        .getInstance()
+                        .getGetRegions()
+                        .apply( !params.containsKey( "regionId" ) ? -1L : Long.parseLong( params.get( "regionId" ) ) ),
+                regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData ) )
+        );
 
         return CassandraDataControl
                 .getInstance()
-                .getGetAllEntities()
+                .getAllEntities
                 .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
                 .sequential()
                 .publishOn( Schedulers.single() )
@@ -99,39 +103,18 @@ public final class PatrulController extends SerDes {
                         : row.getLong( "districtId" ) ).save( row ) )
                 .collectList()
                 .onErrorContinue( super::logging )
-                .map( patrulDivisionByRegions -> new PatrulActivityResponse( regions ) ); }
+                .map( patrulDivisionByRegions -> new PatrulActivityResponse( regions ) );
+    }
 
     @MessageMapping ( value = "ARRIVED" )
-    public Mono< ApiResponseModel > arrived ( final String token ) { return CassandraDataControl
+    public Mono< ApiResponseModel > arrived ( final String token, final Status status ) {
+        return CassandraDataControl
             .getInstance()
-            .getChangeStatus()
-            .apply( token, Status.ARRIVED )
+            .changeStatus
+            .apply( token, status )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "ACCEPTED" )
-    public Mono< ApiResponseModel > accepted ( final String token ) { return CassandraDataControl
-            .getInstance()
-            .getChangeStatus()
-            .apply( token, Status.ACCEPTED )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "SET_IN_PAUSE" )
-    public Mono< ApiResponseModel > setInPause ( final String token ) { return CassandraDataControl
-            .getInstance()
-            .getChangeStatus()
-            .apply( token, Status.SET_IN_PAUSE )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "START_TO_WORK" )
-    public Mono< ApiResponseModel > starToWork ( final String token ) { return CassandraDataControl
-            .getInstance()
-            .getChangeStatus()
-            .apply( token, Status.START_TO_WORK )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "getTaskDetails" )
     public Mono< ApiResponseModel > getTaskDetails ( final Data data ) { return TaskInspector
@@ -139,63 +122,45 @@ public final class PatrulController extends SerDes {
             .getTaskData
             .apply( this.objectMapper.convertValue( data.getData(), new TypeReference<>() {} ), TaskTypes.CARD_DETAILS )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "LOGOUT" ) // used to Log out from current Account
-    public Mono< ApiResponseModel > patrulLogout ( final String token ) { return CassandraDataControl
-            .getInstance()
-            .getChangeStatus()
-            .apply( token, Status.LOGOUT )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "RETURNED_TO_WORK" )
-    public Mono< ApiResponseModel > setInActive ( final String token ) { return CassandraDataControl
-            .getInstance()
-            .getChangeStatus()
-            .apply( token, Status.RETURNED_TO_WORK )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
-
-    @MessageMapping ( value = "STOP_TO_WORK" )
-    public Mono< ApiResponseModel > finishWorkOfPatrul ( final String token ) { return CassandraDataControl
-            .getInstance()
-            .getChangeStatus()
-            .apply( token, Status.STOP_TO_WORK )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "LOGIN" ) // for checking login data of Patrul with his Login and password
     public Mono< ApiResponseModel > patrulLogin ( final PatrulLoginRequest patrulLoginRequest ) {
-        return super.checkRequest.test( patrulLoginRequest, 0 )
+        return super.checkObject( patrulLoginRequest )
                 ? CassandraDataControl
                     .getInstance()
-                    .getLogin()
+                    .login
                     .apply( patrulLoginRequest )
                     .onErrorContinue( super::logging )
-                    .onErrorReturn( super.getErrorResponse().get() )
-                : super.error.apply( "Wrong Params" ); }
+                    .onErrorReturn( super.errorResponse() )
+                : super.errorResponse( "Wrong Params" );
+    }
 
     @MessageMapping( value = "getAllUsersList" ) // returns the list of all created Users
-    public Flux<Patrul> getAllUsersList () { return CassandraDataControl
+    public Flux<Patrul> getAllUsersList () {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
             .map( Patrul::new )
             .sequential()
             .publishOn( Schedulers.single() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "getPatrulByPortion" ) // searching Patruls by their partion name
-    public Flux< Patrul > getPatrulByPortion ( final String name ) { return CassandraDataControl
+    public Flux< Patrul > getPatrulByPortion ( final String name ) {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.PATRULS )
             .map( Patrul::new )
-            .filter( patrul -> patrul.getSurnameNameFatherName().contains( name ) )
+            .filter( patrul -> patrul.getPatrulFIOData().getSurnameNameFatherName().contains( name ) )
             .sequential()
             .publishOn( Schedulers.single() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping( value = "addUser" ) // adding new user
     public Mono< ApiResponseModel > addUser ( final Patrul patrul ) {
@@ -203,54 +168,61 @@ public final class PatrulController extends SerDes {
                 .getInstance()
                 .getAddUser()
                 .accept( patrul );
-        patrul.setSpecialToken( null );
+
         return CassandraDataControl
                 .getInstance()
-                .getSavePatrul()
+                .savePatrul
                 .apply( patrul )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "updatePatrulImage" )
     public Mono< ApiResponseModel > updatePatrulImage ( final PatrulImageRequest request ) {
-            return CassandraDataControl
+        return CassandraDataControl
                 .getInstance()
-                .getUpdatePatrulImage()
-                .apply( request, 0 ); }
+                .updatePatrulImage
+                .apply( request, 0 );
+    }
 
     @MessageMapping ( value = "UPDATE_PATRUL_PHONE_NUMBER" )
     public Mono< ApiResponseModel > updatePatrulPhoneNumber ( final PatrulImageRequest request ) {
         return CassandraDataControl
                 .getInstance()
-                .getUpdatePatrulImage()
-                .apply( request, 1 ); }
+                .updatePatrulImage
+                .apply( request, 1 );
+    }
 
     @MessageMapping ( value = "findTheClosestPatruls" )
     public Flux< Patrul > findTheClosestPatruls ( final Point point ) {
-            return super.checkRequest.test( point, 1 )
+            return super.checkObject( point )
                     ? CassandraDataControl
                     .getInstance()
-                    .getFindTheClosestPatruls()
+                    .findTheClosestPatruls
                     .apply( point, 1 )
                     .onErrorContinue( super::logging )
-                    : Flux.empty(); }
+                    : Flux.empty();
+    }
 
     @MessageMapping ( value = "checkToken" )
     public Mono< ApiResponseModel > checkToken ( final String token ) {
         return CassandraDataControl
             .getInstance()
-            .getCheckToken()
+            .checkToken
             .apply( token )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "getPatrulDataByToken" )
-    public Mono< ApiResponseModel > getPatrulDataByToken ( final String token ) { return CassandraDataControl
+    public Mono< ApiResponseModel > getPatrulDataByToken ( final String token ) {
+        return CassandraDataControl
             .getInstance()
-            .getCheckToken()
+            .checkToken
             .apply( token )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "updatePatrul" )
     public Mono< ApiResponseModel > updatePatrul ( final Patrul patrul ) {
@@ -258,22 +230,25 @@ public final class PatrulController extends SerDes {
                 .getInstance()
                 .getUpdateUser()
                 .accept( patrul );
-        patrul.setSpecialToken( null );
+
         return CassandraDataControl
                 .getInstance()
-                .getUpdatePatrul()
+                .updatePatrul
                 .apply( patrul )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "getCurrentUser" )
     public Mono< Patrul > getCurrentUser ( final String passportSeries ) {
-        if ( passportSeries.length() < 30 ) return Mono.empty();
-        return CassandraDataControl
+        return passportSeries.length() > 30
+                ? CassandraDataControl
                 .getInstance()
-                .getGetPatrulByUUID()
+                .getPatrulByUUID
                 .apply( UUID.fromString( passportSeries ) )
-                .onErrorContinue( super::logging ); }
+                .onErrorContinue( super::logging )
+                : Mono.empty();
+    }
 
     @MessageMapping( value = "deletePatrul" )
     public Mono< ApiResponseModel > deletePatrul ( final String passportNumber ) {
@@ -281,89 +256,117 @@ public final class PatrulController extends SerDes {
                 .getInstance()
                 .getDeleteUser()
                 .accept( passportNumber );
+
         return CassandraDataControl
                 .getInstance()
-                .getDeletePatrul()
+                .deletePatrul
                 .apply( UUID.fromString( passportNumber.split( "@" )[0] ) )
                 .onErrorContinue( super::logging )
-                .onErrorReturn( super.getErrorResponse().get() ); }
+                .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "getAllPatrulTasks" ) // for front end
-    public Mono< ApiResponseModel > getListOfPatrulTasks ( final String uuid ) { return CassandraDataControl
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( final String uuid ) {
+        return CassandraDataControl
             .getInstance()
-            .getGetPatrulByUUID()
+            .getPatrulByUUID
             .apply( UUID.fromString( uuid ) )
-            .flatMap( patrul -> super.checkRequest.test( patrul.getListOfTasks().keySet(), 6 )
+            .flatMap( patrul -> super.isCollectionNotEmpty(
+                    patrul
+                        .getPatrulTaskInfo()
+                        .getListOfTasks()
+                        .keySet() )
                     ? TaskInspector
                             .getInstance()
-                            .getListOfPatrulTasks( patrul, 0, patrul.getListOfTasks().keySet().size() * 2 )
+                            .getListOfCompletedTasksOfPatrul(
+                                    patrul,
+                                    0,
+                                    patrul
+                                            .getPatrulTaskInfo()
+                                            .getListOfTasks()
+                                            .keySet().size() * 2 )
                             .onErrorContinue( super::logging )
-                            .onErrorReturn( super.getErrorResponse().get() )
-                    : super.error.apply( "You have not completed any task, so try to fix this problem please" ) ); }
+                            .onErrorReturn( super.errorResponse() )
+                    : super.errorResponse( "You have not completed any task, so try to fix this problem please" ) );
+    }
 
     @MessageMapping ( value = "getListOfPatrulTasks" )
-    public Mono< ApiResponseModel > getListOfPatrulTasks ( final Request request ) { return CassandraDataControl
+    public Mono< ApiResponseModel > getListOfPatrulTasks ( final Request request ) {
+        return CassandraDataControl
             .getInstance()
-            .getGetPatrulByUUID()
-            .apply( super.getDecode().apply( request.getData() ) )
-            .flatMap( patrul -> super.checkRequest.test( patrul.getListOfTasks().keySet(), 10 )
+            .getPatrulByUUID
+            .apply( super.decode( request.getData() ) )
+            .flatMap( patrul -> super.isCollectionNotEmpty(
+                    patrul
+                        .getPatrulTaskInfo()
+                        .getListOfTasks()
+                        .keySet() )
                     ? TaskInspector
                     .getInstance()
-                    .getListOfPatrulTasks( patrul, (Integer) request.getObject(), (Integer) request.getSubject() )
-                    : super.error.apply( "You have not completed any task, so try to fix this problem please" ) )
+                    .getListOfCompletedTasksOfPatrul( patrul, (Integer) request.getObject(), (Integer) request.getSubject() )
+                    : super.errorResponse( "You have not completed any task, so try to fix this problem please" ) )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "addAllPatrulsToChatService" )
     public Mono< ApiResponseModel > addAllPatrulsToChatService ( final String token ) {
         CassandraDataControl
                 .getInstance()
-                .getAddAllPatrulsToChatService()
+                .addAllPatrulsToChatService
                 .accept( token );
-        return super.getFunction().apply( Map.of( "message", "Successfully added to chat service" ) ); }
+
+        return super.function( Map.of( "message", "Successfully added to chat service" ) );
+    }
 
     @MessageMapping ( value = "getListOfPatrulsByUUID" )
     public Flux< Patrul > getListOfPatrulsByUUID ( final CardRequest< ? > cardRequest ) {
         return Flux.fromStream ( cardRequest.getPatruls().stream() )
                 .flatMap( uuid -> CassandraDataControl
                         .getInstance()
-                        .getGetPatrulByUUID()
+                        .getPatrulByUUID
                         .apply( uuid ) )
-                .onErrorContinue( super::logging ); }
+                .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "getPatrulStatistics" )
     public Mono< PatrulActivityStatistics > getPatrulStatistics ( final PatrulActivityRequest request ) {
-            return super.checkParam.test( request.getPatrulUUID() )
+            return super.objectIsNotNull( request.getPatrulUUID() )
                     ? CassandraDataControl
                     .getInstance()
-                    .getGetPatrulStatistics()
+                    .getPatrulStatistics
                     .apply( request )
                     .onErrorContinue( super::logging )
-                    : Mono.empty(); }
-
-    // возвращает данные обо всех использованных планшетах для каждого патрульного
-    @MessageMapping ( value = "getAllUsedTablets" )
-    public Mono< List<TabletUsage> > getAllUsedTablets (final PatrulActivityRequest request ) { return CassandraDataControl
-            .getInstance()
-            .getGetAllUsedTablets()
-            .apply( UUID.fromString( request.getPatrulUUID() ), request ); }
-
-    @MessageMapping ( value = "getPatrulInRadiusList" )
-    public Mono< PatrulInRadiusList > getPatrulInRadiusList ( final Point point ) {
-        return super.checkRequest.test( point, 1 )
-                ? CassandraDataControl
-                .getInstance()
-                .getGetPatrulInRadiusList()
-                .apply( point )
-                .onErrorContinue( super::logging )
-                .onErrorReturn( new PatrulInRadiusList() )
-                : super.convert( new PatrulInRadiusList() ); }
+                    : Mono.empty();
+    }
 
     @MessageMapping ( value = "GET_TABLETS_USAGE_STATISTICS" )
     public Mono< ApiResponseModel > getTabletsUsageStatistics ( final PatrulActivityRequest request ) {
         return CassandraDataControl
                 .getInstance()
-                .getGetTabletUsageStatistics()
+                .getTabletUsageStatistics
                 .apply( request )
-                .onErrorContinue( super::logging ); }
+                .onErrorContinue( super::logging );
+    }
+
+    // возвращает данные обо всех использованных планшетах для каждого патрульного
+    @MessageMapping ( value = "getAllUsedTablets" )
+    public Mono< List< TabletUsage > > getAllUsedTablets ( final PatrulActivityRequest request ) {
+        return CassandraDataControl
+                .getInstance()
+                .getAllUsedTablets
+                .apply( UUID.fromString( request.getPatrulUUID() ), request );
+    }
+
+    @MessageMapping ( value = "getPatrulInRadiusList" )
+    public Mono< PatrulInRadiusList > getPatrulInRadiusList ( final Point point ) {
+        return super.checkObject( point )
+                ? CassandraDataControl
+                .getInstance()
+                .getPatrulInRadiusList
+                .apply( point )
+                .onErrorContinue( super::logging )
+                .onErrorReturn( new PatrulInRadiusList() )
+                : super.convert( new PatrulInRadiusList() );
+    }
 }

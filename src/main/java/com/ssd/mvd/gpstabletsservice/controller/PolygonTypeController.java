@@ -18,44 +18,54 @@ import java.util.UUID;
 public final class PolygonTypeController extends LogInspector {
 
     @MessageMapping ( value = "updatePolygonType" )
-    public Mono< ApiResponseModel > updatePolygonType ( final PolygonType polygonType ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updatePolygonType ( final PolygonType polygonType ) {
+        return CassandraDataControl
             .getInstance()
-            .getUpdatePolygonType()
+            .updatePolygonType
             .apply( polygonType )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "addPolygonType" )
-    public Mono< ApiResponseModel > addPolygonType ( final PolygonType polygonType ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addPolygonType ( final PolygonType polygonType ) {
+        return CassandraDataControl
             .getInstance()
-            .getSavePolygonType()
+            .savePolygonType
             .apply( polygonType )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "getCurrentPolygonType" )
-    public Mono< PolygonType > getCurrentPolygonType ( final UUID uuid ) { return CassandraDataControl
+    public Mono< PolygonType > getCurrentPolygonType ( final UUID uuid ) {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllPolygonTypeByUUID()
+            .getPolygonTypeByUUID
             .apply( uuid )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "deletePolygonType" )
-    public Mono< ApiResponseModel > deletePolygonType ( final UUID uuid ) { return CassandraDataControl
+    public Mono< ApiResponseModel > deletePolygonType ( final UUID uuid ) {
+        return CassandraDataControl
             .getInstance()
             .delete( CassandraTables.POLYGON_TYPE.name(),
                     "uuid",
                     uuid.toString() )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "getAllPolygonTypes" )
-    public Flux< PolygonType > getAllPolygonTypes () { return CassandraDataControl
+    public Flux< PolygonType > getAllPolygonTypes () {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.POLYGON_TYPE )
             .map( PolygonType::new )
             .sequential()
             .publishOn( Schedulers.single() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 }

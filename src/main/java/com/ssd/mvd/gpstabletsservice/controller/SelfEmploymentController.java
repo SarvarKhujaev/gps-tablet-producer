@@ -19,52 +19,65 @@ public final class SelfEmploymentController extends SerDes {
     public Mono< SelfEmploymentTask > getSelfEmployment ( final String uuid ) {
         return CassandraDataControlForTasks
                 .getInstance()
-                .getGetTask()
+                .getTask
                 .apply( uuid )
-                .flatMap( row -> super.checkParam.test( row )
-                        ? super.convert( super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
-                        .map( selfEmploymentTask -> {
-                            selfEmploymentTask.setPatruls( null );
-                            selfEmploymentTask.setReportForCards( null );
-                            return selfEmploymentTask; } )
-                        : Mono.empty() )
-                .onErrorContinue( super::logging ); }
+                .filter( super::objectIsNotNull )
+                .map( row -> {
+                    final SelfEmploymentTask selfEmploymentTask =
+                            super.deserialize( row.getString("object" ), SelfEmploymentTask.class );
+
+                    selfEmploymentTask.getTaskCommonParams().clear();
+                    return selfEmploymentTask;
+                } )
+                .onErrorContinue( super::logging );
+    }
 
     @MessageMapping ( value = "addReportForSelfEmployment" )
-    public Mono< ApiResponseModel > addReportForSelfEmployment ( final ReportForCard reportForCard ) { return CassandraDataControl
-            .getInstance()
-            .getGetPatrulByUUID()
-            .apply( reportForCard.getUuidOfPatrul() )
-            .flatMap( patrul -> {
-                CassandraDataControl
-                        .getInstance()
-                        .getUpdatePatrulActivity()
-                        .accept( patrul );
-                return TaskInspector
-                        .getInstance()
-                        .saveReportForTask
-                        .apply( patrul, reportForCard ); } )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+    public Mono< ApiResponseModel > addReportForSelfEmployment ( final ReportForCard reportForCard ) {
+        return CassandraDataControl
+                .getInstance()
+                .getPatrulByUUID
+                .apply( reportForCard.getUuidOfPatrul() )
+                .flatMap( patrul -> {
+                    CassandraDataControl
+                            .getInstance()
+                            .updatePatrulActivity
+                            .accept( patrul );
+
+                    return TaskInspector
+                            .getInstance()
+                            .saveReportForTask
+                            .apply( patrul, reportForCard );
+                } )
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "addSelfEmployment" ) // saves new Task and link the Patrul who created it
     public Mono< ApiResponseModel > addSelfEmployment ( final SelfEmploymentTask selfEmploymentTask ) {
-        selfEmploymentTask.setAddress( super.concatNames.apply(
-                UnirestController
-                        .getInstance()
-                        .getGetAddressByLocation()
-                        .apply( selfEmploymentTask.getLatOfAccident(), selfEmploymentTask.getLanOfAccident() ), 3 ) );
-        return CassandraDataControl
-            .getInstance()
-            .getGetPatrulByUUID()
-            .apply( selfEmploymentTask.getPatruls().keySet().iterator().next() )
-            .flatMap( patrul -> super.getFunction().apply(
-                    Map.of( "message", selfEmploymentTask.getUuid()
-                            + " was linked to: "
-                            + TaskInspector
+        selfEmploymentTask.setAddress(
+                super.removeAllDotes(
+                    UnirestController
                             .getInstance()
-                            .changeTaskStatus( patrul, selfEmploymentTask.getTaskStatus(), selfEmploymentTask )
-                            .getName() ) ) )
-            .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+                            .getGetAddressByLocation()
+                            .apply( selfEmploymentTask.getLatOfAccident(), selfEmploymentTask.getLanOfAccident() ) ) );
+
+        return CassandraDataControl
+                .getInstance()
+                .getPatrulByUUID
+                .apply( selfEmploymentTask.getTaskCommonParams().getPatruls().keySet().iterator().next() )
+                .flatMap( patrul -> super.function(
+                        Map.of( "message", selfEmploymentTask.getTaskCommonParams().getUuid()
+                                + " was linked to: "
+                                + TaskInspector
+                                .getInstance()
+                                .changeTaskStatus(
+                                        patrul,
+                                        selfEmploymentTask.getTaskCommonParams().getStatus(),
+                                        selfEmploymentTask )
+                                .getPatrulFIOData()
+                                .getName() ) ) )
+                .onErrorContinue( super::logging )
+                .onErrorReturn( super.errorResponse() );
+    }
 }

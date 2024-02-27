@@ -17,20 +17,20 @@ public final class FindFaceRegions {
     private String camera_name;
 
     @SerializedName( value = "region" )
-    private Integer region;
+    private int region;
 
     @SerializedName( value = "findFaceId" )
-    private Integer findFaceId;
+    private int findFaceId;
 
     @SerializedName( value = "district" )
-    private Integer district;
+    private int district;
 
     @SerializedName( value = "countryside" )
-    private Integer countryside;
+    private int countryside;
 
     @SerializedName( value = "latitude" )
-    private Double latitude;
+    private double latitude;
 
     @SerializedName( value = "longitude" )
-    private Double longitude;
+    private double longitude;
 }

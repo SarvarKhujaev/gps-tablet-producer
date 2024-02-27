@@ -1,6 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
 import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraFunctions;
+import com.ssd.mvd.gpstabletsservice.constants.CassandraCommands;
+import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskInspector;
@@ -10,9 +13,11 @@ import com.ssd.mvd.gpstabletsservice.tuple.EscortTuple;
 import com.ssd.mvd.gpstabletsservice.tuple.TupleOfCar;
 import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.entity.Country;
+import com.ssd.mvd.gpstabletsservice.entity.Data;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Row;
+import java.text.MessageFormat;
 
 import reactor.core.scheduler.Schedulers;
 import reactor.core.publisher.Flux;
@@ -29,376 +34,564 @@ import java.util.Map;
 @lombok.Data
 public final class CassandraDataControlForEscort extends CassandraConverter {
     private final Session session = CassandraDataControl.getInstance().getSession();
-    private final Cluster cluster = CassandraDataControl.getInstance().getCluster();
 
     private static CassandraDataControlForEscort INSTANCE = new CassandraDataControlForEscort();
 
-    public static CassandraDataControlForEscort getInstance () { return INSTANCE != null ? INSTANCE : ( INSTANCE = new CassandraDataControlForEscort() ); }
+    public static CassandraDataControlForEscort getInstance () {
+        return INSTANCE != null ? INSTANCE : ( INSTANCE = new CassandraDataControlForEscort() );
+    }
 
     private CassandraDataControlForEscort () {
-        this.getSession().execute( "CREATE KEYSPACE IF NOT EXISTS "
-                + CassandraTables.ESCORT +
-                " WITH REPLICATION = {" +
-                "'class' : 'NetworkTopologyStrategy'," +
-                "'datacenter1':3 }" +
-                "AND DURABLE_WRITES = false;" );
+        super.logging( "CassandraDataControlForEscort is ready" );
+    }
 
-        this.getSession().execute("CREATE TYPE IF NOT EXISTS "
-                + CassandraTables.ESCORT + "."
-                + CassandraTables.POINTS_ENTITY
-                + "( lat double, lng double, pointId uuid, pointName text );" );
-
-        this.getSession().execute("CREATE TYPE IF NOT EXISTS "
-                + CassandraTables.ESCORT + "."
-                + CassandraTables.POLYGON_ENTITY
-                + "( lat double, lng double );" );
-
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.ESCORT + "."
-                + CassandraTables.POLYGON_FOR_ESCORT
-                + "( uuid uuid PRIMARY KEY, " +
-                "uuidOfEscort uuid, " +
-                "name text, " +
-                "totalTime int, " +
-                "routeIndex int, " +
-                "totalDistance int, " +
-                "pointsList list< frozen < " + CassandraTables.POINTS_ENTITY + " > >, " +
-                "latlngs list< frozen < " + CassandraTables.POLYGON_ENTITY + " > > );" );
-
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.ESCORT + "."
-                + CassandraTables.TUPLE_OF_ESCORT +
-                " ( uuid uuid PRIMARY KEY, " +
-                " countries text, " +
-                " uuidOfPolygon uuid, " +
-                " tupleOfCarsList list< uuid >," +
-                " patrulList list< uuid > );" );
-
-        this.getSession().execute( "CREATE TABLE IF NOT EXISTS "
-                + CassandraTables.ESCORT + "."
-                + CassandraTables.COUNTRIES
-                + super.convertClassToCassandra.apply( Country.class )
-                + ", PRIMARY KEY ( uuid ) );" );
-
-        super.logging( "CassandraDataControlForEscort is ready" ); }
+    /*
+    возвращает ROW из БД для любой таблицы внутри Escort
+    */
+    public Row getRowFromEscortKeyspace (
+            // название таблицы внутри Tablets
+            final CassandraTables cassandraTableName,
+            // название колонки
+            final String columnName,
+            // параметр по которому введется поиск
+            final String paramName
+    ) {
+        return this.getSession().execute(
+                MessageFormat.format(
+                        """
+                        {0} {1}.{2} WHERE {3} = {4};
+                        """,
+                        CassandraCommands.SELECT_ALL,
+                        CassandraTables.ESCORT,
+                        cassandraTableName,
+                        columnName,
+                        paramName
+                )
+        ).one();
+    }
 
     private final Function< String, Mono< EscortTuple > > getCurrentTupleOfEscort = id -> super.convert(
-            new EscortTuple( this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.ESCORT + "."
-                    + CassandraTables.TUPLE_OF_ESCORT
-                    + " WHERE id = " + UUID.fromString( id ) + ";" ).one() ) );
+            new EscortTuple(
+                    this.getRowFromEscortKeyspace( CassandraTables.TUPLE_OF_ESCORT, "id", id ) ) );
 
     private final Function< String, Mono< ApiResponseModel > > deleteTupleOfEscort = id ->
             this.getGetCurrentTupleOfEscort().apply( id )
                     .flatMap( escortTuple -> {
                         final Optional< EscortTuple > optional = Optional.ofNullable( escortTuple );
+
+                        final StringBuilder stringBuilder = super.newStringBuilder();
+
                         // если у Эскорта есть закрепленные патрульные, то освобождаем их всех
-                        optional.filter( escortTuple1 -> super.checkRequest.test( escortTuple.getPatrulList(), 6 ) )
-                                .ifPresent( escortTuple1 -> escortTuple
-                                        .getPatrulList()
-                                        .parallelStream()
-                                        .forEach( uuid -> this.getSession().execute(
-                                                "UPDATE " + CassandraTables.TABLETS +
-                                                        "." + CassandraTables.PATRULS +
-                                                        " SET uuidOfEscort = " + null
-                                                        + ", uuidForEscortCar = " + null
-                                                        + " WHERE uuid = " + uuid + ";" ) ) );
+                        optional.filter( escortTuple1 -> super.isCollectionNotEmpty( escortTuple.getPatrulList() ) )
+                                .ifPresent( escortTuple1 -> {
+                                    final StringBuilder patrulUuids = super.newStringBuilder( "" );
+
+                                    super.analyze(
+                                            escortTuple.getPatrulList(),
+                                            uuid -> patrulUuids.append( uuid ).append( ", " )
+                                    );
+
+                                    stringBuilder.append(
+                                            MessageFormat.format(
+                                                    """
+                                                    {0} {1}.{2}
+                                                    SET uuidForEscortCar = {3},
+                                                    uuidOfEscort = {3}
+                                                    WHERE uuid in ( {4} );
+                                                    """,
+                                                    CassandraCommands.UPDATE,
+                                                    CassandraTables.TABLETS,
+                                                    CassandraTables.PATRULS,
+                                                    null,
+                                                    patrulUuids.substring( 0, patrulUuids.length() - 2 )
+                                            )
+                                    );
+                                } );
 
                         // также освобождаем все машины эскорта
-                        optional.filter( escortTuple1 -> super.checkRequest.test( escortTuple.getTupleOfCarsList(), 6 ) )
-                                .ifPresent( escortTuple1 -> escortTuple
-                                        .getTupleOfCarsList()
-                                        .parallelStream()
-                                        .forEach( uuid -> this.getGetCurrentTupleOfCar()
-                                                .apply( uuid )
-                                                .subscribe( tupleOfCar1 -> this.getSession().execute(
-                                                        "UPDATE " +
-                                                                CassandraTables.ESCORT + "."
-                                                                + CassandraTables.TUPLE_OF_CAR +
-                                                                " SET uuidOfEscort = " + null
-                                                                + ", uuidOfPatrul = " + null
-                                                                + " WHERE uuid = " + uuid +
-                                                                " AND trackerid = '" + tupleOfCar1.getTrackerId() + "';" ) ) ) );
+                        optional.filter( escortTuple1 -> super.isCollectionNotEmpty( escortTuple.getTupleOfCarsList() ) )
+                                .ifPresent( escortTuple1 -> {
+                                    final StringBuilder tupleCars = super.newStringBuilder( "" );
 
-                        return super.getFunction().apply(
+                                    super.analyze(
+                                            escortTuple.getTupleOfCarsList(),
+                                            uuid -> this.getGetCurrentTupleOfCar().apply( uuid )
+                                                    .subscribe(
+                                                            new CustomSubscriber<>(
+                                                                    tupleOfCar1 -> tupleCars.append(
+                                                                            MessageFormat.format(
+                                                                                    """
+                                                                                    {0} {1}.{2}
+                                                                                    SET uuidOfEscort = {3},
+                                                                                    uuidOfPatrul = {3}
+                                                                                    WHERE uuid = {4} AND trackerid = {5};
+                                                                                    """,
+                                                                                    CassandraCommands.UPDATE,
+                                                                                    CassandraTables.ESCORT,
+                                                                                    CassandraTables.TUPLE_OF_CAR,
+                                                                                    null,
+                                                                                    uuid,
+                                                                                    super.joinWithAstrix( tupleOfCar1.getTrackerId() )
+                                                                            )
+                                                                    )
+                                                            )
+                                                    )
+                                    );
+
+                                    stringBuilder.append( tupleCars );
+                                } );
+
+                        stringBuilder.append(
+                                MessageFormat.format(
+                                        """
+                                        {0} {1}.{2}
+                                        WHERE id = {3};
+                                        """,
+                                        CassandraCommands.DELETE,
+                                        CassandraTables.ESCORT,
+                                        CassandraTables.TUPLE_OF_ESCORT,
+                                        UUID.fromString( id ) )
+                        ).append( CassandraCommands.APPLY_BATCH );
+
+                        return super.function(
                                 Map.of( "message", id + " was successfully deleted",
-                                        "success", this.getSession()
-                                                .execute( "DELETE FROM "
-                                                        + CassandraTables.ESCORT + "."
-                                                        + CassandraTables.TUPLE_OF_ESCORT
-                                                        + " WHERE id = " + UUID.fromString( id ) + ";" )
-                                                .wasApplied() ) ); } );
+                                        "success", this.getSession().execute( stringBuilder.toString() ).wasApplied() ) );
+                    } );
 
     private final Consumer< EscortTuple > linkPatrulWithEscortCar = escortTuple ->
             Flux.range( 0, escortTuple.getPatrulList().size() )
                     .parallel( escortTuple.getPatrulList().size() )
                     .runOn( Schedulers.parallel() )
-                    .flatMap( integer -> CassandraDataControl
-                            .getInstance()
-                            .getGetPatrulByUUID()
-                            .apply( escortTuple.getPatrulList().get( integer ) )
-                            .flatMap( patrul -> {
-                                patrul.setUuidOfEscort( escortTuple.getUuid() );
-                                patrul.setUuidForEscortCar( escortTuple.getTupleOfCarsList().get( integer ) );
-                                TaskInspector
+                    .map( integer -> {
+                        final Patrul patrul = new Patrul(
+                                CassandraDataControl
                                         .getInstance()
-                                        .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, escortTuple )
-                                        .setUuidOfEscort( escortTuple.getUuid() );
-                                return this.getGetCurrentTupleOfCar()
-                                        .apply( patrul.getUuidForEscortCar() )
-                                        .flatMap( tupleOfCar -> {
-                                            tupleOfCar.setUuidOfPatrul( patrul.getUuid() );
-                                            tupleOfCar.setUuidOfEscort( escortTuple.getUuid() );
-                                            return this.getUpdateTupleOfCar().apply( tupleOfCar ); } ); } ) )
+                                        .getRowFromTabletsKeyspace(
+                                                CassandraTables.PATRULS,
+                                                "uuid",
+                                                escortTuple.getPatrulList().get( integer ).toString() ) );
+
+                        patrul.linkWithEscortCar(
+                                escortTuple.getUuid(),
+                                escortTuple.getTupleOfCarsList().get( integer )
+                        );
+
+                        TaskInspector
+                                .getInstance()
+                                .changeTaskStatus( patrul, com.ssd.mvd.gpstabletsservice.constants.Status.ATTACHED, escortTuple )
+                                .getPatrulUniqueValues()
+                                .setUuidOfEscort( escortTuple.getUuid() );
+
+                        return MessageFormat.format(
+                                """
+                                {0} {1}.{2}
+                                SET uuidOfPatrul = {3}, uuidOfEscort = {4}
+                                WHERE uuid = {5};
+                                """,
+                                CassandraCommands.UPDATE,
+                                CassandraTables.ESCORT,
+                                CassandraTables.TUPLE_OF_CAR,
+                                patrul.getUuid(),
+                                escortTuple.getUuid(),
+                                patrul.getPatrulUniqueValues().getUuidForEscortCar()
+                        );
+                    } )
                     .sequential()
                     .publishOn( Schedulers.single() )
-                    .subscribe( new CustomSubscriber( 0 ) );
+                    .collectList()
+                    .subscribe( new CustomSubscriber<>(
+                            strings -> {
+                                final StringBuilder stringBuilder = super.newStringBuilder();
+
+                                super.analyze(
+                                        strings,
+                                        stringBuilder::append
+                                );
+
+                                stringBuilder.append( CassandraCommands.APPLY_BATCH );
+
+                                this.getSession().execute( stringBuilder.toString() );
+                            }
+                    ) );
 
     private final Function< EscortTuple, Flux< ApiResponseModel > > saveEscortTuple = escortTuple -> {
-            if ( super.checkParam.test( escortTuple.getUuidOfPolygon() ) )
-                this.getGetCurrentPolygonForEscort()
-                        .apply( escortTuple.getUuidOfPolygon().toString() )
-                        .subscribe( polygonForEscort1 -> this.getSession().execute ( "UPDATE "
-                                        + CassandraTables.ESCORT + "."
-                                        + CassandraTables.POLYGON_FOR_ESCORT
-                                        + " SET uuidOfEscort = " + escortTuple.getUuid()
-                                        + " WHERE uuid = " + polygonForEscort1.getUuid() + ";" ) );
+        final StringBuilder stringBuilder = super.newStringBuilder();
 
-            this.getLinkPatrulWithEscortCar().accept( escortTuple );
-            return this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.ESCORT + "."
-                            + CassandraTables.TUPLE_OF_ESCORT
-                            + "( id," +
-                            " countries," +
-                            " uuidOfPolygon," +
-                            " tupleOfCarsList," +
-                            " patrulList ) VALUES ("
-                            + escortTuple.getUuid() + ", '"
-                            + escortTuple.getCountries() + "', "
-                            + escortTuple.getUuidOfPolygon() + ", "
-                            + super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ) + ", "
-                            + super.convertListToCassandra.apply( escortTuple.getPatrulList() ) + " ) IF NOT EXISTS;" )
+        /*
+        проверяем что эскорта не привязан к полигону
+        */
+        if ( super.objectIsNotNull( escortTuple.getUuidOfPolygon() ) ) {
+            /*
+            если да, то обновляем данные самого полигона
+            */
+            this.getGetCurrentPolygonForEscort()
+                    .apply( escortTuple.getUuidOfPolygon().toString() )
+                    .subscribe( new CustomSubscriber<>(
+                            polygonForEscort1 -> stringBuilder.append(
+                                    MessageFormat.format(
+                                            """
+                                            {0} {1}.{2}
+                                            SET uuidOfEscort = {3}
+                                            WHERE uuid = {4};
+                                            """,
+                                            CassandraCommands.UPDATE,
+                                            CassandraTables.ESCORT,
+                                            CassandraTables.POLYGON_FOR_ESCORT,
+                                            escortTuple.getUuid(),
+                                            polygonForEscort1.getUuid()
+                                    )
+                            )
+                    ) );
+        }
+
+        this.getLinkPatrulWithEscortCar().accept( escortTuple );
+
+        stringBuilder.append(
+                MessageFormat.format(
+                        """
+                        {0} {1}.{2}
+                        ( id, countries, uuidOfPolygon, tupleOfCarsList, patrulList )
+                        VALUES ( {3}, {4}, {5}, {6}, {7} );
+                        """,
+                        CassandraCommands.INSERT_INTO,
+                        CassandraTables.ESCORT,
+                        CassandraTables.TUPLE_OF_ESCORT,
+                        CassandraFunctions.UUID,
+                        super.joinWithAstrix( escortTuple.getCountries() ),
+                        escortTuple.getUuidOfPolygon(),
+                        super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ),
+                        super.convertListToCassandra.apply( escortTuple.getPatrulList() ) )
+        ).append( CassandraCommands.APPLY_BATCH );
+
+        return this.getSession().execute( stringBuilder.toString() ).wasApplied()
+                ? Flux.just( super.function( Map.of( "message", "Tuple was successfully created" ) ).block() )
+                : Flux.just( super.errorResponse( "Such a tuple has already been created" ).block() );
+    };
+
+    private final Function< EscortTuple, Mono< ApiResponseModel > > updateEscortTuple = escortTuple ->
+            this.getSession().execute(
+                    MessageFormat.format(
+                            """
+                            {0} {1}.{2}
+                            ( id, countries, uuidOfPolygon, tupleOfCarsList, patrulList )
+                            VALUES ( {3}, {4}, {5}, {6}, {7} ) {8};
+                            """,
+                            CassandraCommands.INSERT_INTO,
+                            CassandraTables.ESCORT,
+                            CassandraTables.TUPLE_OF_ESCORT,
+                            escortTuple.getUuid(),
+                            super.joinWithAstrix( escortTuple.getCountries() ),
+                            escortTuple.getUuidOfPolygon(),
+                            super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ),
+                            super.convertListToCassandra.apply( escortTuple.getPatrulList() ),
+                            CassandraCommands.IF_EXISTS ) )
                     .wasApplied()
-                    ? Flux.just( super.getFunction().apply( Map.of( "message", "Tuple was successfully created" ) ).block() )
-                    : Flux.just( super.error.apply( "Such a tuple has already been created" ).block() ); };
+                    ? super.function( Map.of( "message", escortTuple.getUuid() + " was updated successfully" ) )
+                    : super.errorResponse( "This car does not exist, choose another one" );
 
-    private final Function< EscortTuple, Mono< ApiResponseModel > > updateEscortTuple = escortTuple -> {
-            if ( super.checkParam.test( escortTuple.getUuidOfPolygon() ) ) this.getGetCurrentTupleOfEscort()
-                    .apply( escortTuple.getUuid().toString() )
-                    .filter( escortTuple1 -> super.checkParam.test( escortTuple1.getUuidOfPolygon() ) )
-                    .subscribe( escortTuple1 -> this.getSession().execute (
-                            "UPDATE "
-                                    + CassandraTables.ESCORT + "."
-                                    + CassandraTables.POLYGON_FOR_ESCORT
-                                    + " SET uuidOfEscort = " + null
-                                    + " WHERE uuid = " + escortTuple1.getUuidOfPolygon() + ";" ) );
-
-            this.getLinkPatrulWithEscortCar().accept( escortTuple );
-            return this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.ESCORT + "."
-                            + CassandraTables.TUPLE_OF_ESCORT
-                            + "( id," +
-                            " countries," +
-                            " uuidOfPolygon," +
-                            " tupleOfCarsList," +
-                            " patrulList ) VALUES ("
-                            + escortTuple.getUuid() + ", '"
-                            + escortTuple.getCountries() + "', "
-                            + escortTuple.getUuidOfPolygon() + ", "
-                            + super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ) + ", "
-                            + super.convertListToCassandra.apply( escortTuple.getPatrulList() ) + " );" )
+    private final Function< PolygonForEscort, Mono< ApiResponseModel > > savePolygonForEscort = polygon ->
+            this.getSession().execute(
+                    MessageFormat.format(
+                            """
+                            {0} {1}.{2}
+                            ( uuid, uuidOfEscort, name, totalTime, routeIndex, totalDistance, pointsList, latlngs )
+                            VALUES ( {3}, {4}, {5}, {6,number,#}, {7}, {8,number,#}, {9}, {10} );
+                            """,
+                            CassandraCommands.INSERT_INTO,
+                            CassandraTables.ESCORT,
+                            CassandraTables.POLYGON_FOR_ESCORT,
+                            CassandraFunctions.UUID,
+                            polygon.getUuidOfEscort(),
+                            super.joinWithAstrix( polygon.getName() ),
+                            polygon.getTotalTime(),
+                            polygon.getRouteIndex(),
+                            polygon.getTotalDistance(),
+                            super.convertListOfPointsToCassandra.apply( polygon.getPointsList() ),
+                            super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() ) ) )
                     .wasApplied()
-                    ? super.getFunction().apply( Map.of( "message", escortTuple.getUuid() + " was updated successfully" ) )
-                    : super.error.apply( "This car does not exist, choose another one" ); };
-
-    private final Function<PolygonForEscort, Mono< ApiResponseModel > > savePolygonForEscort = polygon ->
-            this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.ESCORT + "."
-                            + CassandraTables.POLYGON_FOR_ESCORT
-                            + "(uuid, " +
-                            "uuidOfEscort, " +
-                            "name, " +
-                            "totalTime, " +
-                            "routeIndex, " +
-                            "totalDistance, " +
-                            "pointsList, " +
-                            "latlngs ) VALUES ("
-                            + polygon.getUuid() + ", "
-                            + polygon.getUuidOfEscort() + ", '"
-                            + polygon.getName() + "', "
-
-                            + polygon.getTotalTime() + ", "
-                            + polygon.getRouteIndex() + ", "
-                            + polygon.getTotalDistance() + ", "
-
-                            + super.convertListOfPointsToCassandra.apply( polygon.getPointsList() ) + ", "
-
-                            + super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() )
-                            + ") IF NOT EXISTS;" )
-                    .wasApplied()
-                    ? super.getFunction().apply(
+                    ? super.function(
                             Map.of( "message", "Polygon was saved",
-                            "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                    .builder()
-                                    .type( polygon.getUuid().toString() )
-                                    .build() ) )
-                    : super.error.apply( "This polygon has already been saved" );
+                            "data", Data.from( polygon.getUuid().toString() ) ) )
+                    : super.errorResponse( "This polygon has already been saved" );
 
     private final Function< String, Mono< PolygonForEscort > > getCurrentPolygonForEscort = id -> super.convert(
-            new PolygonForEscort( this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.ESCORT + "."
-                    + CassandraTables.POLYGON_FOR_ESCORT
-                    + " WHERE uuid = " + UUID.fromString( id ) + ";" ).one() ) );
+            new PolygonForEscort(
+                    this.getRowFromEscortKeyspace( CassandraTables.POLYGON_FOR_ESCORT, "uuid", id ) ) );
 
     private final Function< String, Mono< ApiResponseModel > > deletePolygonForEscort = id ->
             this.getGetCurrentPolygonForEscort().apply( id )
-                    .flatMap( polygonForEscort -> polygonForEscort.getUuidOfEscort() == null
-                            ? super.getFunction().apply(
+                    .flatMap( polygonForEscort -> !super.objectIsNotNull( polygonForEscort.getUuidOfEscort() )
+                            ? super.function(
                                     Map.of( "message", id + " was removed successfully",
-                                            "success", this.getSession().execute( "DELETE FROM "
-                                                    + CassandraTables.ESCORT + "."
-                                                    + CassandraTables.POLYGON_FOR_ESCORT
-                                                    + " WHERE uuid = " + UUID.fromString( id ) + ";" )
+                                            "success", this.getSession().execute(
+                                                            MessageFormat.format(
+                                                                    """
+                                                                    {0} {1}.{2} WHERE uuid = {3};
+                                                                    """,
+                                                                    CassandraCommands.DELETE,
+                                                                    CassandraTables.ESCORT,
+                                                                    CassandraTables.POLYGON_FOR_ESCORT,
+                                                                    id
+                                                            )
+                                                    )
                                             .wasApplied() ) )
-                            : super.error.apply( "polygon cannot be removed. cause it is linked to Escort" ) );
+                            : super.errorResponse( "polygon cannot be removed. cause it is linked to Escort" ) );
 
     private final Function< PolygonForEscort, Mono< ApiResponseModel > > updatePolygonForEscort = polygon ->
-            this.checkPolygonForEscort.test( polygon )
-                    ? this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.ESCORT + "."
-                            + CassandraTables.POLYGON_FOR_ESCORT
-                            + "(uuid, " +
-                            "uuidOfEscort, " +
-                            "name, " +
-                            "totalTime, " +
-                            "routeIndex, " +
-                            "totalDistance, " +
-                            "pointsList, " +
-                            "latlngs ) VALUES ("
-                            + polygon.getUuid() + ", "
-                            + polygon.getUuidOfEscort() + ", '"
-                            + polygon.getName() + "', "
-
-                            + polygon.getTotalTime() + ", "
-                            + polygon.getRouteIndex() + ", "
-                            + polygon.getTotalDistance() + ", "
-
-                            + super.convertListOfPointsToCassandra.apply( polygon.getPointsList() ) + ", "
-                            + super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() ) + ");" )
+            super.objectIsNotNull(
+                    this.getRowFromEscortKeyspace(
+                            CassandraTables.POLYGON_FOR_ESCORT,
+                            "uuid",
+                            polygon.getUuid().toString() ) )
+                    ? this.getSession().execute(
+                            MessageFormat.format(
+                                    """
+                                    {0} {1}.{2}
+                                    ( uuid, uuidOfEscort, name, totalTime, routeIndex, totalDistance, pointsList, latlngs )
+                                    VALUES ( {3}, {4}, {5}, {6,number,#}, {7}, {8,number,#}, {9}, {10} );
+                                    """,
+                                    CassandraCommands.INSERT_INTO,
+                                    CassandraTables.ESCORT,
+                                    CassandraTables.POLYGON_FOR_ESCORT,
+                                    polygon.getUuid(),
+                                    polygon.getUuidOfEscort(),
+                                    super.joinWithAstrix( polygon.getName() ),
+                                    polygon.getTotalTime(),
+                                    polygon.getRouteIndex(),
+                                    polygon.getTotalDistance(),
+                                    super.convertListOfPointsToCassandra.apply( polygon.getPointsList() ),
+                                    super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() ) ) )
                     .wasApplied()
-                    ? super.getFunction().apply(
+                    ? super.function(
                             Map.of( "message", "Polygon was updated successfully",
-                                    "data", com.ssd.mvd.gpstabletsservice.entity.Data
-                                            .builder()
-                                            .type( polygon.getUuid().toString() )
-                                            .build() ) )
-                    : super.error.apply( "This polygon has already been saved" )
-                    : super.error.apply( "This polygon does not exists. so u cannot update it" );
-
-    private final Consumer< TupleOfCar > unlinkTupleOfCarFromPatrul = tupleOfCar ->
-            this.getSession().execute( "UPDATE "
-                        + CassandraTables.ESCORT + "."
-                        + CassandraTables.TUPLE_OF_CAR
-                        + " SET uuidOfPatrul = " + tupleOfCar.getUuidOfPatrul()
-                        + " WHERE uuid = " + tupleOfCar.getUuid() + ";" );
+                                    "data", Data.from( polygon.getUuid().toString() ) ) )
+                    : super.errorResponse( "This polygon has already been saved" )
+                    : super.errorResponse( "This polygon does not exists. so u cannot update it" );
 
     private final Function< TupleOfCar, Mono< ApiResponseModel > > updateTupleOfCar = tupleOfCar ->
-            this.getSession().execute( "INSERT INTO "
-                            + CassandraTables.ESCORT + "."
-                            + CassandraTables.TUPLE_OF_CAR
-                            + super.getALlNames.apply( TupleOfCar.class )
-                            + " VALUES("
-                            + tupleOfCar.getUuid() + ", "
-                            + tupleOfCar.getUuidOfEscort() + ", "
-                            + tupleOfCar.getUuidOfPatrul() + ", '"
-                            + tupleOfCar.getCarModel() + "', '"
-                            + tupleOfCar.getGosNumber() + "', '"
-                            + tupleOfCar.getTrackerId() + "', '"
-                            + tupleOfCar.getNsfOfPatrul() + "', '"
-                            + tupleOfCar.getSimCardNumber() + "', "
+            this.getSession().execute(
+                    MessageFormat.format(
+                            """
+                            {0} {1}.{2} {3}
+                            VALUES( {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14} );
+                            """,
+                            CassandraCommands.INSERT_INTO,
+                            CassandraTables.ESCORT,
+                            CassandraTables.TUPLE_OF_CAR,
+                            super.getALlParamsNamesForClass.apply( TupleOfCar.class ),
+                            CassandraFunctions.UUID,
+                            tupleOfCar.getUuidOfEscort(),
+                            tupleOfCar.getUuidOfPatrul(),
 
-                            + tupleOfCar.getLatitude() + ", "
-                            + tupleOfCar.getLongitude() + ", " +
-                            tupleOfCar.getAverageFuelConsumption() + ");" )
+                            super.joinWithAstrix( tupleOfCar.getCarModel() ),
+                            super.joinWithAstrix( tupleOfCar.getGosNumber() ),
+                            super.joinWithAstrix( tupleOfCar.getTrackerId() ),
+                            super.joinWithAstrix( tupleOfCar.getNsfOfPatrul() ),
+
+                            super.joinWithAstrix( tupleOfCar.getSimCardNumber() ),
+                            tupleOfCar.getLatitude(),
+                            tupleOfCar.getLongitude(),
+                            tupleOfCar.getAverageFuelConsumption() ) )
                     .wasApplied()
-                    ? super.getFunction().apply( Map.of( "message", "Car" + tupleOfCar.getGosNumber() + " was updated successfully" ) )
-                    : super.error.apply( "This car does not exists" );
+                    ? super.function( Map.of( "message", "Car " + tupleOfCar.getGosNumber() + " was updated successfully" ) )
+                    : super.errorResponse( "This car does not exists" );
+
+    private final Function< TupleOfCar, Mono< ApiResponseModel > > updateEscortAfterDeleting = tupleOfCar -> {
+            final EscortTuple escortTuple = new EscortTuple(
+                    this.getRowFromEscortKeyspace(
+                            CassandraTables.TUPLE_OF_ESCORT,
+                            "id",
+                            tupleOfCar.getUuidOfEscort().toString() ) );
+
+            escortTuple.removePatrulAndCar( tupleOfCar );
+
+            final StringBuilder stringBuilder = super.newStringBuilder();
+
+            stringBuilder.append(
+                    MessageFormat.format(
+                            """
+                            {0} {1}.{2}
+                            SET tupleOfCarsList = {3}, patrulList = {4};
+                            """,
+                            CassandraCommands.UPDATE,
+                            CassandraTables.ESCORT,
+                            CassandraTables.TUPLE_OF_ESCORT,
+                            super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ),
+                            super.convertListToCassandra.apply( escortTuple.getPatrulList() )
+                    )
+            );
+
+            final Patrul patrul = new Patrul(
+                    CassandraDataControl
+                            .getInstance()
+                            .getRowFromTabletsKeyspace(
+                                    CassandraTables.PATRULS,
+                                    "uuid",
+                                    tupleOfCar.getUuidOfPatrul().toString() ) );
+
+            patrul.getPatrulUniqueValues().unlinkFromEscortCar();
+
+            stringBuilder.append(
+                    MessageFormat.format(
+                            """
+                            {0} {1}.{2}
+                            SET uuidForEscortCar = {3},
+                            uuidOfEscort = {3}
+                            WHERE uuid = {4};
+                            """,
+                            CassandraCommands.UPDATE,
+                            CassandraTables.TABLETS,
+                            CassandraTables.PATRULS,
+                            null,
+                            patrul.getUuid()
+                    )
+            );
+
+            tupleOfCar.unlinkFromEscortCarAndPatrul();
+
+            stringBuilder.append(
+                    MessageFormat.format(
+                            """
+                            {0} {1}.{2}
+                            SET uuidOfPatrul = {3},
+                            uuidOfEscort = {3}
+                            WHERE uuid = {4};
+                            """,
+                            CassandraCommands.UPDATE,
+                            CassandraTables.ESCORT,
+                            CassandraTables.TUPLE_OF_CAR,
+                            null,
+                            tupleOfCar.getUuid()
+                    )
+            );
+
+            return this.getSession().execute(
+                    stringBuilder.append( CassandraCommands.APPLY_BATCH ).toString()
+            ).wasApplied()
+                    ? super.function( Map.of( "message", "Car" + tupleOfCar.getGosNumber() + " was updated successfully" ) )
+                    : super.errorResponse( "This car does not exists" );
+    };
 
     private final BiFunction< String, TupleTotalData, Mono< TupleTotalData > > getTupleTotalData = ( uuid, tupleTotalData ) ->
             this.getGetCurrentTupleOfEscort().apply( uuid )
                     .map( escortTuple -> {
-                        if ( super.checkParam.test( escortTuple.getUuidOfPolygon() ) )
-                            this.getGetCurrentPolygonForEscort()
-                                    .apply( escortTuple.getUuidOfPolygon().toString() )
-                                    .subscribe( new CustomSubscriber( 6, tupleTotalData ) );
+                        /*
+                        проверяем есть ли у эскорта полигон
+                        */
+                        if ( super.objectIsNotNull( escortTuple.getUuidOfPolygon() ) ) {
+                            tupleTotalData.setPolygonForEscort(
+                                    new PolygonForEscort(
+                                            this.getRowFromEscortKeyspace(
+                                                    CassandraTables.POLYGON_FOR_ESCORT,
+                                                    "uuid",
+                                                    escortTuple.getUuidOfPolygon().toString()
+                                            )
+                                    )
+                            );
+                        }
 
-                        escortTuple
-                                .getPatrulList()
-                                .parallelStream()
-                                .forEach( uuid1 -> CassandraDataControl
-                                        .getInstance()
-                                        .getGetPatrulByUUID()
-                                        .apply( uuid1 )
-                                        .subscribe( new CustomSubscriber( 7, tupleTotalData ) ) );
+                        /*
+                        сохраняем все данные патрульных прикрепленных к эскорту
+                        */
+                        super.analyze(
+                                escortTuple.getPatrulList(),
+                                uuid1 -> tupleTotalData.getPatrulList().add(
+                                        new Patrul(
+                                                CassandraDataControl
+                                                    .getInstance()
+                                                    .getRowFromTabletsKeyspace(
+                                                            CassandraTables.PATRULS,
+                                                            "uuid",
+                                                            uuid1.toString() ) )
+                                )
+                        );
 
-                        escortTuple
-                                .getTupleOfCarsList()
-                                .parallelStream()
-                                .forEach( uuid1 -> CassandraDataControlForEscort
-                                        .getInstance()
-                                        .getGetCurrentTupleOfCar()
-                                        .apply( uuid1 )
-                                        .subscribe( new CustomSubscriber( 8, tupleTotalData ) ) );
-                        return tupleTotalData; } );
+                        /*
+                        сохраняем все данные машин прикрепленных к эскорту
+                        */
+                        super.analyze(
+                                escortTuple.getTupleOfCarsList(),
+                                uuid1 -> tupleTotalData.getTupleOfCarList().add(
+                                        new TupleOfCar(
+                                                this.getRowFromEscortKeyspace(
+                                                        CassandraTables.TUPLE_OF_CAR,
+                                                        "uuid",
+                                                        uuid1.toString()
+                                                )
+                                        )
+                                )
+                        );
+
+                        return tupleTotalData;
+                    } );
 
     private final Function< UUID, Mono< TupleOfCar > > getCurrentTupleOfCar = uuid -> super.convert(
-            new TupleOfCar( this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.ESCORT + "."
-                    + CassandraTables.TUPLE_OF_CAR
-                    + " WHERE uuid = " + uuid + ";" ).one() ) );
+            new TupleOfCar(
+                    this.getRowFromEscortKeyspace( CassandraTables.TUPLE_OF_CAR, "uuid", uuid.toString() ) ) );
 
     private final Function< String, Mono< Country > > getCurrentCountry = uuid -> super.convert(
-            new Country( this.getSession().execute( "SELECT * FROM "
-                    + CassandraTables.ESCORT + "."
-                    + CassandraTables.COUNTRIES
-                    + " WHERE uuid = " + UUID.fromString( uuid ) + ";" ).one() ) );
+            new Country( this.getRowFromEscortKeyspace( CassandraTables.COUNTRIES, "uuid", uuid ) ) );
 
-    private final Function< String, Mono< ApiResponseModel > > deleteCountry = countryName -> {
-            this.getSession().execute ( "DELETE FROM "
-                    + CassandraTables.ESCORT + "."
-                    + CassandraTables.COUNTRIES
-                    + " WHERE uuid = " + UUID.fromString( countryName ) + ";" );
-            return super.getFunction().apply( Map.of( "message", countryName + " bazadan ochirildi" ) ); };
+    private final Function< String, Mono< ApiResponseModel > > deleteCountry = countryId -> {
+            this.getSession().execute (
+                    MessageFormat.format(
+                            """
+                            {0} {1}.{2} WHERE uuid = {3};
+                            """,
+                            CassandraCommands.DELETE,
+                            CassandraTables.ESCORT,
+                            CassandraTables.COUNTRIES,
+                            countryId
+                    )
+            );
+            return super.function( Map.of( "message", countryId + " bazadan ochirildi" ) );
+    };
 
     private final Function< Country, Mono< ApiResponseModel > > saveNewCountry = country -> this.getSession().execute(
-            "INSERT INTO "
-                    + CassandraTables.ESCORT + "."
-                    + CassandraTables.COUNTRIES
-                    + super.getALlNames.apply( Country.class )
-                    + " VALUES("
-                    + country.getUuid() + ", '"
-                    + ( super.checkParam.test( country.getFlag() ) && !country.getFlag().isEmpty()
-                    ? country.getFlag() : Errors.DATA_NOT_FOUND ) + "', '"
-                    + super.concatNames.apply( country.getSymbol().toUpperCase(), 3 ) + "', '"
-                    + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 3 ) + "', '"
-                    + super.concatNames.apply( country.getCountryNameUz().toUpperCase(), 3 ) + "', '"
-                    + super.concatNames.apply( country.getCountryNameRu().toUpperCase(), 3 )
-                    + "') IF NOT EXISTS;" )
+            MessageFormat.format(
+                    """
+                    {0} {1}.{2} {3}
+                    VALUES( {4}, {5}, {6}, {7}, {8}, {9} );
+                    """,
+                    CassandraCommands.INSERT_INTO,
+                    CassandraTables.ESCORT,
+                    CassandraTables.COUNTRIES,
+
+                    super.convertClassToCassandra.apply( Country.class ),
+
+                    CassandraFunctions.UUID,
+                    super.joinWithAstrix(
+                            ( !country.getFlag().isBlank()
+                                    ? country.getFlag()
+                                    : Errors.DATA_NOT_FOUND )
+                    ),
+                    super.joinWithAstrix( country.getSymbol().toUpperCase() ),
+                    super.joinWithAstrix( country.getCountryNameEn().toUpperCase() ),
+                    super.joinWithAstrix( country.getCountryNameUz().toUpperCase() ),
+                    super.joinWithAstrix( country.getCountryNameRu().toUpperCase() ) ) )
             .wasApplied()
-            ? super.getFunction().apply( Map.of( "message", "Yangi davlat bazaga qoshildi" ) )
-            : super.error.apply( "This country has already been inserted" );
+            ? super.function( Map.of( "message", "Yangi davlat bazaga qoshildi" ) )
+            : super.errorResponse( "This country has already been inserted" );
 
     private final Function< Country, Mono< ApiResponseModel > > update = country -> this.getSession().execute(
-            "UPDATE "
-                    + CassandraTables.ESCORT + "."
-                    + CassandraTables.COUNTRIES +
-                    " SET countryNameUz = '" + super.concatNames.apply( country.getCountryNameUz().toUpperCase(), 3 ) + "', " +
-                    "countryNameRu = '" + super.concatNames.apply( country.getCountryNameRu().toUpperCase(), 3 ) + "', " +
-                    "flag = '" + country.getFlag() + "', " +
-                    "symbol = '" + super.concatNames.apply( country.getSymbol().toUpperCase(), 3 ) +
-                    " countryNameEn = '" + super.concatNames.apply( country.getCountryNameEn().toUpperCase(), 3 ) +
-                    "' WHERE uuid = " + country.getUuid() + " IF EXISTS;" )
+            MessageFormat.format(
+                    """
+                    {0} {1}.{2} {3}
+                    VALUES( {4}, {5}, {6}, {7}, {8}, {9} );
+                    """,
+                    CassandraCommands.INSERT_INTO,
+                    CassandraTables.ESCORT,
+                    CassandraTables.COUNTRIES,
+
+                    super.getALlParamsNamesForClass.apply( Country.class ),
+
+                    country.getUuid(),
+                    super.joinWithAstrix( country.getFlag() ),
+                    super.joinWithAstrix( country.getSymbol().toUpperCase() ),
+                    super.joinWithAstrix( country.getCountryNameEn().toUpperCase() ),
+                    super.joinWithAstrix( country.getCountryNameUz().toUpperCase() ),
+                    super.joinWithAstrix( country.getCountryNameRu().toUpperCase() ) ) )
             .wasApplied()
-            ? super.getFunction().apply( Map.of( "message", country.getCountryNameEn() + " muvaffaqiyatli yangilandi" ) )
-            : super.error.apply( "This country has not been inserted yet" );
+            ? super.function( Map.of( "message", country.getCountryNameEn() + " muvaffaqiyatli yangilandi" ) )
+            : super.errorResponse( "This country has not been inserted yet" );
 }

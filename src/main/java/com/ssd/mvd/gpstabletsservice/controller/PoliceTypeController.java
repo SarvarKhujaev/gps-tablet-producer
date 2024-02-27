@@ -16,37 +16,45 @@ import reactor.core.publisher.Mono;
 @RestController
 public final class PoliceTypeController extends LogInspector {
     @MessageMapping ( value = "getPoliceTypeList" )
-    public Flux< PoliceType > getPoliceTypeList () { return CassandraDataControl
+    public Flux< PoliceType > getPoliceTypeList () {
+        return CassandraDataControl
             .getInstance()
-            .getGetAllEntities()
+            .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.POLICE_TYPE )
             .map( PoliceType::new )
             .sequential()
             .publishOn( Schedulers.single() )
-            .onErrorContinue( super::logging ); }
+            .onErrorContinue( super::logging );
+    }
 
     @MessageMapping( value = "addPoliceType" )
-    public Mono< ApiResponseModel > addPoliceType ( final PoliceType policeType ) { return CassandraDataControl
+    public Mono< ApiResponseModel > addPoliceType ( final PoliceType policeType ) {
+        return CassandraDataControl
             .getInstance()
-            .getSavePoliceType()
+            .savePoliceType
             .apply( policeType )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "updatePoliceType" )
-    public Mono< ApiResponseModel > updatePoliceType ( final PoliceType policeType ) { return CassandraDataControl
+    public Mono< ApiResponseModel > updatePoliceType ( final PoliceType policeType ) {
+        return CassandraDataControl
             .getInstance()
-            .getUpdatePoliceType()
+            .updatePoliceType
             .apply( policeType )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 
     @MessageMapping ( value = "deletePoliceType" )
-    public Mono< ApiResponseModel > deletePoliceType ( final PoliceType policeType ) { return CassandraDataControl
+    public Mono< ApiResponseModel > deletePoliceType ( final PoliceType policeType ) {
+        return CassandraDataControl
             .getInstance()
             .delete( CassandraTables.POLICE_TYPE.name(),
                     "uuid",
                     policeType.getUuid().toString() )
             .onErrorContinue( super::logging )
-            .onErrorReturn( super.getErrorResponse().get() ); }
+            .onErrorReturn( super.errorResponse() );
+    }
 }
