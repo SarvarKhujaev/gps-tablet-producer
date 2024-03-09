@@ -1,11 +1,14 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
 import java.util.Date;
+
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.UDTValue;
-import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
 
-public final class PatrulDateData extends TimeInspector {
+import com.ssd.mvd.gpstabletsservice.inspectors.TimeInspector;
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
+
+public final class PatrulDateData extends TimeInspector implements ObjectCommonMethods< PatrulDateData > {
     public Date getTaskDate() {
         return this.taskDate;
     }
@@ -49,7 +52,7 @@ public final class PatrulDateData extends TimeInspector {
     private Date startedToWorkDate;
     private Date dateOfRegistration;
 
-    public void update ( final Integer value ) {
+    public PatrulDateData update ( final Integer value ) {
         final Date date = super.newDate();
         switch ( value ) {
             case 2 -> {
@@ -61,33 +64,42 @@ public final class PatrulDateData extends TimeInspector {
             case 1 -> this.setTaskDate( date );
             default -> this.setStartedToWorkDate( date );
         }
+
+        return this;
     }
 
-    public static PatrulDateData generateWithInitialValues () {
+    private PatrulDateData () {}
+
+    public static PatrulDateData empty() {
         return new PatrulDateData();
     }
 
-    private PatrulDateData () {
-        this.update( 2 );
-    }
-
-    public static <T> PatrulDateData generate ( final T object ) {
-        return object instanceof Row
-                ? new PatrulDateData( (Row) object )
-                : new PatrulDateData( (UDTValue) object );
-    }
-
-    private PatrulDateData ( final Row row ) {
-        this.setTaskDate( row.getTimestamp( "taskDate" ) );
-        this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
-        this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );
+    @Override
+    public PatrulDateData generate( final Row row ) {
         this.setDateOfRegistration( row.getTimestamp( "dateOfRegistration" ) );
+        this.setStartedToWorkDate( row.getTimestamp( "startedToWorkDate" ) );
+        this.setLastActiveDate( row.getTimestamp( "lastActiveDate" ) );
+        this.setTaskDate( row.getTimestamp( "taskDate" ) );
+
+        return this;
     }
 
-    private PatrulDateData( final UDTValue udtValue ) {
-        this.setTaskDate( udtValue.getTimestamp( "taskDate" ) );
-        this.setLastActiveDate( udtValue.getTimestamp( "lastActiveDate" ) );
-        this.setStartedToWorkDate( udtValue.getTimestamp( "startedToWorkDate" ) );
+    @Override
+    public PatrulDateData generate( final UDTValue udtValue ) {
         this.setDateOfRegistration( udtValue.getTimestamp( "dateOfRegistration" ) );
+        this.setStartedToWorkDate( udtValue.getTimestamp( "startedToWorkDate" ) );
+        this.setLastActiveDate( udtValue.getTimestamp( "lastActiveDate" ) );
+        this.setTaskDate( udtValue.getTimestamp( "taskDate" ) );
+
+        return this;
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setTimestamp( "taskDate", this.getTaskDate() )
+                .setTimestamp( "lastActiveDate", this.getLastActiveDate() )
+                .setTimestamp( "startedToWorkDate", this.getStartedToWorkDate() )
+                .setTimestamp( "dateOfRegistration", this.getDateOfRegistration() );
     }
 }

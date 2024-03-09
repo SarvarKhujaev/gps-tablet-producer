@@ -21,7 +21,7 @@ public final class PolygonController extends LogInspector {
     public Mono< ApiResponseModel > deletePolygon ( final String uuid ) {
         return CassandraDataControl
             .getInstance()
-            .delete( CassandraTables.POLYGON.name(),
+            .close( CassandraTables.POLYGON.name(),
                     "uuid",
                     uuid )
             .onErrorContinue( super::logging )

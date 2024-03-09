@@ -86,7 +86,7 @@ public final class PatrulController extends SerDes {
         super.analyze(
                 UnirestController
                         .getInstance()
-                        .getGetRegions()
+                        .getRegions
                         .apply( !params.containsKey( "regionId" ) ? -1L : Long.parseLong( params.get( "regionId" ) ) ),
                 regionData -> regions.put( regionData.getId(), new PatrulDivisionByRegions( regionData ) )
         );
@@ -166,7 +166,7 @@ public final class PatrulController extends SerDes {
     public Mono< ApiResponseModel > addUser ( final Patrul patrul ) {
         UnirestController
                 .getInstance()
-                .getAddUser()
+                .addUser
                 .accept( patrul );
 
         return CassandraDataControl
@@ -228,7 +228,7 @@ public final class PatrulController extends SerDes {
     public Mono< ApiResponseModel > updatePatrul ( final Patrul patrul ) {
         UnirestController
                 .getInstance()
-                .getUpdateUser()
+                .updateUser
                 .accept( patrul );
 
         return CassandraDataControl
@@ -254,7 +254,7 @@ public final class PatrulController extends SerDes {
     public Mono< ApiResponseModel > deletePatrul ( final String passportNumber ) {
         UnirestController
                 .getInstance()
-                .getDeleteUser()
+                .deleteUser
                 .accept( passportNumber );
 
         return CassandraDataControl

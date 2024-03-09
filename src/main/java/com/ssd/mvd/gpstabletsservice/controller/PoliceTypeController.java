@@ -21,7 +21,7 @@ public final class PoliceTypeController extends LogInspector {
             .getInstance()
             .getAllEntities
             .apply( CassandraTables.TABLETS, CassandraTables.POLICE_TYPE )
-            .map( PoliceType::new )
+            .map( row -> PoliceType.empty().generate( row ) )
             .sequential()
             .publishOn( Schedulers.single() )
             .onErrorContinue( super::logging );
@@ -51,7 +51,7 @@ public final class PoliceTypeController extends LogInspector {
     public Mono< ApiResponseModel > deletePoliceType ( final PoliceType policeType ) {
         return CassandraDataControl
             .getInstance()
-            .delete( CassandraTables.POLICE_TYPE.name(),
+            .close( CassandraTables.POLICE_TYPE.name(),
                     "uuid",
                     policeType.getUuid().toString() )
             .onErrorContinue( super::logging )

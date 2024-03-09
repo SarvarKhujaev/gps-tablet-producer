@@ -30,12 +30,15 @@ public final class MinIoController extends LogInspector {
 
     private static final MinIoController INSTANCE  = new MinIoController();
 
-    public static MinIoController getInstance() { return INSTANCE; }
+    public static MinIoController getInstance() {
+        return INSTANCE;
+    }
 
     public void sendFileToMinio ( final String fileName, final StringBuilder stringBuilder ) {
         try {
-            if ( !this.minioClient.bucketExists( BucketExistsArgs.builder().bucket( this.BUCKET_NAME ).build() ) )
+            if ( !this.minioClient.bucketExists( BucketExistsArgs.builder().bucket( this.BUCKET_NAME ).build() ) ) {
                 this.minioClient.makeBucket( MakeBucketArgs.builder().bucket( this.BUCKET_NAME ).build() );
+            }
 
             this.minioClient.uploadObject(
                     UploadObjectArgs
@@ -44,5 +47,8 @@ public final class MinIoController extends LogInspector {
                             .object( stringBuilder.toString() )
                             .filename( fileName )
                             .build() );
-        } catch ( final Exception e ) { super.logging( e ); } }
+        } catch ( final Exception e ) {
+            super.logging( e );
+        }
+    }
 }

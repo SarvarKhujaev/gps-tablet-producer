@@ -3,8 +3,9 @@ package com.ssd.mvd.gpstabletsservice.entity;
 import java.util.UUID;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.UDTValue;
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
 
-public final class PoliceType {
+public final class PoliceType implements ObjectCommonMethods< PoliceType > {
     public UUID getUuid() {
         return this.uuid;
     }
@@ -42,17 +43,38 @@ public final class PoliceType {
     private String icon2;
     private String policeType;
 
-    public PoliceType ( final Row value ) {
-        this.setUuid( value.getUUID( "uuid" ) );
-        this.setIcon( value.getString( "icon" ) );
-        this.setIcon2( value.getString( "icon2" ) );
-        this.setPoliceType( value.getString( "PoliceType" ) );
+    public static PoliceType empty () {
+        return new PoliceType();
     }
 
-    public PoliceType ( final UDTValue value ) {
-        this.setUuid( value.getUUID( "uuid" ) );
-        this.setIcon( value.getString( "icon" ) );
-        this.setIcon2( value.getString( "icon2" ) );
-        this.setPoliceType( value.getString( "PoliceType" ) );
+    private PoliceType () {}
+
+    @Override
+    public PoliceType generate( final Row row ) {
+        this.setPoliceType( row.getString( "PoliceType" ) );
+        this.setIcon2( row.getString( "icon2" ) );
+        this.setIcon( row.getString( "icon" ) );
+        this.setUuid( row.getUUID( "uuid" ) );
+
+        return this;
+    }
+
+    @Override
+    public PoliceType generate( final UDTValue udtValue ) {
+        this.setPoliceType( udtValue.getString( "PoliceType" ) );
+        this.setIcon2( udtValue.getString( "icon2" ) );
+        this.setIcon( udtValue.getString( "icon" ) );
+        this.setUuid( udtValue.getUUID( "uuid" ) );
+
+        return this;
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setUUID( "uuid", this.getUuid() )
+                .setString( "icon", this.getIcon() )
+                .setString( "icon2", this.getIcon2() )
+                .setString( "policeType", this.getPoliceType() );
     }
 }

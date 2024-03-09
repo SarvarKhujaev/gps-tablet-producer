@@ -1,10 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
+
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
-import java.util.Optional;
 
-public final class PatrulMobileAppInfo {
+public final class PatrulMobileAppInfo extends DataValidateInspector implements ObjectCommonMethods< PatrulMobileAppInfo > {
     public String getPhoneNumber() {
         return this.phoneNumber;
     }
@@ -33,33 +35,48 @@ public final class PatrulMobileAppInfo {
     private String simCardNumber;
     private byte batteryLevel;
 
+    public PatrulMobileAppInfo setInitialValues () {
+        this.setBatteryLevel( (byte) 0 );
+        this.setSimCardNumber( "" );
+        this.setPhoneNumber( "" );
+
+        return this;
+    }
+
     public static PatrulMobileAppInfo empty() {
         return new PatrulMobileAppInfo();
     }
 
-    private PatrulMobileAppInfo () {
-        this.setPhoneNumber( "" );
-        this.setSimCardNumber( "" );
-        this.setBatteryLevel( (byte) 0 );
-    }
+    private PatrulMobileAppInfo () {}
 
-    public static <T> PatrulMobileAppInfo generate ( final T object ) {
-        return object instanceof Row
-                ? new PatrulMobileAppInfo( (Row) object )
-                : new PatrulMobileAppInfo( (UDTValue) object );
-    }
-
-    private PatrulMobileAppInfo ( final Row row ) {
+    @Override
+    public PatrulMobileAppInfo generate( final Row row ) {
+        this.setSimCardNumber( row.getString( "simCardNumber" ) );
         this.setBatteryLevel( row.getByte( "batteryLevel" ) );
         this.setPhoneNumber( row.getString( "phoneNumber" ) );
-        this.setSimCardNumber( row.getString( "simCardNumber" ) );
+
+        return this;
     }
 
-    private PatrulMobileAppInfo( final UDTValue udtValue ) {
-        Optional.ofNullable( udtValue ).ifPresent( udtValue1 -> {
-            this.setBatteryLevel( udtValue.getByte( "batteryLevel" ) );
-            this.setPhoneNumber( udtValue.getString( "phoneNumber" ) );
-            this.setSimCardNumber( udtValue.getString( "simCardNumber" ) );
-        } );
+    @Override
+    public PatrulMobileAppInfo generate( final UDTValue udtValue ) {
+        super.checkAndSetParams(
+                udtValue,
+                udtValue1 -> {
+                    this.setBatteryLevel( udtValue.getByte( "batteryLevel" ) );
+                    this.setPhoneNumber( udtValue.getString( "phoneNumber" ) );
+                    this.setSimCardNumber( udtValue.getString( "simCardNumber" ) );
+                }
+        );
+
+        return this;
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setString( "phoneNumber", this.getPhoneNumber() )
+                .setString( "simCardNumber", this.getSimCardNumber() )
+                .setByte( "batteryLevel", this.getBatteryLevel() );
     }
 }

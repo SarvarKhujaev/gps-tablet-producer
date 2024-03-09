@@ -9,35 +9,21 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 public class TimeInspector extends StringOperations {
-    public static int DAY_IN_SECOND = 86400;
+    protected static int DAY_IN_SECOND = 86400;
 
     public Date getDate() {
         return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public Calendar getCalendar() {
         return calendar;
     }
 
-    public static long getTimestamp() {
-        return timestamp;
-    }
-
     private Date date; // for comparing with current time
     private final Calendar calendar = Calendar.getInstance();
 
-    private static long timestamp = 30L; // time interval of how much time has to be matched to set User like offline 30 mins by default
-    private static long timestampForArchive = 15L;
-
-    private static byte endTimeForEvening = 24;
-    private static byte endTimeForMorning = 16;
-
-    private static byte startTimeForMorning = 0;
-    private static byte startTimeForEvening = 16;
+    private static final byte endTimeForEvening = 24;
+    private static final byte startTimeForMorning = 0;
 
     private final DateTimeFormatter formatter =
             DateTimeFormatter.ofPattern( "EEE MMM d H:mm:ss zzz yyyy", Locale.ENGLISH );
@@ -52,15 +38,23 @@ public class TimeInspector extends StringOperations {
 
     protected Date convertDate( final String s ) {
         try {
-            final List< String > words = Arrays.asList( s.split( " " ) );
+            final List< String > words = super.convertArrayToList( s.split( " " ) );
+
             return new SimpleDateFormat(
                     words.get( 3 ).length() == 4
                             ? "EEE MMM dd yyyy kk:mm:ss"
                             : "EEE MMM dd kk:mm:ss", Locale.US )
                     .parse( words.get( 3 ).length() >= 4
-                            ? String.join( " ", words.get( 0 ), words.get( 1 ), words.get( 2 ), words.get( 3 ), words.get( 4 ) )
+                            ? String.join( " ",
+                                    words.get( 0 ),
+                                    words.get( 1 ),
+                                    words.get( 2 ),
+                                    words.get( 3 ),
+                                    words.get( 4 ) )
                             : String.join( " ", words.get( 0 ), words.get( 1 ), words.get( 2 ), words.get( 3 ) ) );
-        } catch ( final ParseException e ) { throw new RuntimeException( e ); }
+        } catch ( final ParseException e ) {
+            throw new RuntimeException( e );
+        }
     }
 
     protected String convertDateToString ( final Date date ) {
@@ -84,7 +78,9 @@ public class TimeInspector extends StringOperations {
                     .parse( time )
                     .getTime()
                     : 0L;
-        } catch ( final Exception e ) { return 0L; }
+        } catch ( final Exception e ) {
+            return 0L;
+        }
     }
 
     // возвращает данные о дате о начале года или конце

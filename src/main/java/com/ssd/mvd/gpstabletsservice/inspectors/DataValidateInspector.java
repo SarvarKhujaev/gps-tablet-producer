@@ -17,11 +17,14 @@ import com.datastax.driver.core.Row;
 import static java.lang.Math.cos;
 import static java.lang.Math.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class DataValidateInspector extends TimeInspector {
     private static final DataValidateInspector INSTANCE = new DataValidateInspector();
 
-    public static DataValidateInspector getInstance () { return INSTANCE; }
+    public static DataValidateInspector getInstance () {
+        return INSTANCE;
+    }
 
     public boolean objectIsNotNull (
             final Object o
@@ -215,5 +218,17 @@ public class DataValidateInspector extends TimeInspector {
         return 12742 * asin( sqrt( 0.5 - cos( ( second.getPatrulLocationData().getLatitude() - first.getLatitude() ) * p ) / 2
                 + cos( first.getLatitude() * p ) * cos( second.getPatrulLocationData().getLatitude() * p )
                 * ( 1 - cos( ( second.getPatrulLocationData().getLongitude() - first.getLongitude() ) * p ) ) / 2 ) ) * 1000;
+    }
+
+    /*
+    принимает запись из БД
+    проверяет что запись не пуста
+    и заполняет параметры объекта по заданной логике
+    */
+    protected <T> void checkAndSetParams (
+            final T object,
+            final Consumer< T > customConsumer
+    ) {
+        Optional.ofNullable( object ).ifPresent( customConsumer );
     }
 }

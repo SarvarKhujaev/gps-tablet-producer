@@ -1,6 +1,8 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
 import com.ssd.mvd.gpstabletsservice.inspectors.CollectionsInspector;
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
+import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 
@@ -9,35 +11,7 @@ import com.datastax.driver.core.Row;
 
 import java.util.Map;
 
-import static com.ssd.mvd.gpstabletsservice.constants.Status.FREE;
-
-public final class PatrulTaskInfo extends CollectionsInspector {
-    public static PatrulTaskInfo generateWithInitialValues () {
-        return new PatrulTaskInfo();
-    }
-
-    private PatrulTaskInfo () {
-        this.setInitialValues();
-    }
-
-    public static <T> PatrulTaskInfo generate ( final T object ) {
-        return object instanceof Row
-                ? new PatrulTaskInfo( (Row) object )
-                : new PatrulTaskInfo( (UDTValue) object );
-    }
-
-    private PatrulTaskInfo ( final Row row ) {
-        this.setStatus( Status.valueOf( row.getString( "status" ) ) );
-        this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
-        this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) );
-    }
-
-    private PatrulTaskInfo( final UDTValue udtValue ) {
-        this.setStatus( Status.valueOf( udtValue.getString( "status" ) ) );
-        this.setTaskTypes( TaskTypes.valueOf( udtValue.getString( "taskTypes" ) ) );
-        this.setListOfTasks( udtValue.getMap( "listOfTasks", String.class, String.class ) );
-    }
-
+public final class PatrulTaskInfo extends CollectionsInspector implements ObjectCommonMethods< PatrulTaskInfo > {
     public String getTaskId() {
         return this.taskId;
     }
@@ -79,21 +53,11 @@ public final class PatrulTaskInfo extends CollectionsInspector {
     private Map< String, String > listOfTasks = super.newMap();
 
     /*
-    когда патрульного только создали
-    то присваиваем ему все дефолтные значения
-    связанные с задачами
-    */
-    private void setInitialValues () {
-        this.setTaskId( "" );
-        this.setStatus( FREE );
-        this.setTaskTypes( TaskTypes.FREE );
-        this.setListOfTasks( super.newMap() );
-    }
-
-    /*
     после выполнения задачи, сохраняем его ID и тип задачи в список выполненных
     */
-    public void saveNewTaskInTheMapOfCompletedTasks ( final TaskTypes taskTypes ) {
+    public void saveNewTaskInTheMapOfCompletedTasks (
+            final TaskTypes taskTypes
+    ) {
         this.getListOfTasks().putIfAbsent( this.getTaskId(), taskTypes.name() );
     }
 
@@ -105,5 +69,50 @@ public final class PatrulTaskInfo extends CollectionsInspector {
         this.setTaskTypes( TaskTypes.FREE );
         this.setStatus( Status.FREE );
         this.setTaskId( null );
+    }
+
+    /*
+    когда патрульного только создали
+    то присваиваем ему все дефолтные значения
+    связанные с задачами
+    */
+    public PatrulTaskInfo setInitialValues () {
+        this.setListOfTasks( super.newMap() );
+        this.setTaskTypes( TaskTypes.FREE );
+        this.setStatus( FREE );
+        this.setTaskId( "" );
+        return this;
+    }
+
+    public static PatrulTaskInfo empty() {
+        return new PatrulTaskInfo();
+    }
+
+    private PatrulTaskInfo () {}
+
+    @Override
+    public PatrulTaskInfo generate( final Row row ) {
+        this.setListOfTasks( row.getMap( "listOfTasks", String.class, String.class ) );
+        this.setTaskTypes( TaskTypes.valueOf( row.getString( "taskTypes" ) ) );
+        this.setStatus( Status.valueOf( row.getString( "status" ) ) );
+        return this;
+    }
+
+    @Override
+    public PatrulTaskInfo generate( final UDTValue udtValue ) {
+        this.setListOfTasks( udtValue.getMap( "listOfTasks", String.class, String.class ) );
+        this.setTaskTypes( TaskTypes.valueOf( udtValue.getString( "taskTypes" ) ) );
+        this.setStatus( Status.valueOf( udtValue.getString( "status" ) ) );
+
+        return this;
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setString( "taskId", this.getTaskId() )
+                .setString( "status", this.getStatus().name() )
+                .setString( "taskTypes", this.getTaskTypes().name() )
+                .setMap( "listOfTasks", this.getListOfTasks() );
     }
 }

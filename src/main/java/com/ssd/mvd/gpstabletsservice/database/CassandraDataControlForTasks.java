@@ -679,7 +679,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                                         patrulSos.setAddress( super.removeAllDotes(
                                                 UnirestController
                                                         .getInstance()
-                                                        .getGetAddressByLocation()
+                                                        .getAddressByLocation
                                                         .apply( patrulSos.getLatitude(), patrulSos.getLongitude() ) ) );
 
                                         final Flux< SosNotificationForAndroid > sosNotificationForAndroidFlux =

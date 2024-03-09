@@ -120,7 +120,7 @@ public class CassandraConverter extends LogInspector {
                     else if ( field.get( object ) instanceof Map ) {
                         result.append( this.convertMapToCassandra.apply( (Map<String, String>) field.get( object ) ) );
                     }
-                    else if ( field.get( object ) instanceof List) {
+                    else if ( field.get( object ) instanceof List ) {
                         result.append( this.convertListToCassandra.apply( (List<?>) field.get( object ) ) );
                     }
                     else if ( field.get( object ) instanceof Enum<?> ) {
@@ -175,9 +175,9 @@ public class CassandraConverter extends LogInspector {
                             .append( " : " )
                             .append( super.joinWithAstrix( key ) )
                             .append( "', " )
-                    );
+            );
 
-            return stringBuilder.length() == 1
+            return stringBuilder.length() <= 1
                     ? super.joinTextWithCorrectCollectionEnding(
                             stringBuilder.toString(),
                             CassandraDataTypes.MAP

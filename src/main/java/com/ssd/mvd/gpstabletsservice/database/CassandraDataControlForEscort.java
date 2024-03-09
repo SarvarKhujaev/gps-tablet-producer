@@ -163,13 +163,15 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     .parallel( escortTuple.getPatrulList().size() )
                     .runOn( Schedulers.parallel() )
                     .map( integer -> {
-                        final Patrul patrul = new Patrul(
+                        final Patrul patrul = Patrul.empty().generate(
                                 CassandraDataControl
                                         .getInstance()
                                         .getRowFromTabletsKeyspace(
                                                 CassandraTables.PATRULS,
                                                 "uuid",
-                                                escortTuple.getPatrulList().get( integer ).toString() ) );
+                                                escortTuple.getPatrulList().get( integer ).toString()
+                                        )
+                        );
 
                         patrul.linkWithEscortCar(
                                 escortTuple.getUuid(),
@@ -421,7 +423,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     )
             );
 
-            final Patrul patrul = new Patrul(
+            final Patrul patrul = Patrul.empty().generate(
                     CassandraDataControl
                             .getInstance()
                             .getRowFromTabletsKeyspace(
@@ -496,7 +498,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                         super.analyze(
                                 escortTuple.getPatrulList(),
                                 uuid1 -> tupleTotalData.getPatrulList().add(
-                                        new Patrul(
+                                        Patrul.empty().generate(
                                                 CassandraDataControl
                                                     .getInstance()
                                                     .getRowFromTabletsKeyspace(

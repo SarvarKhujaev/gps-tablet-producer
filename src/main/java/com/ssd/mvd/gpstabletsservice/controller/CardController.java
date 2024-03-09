@@ -334,7 +334,7 @@ public final class CardController extends SerDes {
                         super.analyze(
                                 request.getPatruls(),
                                 uuid -> {
-                                    final Patrul patrul = new Patrul(
+                                    final Patrul patrul = Patrul.empty().generate(
                                             CassandraDataControl
                                                     .getInstance()
                                                     .getRowFromTabletsKeyspace(
@@ -365,7 +365,7 @@ public final class CardController extends SerDes {
                         super.analyze(
                                 request.getPatruls(),
                                 uuid -> {
-                                    final Patrul patrul = new Patrul(
+                                    final Patrul patrul = Patrul.empty().generate(
                                             CassandraDataControl
                                                     .getInstance()
                                                     .getRowFromTabletsKeyspace(
@@ -396,7 +396,7 @@ public final class CardController extends SerDes {
                         super.analyze(
                                 request.getPatruls(),
                                 uuid -> {
-                                    final Patrul patrul = new Patrul(
+                                    final Patrul patrul = Patrul.empty().generate(
                                             CassandraDataControl
                                                     .getInstance()
                                                     .getRowFromTabletsKeyspace(
@@ -427,7 +427,7 @@ public final class CardController extends SerDes {
                         super.analyze(
                                 request.getPatruls(),
                                 uuid -> {
-                                    final Patrul patrul = new Patrul(
+                                    final Patrul patrul = Patrul.empty().generate(
                                             CassandraDataControl
                                                     .getInstance()
                                                     .getRowFromTabletsKeyspace(
@@ -458,7 +458,7 @@ public final class CardController extends SerDes {
                         super.analyze(
                                 request.getPatruls(),
                                 uuid -> {
-                                    final Patrul patrul = new Patrul(
+                                    final Patrul patrul = Patrul.empty().generate(
                                             CassandraDataControl
                                                     .getInstance()
                                                     .getRowFromTabletsKeyspace(
@@ -489,7 +489,7 @@ public final class CardController extends SerDes {
                         super.analyze(
                                 request.getPatruls(),
                                 uuid -> {
-                                    final Patrul patrul = new Patrul(
+                                    final Patrul patrul = Patrul.empty().generate(
                                             CassandraDataControl
                                                     .getInstance()
                                                     .getRowFromTabletsKeyspace(
@@ -520,7 +520,7 @@ public final class CardController extends SerDes {
                         super.analyze(
                                 request.getPatruls(),
                                 uuid -> {
-                                    final Patrul patrul = new Patrul(
+                                    final Patrul patrul = Patrul.empty().generate(
                                             CassandraDataControl
                                                     .getInstance()
                                                     .getRowFromTabletsKeyspace(

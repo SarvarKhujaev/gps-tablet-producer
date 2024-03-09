@@ -3,6 +3,7 @@ package com.ssd.mvd.gpstabletsservice.kafkaDataSet;
 import com.ssd.mvd.gpstabletsservice.entity.notifications.SosNotificationForAndroid;
 import com.ssd.mvd.gpstabletsservice.entity.notifications.SosNotification;
 import com.ssd.mvd.gpstabletsservice.entity.responseForAndroid.ActiveTask;
+import com.ssd.mvd.gpstabletsservice.interfaces.ServiceCommonMethods;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
 import com.ssd.mvd.gpstabletsservice.entity.notifications.Notification;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
@@ -24,8 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.*;
 
-@lombok.Data
-public final class KafkaDataControl extends SerDes {
+public final class KafkaDataControl extends SerDes implements ServiceCommonMethods {
     private final static KafkaDataControl KAFKA_DATA_CONTROL = new KafkaDataControl();
 
     private final String CAR_TOTAL_DATA = GpsTabletsServiceApplication
@@ -55,6 +55,54 @@ public final class KafkaDataControl extends SerDes {
 
     public static KafkaDataControl getKafkaDataControl() {
         return KAFKA_DATA_CONTROL;
+    }
+
+    public String getCAR_TOTAL_DATA() {
+        return this.CAR_TOTAL_DATA;
+    }
+
+    public String getACTIVE_TASK() {
+        return this.ACTIVE_TASK;
+    }
+
+    public String getNOTIFICATION() {
+        return this.NOTIFICATION;
+    }
+
+    public String getSOS_TOPIC() {
+        return this.SOS_TOPIC;
+    }
+
+    public String getSOS_TOPIC_FOR_ANDROID_NOTIFICATION() {
+        return this.SOS_TOPIC_FOR_ANDROID_NOTIFICATION;
+    }
+
+    public Supplier<Map<String, Object>> getGetKafkaSenderOptions() {
+        return this.getKafkaSenderOptions;
+    }
+
+    public KafkaSender<String, String> getKafkaSender() {
+        return this.kafkaSender;
+    }
+
+    public Consumer<ActiveTask> getWriteActiveTaskToKafka() {
+        return this.writeActiveTaskToKafka;
+    }
+
+    public BiFunction<Flux<SosNotificationForAndroid>, ApiResponseModel, Mono<ApiResponseModel>> getSendSosNotificationsToAndroid() {
+        return this.sendSosNotificationsToAndroid;
+    }
+
+    public Function<SosNotification, String> getWriteSosNotificationToKafka() {
+        return this.writeSosNotificationToKafka;
+    }
+
+    public Function<CarTotalData, CarTotalData> getWriteCarTotalDataToKafka() {
+        return this.writeCarTotalDataToKafka;
+    }
+
+    public Consumer<Notification> getWriteNotificationToKafka() {
+        return this.writeNotificationToKafka;
     }
 
     private final Supplier< Map< String, Object > > getKafkaSenderOptions = () -> Map.of(
@@ -195,8 +243,9 @@ public final class KafkaDataControl extends SerDes {
                             )
                     );
 
-    public void clear () {
+    @Override
+    public void close () {
         this.getKafkaSender().close();
-        super.logging( this.getClass().getName() + " is closed successfully" );
+        super.logging( this );
     }
 }

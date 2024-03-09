@@ -1,11 +1,14 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
 import java.util.Optional;
+
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.UDTValue;
+
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 
-public final class PatrulFIOData {
+public final class PatrulFIOData extends DataValidateInspector implements ObjectCommonMethods< PatrulFIOData > {
     public String getName() {
         return this.name;
     }
@@ -33,12 +36,12 @@ public final class PatrulFIOData {
     public String getSurnameNameFatherName () {
         return Optional.ofNullable( this.surnameNameFatherName )
                 .filter( s -> this.surnameNameFatherName.contains("NULL") )
-                .orElse( ( this.surnameNameFatherName = DataValidateInspector
-                        .getInstance()
-                        .concatNames( this ) ) );
+                .orElse( ( this.surnameNameFatherName = super.concatNames( this ) ) );
     }
 
-    public void setSurnameNameFatherName ( final String surnameNameFatherName ) {
+    public void setSurnameNameFatherName (
+            final String surnameNameFatherName
+    ) {
         this.surnameNameFatherName = surnameNameFatherName;
     }
 
@@ -47,23 +50,38 @@ public final class PatrulFIOData {
     private String fatherName;
     private String surnameNameFatherName; // Ф.И.О
 
-    public static <T> PatrulFIOData generate ( final T object ) {
-        return object instanceof Row
-                ? new PatrulFIOData( (Row) object )
-                : new PatrulFIOData( (UDTValue) object );
+    private PatrulFIOData () {}
+
+    public static PatrulFIOData empty() {
+        return new PatrulFIOData();
     }
 
-    private PatrulFIOData ( final Row row ) {
-        this.setName( row.getString( "name" ) );
-        this.setSurname( row.getString( "surname" ) );
-        this.setFatherName( row.getString( "fatherName" ) );
+    @Override
+    public PatrulFIOData generate( final Row row ) {
         this.setSurnameNameFatherName( row.getString( "surnameNameFatherName" ) );
+        this.setFatherName( row.getString( "fatherName" ) );
+        this.setSurname( row.getString( "surname" ) );
+        this.setName( row.getString( "name" ) );
+
+        return this;
     }
 
-    private PatrulFIOData( final UDTValue udtValue ) {
-        this.setName( udtValue.getString( "name" ) );
-        this.setSurname( udtValue.getString( "surname" ) );
-        this.setFatherName( udtValue.getString( "fatherName" ) );
+    @Override
+    public PatrulFIOData generate( final UDTValue udtValue ) {
         this.setSurnameNameFatherName( udtValue.getString( "surnameNameFatherName" ) );
+        this.setFatherName( udtValue.getString( "fatherName" ) );
+        this.setSurname( udtValue.getString( "surname" ) );
+        this.setName( udtValue.getString( "name" ) );
+
+        return this;
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setString( "name", this.getName() )
+                .setString( "surname", this.getSurname() )
+                .setString( "fatherName", this.getFatherName() )
+                .setString( "surnameNameFatherName", this.getSurnameNameFatherName() );
     }
 }

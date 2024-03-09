@@ -1,10 +1,12 @@
 package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
-import java.util.Optional;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.UDTValue;
 
-public final class PatrulAuthData {
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
+
+public final class PatrulAuthData extends DataValidateInspector implements ObjectCommonMethods< PatrulAuthData > {
     public String getLogin() {
         return this.login;
     }
@@ -33,21 +35,37 @@ public final class PatrulAuthData {
         }
     }
 
-    public static <T> PatrulAuthData generate ( final T object ) {
-        return object instanceof Row
-                ? new PatrulAuthData( (Row) object )
-                : new PatrulAuthData( (UDTValue) object );
+    public static PatrulAuthData empty () {
+        return new PatrulAuthData();
     }
 
-    private PatrulAuthData ( final Row row ) {
-        this.setLogin( row.getString( "login" ) );
+    private PatrulAuthData () {}
+
+    @Override
+    public PatrulAuthData generate( final Row row ) {
         this.setPassword( row.getString( "password" ) );
+        this.setLogin( row.getString( "login" ) );
+
+        return this;
     }
 
-    private PatrulAuthData( final UDTValue udtValue ) {
-        Optional.ofNullable( udtValue ).ifPresent( udtValue1 -> {
-            this.setLogin( udtValue.getString( "login" ) );
-            this.setPassword( udtValue.getString( "password" ) );
-        } );
+    @Override
+    public PatrulAuthData generate( final UDTValue udtValue ) {
+        super.checkAndSetParams(
+                udtValue,
+                udtValue1 -> {
+                    this.setLogin( udtValue.getString( "login" ) );
+                    this.setPassword( udtValue.getString( "password" ) );
+                }
+        );
+
+        return this;
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setString( "login", this.getLogin() )
+                .setString( "password", this.getPassword() );
     }
 }

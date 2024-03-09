@@ -26,7 +26,6 @@ import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.GpsTabletsServiceApplication;
 import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
 
-@lombok.Data
 public class UnirestController extends LogInspector {
     private final String ADDRESS_LOCATION_API = GpsTabletsServiceApplication
             .context
@@ -43,6 +42,26 @@ public class UnirestController extends LogInspector {
             .getEnvironment()
             .getProperty( "variables.UNIREST_VARIABLES.CHAT_SERVICE_PREFIX" );
 
+    private String getADDRESS_LOCATION_API() {
+        return this.ADDRESS_LOCATION_API;
+    }
+
+    private String getCHAT_SERVICE_DOMAIN() {
+        return this.CHAT_SERVICE_DOMAIN;
+    }
+
+    private String getCHAT_SERVICE_PREFIX() {
+        return this.CHAT_SERVICE_PREFIX;
+    }
+
+    private Gson getGson() {
+        return this.gson;
+    }
+
+    private Function<String, RestTemplate> getRestTemplate() {
+        return this.restTemplate;
+    }
+
     private final Gson gson = new Gson();
     private final static UnirestController serDes = new UnirestController();
 
@@ -55,20 +74,21 @@ public class UnirestController extends LogInspector {
             private final com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
             @Override
-            public String writeValue( Object o ) {
+            public String writeValue( final Object o ) {
                 try {
                     return this.objectMapper.writeValueAsString( o );
                 }
-                catch ( JsonProcessingException e ) {
+                catch ( final JsonProcessingException e ) {
                     throw new RuntimeException(e);
-                } }
+                }
+            }
 
             @Override
-            public <T> T readValue( String s, Class<T> aClass ) {
+            public <T> T readValue( final String s, final Class<T> aClass ) {
                 try {
                     return this.objectMapper.readValue( s, aClass );
                 }
-                catch ( JsonProcessingException e ) {
+                catch ( final JsonProcessingException e ) {
                     throw new RuntimeException(e);
                 }
             }
@@ -81,7 +101,7 @@ public class UnirestController extends LogInspector {
             .defaultHeader( "token", token )
             .build();
 
-    private final Consumer< String > deleteUser = patrulId -> {
+    public final Consumer< String > deleteUser = patrulId -> {
             try {
                 super.convert( new Req( UUID.fromString( patrulId.split( "@" )[0] ) ) )
                     .onErrorContinue( super::logging )
@@ -101,7 +121,7 @@ public class UnirestController extends LogInspector {
             }
     };
 
-    private final Consumer< Patrul > updateUser = patrul -> {
+    public final Consumer< Patrul > updateUser = patrul -> {
             if ( !super.objectIsNotNull( patrul.getPatrulTokenInfo().getSpecialToken() ) ) {
                 return;
             }
@@ -125,7 +145,7 @@ public class UnirestController extends LogInspector {
             }
     };
 
-    private final Consumer< Patrul > addUser = patrul -> {
+    public final Consumer< Patrul > addUser = patrul -> {
             try {
                 super.convert( new Req( patrul ) )
                     .onErrorContinue( super::logging )
@@ -151,7 +171,7 @@ public class UnirestController extends LogInspector {
         return super.convertArrayToList( this.getGson().fromJson( object, clazz ) );
     }
 
-    private final BiFunction< Double, Double, String > getAddressByLocation = ( latitude, longitude ) -> {
+    public final BiFunction< Double, Double, String > getAddressByLocation = ( latitude, longitude ) -> {
             try {
                 return this.stringToArrayList(
                     Unirest.get(
@@ -171,7 +191,7 @@ public class UnirestController extends LogInspector {
             }
     };
 
-    private final Function< Long, List< RegionData > > getRegions = regionId -> {
+    public final Function< Long, List< RegionData > > getRegions = regionId -> {
             try {
                 return this.getGson().fromJson(
                         Unirest.get( regionId > 0

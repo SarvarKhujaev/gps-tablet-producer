@@ -1,12 +1,14 @@
 package com.ssd.mvd.gpstabletsservice.entity.polygons;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
+
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
 
-import java.util.Optional;
 import java.util.UUID;
 
-public final class PolygonType {
+public final class PolygonType extends DataValidateInspector implements ObjectCommonMethods {
     public UUID getUuid () {
         return this.uuid;
     }
@@ -27,8 +29,15 @@ public final class PolygonType {
 
     private String name;
 
+    public static PolygonType empty () {
+        return new PolygonType();
+    }
+
+    private PolygonType () {}
+
     public PolygonType ( final Row row ) {
-        Optional.ofNullable( row ).ifPresent(
+        super.checkAndSetParams(
+                row,
                 row1 -> {
                     this.setUuid( row.getUUID( "uuid" ) );
                     this.setName( row.getString( "name" ) );
@@ -36,8 +45,35 @@ public final class PolygonType {
         );
     }
 
-    public PolygonType( final UDTValue row ) {
-        this.setUuid( row.getUUID( "uuid" ) );
-        this.setName( row.getString( "name" ) );
+    private PolygonType( final UDTValue udtValue ) {
+        super.checkAndSetParams(
+                udtValue,
+                row1 -> {
+                    this.setUuid( udtValue.getUUID( "uuid" ) );
+                    this.setName( udtValue.getString( "name" ) );
+                }
+        );
+    }
+
+    @Override
+    public PolygonType generate( final UDTValue udtValue ) {
+        return new PolygonType( udtValue );
+    }
+
+    @Override
+    public PolygonType generate( final Row row ) {
+        return new PolygonType( row );
+    }
+
+    @Override
+    public Object generate() {
+        return new PolygonType();
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setUUID( "uuid", this.getUuid() )
+                .setString( "name", this.getName() );
     }
 }

@@ -16,11 +16,12 @@ import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonType;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonEntity;
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
 public class CollectionsInspector {
-    public CollectionsInspector () {}
+    protected CollectionsInspector () {}
 
     protected final List< Class > listOfClasses = List.of(
             Patrul.class,
@@ -49,31 +50,37 @@ public class CollectionsInspector {
     protected Map< CassandraTables, List< CassandraTables > > getMapOfKeyspaceAndTypes () {
         final Map< CassandraTables, List< CassandraTables > > keyspaceAndTypes = this.newMap();
 
-        keyspaceAndTypes.put( CassandraTables.TABLETS, List.of(
-                CassandraTables.PATRUL_TYPE,
-                CassandraTables.CAMERA_LIST,
-                CassandraTables.POLICE_TYPE,
-                CassandraTables.POLYGON_TYPE,
-                CassandraTables.POSITION_INFO,
-                CassandraTables.POLYGON_ENTITY,
-                CassandraTables.REPORT_FOR_CARD,
-                CassandraTables.PATRUL_CAR_DATA,
-                CassandraTables.PATRUL_FIO_DATA,
-                CassandraTables.PATRUL_TASK_DATA,
-                CassandraTables.PATRUL_DATE_DATA,
-                CassandraTables.PATRUL_AUTH_DATA,
-                CassandraTables.PATRUL_TOKEN_DATA,
-                CassandraTables.PATRUL_REGION_DATA,
-                CassandraTables.PATRUL_UNIQUE_DATA,
-                CassandraTables.PATRUL_LOCATION_DATA,
-                CassandraTables.PATRUL_MOBILE_DATA,
-                CassandraTables.VIOLATION_LIST_TYPE
-        ) );
+        keyspaceAndTypes.put(
+                CassandraTables.TABLETS,
+                List.of(
+                        CassandraTables.PATRUL_TYPE,
+                        CassandraTables.CAMERA_LIST,
+                        CassandraTables.POLICE_TYPE,
+                        CassandraTables.POLYGON_TYPE,
+                        CassandraTables.POSITION_INFO,
+                        CassandraTables.POLYGON_ENTITY,
+                        CassandraTables.REPORT_FOR_CARD,
+                        CassandraTables.PATRUL_CAR_DATA,
+                        CassandraTables.PATRUL_FIO_DATA,
+                        CassandraTables.PATRUL_TASK_DATA,
+                        CassandraTables.PATRUL_DATE_DATA,
+                        CassandraTables.PATRUL_AUTH_DATA,
+                        CassandraTables.PATRUL_TOKEN_DATA,
+                        CassandraTables.PATRUL_REGION_DATA,
+                        CassandraTables.PATRUL_UNIQUE_DATA,
+                        CassandraTables.PATRUL_LOCATION_DATA,
+                        CassandraTables.PATRUL_MOBILE_DATA,
+                        CassandraTables.VIOLATION_LIST_TYPE
+                )
+        );
 
-        keyspaceAndTypes.put( CassandraTables.ESCORT, List.of(
-                CassandraTables.POLYGON_ENTITY,
-                CassandraTables.POINTS_ENTITY
-        ) );
+        keyspaceAndTypes.put(
+                CassandraTables.ESCORT,
+                List.of(
+                        CassandraTables.POLYGON_ENTITY,
+                        CassandraTables.POINTS_ENTITY
+                )
+        );
 
         return keyspaceAndTypes;
     }
@@ -127,19 +134,22 @@ public class CollectionsInspector {
 
     protected boolean checkCollectionsLengthEquality (
             final Map firstCollection,
-            final Collection secondCollection ) {
+            final Collection secondCollection
+    ) {
         return firstCollection.size() == secondCollection.size();
     }
 
     public <T> void analyze (
             final Collection<T> someList,
-            final Consumer<T> someConsumer ) {
+            final Consumer<T> someConsumer
+    ) {
         someList.forEach( someConsumer );
     }
 
     protected <T, V> void analyze (
             final Map< T, V > someList,
-            final BiConsumer<T, V> someConsumer ) {
+            final BiConsumer<T, V> someConsumer
+    ) {
         someList.forEach( someConsumer );
     }
 

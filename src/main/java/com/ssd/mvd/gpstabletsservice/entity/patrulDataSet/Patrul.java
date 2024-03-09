@@ -2,7 +2,9 @@ package com.ssd.mvd.gpstabletsservice.entity.patrulDataSet;
 
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.car_events.DataInfo;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
+import com.datastax.driver.core.utils.UUIDs;
 
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.Row;
@@ -10,7 +12,7 @@ import com.datastax.driver.core.Row;
 import java.time.Duration;
 import java.util.*;
 
-public final class Patrul extends DataValidateInspector {
+public final class Patrul extends DataValidateInspector implements ObjectCommonMethods< Patrul > {
     public UUID getUuid () {
         return this.uuid;
     }
@@ -175,7 +177,9 @@ public final class Patrul extends DataValidateInspector {
         return this.patrulMobileAppInfo;
     }
 
-    public void setPatrulMobileAppInfo(PatrulMobileAppInfo patrulMobileAppInfo) {
+    public void setPatrulMobileAppInfo(
+            final PatrulMobileAppInfo patrulMobileAppInfo
+    ) {
         this.patrulMobileAppInfo = patrulMobileAppInfo;
     }
 
@@ -232,14 +236,14 @@ public final class Patrul extends DataValidateInspector {
     public void setDefaultValuesInTheBeginning () {
         this.setInPolygon( false );
         this.setTotalActivityTime( 0L );
-        this.setUuid( UUID.randomUUID() );
-        this.setPatrulTokenInfo( PatrulTokenInfo.empty() );
+        this.setUuid( UUIDs.timeBased() );
         this.setPatrulLocationData( PatrulLocationData.empty() );
-        this.setPatrulUniqueValues( PatrulUniqueValues.empty() );
-        this.setPatrulMobileAppInfo( PatrulMobileAppInfo.empty() );
         this.getPatrulAuthData().setInitialPasswordAndLogin( this );
-        this.setPatrulTaskInfo( PatrulTaskInfo.generateWithInitialValues() );
-        this.setPatrulDateData( PatrulDateData.generateWithInitialValues() );
+        this.setPatrulDateData( PatrulDateData.empty().update( 2 ) );
+        this.setPatrulTaskInfo( PatrulTaskInfo.empty().setInitialValues() );
+        this.setPatrulTokenInfo( PatrulTokenInfo.empty().setInitialValues() );
+        this.setPatrulUniqueValues( PatrulUniqueValues.empty().setInitialValues() );
+        this.setPatrulMobileAppInfo( PatrulMobileAppInfo.empty().setInitialValues() );
         this.getPatrulFIOData().setSurnameNameFatherName( this.getPatrulFIOData().getSurnameNameFatherName() );
     }
 
@@ -259,9 +263,10 @@ public final class Patrul extends DataValidateInspector {
 
     public void update (
             final TaskTypes taskTypes,
-            final Double latitudeOfTask,
-            final Double longitudeOfTask,
-            final String taskId ) {
+            final double latitudeOfTask,
+            final double longitudeOfTask,
+            final String taskId
+    ) {
         this.getPatrulTaskInfo().setTaskId( taskId );
         this.getPatrulTaskInfo().setTaskTypes( taskTypes );
         this.getPatrulLocationData().setLatitudeOfTask( latitudeOfTask );
@@ -271,62 +276,104 @@ public final class Patrul extends DataValidateInspector {
     public void update (
             final TaskTypes taskTypes,
             final DataInfo dataInfo,
-            final String taskId ) {
+            final String taskId
+    ) {
         this.getPatrulTaskInfo().setTaskId( taskId );
         this.getPatrulTaskInfo().setTaskTypes( taskTypes );
         this.getPatrulLocationData().changeLocationFromCadastre( dataInfo );
     }
 
-    public Patrul ( final Row row ) {
-        Optional.ofNullable( row ).ifPresent( row1 -> {
-            this.setUuid( row.getUUID( "uuid" ) );
-            this.setInPolygon( row.getBool( "inPolygon" ) );
-            this.setTuplePermission( row.getBool( "tuplePermission" ) );
-            this.setTotalActivityTime( row.getLong( "totalActivityTime" ) );
-
-            this.setRank( row.getString( "rank" ) );
-            this.setEmail( row.getString( "email" ) );
-            this.setOrganName( row.getString( "organName" ) );
-            this.setPoliceType( row.getString( "policeType" ) );
-            this.setDateOfBirth( row.getString( "dateOfBirth" ) );
-            this.setPassportNumber( row.getString( "passportNumber" ) );
-            this.setPatrulImageLink( row.getString( "patrulImageLink" ) );
-
-            this.setPatrulFIOData( PatrulFIOData.generate( row.getUDTValue( "patrulFIOData" ) ) );
-            this.setPatrulCarInfo( PatrulCarInfo.generate( row.getUDTValue( "patrulCarInfo" ) ) );
-            this.setPatrulDateData( PatrulDateData.generate( row.getUDTValue( "patrulDateData" ) ) );
-            this.setPatrulTaskInfo( PatrulTaskInfo.generate( row.getUDTValue( "patrulTaskInfo" ) ) );
-            this.setPatrulAuthData( PatrulAuthData.generate( row.getUDTValue( "patrulAuthData" ) ) );
-            this.setPatrulTokenInfo( PatrulTokenInfo.generate( row.getUDTValue( "patrulTokenInfo" ) ) );
-            this.setPatrulRegionData( PatrulRegionData.generate( row.getUDTValue( "patrulRegionData" ) ) );
-            this.setPatrulLocationData( PatrulLocationData.generate( row.getUDTValue( "patrulLocationData" ) ) );
-            this.setPatrulUniqueValues( PatrulUniqueValues.generate( row.getUDTValue( "patrulUniqueValues" ) ) );
-            this.setPatrulMobileAppInfo( PatrulMobileAppInfo.generate( row.getUDTValue( "patrulMobileAppInfo" ) ) );
-        } );
+    public static Patrul empty () {
+        return new Patrul();
     }
 
-    public Patrul ( final UDTValue udtValue ) {
-        this.setUuid( udtValue.getUUID( "uuid" ) );
-        this.setInPolygon( udtValue.getBool( "inPolygon" ) );
-        this.setTuplePermission( udtValue.getBool( "tuplePermission" ) );
-        this.setTotalActivityTime( udtValue.getLong( "totalActivityTime" ) );
+    private Patrul () {}
 
-        this.setRank( udtValue.getString( "rank" ) );
-        this.setEmail( udtValue.getString( "email" ) );
-        this.setOrganName( udtValue.getString( "organName" ) );
-        this.setPoliceType( udtValue.getString( "policeType" ) );
-        this.setDateOfBirth( udtValue.getString( "dateOfBirth" ) );
-        this.setPassportNumber( udtValue.getString( "passportNumber" ) );
-        this.setPatrulImageLink( udtValue.getString( "patrulImageLink" ) );
+    public Patrul ( final Row row ) {
+        this.generate( row );
+    }
 
-        this.setPatrulFIOData( PatrulFIOData.generate( udtValue ) );
-        this.setPatrulCarInfo( PatrulCarInfo.generate( udtValue ) );
-        this.setPatrulDateData( PatrulDateData.generate( udtValue ) );
-        this.setPatrulTaskInfo( PatrulTaskInfo.generate( udtValue ) );
-        this.setPatrulAuthData( PatrulAuthData.generate( udtValue ) );
-        this.setPatrulTokenInfo( PatrulTokenInfo.generate( udtValue ) );
-        this.setPatrulRegionData( PatrulRegionData.generate( udtValue ) );
-        this.setPatrulLocationData( PatrulLocationData.generate( udtValue ) );
-        this.setPatrulUniqueValues( PatrulUniqueValues.generate( udtValue ) );
+    @Override
+    public Patrul generate( final Row row ) {
+        super.checkAndSetParams(
+                row,
+                row1 -> {
+                    this.setUuid( row.getUUID( "uuid" ) );
+                    this.setInPolygon( row.getBool( "inPolygon" ) );
+                    this.setTuplePermission( row.getBool( "tuplePermission" ) );
+                    this.setTotalActivityTime( row.getLong( "totalActivityTime" ) );
+
+                    this.setRank( row.getString( "rank" ) );
+                    this.setEmail( row.getString( "email" ) );
+                    this.setOrganName( row.getString( "organName" ) );
+                    this.setPoliceType( row.getString( "policeType" ) );
+                    this.setDateOfBirth( row.getString( "dateOfBirth" ) );
+                    this.setPassportNumber( row.getString( "passportNumber" ) );
+                    this.setPatrulImageLink( row.getString( "patrulImageLink" ) );
+
+                    this.setPatrulCarInfo( PatrulCarInfo.empty().generate( row.getUDTValue( "patrulCarInfo" ) ) );
+                    this.setPatrulFIOData( PatrulFIOData.empty().generate( row.getUDTValue( "patrulFIOData" ) ) );
+                    this.setPatrulDateData( PatrulDateData.empty().generate( row.getUDTValue( "patrulDateData" ) ) );
+                    this.setPatrulTaskInfo( PatrulTaskInfo.empty().generate( row.getUDTValue( "patrulTaskInfo" ) ) );
+                    this.setPatrulAuthData( PatrulAuthData.empty().generate( row.getUDTValue( "patrulAuthData" ) ) );
+                    this.setPatrulTokenInfo( PatrulTokenInfo.empty().generate( row.getUDTValue( "patrulTokenInfo" ) ) );
+                    this.setPatrulRegionData( PatrulRegionData.empty().generate( row.getUDTValue( "patrulRegionData" ) ) );
+                    this.setPatrulLocationData( PatrulLocationData.empty().generate( row.getUDTValue( "patrulLocationData" ) ) );
+                    this.setPatrulUniqueValues( PatrulUniqueValues.empty().generate( row.getUDTValue( "patrulUniqueValues" ) ) );
+                    this.setPatrulMobileAppInfo( PatrulMobileAppInfo.empty().generate( row.getUDTValue( "patrulMobileAppInfo" ) ) );
+                }
+        );
+
+        return this;
+    }
+
+    @Override
+    public Patrul generate( final UDTValue udtValue ) {
+        super.checkAndSetParams(
+                udtValue,
+                udtValue1 -> {
+                    this.setUuid( udtValue.getUUID( "uuid" ) );
+                    this.setInPolygon( udtValue.getBool( "inPolygon" ) );
+                    this.setTuplePermission( udtValue.getBool( "tuplePermission" ) );
+                    this.setTotalActivityTime( udtValue.getLong( "totalActivityTime" ) );
+
+                    this.setRank( udtValue.getString( "rank" ) );
+                    this.setEmail( udtValue.getString( "email" ) );
+                    this.setOrganName( udtValue.getString( "organName" ) );
+                    this.setPoliceType( udtValue.getString( "policeType" ) );
+                    this.setDateOfBirth( udtValue.getString( "dateOfBirth" ) );
+                    this.setPassportNumber( udtValue.getString( "passportNumber" ) );
+                    this.setPatrulImageLink( udtValue.getString( "patrulImageLink" ) );
+
+                    this.setPatrulFIOData( PatrulFIOData.empty().generate( udtValue ) );
+                    this.setPatrulCarInfo( PatrulCarInfo.empty().generate( udtValue ) );
+                    this.setPatrulDateData( PatrulDateData.empty().generate( udtValue ) );
+                    this.setPatrulTaskInfo( PatrulTaskInfo.empty().generate( udtValue ) );
+                    this.setPatrulAuthData( PatrulAuthData.empty().generate( udtValue ) );
+                    this.setPatrulTokenInfo( PatrulTokenInfo.empty().generate( udtValue ) );
+                    this.setPatrulRegionData( PatrulRegionData.empty().generate( udtValue ) );
+                    this.setPatrulLocationData( PatrulLocationData.empty().generate( udtValue ) );
+                    this.setPatrulUniqueValues( PatrulUniqueValues.empty().generate( udtValue ) );
+                }
+        );
+        return this;
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue.setUUID( "uuid", this.getUuid() )
+
+                .setLong( "totalActivityTime", this.getTotalActivityTime() )
+
+                .setBool( "inPolygon", this.getInPolygon() )
+                .setBool( "tuplePermission", this.getTuplePermission() )
+
+                .setString( "rank", this.getRank() )
+                .setString( "email", this.getEmail() )
+                .setString( "organName", this.getOrganName() )
+                .setString( "policeType", this.getPoliceType() )
+                .setString( "dateOfBirth", this.getDateOfBirth() )
+                .setString( "passportNumber", this.getPassportNumber() )
+                .setString( "patrulImageLink", this.getPatrulImageLink() );
     }
 }

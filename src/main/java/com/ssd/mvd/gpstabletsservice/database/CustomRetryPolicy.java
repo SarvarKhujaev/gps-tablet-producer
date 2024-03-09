@@ -16,17 +16,20 @@ public final class CustomRetryPolicy extends LogInspector implements RetryPolicy
     public static CustomRetryPolicy generate (
             final int readAttempts,
             final int writeAttempts,
-            final int unavailableAttempts ) {
+            final int unavailableAttempts
+    ) {
         return new CustomRetryPolicy(
                 readAttempts,
                 writeAttempts,
-                unavailableAttempts );
+                unavailableAttempts
+        );
     }
 
     private CustomRetryPolicy (
             final int readAttempts,
             final int writeAttempts,
-            final int unavailableAttempts ) {
+            final int unavailableAttempts
+    ) {
         this.unavailableAttempts = unavailableAttempts;
         this.writeAttempts = writeAttempts;
         this.readAttempts = readAttempts;
@@ -39,7 +42,8 @@ public final class CustomRetryPolicy extends LogInspector implements RetryPolicy
             final int requiredResponses,
             final int receivedResponses,
             final boolean dataReceived,
-            final int rTime ) {
+            final int rTime
+    ) {
         super.logging( "Error in onReadTimeout: " + stmnt );
         return dataReceived
                 ? RetryDecision.ignore()
@@ -55,7 +59,8 @@ public final class CustomRetryPolicy extends LogInspector implements RetryPolicy
             final WriteType wt,
             final int requiredResponses,
             final int receivedResponses,
-            final int wTime ) {
+            final int wTime
+    ) {
         super.logging( "Error in onWriteTimeout: " + stmnt );
         return wTime < this.writeAttempts ? RetryDecision.retry( cl ) : RetryDecision.rethrow();
     }
@@ -66,7 +71,8 @@ public final class CustomRetryPolicy extends LogInspector implements RetryPolicy
             final ConsistencyLevel cl,
             final int requiredResponses,
             final int receivedResponses,
-            final int uTime ) {
+            final int uTime
+    ) {
         super.logging( "Error in onUnavailable: " + stmnt );
         return uTime < this.unavailableAttempts
                 ? RetryDecision.retry( ConsistencyLevel.QUORUM )
@@ -78,12 +84,11 @@ public final class CustomRetryPolicy extends LogInspector implements RetryPolicy
             final Statement statement,
             final ConsistencyLevel consistencyLevel,
             final DriverException e,
-            final int i ) {
+            final int i
+    ) {
         super.logging( "Error in onRequestError: " + statement );
 
-        CassandraDataControl
-                .getInstance()
-                .delete( new Throwable( "Error in onRequestError: " + statement ) );
+        CassandraDataControl.getInstance().close();
 
         return null;
     }

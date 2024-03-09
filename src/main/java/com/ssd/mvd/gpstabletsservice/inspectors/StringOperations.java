@@ -138,16 +138,15 @@ public class StringOperations extends Archive {
     }
 
     protected String concatNames ( final Patrul patrul ) {
-        return Base64
-                .getEncoder()
-                .encodeToString(
-                        String.join( "@",
-                                        patrul.getUuid().toString(),
-                                        patrul.getPassportNumber(),
-                                        patrul.getPatrulAuthData().getPassword(),
-                                        patrul.getPatrulMobileAppInfo().getSimCardNumber(),
-                                        super.generateToken() )
-                                .getBytes( StandardCharsets.UTF_8 ) );
+        return super.encoder.encodeToString(
+                String.join(
+                        "@",
+                        patrul.getUuid().toString(),
+                        patrul.getPassportNumber(),
+                        patrul.getPatrulMobileAppInfo().getSimCardNumber(),
+                        super.generateToken()
+                ).getBytes( StandardCharsets.UTF_8 )
+        );
     }
 
     public String concatNames ( final Object object ) {

@@ -12,6 +12,14 @@ public class LogInspector extends DataValidateInspector {
         return this.LOGGER;
     }
 
+    protected void logging ( final Class clazz ) {
+        this.getLOGGER().info( clazz.getName() + " was created at: " + super.newDate() );
+    }
+
+    protected void logging ( final Object o ) {
+        this.getLOGGER().info( o.getClass().getName() + " was closed successfully at: " + super.newDate() );
+    }
+
     protected void logging ( final String message ) {
         this.getLOGGER().info( message );
     }

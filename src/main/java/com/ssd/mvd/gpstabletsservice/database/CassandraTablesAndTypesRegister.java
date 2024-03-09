@@ -1,7 +1,10 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
 import java.text.MessageFormat;
+
+import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.CodecRegistry;
 
 import com.ssd.mvd.gpstabletsservice.entity.*;
 import com.ssd.mvd.gpstabletsservice.constants.*;
@@ -30,11 +33,19 @@ public final class CassandraTablesAndTypesRegister extends CassandraConverter {
         return this.session;
     }
 
-    public static void generate ( final Session session ) {
-        new CassandraTablesAndTypesRegister( session );
+    public static void generate (
+            final Session session,
+            final Cluster cluster,
+            final CodecRegistry codecRegistry
+    ) {
+        new CassandraTablesAndTypesRegister( session, cluster, codecRegistry );
     }
 
-    private CassandraTablesAndTypesRegister ( final Session session ) {
+    private CassandraTablesAndTypesRegister (
+            final Session session,
+            final Cluster cluster,
+            final CodecRegistry codecRegistry
+    ) {
         this.session = session;
 
         this.createAllKeyspace();
@@ -42,9 +53,9 @@ public final class CassandraTablesAndTypesRegister extends CassandraConverter {
         this.createAllTables();
         this.createAllIndexes();
 
-        this.registerAllCodecs();
+        this.registerAllCodecs( codecRegistry, cluster );
 
-        super.logging( "All tables, keyspace and types were created" );
+        super.logging( this.getClass() );
     }
 
     /*
@@ -937,28 +948,27 @@ public final class CassandraTablesAndTypesRegister extends CassandraConverter {
     /*
     создаем и регистрируем все кодеки для БД
     */
-    private void registerAllCodecs () {
+    private void registerAllCodecs (
+            final CodecRegistry codecRegistry,
+            final Cluster cluster
+    ) {
         i = 0;
         super.analyze(
                 super.getMapOfKeyspaceAndTypes(),
                 ( keyspace, udtTypes ) -> super.analyze(
                         udtTypes,
                         udtType -> {
-                            CassandraDataControl
-                                    .getInstance()
-                                    .getCodecRegistry()
-                                    .register( new CodecRegistration(
-                                            CassandraDataControl
-                                                    .getInstance()
-                                                    .getCodecRegistry()
-                                                    .codecFor( CassandraDataControl
-                                                            .getInstance()
-                                                            .getCluster()
+                            codecRegistry.register(
+                                    new CodecRegistration(
+                                            codecRegistry.codecFor(
+                                                    cluster
                                                             .getMetadata()
                                                             .getKeyspace( keyspace.name() )
-                                                            .getUserType( udtType.name() ) ),
-                                            super.listOfClasses.get( i ),
-                                            i ) );
+                                                            .getUserType( udtType.name() )
+                                            ),
+                                            super.listOfClasses.get( i )
+                                    )
+                            );
                             i++;
                         }
                 )

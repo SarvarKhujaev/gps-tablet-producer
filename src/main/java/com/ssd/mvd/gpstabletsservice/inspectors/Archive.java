@@ -7,10 +7,9 @@ import reactor.core.publisher.Mono;
 import com.ssd.mvd.gpstabletsservice.response.Status;
 import com.ssd.mvd.gpstabletsservice.response.ApiResponseModel;
 
-@lombok.Data
 public class Archive extends CollectionsInspector {
     private final SecureRandom secureRandom = new SecureRandom();
-    private final Base64.Encoder encoder = Base64.getUrlEncoder();
+    protected final Base64.Encoder encoder = Base64.getUrlEncoder();
 
     protected Archive () {}
 
@@ -72,7 +71,7 @@ public class Archive extends CollectionsInspector {
 
     protected String generateToken () {
         final byte[] bytes = new byte[ 24 ];
-        this.getSecureRandom().nextBytes( bytes );
-        return this.getEncoder().encodeToString( bytes );
+        this.secureRandom.nextBytes( bytes );
+        return this.encoder.encodeToString( bytes );
     }
 }

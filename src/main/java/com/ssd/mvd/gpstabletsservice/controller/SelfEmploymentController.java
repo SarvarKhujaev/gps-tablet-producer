@@ -59,7 +59,7 @@ public final class SelfEmploymentController extends SerDes {
                 super.removeAllDotes(
                     UnirestController
                             .getInstance()
-                            .getGetAddressByLocation()
+                            .getAddressByLocation
                             .apply( selfEmploymentTask.getLatOfAccident(), selfEmploymentTask.getLanOfAccident() ) ) );
 
         return CassandraDataControl

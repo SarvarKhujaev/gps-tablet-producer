@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.datastax.driver.core.UDTValue;
@@ -12,20 +13,20 @@ import java.util.UUID;
 /*
 Рапорт от патрульного после завершения задачи
 */
-public final class ReportForCard {
-    public Double getLan() {
+public final class ReportForCard implements ObjectCommonMethods {
+    public double getLan() {
         return this.lan;
     }
 
-    public void setLan ( final Double lan ) {
+    public void setLan ( final double lan ) {
         this.lan = lan;
     }
 
-    public Double getLat() {
+    public double getLat() {
         return this.lat;
     }
 
-    public void setLat ( final Double lat ) {
+    public void setLat ( final double lat ) {
         this.lat = lat;
     }
 
@@ -69,13 +70,13 @@ public final class ReportForCard {
         return this.imagesIds;
     }
 
-    public void setImagesIds ( final List< String> imagesIds) {
+    public void setImagesIds ( final List< String> imagesIds ) {
         this.imagesIds = imagesIds;
     }
 
     // локация патрульного откуда он отправил рапорт
-    private Double lan;
-    private Double lat;
+    private double lan;
+    private double lat;
 
     // оглавление рапорта
     private String title;
@@ -92,6 +93,12 @@ public final class ReportForCard {
     // хранит список из фото которые сделал патрульный
     private List< String > imagesIds;
 
+    public static ReportForCard empty () {
+        return new ReportForCard();
+    }
+
+    private ReportForCard () {}
+
     public ReportForCard ( final UDTValue udtValue ) {
         this.setLan( udtValue.getDouble( "lan" ) );
         this.setLat( udtValue.getDouble( "lat" ) );
@@ -102,5 +109,22 @@ public final class ReportForCard {
 
         this.setDate( udtValue.getTimestamp( "date" ) );
         this.setImagesIds( udtValue.getList( "imagesIds", String.class ) );
+    }
+
+    @Override
+    public ReportForCard generate( final UDTValue udtValue ) {
+        return new ReportForCard( udtValue );
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setDouble("lat", this.getLat() )
+                .setDouble( "lan", this.getLan() )
+                .setString( "title", this.getTitle() )
+                .setTimestamp( "date", this.getDate() )
+                .setList( "imagesIds", this.getImagesIds() )
+                .setString( "description", this.getDescription() )
+                .setString( "passportSeries", this.getPassportSeries() );
     }
 }

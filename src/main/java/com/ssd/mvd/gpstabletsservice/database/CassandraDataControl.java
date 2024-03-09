@@ -5,7 +5,7 @@ import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulI
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.patrulRequests.PatrulLoginRequest;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.entity.notifications.Notification;
-import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
+import com.ssd.mvd.gpstabletsservice.interfaces.ServiceCommonMethods;
 import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
 import com.ssd.mvd.gpstabletsservice.request.AndroidVersionUpdate;
@@ -32,20 +32,13 @@ import java.util.function.*;
 import java.time.Duration;
 import java.util.*;
 
-public final class CassandraDataControl extends CassandraConverter {
+public final class CassandraDataControl extends CassandraConverter implements ServiceCommonMethods {
     private final Cluster cluster;
     private final Session session;
 
     private static CassandraDataControl INSTANCE;
 
     private final CodecRegistry codecRegistry = new CodecRegistry();
-
-    public void register () {
-        /*
-        создаем, регистрируем и сохраняем все таблицы, типы и кодеки
-        */
-        CassandraTablesAndTypesRegister.generate( this.getSession() );
-    }
 
     public static CassandraDataControl getInstance () {
         return INSTANCE != null ? INSTANCE : ( INSTANCE = new CassandraDataControl() );
@@ -57,10 +50,6 @@ public final class CassandraDataControl extends CassandraConverter {
 
     public Session getSession() {
         return this.session;
-    }
-
-    public Cluster getCluster() {
-        return this.cluster;
     }
 
     private CassandraDataControl () {
@@ -85,7 +74,12 @@ public final class CassandraDataControl extends CassandraConverter {
                 .build() )
                 .connect();
 
-        super.logging( "Cassandra is ready" );
+        super.logging( this.getClass() );
+
+        /*
+        создаем, регистрируем и сохраняем все таблицы, типы и кодеки
+        */
+        CassandraTablesAndTypesRegister.generate( this.getSession(), this.cluster, this.getCodecRegistry() );
     }
 
     /*
@@ -192,7 +186,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     ).wasApplied()
                     ? super.function( Map.of( "message", super.getSuccessMessage( "PoliceType", "updated" ) ) )
                     : super.errorResponse( super.getFailMessage( "PoliceType" ) )
-                    .doOnError( this::delete );
+                    .doOnError( this::close);
     };
 
     public final Function< PoliceType, Mono< ApiResponseModel > > savePoliceType = policeType -> this.getAllEntities
@@ -222,7 +216,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     ? super.function( Map.of( "message", super.getSuccessMessage( "PoliceType", "saved" ) ) )
                     : super.errorResponse( super.getFailMessage( "PoliceType" ) )
                     : super.errorResponse( super.getFailMessage( "PoliceType" ) ) )
-            .doOnError( this::delete );
+            .doOnError( this::close);
 
     public final BiFunction< AtlasLustra, Boolean, Mono< ApiResponseModel > > saveLustra = ( atlasLustra, check ) ->
             this.getSession().execute(
@@ -245,7 +239,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     .wasApplied()
                     ? super.function( Map.of( "message", super.getSuccessMessage( "Lustra", "saved" ) ) )
                     : super.errorResponse( super.getFailMessage( "Lustra" ) )
-                    .doOnError( this::delete );
+                    .doOnError( this::close);
 
     public final Function< PolygonType, Mono< ApiResponseModel > > savePolygonType = polygonType ->
             this.getSession().execute(
@@ -263,7 +257,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     .wasApplied()
                     ? super.function( Map.of( "message", super.getSuccessMessage( "PolygonType", "saved" ) ) )
                     : super.errorResponse( super.getFailMessage( "PolygonType" ) )
-                    .doOnError( this::delete );
+                    .doOnError( this::close);
 
     public final Function< PolygonType, Mono< ApiResponseModel > > updatePolygonType = polygonType ->
             this.getSession().execute(
@@ -283,7 +277,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     .wasApplied()
                     ? super.function( Map.of( "message", super.getSuccessMessage( "PolygonType", "updated" ) ) )
                     : super.errorResponse( super.getFailMessage( "PolygonType" ) )
-                    .doOnError( this::delete );
+                    .doOnError( this::close);
 
     public final Function< UUID, Mono< PolygonType > > getPolygonTypeByUUID = uuid -> super.convert(
             new PolygonType(
@@ -291,7 +285,7 @@ public final class CassandraDataControl extends CassandraConverter {
                             CassandraTables.POLYGON_TYPE,
                             "uuid",
                             uuid.toString() ) ) )
-            .doOnError( this::delete );
+            .doOnError( this::close);
 
     public final Function< Polygon, Mono< ApiResponseModel > > updatePolygon = polygon -> this.getSession().execute(
             MessageFormat.format(
@@ -320,7 +314,7 @@ public final class CassandraDataControl extends CassandraConverter {
             .wasApplied()
             ? super.function( Map.of( "message", super.getSuccessMessage( "Polygon", "updated" ) ) )
             : super.errorResponse( super.getFailMessage( "Polygon" ) )
-            .doOnError( this::delete );
+            .doOnError( this::close);
 
     public final Function< Polygon, Mono< ApiResponseModel > > savePolygon = polygon -> this.getSession().execute(
             MessageFormat.format(
@@ -349,7 +343,7 @@ public final class CassandraDataControl extends CassandraConverter {
             .wasApplied()
             ? super.function( Map.of( "message", super.getSuccessMessage( "Polygon", "saved" ) ) )
             : super.errorResponse( super.getFailMessage( "Polygon" ) )
-            .doOnError( this::delete );
+            .doOnError( this::close);
 
     public final Function< UUID, Mono< Polygon > > getPolygonByUUID = uuid -> super.convert(
             new Polygon(
@@ -408,7 +402,7 @@ public final class CassandraDataControl extends CassandraConverter {
                             return super.errorResponse( "This car is linked to patrul" );
                         }
                     } )
-                    .doOnError( this::delete );
+                    .doOnError( this::close);
 
     public final Function< ReqCar, Mono< ApiResponseModel > > updateCar = reqCar ->
             this.getCarByUUID.apply( reqCar.getUuid() )
@@ -578,10 +572,10 @@ public final class CassandraDataControl extends CassandraConverter {
                             Map.of( "message", super.getSuccessMessage( "Car", "saved" ) ) )
                     : super.errorResponse( super.getFailMessage( "Car" ) )
                     : super.errorResponse( super.getFailMessage( "trackerId" ) )
-                    .doOnError( this::delete );
+                    .doOnError( this::close);
 
     public final Function< UUID, Mono< Patrul > > getPatrulByUUID = uuid -> super.convert(
-            new Patrul( this.getRowFromTabletsKeyspace( CassandraTables.PATRULS, "uuid", uuid.toString() ) ) );
+            Patrul.empty().generate( this.getRowFromTabletsKeyspace( CassandraTables.PATRULS, "uuid", uuid.toString() ) ) );
 
     // обновляет время последней активности патрульного
     public final BiConsumer< Patrul, StringBuilder > updatePatrulAfterTask = ( patrul, query ) ->
@@ -790,7 +784,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     return super.errorResponse( super.getFailMessage( "Patrul" ) );
                 }
             } )
-            .doOnError( this::delete );
+            .doOnError( this::close);
 
     public final Function< Patrul, Mono< ApiResponseModel > > savePatrul = patrul -> {
             /*
@@ -800,7 +794,8 @@ public final class CassandraDataControl extends CassandraConverter {
                     this.getRowFromTabletsKeyspace(
                             CassandraTables.PATRULS,
                             "passportNumber",
-                            super.joinWithAstrix( patrul.getPassportNumber() ) ) ) ) {
+                            super.joinWithAstrix( patrul.getPassportNumber() ) ) )
+            ) {
                 /*
                 присваиваем объектам начальные значения по деволту
                 */
@@ -815,91 +810,102 @@ public final class CassandraDataControl extends CassandraConverter {
                     return super.errorResponse( super.getFailMessage( "Login" ) );
                 }
 
-                /*
-                сохраняем данные логина патрульного
-                */
                 this.getSession().execute(
                         MessageFormat.format(
                                 """
-                                {0} {1}.{2}
-                                ( login, password, uuid ) -- сохраняем данные логина патрульного
-                                VALUES( {3}, {4}, {5} );
+                                {0}
+                                {1}
+                                {2}
+                                {3}
+                                {4}
                                 """,
-                                CassandraCommands.INSERT_INTO,
-                                CassandraTables.TABLETS,
-                                CassandraTables.PATRULS_LOGIN_TABLE,
+                                CassandraCommands.BEGIN_BATCH,
 
-                                super.joinWithAstrix( patrul.getPatrulAuthData().getLogin() ),
-                                super.joinWithAstrix( patrul.getPatrulAuthData().getPassword() ),
-                                patrul.getUuid()
-                        )
-                );
+                                /*
+                                сохраняем данные логина патрульного
+                                */
+                                MessageFormat.format(
+                                        """
+                                        {0} {1}.{2}
+                                        ( login, password, uuid ) -- сохраняем данные логина патрульного
+                                        VALUES( {3}, {4}, {5} );
+                                        """,
+                                        CassandraCommands.INSERT_INTO,
+                                        CassandraTables.TABLETS,
+                                        CassandraTables.PATRULS_LOGIN_TABLE,
 
-                /*
-                создаем запись для патрульного в таблице для СОС сигналов
-                */
-                this.getSession().execute(
-                        MessageFormat.format(
-                                """
-                                {0} {1}.{2}
-                                ( patruluuid, sentSosList, attachedSosList, cancelledSosList, acceptedSosList )
-                                VALUES ( {3}, {4}, {4}, {4}, {4} );
-                                """,
-                                CassandraCommands.INSERT_INTO,
-                                CassandraTables.TABLETS,
-                                CassandraTables.PATRUL_SOS_LIST,
-                                patrul.getUuid(),
-                                "{}"
-                        )
-                );
-
-                /*
-                сохраняем сами данные патрульного
-                */
-                this.getSession().execute(
-                        MessageFormat.format(
-                                """
-                                {0} {1}.{2} {3}
-                                {4} ( {5}, {6}, {7}, {8},
-                                {9}, {10}, {11}, {12}, {13}, {14}, {15},
-                                {16}, {17}, {18}, {19}, {20}, {21}, {22}, {23}, {24}, {25} );
-                                """,
-                                CassandraCommands.INSERT_INTO,
-                                CassandraTables.TABLETS,
-                                CassandraTables.PATRULS,
-                                super.getALlParamsNamesForClass.apply( Patrul.class ),
-
-                                "VALUES",
-                                patrul.getUuid(),
-                                patrul.getTotalActivityTime(),
-
-                                patrul.getInPolygon(),
-                                patrul.getTuplePermission(),
-
-                                super.joinWithAstrix( patrul.getRank() ),
-                                super.joinWithAstrix( patrul.getEmail() ),
-                                super.joinWithAstrix( patrul.getOrganName() ),
-                                super.joinWithAstrix( patrul.getPoliceType() ),
-                                super.joinWithAstrix( patrul.getDateOfBirth() ),
-                                super.joinWithAstrix( patrul.getPassportNumber() ),
-                                super.joinWithAstrix( patrul.getPatrulImageLink() ),
-
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulFIOData() ),
-                                super.convertClassToCassandraTable.apply(
-                                        super.objectIsNotNull( patrul.getPatrulCarInfo() )
-                                                ? patrul.getPatrulCarInfo()
-                                                : PatrulCarInfo.empty()
+                                        super.joinWithAstrix( patrul.getPatrulAuthData().getLogin() ),
+                                        super.joinWithAstrix( patrul.getPatrulAuthData().getPassword() ),
+                                        patrul.getUuid()
                                 ),
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulDateData() ),
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulAuthData() ),
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulTaskInfo() ),
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulTokenInfo() ),
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulRegionData() ),
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulLocationData() ),
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulUniqueValues() ),
-                                super.convertClassToCassandraTable.apply( patrul.getPatrulMobileAppInfo() ) ) );
 
-                        return super.function( Map.of( "message", super.getSuccessMessage( "Patrul", "saved" ) ) );
+                                /*
+                                создаем запись для патрульного в таблице для СОС сигналов
+                                */
+                                MessageFormat.format(
+                                        """
+                                        {0} {1}.{2}
+                                        ( patruluuid, sentSosList, attachedSosList, cancelledSosList, acceptedSosList )
+                                        VALUES ( {3}, {4}, {4}, {4}, {4} );
+                                        """,
+                                        CassandraCommands.INSERT_INTO,
+                                        CassandraTables.TABLETS,
+                                        CassandraTables.PATRUL_SOS_LIST,
+                                        patrul.getUuid(),
+                                        "{}"
+                                ),
+
+                                /*
+                                сохраняем сами данные патрульного
+                                */
+                                MessageFormat.format(
+                                        """
+                                        {0} {1}.{2} {3}
+                                        {4} ( {5}, {6}, {7}, {8},
+                                        {9}, {10}, {11}, {12}, {13}, {14}, {15},
+                                        {16}, {17}, {18}, {19}, {20}, {21}, {22}, {23}, {24}, {25} );
+                                        """,
+                                        CassandraCommands.INSERT_INTO,
+                                        CassandraTables.TABLETS,
+                                        CassandraTables.PATRULS,
+                                        super.getALlParamsNamesForClass.apply( Patrul.class ),
+
+                                        "VALUES",
+                                        patrul.getUuid(),
+                                        patrul.getTotalActivityTime(),
+
+                                        patrul.getInPolygon(),
+                                        patrul.getTuplePermission(),
+
+                                        super.joinWithAstrix( patrul.getRank() ),
+                                        super.joinWithAstrix( patrul.getEmail() ),
+                                        super.joinWithAstrix( patrul.getOrganName() ),
+                                        super.joinWithAstrix( patrul.getPoliceType() ),
+                                        super.joinWithAstrix( patrul.getDateOfBirth() ),
+                                        super.joinWithAstrix( patrul.getPassportNumber() ),
+                                        super.joinWithAstrix( patrul.getPatrulImageLink() ),
+
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulFIOData() ),
+                                        super.convertClassToCassandraTable.apply(
+                                                super.objectIsNotNull( patrul.getPatrulCarInfo() )
+                                                        ? patrul.getPatrulCarInfo()
+                                                        : PatrulCarInfo.empty()
+                                        ),
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulDateData() ),
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulAuthData() ),
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulTaskInfo() ),
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulTokenInfo() ),
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulRegionData() ),
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulLocationData() ),
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulUniqueValues() ),
+                                        super.convertClassToCassandraTable.apply( patrul.getPatrulMobileAppInfo() )
+                                ),
+
+                                CassandraCommands.APPLY_BATCH
+                        )
+                );
+
+                return super.function( Map.of( "message", super.getSuccessMessage( "Patrul", "saved" ) ) );
             }
             else {
                 return super.errorResponse( super.getFailMessage( "Login" ) );
@@ -981,7 +987,7 @@ public final class CassandraDataControl extends CassandraConverter {
             .wasApplied()
             ? super.function( Map.of( "message", super.getSuccessMessage( "Polygon", "saved" ) ) )
             : super.errorResponse( "This polygon has already been created" )
-            .doOnError( this::delete );
+            .doOnError( this::close);
 
     public final Function< Polygon, Mono< ApiResponseModel > > updatePolygonForPatrul = polygon -> this.getPolygonForPatrul
             .apply( polygon.getUuid().toString() )
@@ -1034,7 +1040,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     .wasApplied()
                     ? super.function( Map.of( "message", super.getSuccessMessage( "Polygon", "updated" ) ) )
                     : super.errorResponse( "This polygon has already been created" )
-                    .doOnError( this::delete ) );
+                    .doOnError( this::close) );
 
     public final Function< PatrulActivityRequest, Mono< PatrulActivityStatistics > > getPatrulStatistics = request ->
             this.getPatrulByUUID.apply( UUID.fromString( request.getPatrulUUID() ) )
@@ -1155,7 +1161,7 @@ public final class CassandraDataControl extends CassandraConverter {
                     ? super.function( Map.of( "message", "Notification " + uuid + " was updated successfully" ) )
                     : super.errorResponse( "Notification was not updated" );
 
-    public Mono< ApiResponseModel > delete (
+    public Mono< ApiResponseModel > close(
             final String table,
             final String param,
             final String id ) {
@@ -1294,7 +1300,7 @@ public final class CassandraDataControl extends CassandraConverter {
             this.checkLogin.apply( super.joinWithAstrix( patrulLoginRequest.getLogin() ) )
                     // если такой логин есть идем дальше
                     .map( row -> {
-                        final Patrul patrul = new Patrul(
+                        final Patrul patrul = Patrul.empty().generate(
                                 this.getRowFromTabletsKeyspace(
                                         CassandraTables.PATRULS,
                                         "uuid",
@@ -1607,7 +1613,7 @@ public final class CassandraDataControl extends CassandraConverter {
                                 patrul.getPatrulTokenInfo().setSpecialToken( token );
                                 UnirestController
                                         .getInstance()
-                                        .getAddUser()
+                                        .addUser
                                         .accept( patrul );
                             }
                     )
@@ -1783,12 +1789,18 @@ public final class CassandraDataControl extends CassandraConverter {
                     .parallel( super.checkDifference( table.name().length() + keyspace.name().length() ) )
                     .runOn( Schedulers.parallel() );
 
-    public void delete ( final Throwable throwable ) {
+    @Override
+    public void close ( final Throwable throwable ) {
+        super.logging( throwable );
+        super.logging( this );
+        this.close();
+    }
+
+    @Override
+    public void close() {
         INSTANCE = null;
         this.cluster.close();
         this.getSession().close();
-        super.logging( throwable );
-        KafkaDataControl.getKafkaDataControl().clear();
-        super.logging( this.getClass().getName() + " is closed!!!" );
+        super.logging( this );
     }
 }

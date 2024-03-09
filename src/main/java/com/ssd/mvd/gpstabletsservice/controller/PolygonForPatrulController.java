@@ -44,7 +44,7 @@ public final class PolygonForPatrulController extends LogInspector {
                         uuids -> super.analyze(
                                 uuids,
                                 uuid1 -> patrulList.add(
-                                        new Patrul(
+                                        Patrul.empty().generate(
                                                 CassandraDataControl
                                                         .getInstance()
                                                         .getRowFromTabletsKeyspace(

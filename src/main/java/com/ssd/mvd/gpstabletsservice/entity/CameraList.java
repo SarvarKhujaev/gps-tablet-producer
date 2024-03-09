@@ -1,8 +1,9 @@
 package com.ssd.mvd.gpstabletsservice.entity;
 
 import com.datastax.driver.core.UDTValue;
+import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
 
-public final class CameraList {
+public final class CameraList implements ObjectCommonMethods< CameraList > {
     public String getRtspLink() {
         return this.rtspLink;
     }
@@ -22,8 +23,26 @@ public final class CameraList {
     private String rtspLink;
     private String cameraName;
 
+    public static CameraList empty () {
+        return new CameraList();
+    }
+
+    private CameraList () {}
+
     public CameraList ( final UDTValue value ) {
         this.setRtspLink( value.getString( "rtspLink" ) );
         this.setCameraName( value.getString( "cameraName" ) );
+    }
+
+    @Override
+    public CameraList generate( final UDTValue udtValue ) {
+        return new CameraList( udtValue );
+    }
+
+    @Override
+    public UDTValue fillUdtByEntityParams( final UDTValue udtValue ) {
+        return udtValue
+                .setString ("rtspLink", this.getRtspLink() )
+                .setString ( "cameraName", this.getCameraName() );
     }
 }
