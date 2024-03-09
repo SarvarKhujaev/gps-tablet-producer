@@ -5,10 +5,10 @@ server:
 spring:
     data:
         cassandra:
-            port: ${CASSANDRA_PORT:9942}
+            port: ${CASSANDRA_PORT:9042}
             keyspace-name: ${KEYSPACE_NAME:SSD.TABLETS}
-            contact-points: ${CASSANDRA_HOST:10.254.5.1, 10.254.5.2, 10.254.5.3}
-            local-datacenter: ${CASSANDRA_DC:datacenter1}
+            contact-points: ${CASSANDRA_HOST}
+            local-datacenter: ${CASSANDRA_DC}
             schema-action: CREATE_IF_NOT_EXISTS
 
         request:
@@ -26,10 +26,10 @@ spring:
 
 variables:
     MINIO_VARIABLES:
-        ENDPOINT: ${ENDPOINT:https://minio.ssd.uz}
-        ACCESS_KEY: ${ACCESS_KEY:1rQ6uw2UfS6PKGCX}
-        SECRET_KEY: ${SECRET_KEY:tcfecji8F5ZGtT2A7GQg63DUeQp54hE0}
-        BUCKET_NAME: ${BUCKET_NAME:miniocontroller}
+        ENDPOINT: ${ENDPOINT}
+        ACCESS_KEY: ${ACCESS_KEY}
+        SECRET_KEY: ${SECRET_KEY}
+        BUCKET_NAME: ${BUCKET_NAME}
 
     KAFKA_VARIABLES:
         KAFKA_BROKER : ${KAFKA_BROKER:localhost:9092}
@@ -44,7 +44,7 @@ variables:
 
     CASSANDRA_VARIABLES:
         CASSANDRA_PORT: ${CASSANDRA_PORT:9042}
-        CASSANDRA_HOST: ${CASSANDRA_HOST:10.254.5.1, 10.254.5.2, 10.254.5.3}
+        CASSANDRA_HOST: ${CASSANDRA_HOST}
 
         CASSANDRA_MAX_REQ: ${CASSANDRA_MAX_REQ:1000}
         CASSANDRA_MAX_CONN_LOCAL: ${CASSANDRA_MAX_CONN_LOCAL:10}
@@ -54,6 +54,6 @@ variables:
         CASSANDRA_CORE_CONN_REMOTE: ${CASSANDRA_CORE_CONN_REMOTE:2}
 
     UNIREST_VARIABLES:
-        ADDRESS_LOCATION_API : ${ADDRESS_LOCATION_API:http://ms-dev.ssd.uz/nominatim/search?q=}
-        CHAT_SERVICE_DOMAIN : ${CHAT_SERVICE_DOMAIN:https://ms.ssd.uz}
-        CHAT_SERVICE_PREFIX : ${CHAT_SERVICE_PREFIX:chat}
+        ADDRESS_LOCATION_API : ${ADDRESS_LOCATION_API}
+        CHAT_SERVICE_DOMAIN : ${CHAT_SERVICE_DOMAIN}
+        CHAT_SERVICE_PREFIX : ${CHAT_SERVICE_PREFIX}
