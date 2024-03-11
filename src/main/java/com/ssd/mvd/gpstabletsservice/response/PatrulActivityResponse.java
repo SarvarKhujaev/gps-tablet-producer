@@ -3,7 +3,6 @@ package com.ssd.mvd.gpstabletsservice.response;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulDivisionByRegions;
 import com.ssd.mvd.gpstabletsservice.inspectors.CollectionsInspector;
 
-import java.util.ArrayList;
 import java.util.SortedMap;
 import java.util.List;
 
@@ -14,7 +13,9 @@ public final class PatrulActivityResponse extends CollectionsInspector {
     public PatrulActivityResponse (
             final SortedMap< Long, PatrulDivisionByRegions > regions
     ) {
-        this.regions = new ArrayList<>( regions.values() );
+        this.regions = super.newList();
+        this.regions.addAll( regions.values() );
+
         super.analyze(
                 this.regions,
                 patrulDivisionByRegions -> this.count += (
@@ -22,5 +23,7 @@ public final class PatrulActivityResponse extends CollectionsInspector {
                                 + patrulDivisionByRegions.getNonActivePatruls()
                                 + patrulDivisionByRegions.getNeverAuthorizedPatruls() )
         );
+
+        super.close();
     }
 }

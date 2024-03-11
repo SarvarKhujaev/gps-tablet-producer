@@ -60,10 +60,11 @@ public final class ExelInspector extends LogInspector {
     save info about Region and District
     the current Patrul is attached to
     */
-    private void saveRegionAndDistrict(
+    private void saveRegionAndDistrict (
             final Patrul patrul,
             // shows that Patrul is attached to some District or not
-            final Boolean hasDistrict ) {
+            final Boolean hasDistrict
+    ) {
         this.stringBuilder.append( "Region_" )
                 .append( patrul.getPatrulRegionData().getRegionName() )
                 .append( hasDistrict ? "_District_" + patrul.getPatrulRegionData().getDistrictName() : "" );
@@ -72,7 +73,8 @@ public final class ExelInspector extends LogInspector {
     private void saveCellValue (
             final Row row,
             final String value,
-            final CellStyle headerStyle ) {
+            final CellStyle headerStyle
+    ) {
         final Cell headerCell = row.createCell( i++ );
         headerCell.setCellStyle( headerStyle );
         headerCell.setCellValue( value );
@@ -111,7 +113,8 @@ public final class ExelInspector extends LogInspector {
                 patrul.getDateOfBirth().length() <= 10
                         ? patrul.getDateOfBirth()
                         : super.convertDateToString( super.convertDate( patrul.getDateOfBirth() ) ),
-                headerStyle );
+                headerStyle
+        );
 
         this.saveCellValue( row, patrul.getPatrulMobileAppInfo().getPhoneNumber(), headerStyle );
         this.saveCellValue( row, patrul.getRank(), headerStyle );
@@ -121,20 +124,33 @@ public final class ExelInspector extends LogInspector {
 
         this.saveCellValue( row, patrul.getPoliceType(), headerStyle );
 
-        this.saveCellValue( row, super.convertDateToString(
-                patrul
-                        .getPatrulDateData()
-                        .getLastActiveDate() ), headerStyle );
+        this.saveCellValue(
+                row,
+                super.convertDateToString(
+                        patrul.getPatrulDateData().getLastActiveDate()
+                ),
+                headerStyle
+        );
 
-        this.saveCellValue( row, super.convertDateToString(
-                patrul
-                        .getPatrulDateData()
-                        .getStartedToWorkDate() ), headerStyle );
+        this.saveCellValue(
+                row,
+                super.convertDateToString(
+                        patrul
+                                .getPatrulDateData()
+                                .getStartedToWorkDate()
+                ),
+                headerStyle
+        );
 
-        this.saveCellValue( row, super.convertDateToString(
-                patrul
-                        .getPatrulDateData()
-                        .getDateOfRegistration() ), headerStyle );
+        this.saveCellValue(
+                row,
+                super.convertDateToString(
+                        patrul
+                                .getPatrulDateData()
+                                .getDateOfRegistration()
+                ),
+                headerStyle
+        );
 
         this.saveCellValue( row, String.valueOf( patrul.getTotalActivityTime() ), headerStyle );
         this.saveCellValue( row, String.valueOf( patrul.getPatrulMobileAppInfo().getBatteryLevel() ), headerStyle );
@@ -143,7 +159,8 @@ public final class ExelInspector extends LogInspector {
     public String download (
             final List< Patrul > patruls,
             final Map< String, String > params,
-            final List< String > policeTypes ) {
+            final List< String > policeTypes
+    ) {
         this.setTitle( Status.valueOf( params.get( "status" ) ) );
         policeTypes.forEach( s -> this.stringBuilder.append( s ).append( "_" ) );
 

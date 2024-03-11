@@ -48,6 +48,10 @@ public final class CassandraDataControl extends CassandraConverter implements Se
         return this.codecRegistry;
     }
 
+    public Cluster getCluster() {
+        return this.cluster;
+    }
+
     public Session getSession() {
         return this.session;
     }
@@ -79,7 +83,7 @@ public final class CassandraDataControl extends CassandraConverter implements Se
         /*
         создаем, регистрируем и сохраняем все таблицы, типы и кодеки
         */
-        CassandraTablesAndTypesRegister.generate( this.getSession(), this.cluster, this.getCodecRegistry() );
+        CassandraTablesAndTypesRegister.generate( this.getSession(), this.getCluster(), this.getCodecRegistry() );
     }
 
     /*
@@ -1790,7 +1794,7 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                     .runOn( Schedulers.parallel() );
 
     @Override
-    public void close ( final Throwable throwable ) {
+    public void close( final Throwable throwable ) {
         super.logging( throwable );
         super.logging( this );
         this.close();
@@ -1799,7 +1803,7 @@ public final class CassandraDataControl extends CassandraConverter implements Se
     @Override
     public void close() {
         INSTANCE = null;
-        this.cluster.close();
+        this.getCluster().close();
         this.getSession().close();
         super.logging( this );
     }

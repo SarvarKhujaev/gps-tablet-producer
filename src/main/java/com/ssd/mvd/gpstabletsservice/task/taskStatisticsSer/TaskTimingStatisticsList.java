@@ -3,7 +3,6 @@ package com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer;
 import com.ssd.mvd.gpstabletsservice.inspectors.CollectionsInspector;
 import java.util.ArrayList;
 
-@lombok.Data
 public final class TaskTimingStatisticsList extends CollectionsInspector {
     private final ArrayList< TaskTimingStatistics > listLate;
     private final ArrayList< TaskTimingStatistics > listInTime;
@@ -14,8 +13,10 @@ public final class TaskTimingStatisticsList extends CollectionsInspector {
     }
 
     private TaskTimingStatisticsList () {
-        this.listDidNotArrived = newList();
-        this.listInTime = newList();
-        this.listLate = newList();
+        this.listDidNotArrived = super.newList();
+        this.listInTime = super.newList();
+        this.listLate = super.newList();
+
+        super.close();
     }
 }

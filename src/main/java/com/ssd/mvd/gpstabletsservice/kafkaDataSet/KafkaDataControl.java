@@ -77,10 +77,6 @@ public final class KafkaDataControl extends SerDes implements ServiceCommonMetho
         return this.SOS_TOPIC_FOR_ANDROID_NOTIFICATION;
     }
 
-    public Supplier<Map<String, Object>> getGetKafkaSenderOptions() {
-        return this.getKafkaSenderOptions;
-    }
-
     public KafkaSender<String, String> getKafkaSender() {
         return this.kafkaSender;
     }
@@ -119,11 +115,11 @@ public final class KafkaDataControl extends SerDes implements ServiceCommonMetho
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class );
 
     private final KafkaSender< String, String > kafkaSender = KafkaSender.create(
-            SenderOptions.< String, String >create( this.getGetKafkaSenderOptions().get() )
+            SenderOptions.< String, String >create( this.getKafkaSenderOptions.get() )
                     .maxInFlight( 1024 ) );
 
     private KafkaDataControl () {
-        super.logging( this.getClass().getName() + " was created" );
+        super.logging( this.getClass() );
     }
 
     private final Consumer< ActiveTask > writeActiveTaskToKafka = activeTask -> this.getKafkaSender()

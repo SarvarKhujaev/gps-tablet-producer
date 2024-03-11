@@ -1,22 +1,32 @@
 package com.ssd.mvd.gpstabletsservice;
 
-import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulAuthData;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulFIOData;
-import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulRegionData;
+import org.junit.runner.JUnitCore;
+import junit.extensions.RepeatedTest;
+import junit.framework.JUnit4TestAdapter;
+
+import com.ssd.mvd.gpstabletsservice.testing.JavaTest;
+import com.ssd.mvd.gpstabletsservice.inspectors.LogInspector;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
-import com.ssd.mvd.gpstabletsservice.database.CassandraDataControl;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import reactor.core.scheduler.Schedulers;
 
 @SpringBootApplication
 public class GpsTabletsServiceApplication {
     public static ApplicationContext context;
 
     public static void main( final String[] args ) {
-//        context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
-        CassandraDataControl.getInstance().close();
+        context = SpringApplication.run( GpsTabletsServiceApplication.class, args );
+
+        /*
+        запускаем тесты
+        */
+        new LogInspector(
+                new JUnitCore().run(
+                        new RepeatedTest(
+                                new JUnit4TestAdapter( JavaTest.class ), 2
+                        )
+                )
+        ).close();
     }
 }

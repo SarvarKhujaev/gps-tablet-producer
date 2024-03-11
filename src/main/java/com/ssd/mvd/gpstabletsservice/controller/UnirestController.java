@@ -79,8 +79,9 @@ public class UnirestController extends LogInspector {
                     return this.objectMapper.writeValueAsString( o );
                 }
                 catch ( final JsonProcessingException e ) {
-                    throw new RuntimeException(e);
+                    UnirestController.super.logging( e );
                 }
+                return null;
             }
 
             @Override
@@ -89,8 +90,9 @@ public class UnirestController extends LogInspector {
                     return this.objectMapper.readValue( s, aClass );
                 }
                 catch ( final JsonProcessingException e ) {
-                    throw new RuntimeException(e);
+                    UnirestController.super.logging( e );
                 }
+                return null;
             }
         } );
     }
@@ -109,9 +111,13 @@ public class UnirestController extends LogInspector {
                             new CustomSubscriber<>(
                                 req -> this.getRestTemplate()
                                         .apply( patrulId.split( "@" )[1] )
-                                        .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
-                                                        + this.getCHAT_SERVICE_PREFIX()
-                                                        + "/delete-user",
+                                        .exchange(
+                                                String.join(
+                                                        "/",
+                                                        this.getCHAT_SERVICE_DOMAIN(),
+                                                        this.getCHAT_SERVICE_PREFIX(),
+                                                        "delete-user"
+                                                ),
                                                 HttpMethod.POST,
                                                 new HttpEntity<>( req, null ),
                                                 String.class )
@@ -132,12 +138,17 @@ public class UnirestController extends LogInspector {
                     .subscribe(
                             new CustomSubscriber<>(
                                     req -> this.getRestTemplate().apply( patrul.getPatrulTokenInfo().getSpecialToken() )
-                                            .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
-                                                            + this.getCHAT_SERVICE_PREFIX()
-                                                            + "/edit-user",
+                                            .exchange(
+                                                    String.join(
+                                                            "/",
+                                                            this.getCHAT_SERVICE_DOMAIN(),
+                                                            this.getCHAT_SERVICE_PREFIX(),
+                                                            "edit-user"
+                                                    ),
                                                     HttpMethod.POST,
                                                     new HttpEntity<>( req, null ),
-                                                    String.class )
+                                                    String.class
+                                            )
                             )
                     );
             } catch ( final Exception e ) {
@@ -153,9 +164,13 @@ public class UnirestController extends LogInspector {
                     .subscribe( new CustomSubscriber<>(
                             req -> this.getRestTemplate()
                                     .apply( patrul.getPatrulTokenInfo().getSpecialToken() )
-                                    .exchange( this.getCHAT_SERVICE_DOMAIN() + "/"
-                                                    + this.getCHAT_SERVICE_PREFIX()
-                                                    + "/add-user",
+                                    .exchange(
+                                            String.join(
+                                                    "/",
+                                                    this.getCHAT_SERVICE_DOMAIN(),
+                                                    this.getCHAT_SERVICE_PREFIX(),
+                                                    "add-user"
+                                            ),
                                             HttpMethod.POST,
                                             new HttpEntity<>( req, null ),
                                             String.class )
@@ -175,9 +190,15 @@ public class UnirestController extends LogInspector {
             try {
                 return this.stringToArrayList(
                     Unirest.get(
-                            this.getADDRESS_LOCATION_API()
-                                + latitude + "," + longitude
-                                + "&limit=5&format=json&addressdetails=1" )
+                            String.join(
+                                    "",
+                                    this.getADDRESS_LOCATION_API(),
+                                    String.join(
+                                            ",",
+                                            latitude.toString(),
+                                            longitude.toString()
+                                    ),
+                                    "&limit=5&format=json&addressdetails=1" ) )
                             .asJson()
                             .getBody()
                             .getArray()
@@ -194,14 +215,15 @@ public class UnirestController extends LogInspector {
     public final Function< Long, List< RegionData > > getRegions = regionId -> {
             try {
                 return this.getGson().fromJson(
-                        Unirest.get( regionId > 0
-                                    ? "http://10.254.1.1:1234/region-dictionary/api/v1/front/getDistrictByRegion/" + regionId
-                                    : "http://10.254.1.1:1234/region-dictionary/api/v1/front/getAllRegion" )
-                            .asJson()
-                            .getBody()
-                            .toString(),
-                            Regions.class )
-                        .getResData();
+                        Unirest.get(
+                                regionId > 0
+                                        ? "http://10.254.1.1:1234/region-dictionary/api/v1/front/getDistrictByRegion/" + regionId
+                                        : "http://10.254.1.1:1234/region-dictionary/api/v1/front/getAllRegion" )
+                                .asJson()
+                                .getBody()
+                                .toString(),
+                                Regions.class
+                        ).getResData();
             } catch ( final Exception e ) {
                 super.logging( e );
                 return super.emptyList();

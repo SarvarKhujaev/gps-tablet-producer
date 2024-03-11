@@ -16,11 +16,11 @@ import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonType;
 import com.ssd.mvd.gpstabletsservice.entity.polygons.PolygonEntity;
-import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
+import com.ssd.mvd.gpstabletsservice.interfaces.ServiceCommonMethods;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PositionInfo;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
-public class CollectionsInspector {
+public class CollectionsInspector implements ServiceCommonMethods {
     protected CollectionsInspector () {}
 
     protected final List< Class > listOfClasses = List.of(
@@ -120,7 +120,7 @@ public class CollectionsInspector {
         return Collections.emptyList();
     }
 
-    public <T> ArrayList<T> newList () {
+    protected  <T> ArrayList<T> newList () {
         return new ArrayList<>();
     }
 
@@ -139,7 +139,7 @@ public class CollectionsInspector {
         return firstCollection.size() == secondCollection.size();
     }
 
-    public <T> void analyze (
+    protected <T> void analyze (
             final Collection<T> someList,
             final Consumer<T> someConsumer
     ) {
@@ -165,5 +165,12 @@ public class CollectionsInspector {
             final T[] objects
     ) {
         return Arrays.asList( objects );
+    }
+
+    @Override
+    public void close() {
+        this.fields.clear();
+        this.detailsList.clear();
+        this.listOfClasses.clear();
     }
 }

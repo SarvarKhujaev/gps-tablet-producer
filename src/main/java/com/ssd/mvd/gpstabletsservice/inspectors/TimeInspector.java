@@ -11,12 +11,12 @@ import java.time.format.DateTimeFormatter;
 public class TimeInspector extends StringOperations {
     protected static int DAY_IN_SECOND = 86400;
 
-    public Date getDate() {
-        return date;
+    private Date getDate() {
+        return this.date;
     }
 
-    public Calendar getCalendar() {
-        return calendar;
+    private Calendar getCalendar() {
+        return this.calendar;
     }
 
     private Date date; // for comparing with current time
@@ -32,7 +32,7 @@ public class TimeInspector extends StringOperations {
         return ( this.date = new Date() );
     }
 
-    public Date newDate () {
+    protected Date newDate () {
         return new Date();
     }
 
@@ -63,7 +63,7 @@ public class TimeInspector extends StringOperations {
         ).format( DateTimeFormatter.ISO_LOCAL_DATE );
     }
 
-    public boolean checkDate ( final Instant instant ) {
+    protected boolean checkDate ( final Instant instant ) {
         return endTimeForEvening >= this.setDate().getHours()
                 && this.getDate().getHours() >= startTimeForMorning
                 ? ( this.getTimeDifference( instant, 2 ) <= 10 )
@@ -71,7 +71,7 @@ public class TimeInspector extends StringOperations {
     }
 
     // for checking current time of task ending
-    public long convertTimeToLong ( final String time ) {
+    protected long convertTimeToLong ( final String time ) {
         try {
             return time != null && !time.contains( "null" )
                     ? new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" )
@@ -98,11 +98,11 @@ public class TimeInspector extends StringOperations {
         return this.getCalendar().getTime();
     }
 
-    public Month getMonthName ( final Date date ) {
+    protected Month getMonthName ( final Date date ) {
         return Month.of( date.getMonth() + 1 );
     }
 
-    public long getTimeDifference (
+    protected long getTimeDifference (
             final Instant instant,
             final int integer
     ) {

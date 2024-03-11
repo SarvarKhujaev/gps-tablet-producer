@@ -7,15 +7,15 @@ import java.util.List;
 // используется когда нужно найти патрульных рядом с камерой
 // максимум 5 не занятых патрульных
 public final class PatrulInRadiusList extends CollectionsInspector {
-    public void setMaxDistance(Double maxDistance) {
-        this.maxDistance = maxDistance;
-    }
-
-    private Double maxDistance;
+    private double maxDistance;
     private List< Patrul > freePatrulList; // максимум 5 не занятых патрульных
     private List< Patrul > busyPatrulListInRadius;
     private List< Patrul > busyPatrulListOutOfRadius;
     private List< Patrul > freePatrulListOutOfRadius; // список патрульных которые не входят в радиус
+
+    private void setMaxDistance ( final double maxDistance ) {
+        this.maxDistance = maxDistance;
+    }
 
     public PatrulInRadiusList () {}
 
@@ -52,5 +52,7 @@ public final class PatrulInRadiusList extends CollectionsInspector {
                     }
                 }
         );
+
+        super.close();
     }
 }

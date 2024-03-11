@@ -16,8 +16,9 @@ import com.ssd.mvd.gpstabletsservice.entity.Point;
 import com.datastax.driver.core.Row;
 import static java.lang.Math.cos;
 import static java.lang.Math.*;
-import java.util.*;
+
 import java.util.function.Consumer;
+import java.util.*;
 
 public class DataValidateInspector extends TimeInspector {
     private static final DataValidateInspector INSTANCE = new DataValidateInspector();
@@ -44,12 +45,12 @@ public class DataValidateInspector extends TimeInspector {
         );
     }
 
-    public Boolean checkObject ( final Point point ) {
+    protected Boolean checkObject ( final Point point ) {
         return this.objectIsNotNull( point.getLatitude() )
                 && this.objectIsNotNull( point.getLongitude() );
     }
 
-    public Boolean checkObject ( final Patrul patrul ) {
+    protected Boolean checkObject ( final Patrul patrul ) {
         return patrul.getPatrulTaskInfo().getTaskId().equals( "null" )
                 && patrul.getPatrulUniqueValues().getUuidOfEscort() == null
                 && patrul.getPatrulUniqueValues().getUuidForPatrulCar() == null
@@ -58,25 +59,25 @@ public class DataValidateInspector extends TimeInspector {
                 && patrul.getPatrulTaskInfo().getTaskTypes().isFree();
     }
 
-    public Boolean checkObject ( final TaskDetailsRequest request ) {
+    protected Boolean checkObject ( final TaskDetailsRequest request ) {
         return this.objectIsNotNull( request )
                 && this.objectIsNotNull( request.getId() )
                 && this.objectIsNotNull( request.getTaskTypes() )
                 && this.objectIsNotNull( request.getPatrulUUID() );
     }
 
-    public Boolean checkObject ( final PatrulLoginRequest patrulLoginRequest ) {
+    protected Boolean checkObject ( final PatrulLoginRequest patrulLoginRequest ) {
         return this.objectIsNotNull( patrulLoginRequest.getLogin() )
                 && this.objectIsNotNull( patrulLoginRequest.getPassword() )
                 && this.objectIsNotNull( patrulLoginRequest.getSimCardNumber() );
     }
 
-    public Boolean checkObject ( final AndroidVersionUpdate androidVersionUpdate ) {
+    protected Boolean checkObject ( final AndroidVersionUpdate androidVersionUpdate ) {
         return this.objectIsNotNull( androidVersionUpdate.getVersion() )
                 && this.objectIsNotNull( androidVersionUpdate.getLink() );
     }
 
-    public Boolean checkObject ( final PatrulActivityRequest patrulActivityRequest ) {
+    protected Boolean checkObject ( final PatrulActivityRequest patrulActivityRequest ) {
         return this.objectIsNotNull( patrulActivityRequest.getStartDate() )
                 && this.objectIsNotNull( patrulActivityRequest.getEndDate() );
     }
@@ -85,7 +86,8 @@ public class DataValidateInspector extends TimeInspector {
             final Row row,
             final Map< String, String > params,
             final List< String > policeTypes,
-            final Integer value ) {
+            final Integer value
+    ) {
         return value == 1 ? ( !params.containsKey( "regionId" )
                 || row.getLong( "regionId" ) == Long.parseLong( params.get( "regionId" ) ) )
                 && ( !params.containsKey( "policeType" ) || policeTypes.contains( row.getString( "policeType" ) ) )
@@ -108,7 +110,8 @@ public class DataValidateInspector extends TimeInspector {
 
                     // патрульные которые которые заходили хотя бы раз
                     default -> !this.checkPatrulActivity( row.getUUID( "uuid" ) );
-        }; }
+        };
+    }
 
     protected int checkDifference ( final int integer ) {
         return integer > 0 && integer < 100 ? integer : 10;
@@ -191,7 +194,7 @@ public class DataValidateInspector extends TimeInspector {
                 ) == null;
     }
 
-    public boolean checkPatrulActivity (
+    protected boolean checkPatrulActivity (
             final UUID uuid
     ) {
         return CassandraDataControl

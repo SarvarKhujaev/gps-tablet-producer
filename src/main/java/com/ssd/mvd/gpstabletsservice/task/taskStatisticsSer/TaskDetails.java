@@ -25,11 +25,11 @@ public final class TaskDetails extends CollectionsInspector {
         this.fabula = fabula;
     }
 
-    public void setTimeWastedToArrive ( final Long timeWastedToArrive ) {
+    public void setTimeWastedToArrive ( final long timeWastedToArrive ) {
         this.timeWastedToArrive = timeWastedToArrive;
     }
 
-    public void setTotalTimeConsumption ( final Long totalTimeConsumption ) {
+    public void setTotalTimeConsumption ( final long totalTimeConsumption ) {
         this.totalTimeConsumption = totalTimeConsumption;
     }
 
@@ -45,8 +45,8 @@ public final class TaskDetails extends CollectionsInspector {
     private String title;
     private String fabula; // описания задачи
 
-    private Long timeWastedToArrive; // время которое патрульный потратил чтобы дойти до цели
-    private Long totalTimeConsumption; // общее потраченное время на задачу
+    private long timeWastedToArrive; // время которое патрульный потратил чтобы дойти до цели
+    private long totalTimeConsumption; // общее потраченное время на задачу
 
     private ReportForCard reportForCardList; // рапорт конкретного патрульного
     private List< PositionInfo > positionInfoList; // история его маршрута до цели
@@ -55,7 +55,8 @@ public final class TaskDetails extends CollectionsInspector {
             final Object object,
             final UUID patrulUUID,
             final TaskTotalData taskTotalData,
-            final TaskCommonParams taskCommonParams ) {
+            final TaskCommonParams taskCommonParams
+    ) {
         return new TaskDetails(
                 object,
                 patrulUUID,
@@ -67,7 +68,8 @@ public final class TaskDetails extends CollectionsInspector {
             final Object object,
             final UUID patrulUUID,
             final TaskTotalData taskTotalData,
-            final TaskCommonParams taskCommonParams ) {
+            final TaskCommonParams taskCommonParams
+    ) {
         this.setPositionInfoList( taskTotalData.getPositionInfoList() );
         this.setTimeWastedToArrive( taskTotalData.getTimeWastedToArrive() );
         this.setTotalTimeConsumption( taskTotalData.getTotalTimeConsumption() );
@@ -95,6 +97,8 @@ public final class TaskDetails extends CollectionsInspector {
             case FIND_FACE_EVENT_FACE -> this.setDate( ( (EventFace) object ).getCreated_date().toString() );
             default -> this.save( ( (SelfEmploymentTask) object ) );
         }
+
+        super.close();
     }
 
     private void save ( final Card card ) {
@@ -103,7 +107,9 @@ public final class TaskDetails extends CollectionsInspector {
         this.setDate( card.getCreated_date().toString() );
     }
 
-    private void save ( final SelfEmploymentTask selfEmploymentTask ) {
+    private void save (
+            final SelfEmploymentTask selfEmploymentTask
+    ) {
         this.setTitle( selfEmploymentTask.getTitle() );
         this.setFabula( selfEmploymentTask.getDescription() );
         this.setDate( selfEmploymentTask.getIncidentDate().toString() );

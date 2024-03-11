@@ -7,7 +7,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import java.util.UUID;
 import java.util.Date;
 
-public final class SosTotalData {
+public final class SosTotalData extends DataValidateInspector {
     public void setUuid( final UUID uuid ) {
         this.uuid = uuid;
     }
@@ -67,7 +67,8 @@ public final class SosTotalData {
     public SosTotalData (
             final PatrulSos patrulSos,
             final String patrulStatus,
-            final SosNotificationForAndroid sosNotificationForAndroid ) {
+            final SosNotificationForAndroid sosNotificationForAndroid
+    ) {
         this.setUuid( patrulSos.getUuid() );
         this.setPatrulUUID( patrulSos.getPatrulUUID() );
 
@@ -80,10 +81,9 @@ public final class SosTotalData {
 
         this.setSosNotificationForAndroid( sosNotificationForAndroid );
         this.setPatrulStatus(
-                DataValidateInspector
-                .getInstance()
-                .objectIsNotNull( patrulStatus )
+                super.objectIsNotNull( patrulStatus )
                 ? Status.valueOf( patrulStatus )
-                : Status.ATTACHED );
+                : Status.ATTACHED
+        );
     }
 }

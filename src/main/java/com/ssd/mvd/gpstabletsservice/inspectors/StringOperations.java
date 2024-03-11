@@ -14,6 +14,8 @@ import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.PatrulFIOData;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ModelForCar;
 
 public class StringOperations extends Archive {
+    protected StringOperations () {}
+
     protected final String taskDetailsMessage = "Your task details";
     protected final String noneTaskIsAttached = "U have no tasks, thus u cannot send report";
 
@@ -149,18 +151,18 @@ public class StringOperations extends Archive {
         );
     }
 
-    public String concatNames ( final Object object ) {
+    protected String concatNames ( final Object object ) {
         return String.join( "", String.valueOf( object ).split( "[.]" ) );
     }
 
-    public String concatNames ( final ModelForCar modelForCar ) {
+    protected String concatNames ( final ModelForCar modelForCar ) {
         return String.join( " ",
                 modelForCar.getModel(),
                 modelForCar.getVehicleType(),
                 modelForCar.getColor() );
     }
 
-    public String concatNames ( final PatrulFIOData patrulFIOData ) {
+    protected String concatNames ( final PatrulFIOData patrulFIOData ) {
         return String.join( " ",
                 patrulFIOData.getName(),
                 patrulFIOData.getSurname(),
