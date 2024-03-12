@@ -7,9 +7,10 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
+import com.ssd.mvd.gpstabletsservice.interfaces.ServiceCommonMethods;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.PatrulTimeConsumedToArriveToTaskLocation;
 
-public class TaskCommonParams extends CollectionsInspector {
+public class TaskCommonParams extends CollectionsInspector implements ServiceCommonMethods {
     /*
     показывает не завершено ли задание
     */
@@ -117,7 +118,8 @@ public class TaskCommonParams extends CollectionsInspector {
         return this;
     }
 
-    public void clear () {
+    @Override
+    public void close () {
         this.getReportForCardList().clear();
         this.getPatruls().clear();
     }

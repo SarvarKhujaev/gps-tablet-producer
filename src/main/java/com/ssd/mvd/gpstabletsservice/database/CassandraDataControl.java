@@ -361,7 +361,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                     this.getRowFromTabletsKeyspace(
                             CassandraTables.CARS,
                             "uuid",
-                            uuid.toString() ) ) );
+                            uuid.toString()
+                    )
+            )
+    );
 
     public final Function< String, Mono< ApiResponseModel > > deleteCar = gosno ->
             this.getCarByUUID.apply( UUID.fromString( gosno ) )
@@ -374,24 +377,34 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                             {0} {1} {2} {3};
                                             """,
                                             CassandraCommands.BEGIN_BATCH,
+
                                             MessageFormat.format(
                                                     """
                                                     {0} {1}.{2} WHERE uuid = {3};
                                                     """,
                                                     CassandraCommands.DELETE,
+
                                                     CassandraTables.TABLETS,
                                                     CassandraTables.CARS,
+
                                                     gosno
                                             ),
+
                                             MessageFormat.format(
                                                     """
                                                     {0} {1}.{2} WHERE trackersId = {3};
                                                     """,
                                                     CassandraCommands.DELETE,
+
                                                     CassandraTables.TRACKERS,
                                                     CassandraTables.TRACKERSID,
-                                                    super.joinWithAstrix( reqCar.getTrackerId() ) ),
-                                            CassandraCommands.APPLY_BATCH ) );
+
+                                                    super.joinWithAstrix( reqCar.getTrackerId() )
+                                            ),
+
+                                            CassandraCommands.APPLY_BATCH
+                                    )
+                            );
 
                             return super.convert(
                                     ApiResponseModel
@@ -400,13 +413,14 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                                     .builder()
                                                     .message( super.getSuccessMessage( "Car", "deleted" ) )
                                                     .build() )
-                                            .build() );
+                                            .build()
+                            );
                         }
                         else {
                             return super.errorResponse( "This car is linked to patrul" );
                         }
                     } )
-                    .doOnError( this::close);
+                    .doOnError( this::close );
 
     public final Function< ReqCar, Mono< ApiResponseModel > > updateCar = reqCar ->
             this.getCarByUUID.apply( reqCar.getUuid() )
@@ -448,6 +462,7 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                                                     super.joinWithAstrix( reqCar1.getPatrulPassportSeries() ) )
                                                             .getUUID( "uuid" )
                                             ),
+
                                             MessageFormat.format(
                                                     """
                                                     {0} {1}.{2}
@@ -556,6 +571,7 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                             CassandraFunctions.UUID,
 
                                             reqCar.getLustraId(),
+
                                             super.joinWithAstrix( reqCar.getGosNumber() ),
                                             super.joinWithAstrix( reqCar.getTrackerId() ),
                                             super.joinWithAstrix( reqCar.getVehicleType() ),

@@ -5,14 +5,25 @@ import org.reactivestreams.Subscription;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Publisher;
 
+/*
+кастомный Publisher, который принимает сообщение и название топика для Кафки
+
+А также отслеживает состояние передачи сообщения и обрабатывает ошибки или сообщение об удаче
+*/
 public final class CustomPublisher implements Publisher< ProducerRecord< String, String > > {
     private final ProducerRecord< String, String > producerRecord;
 
-    public static CustomPublisher from ( final String topic, final String message ) {
+    public static CustomPublisher from (
+            final String topic,
+            final String message
+    ) {
         return new CustomPublisher( topic, message );
     }
 
-    private CustomPublisher ( final String topic, final String message ) {
+    private CustomPublisher (
+            final String topic,
+            final String message
+    ) {
         this.producerRecord = new ProducerRecord<>( topic, message );
     }
 

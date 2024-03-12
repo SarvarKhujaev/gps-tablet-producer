@@ -26,7 +26,7 @@ public final class SelfEmploymentController extends SerDes {
                     final SelfEmploymentTask selfEmploymentTask =
                             super.deserialize( row.getString("object" ), SelfEmploymentTask.class );
 
-                    selfEmploymentTask.getTaskCommonParams().clear();
+                    selfEmploymentTask.getTaskCommonParams().close();
                     return selfEmploymentTask;
                 } )
                 .onErrorContinue( super::logging );
