@@ -32,7 +32,8 @@ public final class PositionInfo extends DataValidateInspector implements ObjectC
 
     private PositionInfo () {}
 
-    public PositionInfo ( final Row row ) {
+    @Override
+    public PositionInfo generate( final Row row ) {
         super.checkAndSetParams(
                 row,
                 row1 -> {
@@ -40,21 +41,16 @@ public final class PositionInfo extends DataValidateInspector implements ObjectC
                     this.setLng( row.getDouble( "longitude" ) );
                 }
         );
-    }
 
-    public PositionInfo ( final UDTValue value ) {
-        this.setLat( value.getDouble( "lat" ) );
-        this.setLng( value.getDouble( "lng" ) );
+        return this;
     }
 
     @Override
     public PositionInfo generate( final UDTValue udtValue ) {
-        return new PositionInfo( udtValue );
-    }
+        this.setLat( udtValue.getDouble( "lat" ) );
+        this.setLng( udtValue.getDouble( "lng" ) );
 
-    @Override
-    public PositionInfo generate( final Row row ) {
-        return new PositionInfo( row );
+        return this;
     }
 
     @Override

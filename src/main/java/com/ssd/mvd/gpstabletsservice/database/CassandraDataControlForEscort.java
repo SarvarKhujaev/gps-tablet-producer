@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.database;
 
+import com.ssd.mvd.gpstabletsservice.interfaces.ServiceCommonMethods;
 import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraFunctions;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraCommands;
@@ -32,7 +33,7 @@ import java.util.UUID;
 import java.util.Map;
 
 @lombok.Data
-public final class CassandraDataControlForEscort extends CassandraConverter {
+public final class CassandraDataControlForEscort extends CassandraConverter implements ServiceCommonMethods {
     private final Session session = CassandraDataControl.getInstance().getSession();
 
     private static CassandraDataControlForEscort INSTANCE = new CassandraDataControlForEscort();
@@ -256,13 +257,17 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                         VALUES ( {3}, {4}, {5}, {6}, {7} );
                         """,
                         CassandraCommands.INSERT_INTO,
+
                         CassandraTables.ESCORT,
                         CassandraTables.TUPLE_OF_ESCORT,
+
                         CassandraFunctions.UUID,
+
                         super.joinWithAstrix( escortTuple.getCountries() ),
                         escortTuple.getUuidOfPolygon(),
                         super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ),
-                        super.convertListToCassandra.apply( escortTuple.getPatrulList() ) )
+                        super.convertListToCassandra.apply( escortTuple.getPatrulList() )
+                )
         ).append( CassandraCommands.APPLY_BATCH );
 
         return this.getSession().execute( stringBuilder.toString() ).wasApplied()
@@ -279,14 +284,18 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             VALUES ( {3}, {4}, {5}, {6}, {7} ) {8};
                             """,
                             CassandraCommands.INSERT_INTO,
+
                             CassandraTables.ESCORT,
                             CassandraTables.TUPLE_OF_ESCORT,
+
                             escortTuple.getUuid(),
                             super.joinWithAstrix( escortTuple.getCountries() ),
                             escortTuple.getUuidOfPolygon(),
                             super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ),
                             super.convertListToCassandra.apply( escortTuple.getPatrulList() ),
-                            CassandraCommands.IF_EXISTS ) )
+
+                            CassandraCommands.IF_EXISTS
+                    ) )
                     .wasApplied()
                     ? super.function( Map.of( "message", escortTuple.getUuid() + " was updated successfully" ) )
                     : super.errorResponse( "This car does not exist, choose another one" );
@@ -378,10 +387,14 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             VALUES( {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14} );
                             """,
                             CassandraCommands.INSERT_INTO,
+
                             CassandraTables.ESCORT,
                             CassandraTables.TUPLE_OF_CAR,
+
                             super.getALlParamsNamesForClass.apply( TupleOfCar.class ),
+
                             CassandraFunctions.UUID,
+
                             tupleOfCar.getUuidOfEscort(),
                             tupleOfCar.getUuidOfPatrul(),
 
@@ -389,11 +402,12 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             super.joinWithAstrix( tupleOfCar.getGosNumber() ),
                             super.joinWithAstrix( tupleOfCar.getTrackerId() ),
                             super.joinWithAstrix( tupleOfCar.getNsfOfPatrul() ),
-
                             super.joinWithAstrix( tupleOfCar.getSimCardNumber() ),
+
                             tupleOfCar.getLatitude(),
                             tupleOfCar.getLongitude(),
-                            tupleOfCar.getAverageFuelConsumption() ) )
+                            tupleOfCar.getAverageFuelConsumption()
+                    ) )
                     .wasApplied()
                     ? super.function( Map.of( "message", "Car " + tupleOfCar.getGosNumber() + " was updated successfully" ) )
                     : super.errorResponse( "This car does not exists" );
@@ -504,7 +518,9 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                                                     .getRowFromTabletsKeyspace(
                                                             CassandraTables.PATRULS,
                                                             "uuid",
-                                                            uuid1.toString() ) )
+                                                            uuid1.toString()
+                                                    )
+                                        )
                                 )
                         );
 
@@ -529,10 +545,15 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
 
     private final Function< UUID, Mono< TupleOfCar > > getCurrentTupleOfCar = uuid -> super.convert(
             new TupleOfCar(
-                    this.getRowFromEscortKeyspace( CassandraTables.TUPLE_OF_CAR, "uuid", uuid.toString() ) ) );
+                    this.getRowFromEscortKeyspace( CassandraTables.TUPLE_OF_CAR, "uuid", uuid.toString() )
+            )
+    );
 
     private final Function< String, Mono< Country > > getCurrentCountry = uuid -> super.convert(
-            new Country( this.getRowFromEscortKeyspace( CassandraTables.COUNTRIES, "uuid", uuid ) ) );
+            new Country(
+                    this.getRowFromEscortKeyspace( CassandraTables.COUNTRIES, "uuid", uuid )
+            )
+    );
 
     private final Function< String, Mono< ApiResponseModel > > deleteCountry = countryId -> {
             this.getSession().execute (
@@ -542,10 +563,12 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                             """,
                             CassandraCommands.DELETE,
                             CassandraTables.ESCORT,
+
                             CassandraTables.COUNTRIES,
                             countryId
                     )
             );
+
             return super.function( Map.of( "message", countryId + " bazadan ochirildi" ) );
     };
 
@@ -556,6 +579,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     VALUES( {4}, {5}, {6}, {7}, {8}, {9} );
                     """,
                     CassandraCommands.INSERT_INTO,
+
                     CassandraTables.ESCORT,
                     CassandraTables.COUNTRIES,
 
@@ -582,6 +606,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
                     VALUES( {4}, {5}, {6}, {7}, {8}, {9} );
                     """,
                     CassandraCommands.INSERT_INTO,
+
                     CassandraTables.ESCORT,
                     CassandraTables.COUNTRIES,
 
@@ -596,4 +621,11 @@ public final class CassandraDataControlForEscort extends CassandraConverter {
             .wasApplied()
             ? super.function( Map.of( "message", country.getCountryNameEn() + " muvaffaqiyatli yangilandi" ) )
             : super.errorResponse( "This country has not been inserted yet" );
+
+    @Override
+    public void close () {
+        INSTANCE = null;
+        this.session.close();
+        super.logging( this );
+    }
 }

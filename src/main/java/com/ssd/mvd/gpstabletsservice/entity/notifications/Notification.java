@@ -11,6 +11,7 @@ import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.Errors;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
+import com.ssd.mvd.gpstabletsservice.interfaces.TaskCommonMethods;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
@@ -311,13 +312,12 @@ public final class Notification extends DataValidateInspector {
     public static Notification generate (
             final Patrul patrul,
             final Status status,
-            final Object task,
-            final TaskTypes taskTypes ) {
+            final TaskCommonMethods taskCommonMethods
+    ) {
         return new Notification(
                 patrul,
                 status,
-                task,
-                taskTypes
+                taskCommonMethods
         );
     }
 
@@ -351,30 +351,30 @@ public final class Notification extends DataValidateInspector {
     private Notification (
             final Patrul patrul,
             final Status status,
-            final Object task,
-            final TaskTypes taskTypes ) {
+            final TaskCommonMethods taskCommonMethods
+    ) {
         // сохраняем данные патрульного
         this.save( patrul );
         this.setStatus( status );
-        this.setType( taskTypes.name() );
+        this.setType( taskCommonMethods.getTaskCommonParams().getTaskTypes().name() );
 
         // составляем сообщение для уведомления
         this.setTitle( this.generateAndSaveMessage.apply( status, patrul ) );
 
         switch ( taskTypes ) {
-            case CARD_102 -> this.save( ( Card ) task );
+            case CARD_102 -> this.save( ( Card ) taskCommonMethods );
 
-            case FIND_FACE_EVENT_CAR -> this.save( (EventCar) task );
+            case FIND_FACE_EVENT_CAR -> this.save( (EventCar) taskCommonMethods );
 
-            case FIND_FACE_EVENT_FACE -> this.save( (EventFace) task );
+            case FIND_FACE_EVENT_FACE -> this.save( (EventFace) taskCommonMethods );
 
-            case FIND_FACE_EVENT_BODY -> this.save( (EventBody) task );
+            case FIND_FACE_EVENT_BODY -> this.save( (EventBody) taskCommonMethods );
 
-            case FIND_FACE_CAR -> this.save( (CarEvent) task );
+            case FIND_FACE_CAR -> this.save( (CarEvent) taskCommonMethods );
 
-            case FIND_FACE_PERSON -> this.save( (FaceEvent) task );
+            case FIND_FACE_PERSON -> this.save( (FaceEvent) taskCommonMethods );
 
-            default -> this.save( (SelfEmploymentTask) task );
+            default -> this.save( (SelfEmploymentTask) taskCommonMethods );
         }
     }
 }

@@ -8,7 +8,7 @@ import com.ssd.mvd.gpstabletsservice.task.card.Card;
 import com.ssd.mvd.gpstabletsservice.constants.Status;
 import com.ssd.mvd.gpstabletsservice.constants.TaskTypes;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
-import com.ssd.mvd.gpstabletsservice.inspectors.TaskCommonParams;
+import com.ssd.mvd.gpstabletsservice.interfaces.TaskCommonMethods;
 import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventCar;
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromShamsiddin.EventBody;
@@ -176,75 +176,57 @@ public final class ActiveTask extends DataValidateInspector {
     }
 
     private void save (
-            final Object object,
-            final TaskCommonParams taskCommonParams
+            final TaskCommonMethods taskCommonMethods
     ) {
-        this.setStatus( taskCommonParams.getStatus() );
-        this.setTaskId( taskCommonParams.getTaskId() );
-        this.setPatrulList( taskCommonParams.getPatruls() );
-        this.setType( taskCommonParams.getTaskTypes().name() );
-        this.setCardId( taskCommonParams.getUuid().toString() );
+        this.setStatus( taskCommonMethods.getTaskCommonParams().getStatus() );
+        this.setTaskId( taskCommonMethods.getTaskCommonParams().getTaskId() );
+        this.setPatrulList( taskCommonMethods.getTaskCommonParams().getPatruls() );
+        this.setType( taskCommonMethods.getTaskCommonParams().getTaskTypes().name() );
+        this.setCardId( taskCommonMethods.getTaskCommonParams().getUuid().toString() );
 
-        switch ( taskCommonParams.getTaskTypes() ) {
-            case CARD_102 -> this.save( (Card) object );
+        switch ( taskCommonMethods.getTaskCommonParams().getTaskTypes() ) {
+            case CARD_102 -> this.save( (Card) taskCommonMethods );
 
-            case FIND_FACE_CAR -> this.save( ( (CarEvent) object ).getDataInfo() );
+            case FIND_FACE_CAR -> this.save( ( (CarEvent) taskCommonMethods ).getDataInfo() );
 
-            case FIND_FACE_PERSON -> this.save( ( (FaceEvent) object ).getDataInfo() );
+            case FIND_FACE_PERSON -> this.save( ( (FaceEvent) taskCommonMethods ).getDataInfo() );
 
-            case FIND_FACE_EVENT_CAR -> this.save( ( (EventCar) object ) );
+            case FIND_FACE_EVENT_CAR -> this.save( ( (EventCar) taskCommonMethods ) );
 
-            case FIND_FACE_EVENT_FACE -> this.save( (EventFace) object );
+            case FIND_FACE_EVENT_FACE -> this.save( (EventFace) taskCommonMethods );
 
-            case FIND_FACE_EVENT_BODY -> this.save( (EventBody) object );
+            case FIND_FACE_EVENT_BODY -> this.save( (EventBody) taskCommonMethods );
 
-            case SELF_EMPLOYMENT -> this.save( (SelfEmploymentTask) object );
+            case SELF_EMPLOYMENT -> this.save( (SelfEmploymentTask) taskCommonMethods );
         }
     }
 
     public static ActiveTask generate (
-            final Object object,
-            final TaskCommonParams taskCommonParams ) {
-        return new ActiveTask( object, taskCommonParams );
-    }
-
-    private ActiveTask (
-            final Object object,
-            final TaskCommonParams taskCommonParams ) {
-        this.setCreatedDate();
-        this.save( object, taskCommonParams );
-    }
-
-    public static ActiveTask generate (
-            final TaskCommonParams taskCommonParams,
-            final Status patrulStatus,
-            final Object object
+            final TaskCommonMethods taskCommonMethods
     ) {
-        return new ActiveTask( taskCommonParams, patrulStatus, object );
+        return new ActiveTask( taskCommonMethods );
     }
 
     private ActiveTask (
-            final TaskCommonParams taskCommonParams,
-            final Status patrulStatus,
-            final Object object ) {
+            final TaskCommonMethods taskCommonMethods
+    ) {
         this.setCreatedDate();
-        this.setPatrulStatus( patrulStatus );
-        this.save( object, taskCommonParams );
+        this.save( taskCommonMethods );
     }
 
     public static ActiveTask generate (
-            final Object object,
-            final Status patrulStatus,
-            final TaskCommonParams taskCommonParams ) {
-        return new ActiveTask( object, patrulStatus, taskCommonParams );
+            final TaskCommonMethods taskCommonMethods,
+            final Status patrulStatus
+    ) {
+        return new ActiveTask( taskCommonMethods, patrulStatus );
     }
 
     private ActiveTask (
-            final Object object,
-            final Status patrulStatus,
-            final TaskCommonParams taskCommonParams ) {
+            final TaskCommonMethods taskCommonMethods,
+            final Status patrulStatus
+    ) {
         this.setCreatedDate();
+        this.save( taskCommonMethods );
         this.setPatrulStatus( patrulStatus );
-        this.save( object, taskCommonParams );
     }
 }

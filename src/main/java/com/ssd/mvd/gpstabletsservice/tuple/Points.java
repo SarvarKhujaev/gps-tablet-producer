@@ -49,17 +49,15 @@ public final class Points implements ObjectCommonMethods< Points > {
 
     private Points () {}
 
-    public Points( final UDTValue value ) {
-        this.setLat( value.getDouble( "lat" ) );
-        this.setLng( value.getDouble( "lng" ) );
-
-        this.setPointId( value.getUUID( "pointId" ) );
-        this.setPointName( value.getString( "pointName" ) );
-    }
-
     @Override
     public Points generate( final UDTValue udtValue ) {
-        return new Points( udtValue );
+        this.setPointName( udtValue.getString( "pointName" ) );
+        this.setPointId( udtValue.getUUID( "pointId" ) );
+
+        this.setLat( udtValue.getDouble( "lat" ) );
+        this.setLng( udtValue.getDouble( "lng" ) );
+
+        return this;
     }
 
     @Override

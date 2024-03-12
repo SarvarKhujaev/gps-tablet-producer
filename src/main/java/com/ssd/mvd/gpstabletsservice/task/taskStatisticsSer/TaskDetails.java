@@ -61,7 +61,8 @@ public final class TaskDetails extends CollectionsInspector {
                 object,
                 patrulUUID,
                 taskTotalData,
-                taskCommonParams );
+                taskCommonParams
+        );
     }
 
     private TaskDetails (

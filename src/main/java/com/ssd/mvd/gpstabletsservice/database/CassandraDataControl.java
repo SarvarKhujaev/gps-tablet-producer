@@ -32,7 +32,7 @@ import java.util.function.*;
 import java.time.Duration;
 import java.util.*;
 
-public final class CassandraDataControl extends CassandraConverter implements ServiceCommonMethods {
+public class CassandraDataControl extends CassandraConverter implements ServiceCommonMethods {
     private final Cluster cluster;
     private final Session session;
 
@@ -116,31 +116,31 @@ public final class CassandraDataControl extends CassandraConverter implements Se
     за выбранные отрезок времени
     */
     public final Function< PatrulActivityRequest, Mono< List< PositionInfo > > > getHistoricalPositionOfPatrulUntilArriveness = request ->
-            Flux.fromStream(
-                    super.convertRowToStream(
-                            this.getSession().execute(
-                                    MessageFormat.format(
-                                            """
-                                            {0} {1}.{2}
-                                            WHERE {3} = {4} AND date >= {5} AND date <= {6};
-                                            """,
-                                            CassandraCommands.SELECT_ALL,
-                                            CassandraTables.GPSTABLETS,
-                                            CassandraTables.TABLETS_LOCATION_TABLE,
-                                            "userId",
-                                            request.getPatrulUUID(),
-                                            super.joinWithAstrix( request.getStartDate() ),
-                                            super.joinWithAstrix( request.getEndDate() ) ) ) ) )
-                .parallel( super.checkDifference(
-                        (int) Math.abs(
-                                Duration.between(
-                                        request.getStartDate().toInstant(),
-                                        request.getEndDate().toInstant() ).toDays() ) ) )
-                .runOn( Schedulers.parallel() )
-                .map( PositionInfo::new )
-                .sequential()
-                .publishOn( Schedulers.single() )
-                .collectList();
+            super.convertValuesToParallelFlux(
+                    this.getSession().execute(
+                            MessageFormat.format(
+                                    """
+                                    {0} {1}.{2}
+                                    WHERE {3} = {4} AND date >= {5} AND date <= {6};
+                                    """,
+                                    CassandraCommands.SELECT_ALL,
+                                    CassandraTables.GPSTABLETS,
+                                    CassandraTables.TABLETS_LOCATION_TABLE,
+                                    "userId",
+                                    request.getPatrulUUID(),
+                                    super.joinWithAstrix( request.getStartDate() ),
+                                    super.joinWithAstrix( request.getEndDate() )
+                            )
+                    ),
+                    (int) Math.abs(
+                            Duration.between(
+                                    request.getStartDate().toInstant(),
+                                    request.getEndDate().toInstant() ).toDays()
+                    )
+            ).map( row -> PositionInfo.empty().generate( row ) )
+            .sequential()
+            .publishOn( Schedulers.single() )
+            .collectList();
 
     public final Function< PoliceType, Mono< ApiResponseModel > > updatePoliceType = policeType -> {
             final StringBuilder stringBuilder = super.newStringBuilder();
@@ -190,7 +190,7 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                     ).wasApplied()
                     ? super.function( Map.of( "message", super.getSuccessMessage( "PoliceType", "updated" ) ) )
                     : super.errorResponse( super.getFailMessage( "PoliceType" ) )
-                    .doOnError( this::close);
+                    .doOnError( this::close );
     };
 
     public final Function< PoliceType, Mono< ApiResponseModel > > savePoliceType = policeType -> this.getAllEntities
@@ -779,7 +779,9 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                                             .apply( patrul )
                                             .toString(),
 
-                                    CassandraCommands.APPLY_BATCH ) );
+                                    CassandraCommands.APPLY_BATCH
+                            )
+                    );
 
                     return super.function( Map.of( "message", super.getSuccessMessage( "Patrul", "deleted" ) ) );
                 }
@@ -1048,31 +1050,32 @@ public final class CassandraDataControl extends CassandraConverter implements Se
 
     public final Function< PatrulActivityRequest, Mono< PatrulActivityStatistics > > getPatrulStatistics = request ->
             this.getPatrulByUUID.apply( UUID.fromString( request.getPatrulUUID() ) )
-                    .flatMap( patrul -> Flux.fromStream(
-                            super.convertRowToStream(
-                                    this.getSession().execute(
-                                            MessageFormat.format(
-                                                    """
-                                                    {0} {1}.{2}
-                                                    WHERE uuid = {3} {4};
-                                                    """,
-                                                    CassandraCommands.SELECT_ALL,
-                                                    CassandraTables.TABLETS,
-                                                    CassandraTables.PATRULS_STATUS_TABLE,
+                    .flatMap( patrul -> super.convertValuesToParallelFlux(
+                            this.getSession().execute(
+                                    MessageFormat.format(
+                                            """
+                                            {0} {1}.{2}
+                                            WHERE uuid = {3} {4};
+                                            """,
+                                            CassandraCommands.SELECT_ALL,
+                                            CassandraTables.TABLETS,
+                                            CassandraTables.PATRULS_STATUS_TABLE,
 
-                                                    patrul.getUuid(),
-                                                    ( super.objectIsNotNull( request.getEndDate() )
-                                                            && super.objectIsNotNull( request.getStartDate() )
-                                                            ? " AND date >= " + super.joinWithAstrix( request.getStartDate() )
-                                                            + " AND date <= " + super.joinWithAstrix( request.getEndDate() )
-                                                            : "" )
-                                            ) ) ) )
-                            .parallel( super.checkDifference(
-                                    (int) Math.abs( Duration.between(
+                                            patrul.getUuid(),
+                                            ( super.objectIsNotNull( request.getEndDate() )
+                                                    && super.objectIsNotNull( request.getStartDate() )
+                                                    ? " AND date >= " + super.joinWithAstrix( request.getStartDate() )
+                                                    + " AND date <= " + super.joinWithAstrix( request.getEndDate() )
+                                                    : "" )
+                                    )
+                                ),
+                                (int) Math.abs(
+                                        Duration.between(
                                             request.getStartDate().toInstant(),
-                                            request.getEndDate().toInstant() ).toDays() ) ) )
-                            .runOn( Schedulers.parallel() )
-                            .filter( row -> Status.valueOf( row.getString( "status" ) ).isLogout() )
+                                            request.getEndDate().toInstant()
+                                        ).toDays()
+                                )
+                            ).filter( row -> Status.valueOf( row.getString( "status" ) ).isLogout() )
                             .map( row -> row.getLong( "totalActivityTime" ) )
                             .sequential()
                             .publishOn( Schedulers.single() )
@@ -1085,13 +1088,12 @@ public final class CassandraDataControl extends CassandraConverter implements Se
 
     public final Function< ScheduleForPolygonPatrul, Mono< ApiResponseModel > > addPatrulToPolygon =
             scheduleForPolygonPatrul -> this.getPolygonForPatrul.apply( scheduleForPolygonPatrul.getUuid() )
-                    .flatMap( polygon -> Flux.fromStream(
-                            scheduleForPolygonPatrul
-                                    .getPatrulUUIDs()
-                                    .stream() )
-                            .parallel( super.checkDifference( scheduleForPolygonPatrul.getPatrulUUIDs().size() ) )
-                            .runOn( Schedulers.parallel() )
-                            .flatMap( this.getPatrulByUUID )
+                    .flatMap( polygon -> super.convertValuesToParallelFlux(
+                                    scheduleForPolygonPatrul
+                                            .getPatrulUUIDs()
+                                            .stream(),
+                                    scheduleForPolygonPatrul.getPatrulUUIDs().size()
+                            ).flatMap( this.getPatrulByUUID )
                             .map( patrul -> {
                                 this.getSession().executeAsync(
                                         MessageFormat.format(
@@ -1113,14 +1115,10 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                             .sequential()
                             .publishOn( Schedulers.single() )
                             .collectList()
-                            .flatMap( uuidList -> {
-                                polygon.setPatrulList( uuidList );
-                                return this.updatePolygonForPatrul.apply( polygon );
-                            } ) );
+                            .flatMap( uuidList -> this.updatePolygonForPatrul.apply( polygon.setPatrulList( uuidList ) ) ) );
 
-    public final Supplier< Flux< Notification > > getUnreadNotifications = () -> Flux.fromStream(
-            super.convertRowToStream(
-                    this.getSession().execute(
+    public final Supplier< Flux< Notification > > getUnreadNotifications = () -> super.convertValuesToParallelFlux(
+                this.getSession().execute(
                         MessageFormat.format(
                                 """
                                 {0} {1}.{2} WHERE wasread = {3};
@@ -1128,15 +1126,15 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                                 CassandraCommands.SELECT_ALL,
                                 CassandraTables.TABLETS,
                                 CassandraTables.NOTIFICATION,
-                                false ) ) ) )
-            .parallel()
-            .runOn( Schedulers.parallel() )
-            .map( Notification::generate )
+                                false
+                        )
+                )
+            ).map( Notification::generate )
             .sequential()
             .publishOn( Schedulers.single() );
 
     public final Supplier< Mono< Long > > getUnreadNotificationQuantity = () -> super.convert(
-            this.getSession().execute (
+            this.getSession().execute(
                     MessageFormat.format(
                             """
                             {0} {1}.{2} WHERE wasread ={3};
@@ -1144,9 +1142,11 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                             CassandraCommands.SELECT_ALL.replaceAll( "[*]", "COUNT(*) as quantity" ),
                             CassandraTables.TABLETS,
                             CassandraTables.NOTIFICATION,
-                            false ) )
+                            false
+                    ) )
                     .one()
-                    .getLong( "quantity" ) );
+                    .getLong( "quantity" )
+    );
 
     public final Function< UUID, Mono< ApiResponseModel > > setNotificationAsRead = uuid ->
             this.getSession().execute(
@@ -1157,18 +1157,22 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                             WHERE uuid = {4};
                             """,
                             CassandraCommands.UPDATE,
+
                             CassandraTables.TABLETS,
                             CassandraTables.NOTIFICATION,
+
                             false,
-                            uuid ) )
+                            uuid
+                    ) )
                     .wasApplied()
                     ? super.function( Map.of( "message", "Notification " + uuid + " was updated successfully" ) )
                     : super.errorResponse( "Notification was not updated" );
 
-    public Mono< ApiResponseModel > close(
+    public Mono< ApiResponseModel > deleteRow (
             final String table,
             final String param,
-            final String id ) {
+            final String id
+    ) {
         this.getSession().execute (
                 MessageFormat.format(
                         """
@@ -1176,11 +1180,13 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                         """,
                         CassandraCommands.DELETE,
                         CassandraTables.TABLETS,
+
                         table,
                         param,
                         id
                 )
         );
+
         return super.function( Map.of( "message", "Deleting has been finished successfully" ) );
     }
 
@@ -1585,20 +1591,21 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                             "success", this.updatePatrulStatus.apply( patrul, Status.LOGIN ),
                             "data", Data.from( patrul ) ) ) );
 
-    public final BiFunction< UUID, PatrulActivityRequest, Mono< List< TabletUsage > > > getAllUsedTablets = ( uuid, request ) -> Flux.fromStream(
-            super.convertRowToStream( this.getSession().execute(
-                    MessageFormat.format(
-                            """
-                            {0} {1}.{2} WHERE uuidOfPatrul = {3};
-                            """,
-                            CassandraCommands.SELECT_ALL,
-                            CassandraTables.TABLETS,
-                            CassandraTables.TABLETS_USAGE_TABLE,
-                            uuid
-                    ) ) ) )
-            .parallel( super.checkDifference( uuid.toString().length() ) )
-            .runOn( Schedulers.parallel() )
-            .filter( row -> !super.checkObject( request ) || super.checkTabletUsage( row, request ) )
+    public final BiFunction< UUID, PatrulActivityRequest, Mono< List< TabletUsage > > > getAllUsedTablets = ( uuid, request ) ->
+            super.convertValuesToParallelFlux(
+                    this.getSession().execute(
+                            MessageFormat.format(
+                                    """
+                                    {0} {1}.{2} WHERE uuidOfPatrul = {3};
+                                    """,
+                                    CassandraCommands.SELECT_ALL,
+                                    CassandraTables.TABLETS,
+                                    CassandraTables.TABLETS_USAGE_TABLE,
+                                    uuid
+                            )
+                    ),
+                    super.checkDifference( uuid.toString().length() )
+            ).filter( row -> !super.checkObject( request ) || super.checkTabletUsage( row, request ) )
             .map( TabletUsage::generate )
             .sequential()
             .publishOn( Schedulers.single() )
@@ -1623,7 +1630,9 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                     )
             ) );
 
-    // возвращает список патрульных которые макс близко к камере
+    /*
+    возвращает список патрульных которые макс близко к камере
+     */
     public final Function< Point, Mono< PatrulInRadiusList > > getPatrulInRadiusList = point ->
             this.findTheClosestPatruls
                     .apply( point, 2 )
@@ -1702,20 +1711,18 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                             final Date endOfYear = super.getYearStartOrEnd( false );
 
                             tabletUsageStatistics.setMap();
-                            return Flux.fromStream(
-                                    super.convertRowToStream(
-                                            this.getSession().execute(
-                                                    MessageFormat.format(
-                                                            """
-                                                            {0} {1}.{2}
-                                                            WHERE uuidofpatrul = {3};
-                                                            """,
-                                                            CassandraCommands.SELECT_ALL,
-                                                            CassandraTables.TABLETS,
-                                                            CassandraTables.TABLETS_USAGE_TABLE,
-                                                            patrulActivityRequest.getPatrulUUID() ) ) ) )
-                                    .parallel()
-                                    .runOn( Schedulers.parallel() )
+                            return super.convertValuesToParallelFlux(
+                                    this.getSession().execute(
+                                            MessageFormat.format(
+                                                    """
+                                                    {0} {1}.{2}
+                                                    WHERE uuidofpatrul = {3};
+                                                    """,
+                                                    CassandraCommands.SELECT_ALL,
+                                                    CassandraTables.TABLETS,
+                                                    CassandraTables.TABLETS_USAGE_TABLE,
+                                                    patrulActivityRequest.getPatrulUUID() )
+                                    ) )
                                     .filter( row -> row.getTimestamp( "startedtouse" ).after( startOfYear )
                                             && row.getTimestamp( "startedtouse" ).before( endOfYear ) )
                                     .map( row -> tabletUsageStatistics.update(
@@ -1726,7 +1733,8 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                                     .publishOn( Schedulers.single() )
                                     .collectList()
                                     .map( longs -> {
-                                        final List< TabletUsageData > tabletUsageDataList = newList();
+                                        final List< TabletUsageData > tabletUsageDataList = super.newList();
+
                                         super.analyze(
                                                 tabletUsageStatistics.getTabletUsageStatisticsForYear(),
                                                 ( key, value ) -> tabletUsageDataList.add( TabletUsageData.generate( value, key.toString() ) )
@@ -1739,23 +1747,22 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                         }
 
                         else {
-                            return Flux.fromStream(
-                                    super.convertRowToStream(
-                                            this.getSession().execute(
-                                                    MessageFormat.format(
-                                                            """
-                                                            {0} {1}.{2} WHERE uuidofpatrul = {3};
-                                                            """,
-                                                            CassandraCommands.SELECT_ALL,
-                                                            CassandraTables.TABLETS,
-                                                            CassandraTables.TABLETS_USAGE_TABLE,
-                                                            patrulActivityRequest.getPatrulUUID() ) ) ) )
-                                    .parallel( super.checkDifference(
-                                            (int) Math.abs( Duration.between(
-                                                    patrulActivityRequest.getStartDate().toInstant(),
-                                                    patrulActivityRequest.getEndDate().toInstant() ).toDays() ) ) )
-                                    .runOn( Schedulers.parallel() )
-                                    .filter( row -> row.getTimestamp( "startedtouse" ).after( patrulActivityRequest.getStartDate() )
+                            return super.convertValuesToParallelFlux(
+                                    this.getSession().execute(
+                                            MessageFormat.format(
+                                                    """
+                                                    {0} {1}.{2} WHERE uuidofpatrul = {3};
+                                                    """,
+                                                    CassandraCommands.SELECT_ALL,
+                                                    CassandraTables.TABLETS,
+                                                    CassandraTables.TABLETS_USAGE_TABLE,
+                                                    patrulActivityRequest.getPatrulUUID()
+                                            )
+                                    ),
+                                    (int) Math.abs( Duration.between(
+                                            patrulActivityRequest.getStartDate().toInstant(),
+                                            patrulActivityRequest.getEndDate().toInstant() ).toDays() )
+                                    ).filter( row -> row.getTimestamp( "startedtouse" ).after( patrulActivityRequest.getStartDate() )
                                             && row.getTimestamp( "startedtouse" ).before( patrulActivityRequest.getEndDate() ) )
                                     .map( row -> tabletUsageStatistics.update(
                                             row.getTimestamp( "startedtouse" ),
@@ -1765,7 +1772,8 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                                     .publishOn( Schedulers.single() )
                                     .collectList()
                                     .map( longs -> {
-                                        final List< TabletUsageData > tabletUsageDataList = newList();
+                                        final List< TabletUsageData > tabletUsageDataList = super.newList();
+
                                         super.analyze(
                                                 tabletUsageStatistics.getTabletUsageStatisticsForEachDay(),
                                                 ( key, value ) -> tabletUsageDataList.add(
@@ -1779,19 +1787,20 @@ public final class CassandraDataControl extends CassandraConverter implements Se
                         }
                     } );
 
-    public final BiFunction< CassandraTables, CassandraTables, ParallelFlux< Row > > getAllEntities =
-            ( keyspace, table ) -> Flux.fromStream(
-                    super.convertRowToStream(
-                            this.getSession().execute(
-                                    MessageFormat.format(
-                                            """
-                                            {0} {1}.{2};
-                                            """,
-                                            CassandraCommands.SELECT_ALL,
-                                            keyspace,
-                                            table ) ) ) )
-                    .parallel( super.checkDifference( table.name().length() + keyspace.name().length() ) )
-                    .runOn( Schedulers.parallel() );
+    public final BiFunction< CassandraTables, CassandraTables, ParallelFlux< Row >> getAllEntities =
+            ( keyspace, table ) -> super.convertValuesToParallelFlux(
+                    this.getSession().execute(
+                            MessageFormat.format(
+                                    """
+                                    {0} {1}.{2};
+                                    """,
+                                    CassandraCommands.SELECT_ALL,
+                                    keyspace,
+                                    table
+                            )
+                    ),
+                    Math.abs( keyspace.name().length() + table.name().length() )
+            );
 
     @Override
     public void close( final Throwable throwable ) {
@@ -1803,8 +1812,8 @@ public final class CassandraDataControl extends CassandraConverter implements Se
     @Override
     public void close() {
         INSTANCE = null;
+        super.logging( this );
         this.getCluster().close();
         this.getSession().close();
-        super.logging( this );
     }
 }

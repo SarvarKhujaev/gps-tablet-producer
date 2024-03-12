@@ -29,14 +29,11 @@ public final class CameraList implements ObjectCommonMethods< CameraList > {
 
     private CameraList () {}
 
-    public CameraList ( final UDTValue value ) {
-        this.setRtspLink( value.getString( "rtspLink" ) );
-        this.setCameraName( value.getString( "cameraName" ) );
-    }
-
     @Override
     public CameraList generate( final UDTValue udtValue ) {
-        return new CameraList( udtValue );
+        this.setCameraName( udtValue.getString( "cameraName" ) );
+        this.setRtspLink( udtValue.getString( "rtspLink" ) );
+        return this;
     }
 
     @Override

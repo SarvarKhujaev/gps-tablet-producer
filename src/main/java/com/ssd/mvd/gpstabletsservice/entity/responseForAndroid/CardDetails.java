@@ -41,10 +41,12 @@ public final class CardDetails extends DataValidateInspector {
 
     private CardDetails ( final CarDetails carDetails ) {
         this.setCarDetails( carDetails );
+        super.close();
     }
 
     private CardDetails ( final PersonDetails personDetails ) {
         this.setPersonDetails( personDetails );
+        super.close();
     }
 
     public CardDetails ( final CarTotalData carTotalData ) {
@@ -123,67 +125,87 @@ public final class CardDetails extends DataValidateInspector {
                             .getPsychologyCard()
                             .getModelForPassport()
                             .getDocument()
-                            .getSerialNumber() ) );
+                            .getSerialNumber() )
+                    );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Avtomobil egasi", carTotalData.getModelForCar().getPerson() ) );
+                    Item.generate( "Avtomobil egasi", carTotalData.getModelForCar().getPerson() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Avtomobil modeli", carTotalData.getModelForCar().getModel() ) );
+                    Item.generate( "Avtomobil modeli", carTotalData.getModelForCar().getModel() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Avtomobil rangi", carTotalData.getModelForCar().getColor() ) );
+                    Item.generate( "Avtomobil rangi", carTotalData.getModelForCar().getColor() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Berilgan sanasi", carTotalData.getModelForCar().getRegistrationDate() ) );
+                    Item.generate( "Berilgan sanasi", carTotalData.getModelForCar().getRegistrationDate() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Avtomobil egasi", carTotalData.getModelForCar().getPerson() ) );
+                    Item.generate( "Avtomobil egasi", carTotalData.getModelForCar().getPerson() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "STIR", carTotalData.getModelForCar().getStir() ) );
+                    Item.generate( "STIR", carTotalData.getModelForCar().getStir() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Organizatiya", carTotalData.getModelForCar().getOrganization() ) );
+                    Item.generate( "Organizatiya", carTotalData.getModelForCar().getOrganization() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Turi", carTotalData.getModelForCar().getVehicleType() ) );
+                    Item.generate( "Turi", carTotalData.getModelForCar().getVehicleType() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Manzil", carTotalData.getModelForCar().getAddress() ) );
+                    Item.generate( "Manzil", carTotalData.getModelForCar().getAddress() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Kuzov ragami", carTotalData.getModelForCar().getKuzov() ) );
+                    Item.generate( "Kuzov ragami", carTotalData.getModelForCar().getKuzov() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Tola vazni", carTotalData.getModelForCar().getFullWeight() ) );
+                    Item.generate( "Tola vazni", carTotalData.getModelForCar().getFullWeight() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Yuksiz vazni", carTotalData.getModelForCar().getEmptyWeight() ) );
+                    Item.generate( "Yuksiz vazni", carTotalData.getModelForCar().getEmptyWeight() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Dvigatel raqami", carTotalData.getModelForCar().getEngine() ) );
+                    Item.generate( "Dvigatel raqami", carTotalData.getModelForCar().getEngine() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Dvigatel quvvati", carTotalData.getModelForCar().getPower() ) );
+                    Item.generate( "Dvigatel quvvati", carTotalData.getModelForCar().getPower() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                    Item.generate( "Yonilg'i turi", carTotalData.getModelForCar().getFullWeight() ) );
+                    Item.generate( "Yonilg'i turi", carTotalData.getModelForCar().getFullWeight() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
-                            Item.generate( "Tola vazni", carTotalData.getModelForCar().getFuelType() ) );
+                            Item.generate( "Tola vazni", carTotalData.getModelForCar().getFuelType() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
                     Item.generate( "O'TIRADIGAN JOYLAR SONI",
-                    carTotalData.getModelForCar().getSeats() ) );
+                    carTotalData.getModelForCar().getSeats() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
                     Item.generate( "TIK TURADIGAN JOYLAR SONI",
-                    carTotalData.getModelForCar().getStands() ) );
+                    carTotalData.getModelForCar().getStands() )
+            );
 
             this.getDetails().get( Details.TEX_PASSPORT ).add(
                     Item.generate( "ALOHIDA BELGILARI",
-                    carTotalData.getModelForCar().getTexPassportSerialNumber() ) );
+                    carTotalData.getModelForCar().getTexPassportSerialNumber() )
+            );
         }
 
         if ( super.objectIsNotNull( carTotalData.getModelForCar().getTonirovka() ) ) {
@@ -192,21 +214,24 @@ public final class CardDetails extends DataValidateInspector {
                             carTotalData
                             .getModelForCar()
                             .getTonirovka()
-                            .getTintinType() ) );
+                            .getTintinType() )
+            );
 
             this.getDetails().get( Details.TONIROVKA ).add(
                     Item.generate( "RUXSATNOMA BERILGAN SANASI",
                             carTotalData
                             .getModelForCar()
                             .getTonirovka()
-                            .getDateOfPermission() ) );
+                            .getDateOfPermission() )
+            );
 
             this.getDetails().get( Details.TONIROVKA ).add(
                     Item.generate( "RUXSATNOMA AMAL QILISH MUDDATI",
                             carTotalData
                             .getModelForCar()
                             .getTonirovka()
-                            .getDateOfValidotion() ) );
+                            .getDateOfValidotion() )
+            );
         }
 
         if ( super.objectIsNotNull( carTotalData.getModelForCar().getInsurance() ) ) {
@@ -214,26 +239,32 @@ public final class CardDetails extends DataValidateInspector {
                     Item.generate( "BERILGAN VAQTI", carTotalData
                     .getModelForCar()
                     .getInsurance()
-                    .getDateBegin() ) );
+                    .getDateBegin() )
+            );
 
             this.getDetails().get( Details.AVTO_SUGURTA ).add(
                     Item.generate( "MUDDAT TUGASH SANASI", carTotalData
                     .getModelForCar()
                     .getInsurance()
-                    .getDateValid() ) );
+                    .getDateValid() )
+            );
 
             this.getDetails().get( Details.AVTO_SUGURTA ).add(
                     Item.generate( "SUG'URTA RAQAMI", carTotalData
                     .getModelForCar()
                     .getInsurance()
-                    .getInsuranceSerialNumber() ) );
+                    .getInsuranceSerialNumber() )
+            );
         }
+
+        super.close();
     }
 
     public CardDetails (
             final Card card,
             final Patrul patrul,
-            final String language ) {
+            final String language
+    ) {
         this.getDetails().clear();
         this.getDetails().put( Details.DETAILS, super.newList() );
         this.getDetails().put( Details.APPLICANT_DATA, super.newList() );
@@ -244,6 +275,8 @@ public final class CardDetails extends DataValidateInspector {
         this.getDetails().put( Details.ADDRESS_OF_APPLICANT, super.newList() );
         this.getDetails().put( Details.ADDITIONAL_ADDRESS_OF_Victim, super.newList() );
         this.getDetails().put( Details.ADDITIONAL_ADDRESS_OF_APPLICANT, super.newList() );
+
+        super.setDetailList();
 
         Flux.fromStream( Arrays.stream( Details.values() ).sorted() )
                 .subscribe( new CustomSubscriber<>(
@@ -348,6 +381,7 @@ public final class CardDetails extends DataValidateInspector {
                                                     && card.getVictimHumans().isEmpty()
                                                     ? card.getVictimHumans().get( 0 ).getPhone()
                                                     : Errors.DATA_NOT_FOUND.name() ) );
+
                                     this.getDetails().get( Details.DATA_OF_VICTIM )
                                             .add( Item.generate( "Имя", super
                                                     .objectIsNotNull( card.getVictimHumans() )
@@ -355,39 +389,50 @@ public final class CardDetails extends DataValidateInspector {
                                                     ? card.getVictimHumans()
                                                     .get( 0 )
                                                     .getFirstName()
-                                                    : Errors.DATA_NOT_FOUND.name()  ) );
-                                    this.getDetails().get( Details.DATA_OF_VICTIM )
-                                            .add( Item.generate( "Отчество", super
-                                                    .objectIsNotNull( card.getVictimHumans() )
-                                                    && card.getVictimHumans().isEmpty()
-                                                    ? card.getVictimHumans()
-                                                    .get( 0 )
-                                                    .getMiddleName()
-                                                    : Errors.DATA_NOT_FOUND.name()  ) );
-                                    this.getDetails().get( Details.DATA_OF_VICTIM )
-                                            .add( Item.generate( "Фамилия", super
-                                                    .objectIsNotNull( card.getVictimHumans() )
-                                                    && card.getVictimHumans().isEmpty()
-                                                    ? card.getVictimHumans()
-                                                    .get( 0 )
-                                                    .getLastName()
-                                                    : Errors.DATA_NOT_FOUND.name()  ) );
+                                                    : Errors.DATA_NOT_FOUND.name() )
+                                            );
+
                                     this.getDetails().get( Details.DATA_OF_VICTIM ).add(
-                                            Item.generate( "ID Потерпевшего", super
-                                                    .objectIsNotNull( card.getVictimHumans() )
-                                                    && card.getVictimHumans().isEmpty()
-                                                    ? card.getVictimHumans()
-                                                    .get( 0 )
-                                                    .getVictimId()
-                                                    : Errors.DATA_NOT_FOUND.name() ) );
+                                            Item.generate(
+                                                    "Отчество",
+                                                    super.objectIsNotNull( card.getVictimHumans() )
+                                                            && card.getVictimHumans().isEmpty()
+                                                            ? card.getVictimHumans().get( 0 ).getMiddleName()
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
+
                                     this.getDetails().get( Details.DATA_OF_VICTIM ).add(
-                                            Item.generate( "Дата рождения", super
-                                                    .objectIsNotNull( card.getVictimHumans() )
-                                                    && card.getVictimHumans().isEmpty()
-                                                    ? card.getVictimHumans()
-                                                    .get( 0 )
-                                                    .getDateOfBirth()
-                                                    : Errors.DATA_NOT_FOUND.name() ) );
+                                            Item.generate(
+                                                    "Фамилия",
+                                                    super.objectIsNotNull( card.getVictimHumans() )
+                                                            && card.getVictimHumans().isEmpty()
+                                                            ? card.getVictimHumans().get( 0 ).getLastName()
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
+
+                                    this.getDetails().get( Details.DATA_OF_VICTIM ).add(
+                                            Item.generate(
+                                                    "ID Потерпевшего",
+                                                    super.objectIsNotNull( card.getVictimHumans() )
+                                                            && card.getVictimHumans().isEmpty()
+                                                            ? card.getVictimHumans().get( 0 ).getVictimId()
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
+
+                                    this.getDetails().get( Details.DATA_OF_VICTIM ).add(
+                                            Item.generate(
+                                                    "Дата рождения",
+                                                    super.objectIsNotNull( card.getVictimHumans() )
+                                                            && card.getVictimHumans().isEmpty()
+                                                            ? card.getVictimHumans()
+                                                            .get( 0 )
+                                                            .getDateOfBirth()
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
                                 }
 
                                 case ADDRESS_OF_VICTIM -> {
@@ -408,77 +453,100 @@ public final class CardDetails extends DataValidateInspector {
                                     } }
 
                                 case ADDITIONAL_ADDRESS -> {
-                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                            .add( Item.generate( "Дом",
-                                                    super
-                                                            .objectIsNotNull( card.getEventAddress() )
+                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS ).add(
+                                            Item.generate(
+                                                    "Дом",
+                                                    super.objectIsNotNull( card.getEventAddress() )
                                                             ? card.getEventAddress().getFlat()
-                                                            : Errors.DATA_NOT_FOUND.name() ) );
-                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                            .add( Item.generate( "Адрес",
-                                                    super
-                                                            .objectIsNotNull( card.getEventAddress() )
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
+
+                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS ).add(
+                                            Item.generate(
+                                                    "Адрес",
+                                                    super.objectIsNotNull( card.getEventAddress() )
                                                             ? card.getEventAddress().getStreet()
-                                                            : Errors.DATA_NOT_FOUND.name() ) );
-                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS )
-                                            .add( Item.generate( "Квартира",
-                                                    super
-                                                            .objectIsNotNull( card.getEventAddress() )
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
+
+                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS ).add(
+                                            Item.generate(
+                                                    "Квартира",
+                                                    super.objectIsNotNull( card.getEventAddress() )
                                                             ? card.getEventAddress().getHouse()
-                                                            : Errors.DATA_NOT_FOUND.name() ) );
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
                                 }
 
                                 case ADDRESS_OF_INCIDENT -> {
                                     if ( super.objectIsNotNull( card.getEventAddress() ) ) {
                                         this.getDetails().get( Details.APPLICANT_DATA )
                                                 .add( Item.generate( "Улица", card.getEventAddress().getStreet() ) );
+
                                         this.getDetails().get( Details.APPLICANT_DATA )
                                                 .add( Item.generate( "Страна", card.getEventAddress().getSRegionId() ) );
+
                                         this.getDetails().get( Details.APPLICANT_DATA )
                                                 .add( Item.generate( "Область", card.getEventAddress().getSOblastiId() ) );
+
                                         this.getDetails().get( Details.APPLICANT_DATA )
                                                 .add( Item.generate( "Район", card.getEventAddress().getSCountriesId() ) );
+
                                         this.getDetails().get( Details.APPLICANT_DATA )
                                                 .add( Item.generate( "Махалля", card.getEventAddress().getSMahallyaId() ) );
+
                                         this.getDetails().get( Details.APPLICANT_DATA )
                                                 .add( Item.generate( "Населенныый пункт", card.getEventAddress().getSNote() ) );
-                                    } }
+                                    }
+                                }
 
                                 case ADDRESS_OF_APPLICANT -> {
                                     if ( super.objectIsNotNull( card.getEventHuman() )
                                             && super.objectIsNotNull( card.getEventHuman().getHumanAddress() ) ) {
-                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                                .add( Item.generate( "Улица", card
-                                                        .getEventHuman()
-                                                        .getHumanAddress()
-                                                        .getStreet() ) );
+                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT ).add(
+                                                Item.generate(
+                                                        "Улица",
+                                                        card.getEventHuman().getHumanAddress().getStreet()
+                                                )
+                                        );
 
-                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                                .add( Item.generate( "Район", card
-                                                        .getEventHuman()
-                                                        .getHumanAddress()
-                                                        .getSRegionId() ) );
+                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT ).add(
+                                                Item.generate(
+                                                        "Район",
+                                                        card.getEventHuman().getHumanAddress().getSRegionId()
+                                                )
+                                        );
 
-                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                                .add( Item.generate( "Область", card
-                                                        .getEventHuman()
-                                                        .getHumanAddress()
-                                                        .getSOblastiId() ) );
+                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT ).add(
+                                                Item.generate(
+                                                        "Область",
+                                                        card.getEventHuman().getHumanAddress().getSOblastiId()
+                                                )
+                                        );
 
-                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                                .add( Item.generate( "Страна", card
-                                                        .getEventHuman()
-                                                        .getHumanAddress()
-                                                        .getSCountriesId() ) );
+                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT ).add(
+                                                Item.generate(
+                                                        "Страна",
+                                                        card.getEventHuman().getHumanAddress().getSCountriesId()
+                                                )
+                                        );
 
-                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                                .add( Item.generate( "Махалля", card
-                                                        .getEventHuman()
-                                                        .getHumanAddress()
-                                                        .getSMahallyaId() ) );
+                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT ).add(
+                                                Item.generate(
+                                                        "Махалля",
+                                                        card.getEventHuman().getHumanAddress().getSMahallyaId()
+                                                )
+                                        );
 
-                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT )
-                                                .add( Item.generate( "Населенныый пункт", card.getEventHuman().getHumanAddress().getSNote() ) );
+                                        this.getDetails().get( Details.ADDRESS_OF_APPLICANT ).add(
+                                                Item.generate(
+                                                        "Населенныый пункт",
+                                                        card.getEventHuman().getHumanAddress().getSNote()
+                                                )
+                                        );
                                     } }
 
                                 case ADDITIONAL_ADDRESS_OF_Victim -> {
@@ -488,46 +556,58 @@ public final class CardDetails extends DataValidateInspector {
                                                     .getVictimHumans()
                                                     .get( 0 )
                                                     .getVictimAddress() ) ) {
-                                        this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim )
-                                                .add( Item.generate( "Дом", card
-                                                        .getVictimHumans()
-                                                        .get( 0 )
-                                                        .getVictimAddress()
-                                                        .getFlat() ) );
-                                        this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim )
-                                                .add( Item.generate( "Адрес", card
-                                                        .getVictimHumans()
-                                                        .get( 0 )
-                                                        .getVictimAddress()
-                                                        .getHouse() ) );
-                                        this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim )
-                                                .add( Item.generate( "Квартира", card
-                                                        .getVictimHumans()
-                                                        .get( 0 )
-                                                        .getVictimAddress()
-                                                        .getStreet() ) );
+
+                                        this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add(
+                                                Item.generate(
+                                                        "Дом",
+                                                        card.getVictimHumans().get( 0 ).getVictimAddress().getFlat()
+                                                )
+                                        );
+
+                                        this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add(
+                                                Item.generate(
+                                                        "Адрес",
+                                                        card.getVictimHumans().get( 0 ).getVictimAddress().getHouse()
+                                                )
+                                        );
+
+                                        this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_Victim ).add(
+                                                Item.generate(
+                                                        "Квартира",
+                                                        card.getVictimHumans().get( 0 ).getVictimAddress().getStreet()
+                                                )
+                                        );
                                     } }
 
                                 case ADDITIONAL_ADDRESS_OF_APPLICANT -> {
-                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                            .add( Item.generate( "Дом", super
-                                                    .objectIsNotNull( card.getEventAddress() )
-                                                    ? card.getEventAddress().getFlat()
-                                                    : Errors.DATA_NOT_FOUND.name() ) );
+                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT ).add(
+                                            Item.generate(
+                                                    "Дом",
+                                                    super.objectIsNotNull( card.getEventAddress() )
+                                                            ? card.getEventAddress().getFlat()
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
 
-                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                            .add( Item.generate( "Адрес", super
-                                                    .objectIsNotNull( card.getEventAddress() )
-                                                    ? card.getEventAddress().getHouse()
-                                                    : Errors.DATA_NOT_FOUND.name() ) );
+                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT ).add(
+                                            Item.generate(
+                                                    "Адрес",
+                                                    super.objectIsNotNull( card.getEventAddress() )
+                                                            ? card.getEventAddress().getHouse()
+                                                            : Errors.DATA_NOT_FOUND.name()
+                                            )
+                                    );
 
-                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT )
-                                            .add( Item.generate( "Квартира", super
-                                                    .objectIsNotNull( card.getEventAddress() )
-                                                    ? card.getEventAddress().getStreet()
-                                                    : Errors.DATA_NOT_FOUND.name() ) );
+                                    this.getDetails().get( Details.ADDITIONAL_ADDRESS_OF_APPLICANT ).add(
+                                            Item.generate(
+                                                    "Квартира",
+                                                    super.objectIsNotNull( card.getEventAddress() )
+                                                            ? card.getEventAddress().getStreet()
+                                                            : Errors.DATA_NOT_FOUND.name() ) );
                                 }
                             }
+
+                            super.close();
                         }
                 ) );
     }
@@ -535,7 +615,8 @@ public final class CardDetails extends DataValidateInspector {
     public CardDetails (
             final SelfEmploymentTask selfEmploymentTask,
             final String language,
-            final Patrul patrul ) {
+            final Patrul patrul
+    ) {
         this.getDetails().clear();
         this.getDetails().put( Details.SELF_EMPLOYMENT, super.newList() );
 
@@ -569,6 +650,8 @@ public final class CardDetails extends DataValidateInspector {
                                                 .getPatrulDateData()
                                                 .getTaskDate() ) );
                             }
+
+                            super.close();
                         }
                 ) );
     }

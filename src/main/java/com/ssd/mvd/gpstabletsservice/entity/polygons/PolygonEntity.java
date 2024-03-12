@@ -29,14 +29,12 @@ public final class PolygonEntity implements ObjectCommonMethods< PolygonEntity >
 
     private PolygonEntity () {}
 
-    private PolygonEntity ( final UDTValue udtValue ) {
-        this.setLat( udtValue.getDouble("lat" ) );
-        this.setLng( udtValue.getDouble("lng" ) );
-    }
-
     @Override
     public PolygonEntity generate ( final UDTValue udtValue ) {
-        return new PolygonEntity( udtValue );
+        this.setLat( udtValue.getDouble("lat" ) );
+        this.setLng( udtValue.getDouble("lng" ) );
+
+        return this;
     }
 
     @Override

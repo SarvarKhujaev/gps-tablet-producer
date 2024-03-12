@@ -70,8 +70,9 @@ public final class Polygon {
         return this.patrulList;
     }
 
-    public void setPatrulList( final List<UUID> patrulList ) {
+    public Polygon setPatrulList( final List<UUID> patrulList ) {
         this.patrulList = patrulList;
+        return this;
     }
 
     public List< PolygonEntity > getLatlngs() {

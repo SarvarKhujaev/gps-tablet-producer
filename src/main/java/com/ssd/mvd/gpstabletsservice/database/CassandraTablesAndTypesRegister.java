@@ -953,6 +953,8 @@ public final class CassandraTablesAndTypesRegister extends CassandraConverter {
             final Cluster cluster
     ) {
         i = 0;
+        super.setInstancesList();
+
         super.analyze(
                 super.getMapOfKeyspaceAndTypes(),
                 ( keyspace, udtTypes ) -> super.analyze(
@@ -973,5 +975,7 @@ public final class CassandraTablesAndTypesRegister extends CassandraConverter {
                         }
                 )
         );
+
+        super.close();
     }
 }

@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.Result;
 
-public class LogInspector extends DataValidateInspector {
+public class LogInspector extends WebFluxInspector {
     protected LogInspector () {}
 
     public LogInspector (

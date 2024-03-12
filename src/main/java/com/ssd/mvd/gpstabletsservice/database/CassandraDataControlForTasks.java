@@ -23,8 +23,10 @@ import com.ssd.mvd.gpstabletsservice.request.TaskDetailsRequest;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.Patrul;
 import com.ssd.mvd.gpstabletsservice.inspectors.TaskCommonParams;
 import com.ssd.mvd.gpstabletsservice.controller.UnirestController;
+import com.ssd.mvd.gpstabletsservice.interfaces.TaskCommonMethods;
 import com.ssd.mvd.gpstabletsservice.subscribers.CustomSubscriber;
 import com.ssd.mvd.gpstabletsservice.kafkaDataSet.KafkaDataControl;
+import com.ssd.mvd.gpstabletsservice.interfaces.ServiceCommonMethods;
 import com.ssd.mvd.gpstabletsservice.entity.notifications.Notification;
 import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.TaskDetails;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.CarTotalData;
@@ -43,7 +45,7 @@ import com.ssd.mvd.gpstabletsservice.task.taskStatisticsSer.TaskTimingStatistics
 import com.ssd.mvd.gpstabletsservice.task.findFaceFromAssomidin.face_events.FaceEvent;
 import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.ViolationsInformation;
 
-public final class CassandraDataControlForTasks extends SerDes {
+public final class CassandraDataControlForTasks extends SerDes implements ServiceCommonMethods {
     private final Session session = CassandraDataControl.getInstance().getSession();
 
     private static CassandraDataControlForTasks INSTANCE = new CassandraDataControlForTasks();
@@ -104,7 +106,11 @@ public final class CassandraDataControlForTasks extends SerDes {
                                                     "gosnumber",
                                                     super.joinWithAstrix( gosnumber )
                                             ).getString( "object" ),
-                                    CarTotalData.class ) ) ) ) );
+                                    CarTotalData.class )
+                            )
+                    )
+            )
+    );
 
     // возвращает запись из БД для конкретной задачи
     public final Function< String, Mono< Row > > getTask = uuid ->
@@ -112,7 +118,8 @@ public final class CassandraDataControlForTasks extends SerDes {
                     this.getRowFromTaskKeyspace(
                             CassandraTables.TASKS_STORAGE_TABLE,
                             "uuid",
-                            uuid )
+                            uuid
+                    )
             );
 
     public final Consumer< String > deleteActiveTask = id -> this.getSession().execute(
@@ -131,17 +138,16 @@ public final class CassandraDataControlForTasks extends SerDes {
     сохраняет уведомление, обновляет данные патрульного и задачи
     */
     public Notification updateTaskPatrulAndNotificationAfterChange (
-            final TaskCommonParams taskCommonParams,
-            final Object clazz,
             final Patrul patrul,
-            final Notification notification
+            final Notification notification,
+            final TaskCommonMethods taskCommonMethods
     ) {
         final StringBuilder stringBuilder = super.newStringBuilder();
 
         /*
         проверяем что задача еще не завершена
         */
-        if ( taskCommonParams.isNotFinished() ) {
+        if ( taskCommonMethods.getTaskCommonParams().isNotFinished() ) {
             /*
             генерируем и сохраняем свежие данные о задаче и патрульном
             */
@@ -149,10 +155,12 @@ public final class CassandraDataControlForTasks extends SerDes {
                     CassandraDataControlForTasks
                             .getInstance()
                             .saveActiveTask
-                            .apply( ActiveTask.generate(
-                                    clazz,
-                                    patrul.getPatrulTaskInfo().getStatus(),
-                                    taskCommonParams ) )
+                            .apply(
+                                    ActiveTask.generate(
+                                            taskCommonMethods,
+                                            patrul.getPatrulTaskInfo().getStatus()
+                                    )
+                            )
             );
         }
 
@@ -183,11 +191,11 @@ public final class CassandraDataControlForTasks extends SerDes {
                                 CassandraTables.TABLETS,
                                 CassandraTables.TASKS_STORAGE_TABLE,
 
-                                taskCommonParams.getUuid(),
+                                taskCommonMethods.getTaskCommonParams().getUuid(),
 
-                                super.joinWithAstrix( taskCommonParams.getTaskId() ),
-                                super.joinWithAstrix( taskCommonParams.getTaskTypes() ),
-                                super.joinWithAstrix( super.serialize( clazz ) )
+                                super.joinWithAstrix( taskCommonMethods.getTaskCommonParams().getTaskId() ),
+                                super.joinWithAstrix( taskCommonMethods.getTaskCommonParams().getTaskTypes() ),
+                                super.joinWithAstrix( super.serialize( taskCommonMethods ) )
                         ),
 
                         /*
@@ -278,6 +286,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                             VALUES( {3}, {4}, {5}, {6} );
                             """,
                             CassandraCommands.INSERT_INTO,
+
                             CassandraTables.TABLETS,
                             CassandraTables.CARTOTALDATA,
 
@@ -288,7 +297,9 @@ public final class CassandraDataControlForTasks extends SerDes {
                                     carTotalData
                                             .getViolationsList()
                                             .getViolationsInformationsList() ),
-                            super.joinWithAstrix( super.serialize( carTotalData ) ) ) )
+
+                            super.joinWithAstrix( super.serialize( carTotalData ) )
+                    ) )
                     .wasApplied();
 
     private final Function< ActiveTask, String > saveActiveTask = activeTask ->
@@ -299,6 +310,7 @@ public final class CassandraDataControlForTasks extends SerDes {
                     VALUES ( {3}, {4} );
                     """,
                     CassandraCommands.INSERT_INTO,
+
                     CassandraTables.TABLETS,
                     CassandraTables.ACTIVE_TASK,
 
@@ -341,8 +353,10 @@ public final class CassandraDataControlForTasks extends SerDes {
                             WHERE taskId = {4} AND patruluuid = {5};
                             """,
                             CassandraCommands.UPDATE,
+
                             CassandraTables.TABLETS,
                             CassandraTables.TASKS_TIMING_TABLE,
+
                             timeConsumption,
                             super.joinWithAstrix( patrul.getPatrulTaskInfo().getTaskId() ),
                             patrul.getUuid()
@@ -444,72 +458,19 @@ public final class CassandraDataControlForTasks extends SerDes {
 
     public final Function< TaskDetailsRequest, Mono< TaskDetails > > getTaskDetails = taskDetailsRequest ->
             this.getTask.apply( taskDetailsRequest.getId() )
-                    .flatMap( row -> switch ( taskDetailsRequest.getTaskTypes() ) {
-                case CARD_102 -> super.convert( super.deserialize( row.getString( "object" ), Card.class ) )
-                        .map( card -> TaskDetails.generate(
-                                card,
-                                taskDetailsRequest.getPatrulUUID(),
-                                this.getPatrulLocationHistoryBeforeArrived.apply(
-                                        card.getTaskCommonParams().getUuid().toString(),
-                                        taskDetailsRequest.getPatrulUUID() ),
-                                card.getTaskCommonParams() ) );
-
-                case FIND_FACE_CAR -> super.checkTable( taskDetailsRequest.getId(), CassandraTables.FACECAR )
-                        ? super.convert( super.deserialize( row.getString("object" ), CarEvent.class ) )
-                        .map( carEvent -> TaskDetails.generate(
-                                carEvent,
-                                taskDetailsRequest.getPatrulUUID(),
-                                this.getPatrulLocationHistoryBeforeArrived.apply(
-                                        carEvent.getTaskCommonParams().getUuid().toString(),
-                                        taskDetailsRequest.getPatrulUUID() ),
-                                carEvent.getTaskCommonParams() ) )
-                        : super.convert( super.deserialize( row.getString("object" ), EventCar.class ) )
-                        .map( eventCar -> TaskDetails.generate(
-                                eventCar,
-                                taskDetailsRequest.getPatrulUUID(),
-                                this.getPatrulLocationHistoryBeforeArrived.apply(
-                                        eventCar.getTaskCommonParams().getUuid().toString(),
-                                        taskDetailsRequest.getPatrulUUID() ),
-                                eventCar.getTaskCommonParams() ) );
-
-                case FIND_FACE_PERSON -> switch ( this.findTable( taskDetailsRequest.getId() ) ) {
-                    case FACEPERSON -> super.convert( super.deserialize( row.getString("object" ), FaceEvent.class ) )
-                            .map( faceEvent -> TaskDetails.generate(
-                                    faceEvent,
-                                    taskDetailsRequest.getPatrulUUID(),
-                                    this.getPatrulLocationHistoryBeforeArrived.apply(
-                                            faceEvent.getTaskCommonParams().getUuid().toString(),
-                                            taskDetailsRequest.getPatrulUUID() ),
-                                    faceEvent.getTaskCommonParams() ) );
-
-                    case EVENTBODY -> super.convert( super.deserialize( row.getString("object" ), EventBody.class ) )
-                            .map( eventBody -> TaskDetails.generate(
-                                    eventBody,
-                                    taskDetailsRequest.getPatrulUUID(),
-                                    this.getPatrulLocationHistoryBeforeArrived.apply(
-                                            eventBody.getTaskCommonParams().getUuid().toString(),
-                                            taskDetailsRequest.getPatrulUUID() ),
-                                    eventBody.getTaskCommonParams() ) );
-
-                    default -> super.convert( super.deserialize( row.getString( "object" ), EventFace.class ) )
-                            .map( eventFace -> TaskDetails.generate(
-                                    eventFace,
-                                    taskDetailsRequest.getPatrulUUID(),
-                                    this.getPatrulLocationHistoryBeforeArrived.apply(
-                                            eventFace.getTaskCommonParams().getUuid().toString(),
-                                            taskDetailsRequest.getPatrulUUID() ),
-                                    eventFace.getTaskCommonParams() ) );
-                };
-
-                default -> super.convert( super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
-                        .map( selfEmploymentTask -> TaskDetails.generate(
-                                selfEmploymentTask,
-                                taskDetailsRequest.getPatrulUUID(),
-                                this.getPatrulLocationHistoryBeforeArrived.apply(
-                                        selfEmploymentTask.getTaskCommonParams().getUuid().toString(),
-                                        taskDetailsRequest.getPatrulUUID() ),
-                                selfEmploymentTask.getTaskCommonParams() ) );
-            } );
+                    .flatMap( row -> super.convert( super.deserialize( row.getString( "object" ), TaskCommonMethods.class ) )
+                            .map( taskCommonMethods ->
+                                    TaskDetails.generate(
+                                            taskCommonMethods,
+                                            taskDetailsRequest.getPatrulUUID(),
+                                            this.getPatrulLocationHistoryBeforeArrived.apply(
+                                                    taskCommonMethods.getTaskCommonParams().getUuid().toString(),
+                                                    taskDetailsRequest.getPatrulUUID()
+                                            ),
+                                            taskCommonMethods.getTaskCommonParams()
+                                    )
+                            )
+                    );
 
     // сохраняет сос сигнал от патрульного
     private final Function< PatrulSos, Mono< ApiResponseModel > > saveSos = patrulSos -> this.getSession().execute(
@@ -543,7 +504,10 @@ public final class CassandraDataControlForTasks extends SerDes {
             : super.function(
                     Map.of( "message", "Sos was deleted successfully",
                     "data", com.ssd.mvd.gpstabletsservice.entity.Data.from( Status.IN_ACTIVE ) ) )
-            .map( status -> { // если патрульный уже отправлял сигнал ранее, то этот сигнал будет удален
+            .map( status -> {
+                /*
+                если патрульный уже отправлял сигнал ранее, то этот сигнал будет удален
+                 */
                 KafkaDataControl // sending message to Kafka
                         .getKafkaDataControl()
                         .getWriteSosNotificationToKafka()
@@ -596,7 +560,8 @@ public final class CassandraDataControlForTasks extends SerDes {
     private String updatePatrulSosList (
             final UUID sosUUID,
             final UUID patrulUUID,
-            final Status status ) {
+            final Status status
+    ) {
         return MessageFormat.format(
                 """
                 {0} {1}.{2}
@@ -925,7 +890,7 @@ public final class CassandraDataControlForTasks extends SerDes {
 
     /*
     находит все СОС сигналы, привязанные к патрульному
-     */
+    */
     public final Function< Patrul, StringBuilder > deletePatrulSosSignals = patrul -> {
         /*
         проверяем что сам патрульный не отправлял сос сигнал
@@ -991,37 +956,7 @@ public final class CassandraDataControlForTasks extends SerDes {
 
     public final Function< TaskDetailsRequest, Mono< ActiveTask > > getActiveTask = taskDetailsRequest ->
             this.getTask.apply( taskDetailsRequest.getId() )
-                    .flatMap( row -> switch ( taskDetailsRequest.getTaskTypes() ) {
-                    case CARD_102 -> super.convert(
-                            super.deserialize( row.getString( "object" ), Card.class ) )
-                            .map( card -> ActiveTask.generate( card, card.getTaskCommonParams() ) );
-
-                    case FIND_FACE_CAR -> super.convert(
-                            super.deserialize( row.getString("object" ), CarEvent.class ) )
-                            .map( carEvent -> ActiveTask.generate( carEvent, carEvent.getTaskCommonParams() ) );
-
-                    case FIND_FACE_PERSON -> super.convert(
-                            super.deserialize( row.getString("object" ), FaceEvent.class ) )
-                            .map( faceEvent -> ActiveTask.generate( faceEvent, faceEvent.getTaskCommonParams() ) );
-
-                    case FIND_FACE_EVENT_CAR -> super.convert(
-                            super.deserialize( row.getString("object" ), EventCar.class ) )
-                            .map( eventCar -> ActiveTask.generate( eventCar, eventCar.getTaskCommonParams() ) );
-
-                    case FIND_FACE_EVENT_BODY -> super.convert(
-                            super.deserialize( row.getString("object" ), EventBody.class ) )
-                            .map( eventBody -> ActiveTask.generate( eventBody, eventBody.getTaskCommonParams() ) );
-
-                    case FIND_FACE_EVENT_FACE -> super.convert(
-                            super.deserialize( row.getString( "object" ), EventFace.class ) )
-                            .map( eventFace -> ActiveTask.generate( eventFace, eventFace.getTaskCommonParams() ) );
-
-                    default -> super.convert(
-                            super.deserialize( row.getString("object" ), SelfEmploymentTask.class ) )
-                            .map( selfEmploymentTask -> ActiveTask.generate(
-                                    selfEmploymentTask,
-                                    selfEmploymentTask.getTaskCommonParams() ) );
-            } );
+                    .map( row -> ActiveTask.generate( super.deserialize( row.getString( "object" ), TaskCommonMethods.class ) ) );
 
     /*
     после того, как отсоединили патрульного от задачи,
@@ -1142,4 +1077,11 @@ public final class CassandraDataControlForTasks extends SerDes {
 
         return stringBuilder;
     };
+
+    @Override
+    public void close () {
+        INSTANCE = null;
+        this.session.close();
+        super.logging( this );
+    }
 }

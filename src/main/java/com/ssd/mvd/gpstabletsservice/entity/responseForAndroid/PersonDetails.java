@@ -30,19 +30,19 @@ public final class PersonDetails extends DataValidateInspector {
         this.passportSeries = passportSeries;
     }
 
-    public void setDate ( final Long date ) {
+    public void setDate ( final long date ) {
         this.date = date;
     }
 
-    public void setTime ( final Long time ) {
+    public void setTime ( final long time ) {
         this.time = time;
     }
 
-    public Double getConfidence() {
+    public double getConfidence() {
         return this.confidence;
     }
 
-    public void setConfidence ( final Double confidence ) {
+    public void setConfidence ( final double confidence ) {
         this.confidence = confidence;
     }
 
@@ -53,9 +53,9 @@ public final class PersonDetails extends DataValidateInspector {
     private String dossier_photo;
     private String passportSeries;
 
-    private Long date;
-    private Long time;
-    private Double confidence;
+    private long date;
+    private long time;
+    private double confidence;
 
     public static <T> PersonDetails from ( final T object ) {
         if ( object instanceof EventBody ) {
@@ -82,40 +82,44 @@ public final class PersonDetails extends DataValidateInspector {
                 ? eventBody.getCreated_date().getTime()
                 : null );
 
-        this.setTime( super
-                .objectIsNotNull( eventBody.getCreated_date() )
-                ? eventBody.getCreated_date().getTime()
-                : null );
+        this.setTime(
+                super.objectIsNotNull( eventBody.getCreated_date() )
+                        ? eventBody.getCreated_date().getTime()
+                        : null
+        );
 
         this.setThumbnail( eventBody.getThumbnail() );
         this.setCameraImage( eventBody.getFullframe() );
         this.setDossier_photo( eventBody.getMatched_dossier() );
 
-        if ( super
-                .objectIsNotNull( eventBody.getPsychologyCard() ) ) {
-            this.setFIO( super.isCollectionNotEmpty(
-                    eventBody
-                            .getPsychologyCard()
-                            .getPapilonData() )
-                    ? super.splitWordAndJoin(
+        if ( super.objectIsNotNull( eventBody.getPsychologyCard() ) ) {
+            this.setFIO(
+                    super.isCollectionNotEmpty(
                             eventBody
-                                .getPsychologyCard()
-                                .getPapilonData()
-                                .get( 0 )
-                                .getName() )
-                    : null );
+                                    .getPsychologyCard()
+                                    .getPapilonData() )
+                            ? super.splitWordAndJoin(
+                                    eventBody
+                                            .getPsychologyCard()
+                                            .getPapilonData()
+                                            .get( 0 )
+                                            .getName() )
+                            : null
+            );
 
-            this.setPassportSeries( super.isCollectionNotEmpty(
-                    eventBody
+            this.setPassportSeries(
+                    super.isCollectionNotEmpty(
+                            eventBody
+                                    .getPsychologyCard()
+                                    .getPapilonData() )
+                            ? eventBody
                             .getPsychologyCard()
-                            .getPapilonData() )
-                    ? eventBody
-                    .getPsychologyCard()
-                    .getPapilonData()
-                    .get( 0 )
-                    .getPassport()
-                    .split( " " )[0]
-                    : null );
+                            .getPapilonData()
+                            .get( 0 )
+                            .getPassport()
+                            .split( " " )[0]
+                            : null
+            );
         }
     }
 
@@ -126,12 +130,14 @@ public final class PersonDetails extends DataValidateInspector {
         this.setDate(
                 super.objectIsNotNull( eventFace.getCreated_date() )
                         ? eventFace.getCreated_date().getTime()
-                        : null );
+                        : null
+        );
 
         this.setTime(
                 super.objectIsNotNull( eventFace.getCreated_date() )
                         ? eventFace.getCreated_date().getTime()
-                        : null );
+                        : null
+        );
 
         this.setThumbnail( eventFace.getThumbnail() );
         this.setCameraImage( eventFace.getFullframe() );
@@ -172,13 +178,15 @@ public final class PersonDetails extends DataValidateInspector {
                 super.objectIsNotNull( faceEvent.getCreated_date() )
                         && !faceEvent.getCreated_date().equals( "null" )
                         ? super.convertTimeToLong( faceEvent.getCreated_date() )
-                        : null );
+                        : null
+        );
 
         this.setIp(
                 super.objectIsNotNull( faceEvent.getDataInfo() )
                 && super.objectIsNotNull( faceEvent.getDataInfo().getCadaster() )
                         ? faceEvent.getDataInfo().getCadaster().getIp()
-                        : null );
+                        : null
+        );
 
         // в случае если псих портрет отсутствует то возмем отсюда
         this.setFIO( faceEvent.getComment() );
@@ -187,14 +195,16 @@ public final class PersonDetails extends DataValidateInspector {
         this.setDossier_photo( faceEvent.getDossier_photo() );
 
         if ( super.objectIsNotNull( faceEvent.getPsychologyCard() ) ) {
-            this.setFIO( super.isCollectionNotEmpty( faceEvent.getPsychologyCard().getPapilonData() )
-                    ? super.splitWordAndJoin(
-                            faceEvent
-                                .getPsychologyCard()
-                                .getPapilonData()
-                                .get( 0 )
-                                .getName() )
-                    : null );
+            this.setFIO(
+                    super.isCollectionNotEmpty( faceEvent.getPsychologyCard().getPapilonData() )
+                            ? super.splitWordAndJoin(
+                                    faceEvent
+                                        .getPsychologyCard()
+                                        .getPapilonData()
+                                        .get( 0 )
+                                        .getName() )
+                            : null
+            );
 
             this.setPassportSeries(
                     super.isCollectionNotEmpty( faceEvent.getPsychologyCard().getPapilonData() )

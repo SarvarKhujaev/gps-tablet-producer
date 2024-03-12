@@ -6,11 +6,11 @@ import com.datastax.driver.core.Row;
 public interface ObjectCommonMethods< T > {
     T generate ( final UDTValue udtValue );
 
-    default T generate ( final Row row ) {
+    default T generate () {
         return null;
     }
 
-    default T generate () {
+    default T generate ( final Row row ) {
         return null;
     }
 

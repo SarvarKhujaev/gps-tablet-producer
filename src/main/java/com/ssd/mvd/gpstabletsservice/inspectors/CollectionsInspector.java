@@ -9,8 +9,8 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.ResultSet;
 
 import com.ssd.mvd.gpstabletsservice.tuple.Points;
-import com.ssd.mvd.gpstabletsservice.entity.PoliceType;
 import com.ssd.mvd.gpstabletsservice.entity.CameraList;
+import com.ssd.mvd.gpstabletsservice.entity.PoliceType;
 import com.ssd.mvd.gpstabletsservice.entity.patrulDataSet.*;
 import com.ssd.mvd.gpstabletsservice.task.card.ReportForCard;
 import com.ssd.mvd.gpstabletsservice.constants.CassandraTables;
@@ -23,29 +23,81 @@ import com.ssd.mvd.gpstabletsservice.task.entityForPapilon.modelForGai.Violation
 public class CollectionsInspector implements ServiceCommonMethods {
     protected CollectionsInspector () {}
 
-    protected final List< Class > listOfClasses = List.of(
-            Patrul.class,
-            CameraList.class,
-            PoliceType.class,
-            PolygonType.class,
-            PositionInfo.class,
-            PolygonEntity.class,
-            ReportForCard.class,
-            PatrulCarInfo.class,
-            PatrulFIOData.class,
-            PatrulTaskInfo.class,
-            PatrulDateData.class,
-            PatrulAuthData.class,
-            PatrulTokenInfo.class,
-            PatrulRegionData.class,
-            PatrulUniqueValues.class,
-            PatrulLocationData.class,
-            PatrulMobileAppInfo.class,
-            ViolationsInformation.class,
+    /*
+    создает список с параметрами для подробного описания задачи
+    */
+    protected void setDetailList () {
+        this.detailsList = Set.of(
+                "Ф.И.О",
+                "",
+                "ПОДРАЗДЕЛЕНИЕ",
+                "ДАТА И ВРЕМЯ",
+                "ID",
+                "ШИРОТА",
+                "ДОЛГОТА",
+                "ВИД ПРОИСШЕСТВИЯ",
+                "НАЧАЛО СОБЫТИЯ",
+                "КОНЕЦ СОБЫТИЯ",
+                "КОЛ.СТВО ПОСТРАДАВШИХ",
+                "КОЛ.СТВО ПОГИБШИХ",
+                "ФАБУЛА"
+        );
+    }
 
-            PolygonEntity.class,
-            Points.class
-    );
+    /*
+    создает список с параметрами для заполнения Excel файла
+    */
+    protected void setListForExcel () {
+        this.fields = List.of(
+                "F.I.O",
+                "Tug'ilgan sana",
+                "Telefon raqam",
+                "Unvon",
+                "Viloyat",
+                "Tuman/Shahar",
+                "Patrul turi",
+                "Oxirgi faollik vaqti",
+                "Ishlashni boshlagan vaqti",
+                "Ro'yxatdan o'tgan vaqti",
+                "Umumiy faollik vaqti",
+                "Planshet quvvati"
+        );
+    }
+
+    /*
+    создает список с экземплярами классов нужных для создания кодеков в Кассандре
+    */
+    protected void setInstancesList () {
+        this.listOfClasses = List.of(
+                Patrul.class,
+                CameraList.class,
+                PoliceType.class,
+                PolygonType.class,
+                PositionInfo.class,
+                PolygonEntity.class,
+                ReportForCard.class,
+                PatrulCarInfo.class,
+                PatrulFIOData.class,
+                PatrulTaskInfo.class,
+                PatrulDateData.class,
+                PatrulAuthData.class,
+                PatrulTokenInfo.class,
+                PatrulRegionData.class,
+                PatrulUniqueValues.class,
+                PatrulLocationData.class,
+                PatrulMobileAppInfo.class,
+                ViolationsInformation.class,
+
+                PolygonEntity.class,
+                Points.class
+        );
+    }
+
+    protected List< String > fields;
+
+    protected Set< String > detailsList;
+
+    protected List< Class > listOfClasses;
 
     protected Map< CassandraTables, List< CassandraTables > > getMapOfKeyspaceAndTypes () {
         final Map< CassandraTables, List< CassandraTables > > keyspaceAndTypes = this.newMap();
@@ -85,37 +137,6 @@ public class CollectionsInspector implements ServiceCommonMethods {
         return keyspaceAndTypes;
     }
 
-    protected final Set< String > detailsList = Set.of(
-            "Ф.И.О",
-            "",
-            "ПОДРАЗДЕЛЕНИЕ",
-            "ДАТА И ВРЕМЯ",
-            "ID",
-            "ШИРОТА",
-            "ДОЛГОТА",
-            "ВИД ПРОИСШЕСТВИЯ",
-            "НАЧАЛО СОБЫТИЯ",
-            "КОНЕЦ СОБЫТИЯ",
-            "КОЛ.СТВО ПОСТРАДАВШИХ",
-            "КОЛ.СТВО ПОГИБШИХ",
-            "ФАБУЛА"
-    );
-
-    protected final List< String > fields = List.of(
-            "F.I.O",
-            "Tug'ilgan sana",
-            "Telefon raqam",
-            "Unvon",
-            "Viloyat",
-            "Tuman/Shahar",
-            "Patrul turi",
-            "Oxirgi faollik vaqti",
-            "Ishlashni boshlagan vaqti",
-            "Ro'yxatdan o'tgan vaqti",
-            "Umumiy faollik vaqti",
-            "Planshet quvvati"
-    );
-
     protected <T> List<T> emptyList () {
         return Collections.emptyList();
     }
@@ -132,13 +153,16 @@ public class CollectionsInspector implements ServiceCommonMethods {
         return new HashMap<>();
     }
 
-    protected boolean checkCollectionsLengthEquality (
+    public boolean checkCollectionsLengthEquality(
             final Map firstCollection,
             final Collection secondCollection
     ) {
         return firstCollection.size() == secondCollection.size();
     }
 
+    /*
+    получает коллекцию и логику описывающую поведение для элементов коллекции
+    */
     protected <T> void analyze (
             final Collection<T> someList,
             final Consumer<T> someConsumer
@@ -157,6 +181,10 @@ public class CollectionsInspector implements ServiceCommonMethods {
         return collection != null && !collection.isEmpty();
     }
 
+    /*
+    получает ResultSet в котором находиться Row объект с данными из БД
+    После чего конвертирует его в Stream
+    */
     protected Stream< Row > convertRowToStream ( final ResultSet resultSet ) {
         return resultSet.all().stream();
     }

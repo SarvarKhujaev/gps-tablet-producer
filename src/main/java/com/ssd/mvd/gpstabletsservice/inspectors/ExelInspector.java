@@ -178,18 +178,30 @@ public final class ExelInspector extends LogInspector {
         final CellStyle headerStyle = this.createCellStyle.get();
         headerStyle.setFont( this.createFont.get() );
 
+        super.setListForExcel();
+
         i = 0;
         super.fields.forEach( s -> this.saveCellValue( this.sheet.createRow( 0 ), s, headerStyle ) );
 
         j = 0;
-        patruls.forEach( patrul -> {
-            i = 0;
-            super.fields.forEach( field -> this.writePatrulDataIntoExel(
-                    this.sheet.createRow( j + 1 ),
-                    patrul,
-                    headerStyle ) );
-            j++;
-        } );
+
+        super.analyze(
+                patruls,
+                patrul -> {
+                    i = 0;
+                    super.analyze(
+                            super.fields,
+                            field -> this.writePatrulDataIntoExel(
+                                    this.sheet.createRow( j + 1 ),
+                                    patrul,
+                                    headerStyle
+                            )
+                    );
+                    j++;
+                }
+        );
+
+        super.close();
 
         return this.saveResultInExelFileAndReturnParsedFile();
     }

@@ -51,7 +51,7 @@ public final class PoliceTypeController extends LogInspector {
     public Mono< ApiResponseModel > deletePoliceType ( final PoliceType policeType ) {
         return CassandraDataControl
             .getInstance()
-            .close( CassandraTables.POLICE_TYPE.name(),
+            .deleteRow( CassandraTables.POLICE_TYPE.name(),
                     "uuid",
                     policeType.getUuid().toString() )
             .onErrorContinue( super::logging )

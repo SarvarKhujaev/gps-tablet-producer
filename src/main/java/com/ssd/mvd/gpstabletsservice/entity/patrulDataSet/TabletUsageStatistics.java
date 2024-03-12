@@ -9,7 +9,7 @@ public final class TabletUsageStatistics extends TimeInspector {
         return this.totalCount;
     }
 
-    public void setTotalCount( final Long totalCount ) {
+    public void setTotalCount( final long totalCount ) {
         this.totalCount = totalCount;
     }
 
@@ -21,11 +21,12 @@ public final class TabletUsageStatistics extends TimeInspector {
         return this.tabletUsageStatisticsForEachDay;
     }
 
-    private Long totalCount = 0L;
+    private long totalCount = 0L;
+
     // хранит данные о том, сколько часов патрульный использовал в каждом месяце
-    private final SortedMap< Month, Long > tabletUsageStatisticsForYear = newTreeMap();
+    private final SortedMap< Month, Long > tabletUsageStatisticsForYear = super.newTreeMap();
     // хранит данные о том, сколько часов патрульный использовал каждый день в течении месяца
-    private final SortedMap< Date, Long > tabletUsageStatisticsForEachDay = newTreeMap();
+    private final SortedMap< Date, Long > tabletUsageStatisticsForEachDay = super.newTreeMap();
 
     /*
     заполняем Map названиями всех месяцев года
@@ -37,14 +38,16 @@ public final class TabletUsageStatistics extends TimeInspector {
 
     public TabletUsageStatistics update (
             final Date date,
-            final Long usage,
-            final Boolean flag ) {
+            final long usage,
+            final boolean flag
+    ) {
         if ( flag ) {
             final Month month = super.getMonthName( date );
 
             this.getTabletUsageStatisticsForYear().put(
                     month,
-                    this.getTabletUsageStatisticsForYear().get( month ) + usage );
+                    this.getTabletUsageStatisticsForYear().get( month ) + usage
+            );
         }
 
         else {

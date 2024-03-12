@@ -111,24 +111,22 @@ public final class ViolationsInformation implements ObjectCommonMethods< Violati
 
     private ViolationsInformation () {}
 
-    private ViolationsInformation ( final UDTValue value ) {
-        this.setAmount( value.getInt( "amount" ) );
-        this.setDecreeStatus( value.getInt( "decreeStatus" ) );
-
-        this.setBill( value.getString( "bill" ) );
-        this.setModel( value.getString( "model" ) );
-        this.setOwner( value.getString( "owner" ) );
-        this.setArticle( value.getString( "article" ) );
-        this.setAddress( value.getString( "address" ) );
-        this.setPayDate( value.getString( "payDate" ) );
-        this.setDivision( value.getString( "division" ) );
-        this.setViolation( value.getString( "violation" ) );
-        this.setDecreeSerialNumber( value.getString( "decreeSerialNumber" ) );
-    }
-
     @Override
     public ViolationsInformation generate( final UDTValue udtValue ) {
-        return new ViolationsInformation( udtValue );
+        this.setAmount( udtValue.getInt( "amount" ) );
+        this.setDecreeStatus( udtValue.getInt( "decreeStatus" ) );
+
+        this.setBill( udtValue.getString( "bill" ) );
+        this.setModel( udtValue.getString( "model" ) );
+        this.setOwner( udtValue.getString( "owner" ) );
+        this.setArticle( udtValue.getString( "article" ) );
+        this.setAddress( udtValue.getString( "address" ) );
+        this.setPayDate( udtValue.getString( "payDate" ) );
+        this.setDivision( udtValue.getString( "division" ) );
+        this.setViolation( udtValue.getString( "violation" ) );
+        this.setDecreeSerialNumber( udtValue.getString( "decreeSerialNumber" ) );
+
+        return this;
     }
 
     @Override
