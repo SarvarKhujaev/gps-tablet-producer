@@ -611,6 +611,7 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                     WHERE uuid = {7};
                                     """,
                                     CassandraCommands.UPDATE,
+
                                     CassandraTables.TABLETS,
                                     CassandraTables.PATRULS,
 
@@ -618,6 +619,7 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                     super.convertClassToCassandraTable.apply( patrul.getPatrulUniqueValues() ),
                                     super.convertClassToCassandraTable.apply( patrul.getPatrulLocationData() ),
                                     super.convertClassToCassandraTable.apply( patrul.getPatrulDateData() ),
+
                                     patrul.getUuid()
                             )
                     ).append( CassandraCommands.APPLY_BATCH ).toString()
@@ -633,6 +635,7 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                             WHERE uuid = {5};
                             """,
                             CassandraCommands.UPDATE,
+
                             CassandraTables.TABLETS,
                             CassandraTables.PATRULS,
 
@@ -670,8 +673,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                     {16}, {17}, {18}, {19}, {20}, {21}, {22}, {23}, {24}, {25} ),
                                     """,
                                     CassandraCommands.INSERT_INTO,
+
                                     CassandraTables.TABLETS,
                                     CassandraTables.PATRULS,
+
                                     super.getALlParamsNamesForClass.apply( Patrul.class ),
 
                                     "VALUES",
@@ -718,11 +723,14 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                             WHERE uuid = {5};
                             """,
                             CassandraCommands.UPDATE,
+
                             CassandraTables.TABLETS,
                             CassandraTables.PATRULS,
+
                             ( integer == 0 ? "patrulImageLink" : "patrulMobileAppInfo.phoneNumber" ),
                             request.getNewImage(),
-                            request.getPatrulUUID() ) )
+                            request.getPatrulUUID()
+                    ) )
                     .wasApplied()
                     ? super.function( Map.of( "message", super.getSuccessMessage( "Image", "updated" ) ) )
                     : super.convert( super.errorResponse() );
@@ -753,8 +761,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                             WHERE login = {3} AND uuid = {4};
                                             """,
                                             CassandraCommands.DELETE,
+
                                             CassandraTables.TABLETS,
                                             CassandraTables.PATRULS_LOGIN_TABLE,
+
                                             patrul.getPatrulAuthData().getLogin(),
                                             patrul.getUuid()
                                     ),
@@ -768,8 +778,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                             WHERE uuid = {3};
                                             """,
                                             CassandraCommands.DELETE,
+
                                             CassandraTables.TABLETS,
                                             CassandraTables.PATRULS,
+
                                             patrul.getUuid()
                                     ),
 
@@ -781,8 +793,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                             {0} {1}.{2} WHERE userId = {3};
                                             """,
                                             CassandraCommands.DELETE,
+
                                             CassandraTables.GPSTABLETS,
                                             CassandraTables.TABLETS_LOCATION_TABLE,
+
                                             patrul.getPassportNumber()
                                     ),
 
@@ -853,6 +867,7 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                         VALUES( {3}, {4}, {5} );
                                         """,
                                         CassandraCommands.INSERT_INTO,
+
                                         CassandraTables.TABLETS,
                                         CassandraTables.PATRULS_LOGIN_TABLE,
 
@@ -888,8 +903,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                         {16}, {17}, {18}, {19}, {20}, {21}, {22}, {23}, {24}, {25} );
                                         """,
                                         CassandraCommands.INSERT_INTO,
+
                                         CassandraTables.TABLETS,
                                         CassandraTables.PATRULS,
+
                                         super.getALlParamsNamesForClass.apply( Patrul.class ),
 
                                         "VALUES",
@@ -972,6 +989,7 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                 {0} {1}.{2} WHERE uuid = {3};
                                 """,
                                 CassandraCommands.DELETE,
+
                                 CassandraTables.TABLETS,
                                 CassandraTables.POLYGON_FOR_PATRUl,
                                 id
@@ -1042,8 +1060,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                             VALUES ( {4}, {5}, {6,number,#}, {7,number,#}, {8,number,#}, {9}, {10}, {11}, {12}, {13} );
                             """,
                             CassandraCommands.INSERT_INTO,
+
                             CassandraTables.TABLETS,
                             CassandraTables.POLYGON_FOR_PATRUl,
+
                             super.getALlParamsNamesForClass.apply( Polygon.class ),
 
                             polygon.getUuid(),
@@ -1119,8 +1139,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                                 WHERE uuid = {4};
                                                 """,
                                                 CassandraCommands.UPDATE,
+
                                                 CassandraTables.TABLETS,
                                                 CassandraTables.PATRULS,
+
                                                 true,
                                                 patrul.getUuid()
                                         )
@@ -1156,8 +1178,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                             {0} {1}.{2} WHERE wasread ={3};
                             """,
                             CassandraCommands.SELECT_ALL.replaceAll( "[*]", "COUNT(*) as quantity" ),
+
                             CassandraTables.TABLETS,
                             CassandraTables.NOTIFICATION,
+
                             false
                     ) )
                     .one()
@@ -1247,12 +1271,16 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                         VALUES( {3}, {4}, {5}, {6}, {7,number,#} );
                         """,
                         CassandraCommands.INSERT_INTO,
+
                         CassandraTables.TABLETS,
                         CassandraTables.PATRULS_STATUS_TABLE,
+
                         patrul.getUuid(),
                         CassandraFunctions.TO_TIMESTAMP.formatted( CassandraFunctions.NOW ),
+
                         super.joinWithAstrix( status ),
                         super.joinWithAstrix( message ),
+
                         patrul.getTotalActivityTime()
                 )
         ).isDone();
@@ -1271,8 +1299,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                     WHERE uuidOfPatrul = {3} AND simCardNumber = {4};
                                     """,
                                     CassandraCommands.SELECT_ALL,
+
                                     CassandraTables.TABLETS,
                                     CassandraTables.TABLETS_USAGE_TABLE,
+
                                     patrul.getUuid(),
                                     super.joinWithAstrix( patrul.getPatrulMobileAppInfo().getSimCardNumber() )
                             ) ).one() )
@@ -1288,28 +1318,34 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                     WHERE uuidOfPatrul = {3} AND simCardNumber = {4};
                                     """,
                                     CassandraCommands.SELECT_ALL,
+
                                     CassandraTables.TABLETS,
                                     CassandraTables.TABLETS_USAGE_TABLE,
+
                                     patrul.getUuid(),
-                                    super.joinWithAstrix( patrul.getPatrulMobileAppInfo().getSimCardNumber() ) ) )
-                                    .one() )
-                    .map( row -> MessageFormat.format(
+                                    super.joinWithAstrix( patrul.getPatrulMobileAppInfo().getSimCardNumber() )
+                            ) ).one()
+                    ).map( row -> MessageFormat.format(
                                     """
                                     {0} {1}.{2}
                                     SET lastActiveDate = {3}, {4}
                                     WHERE uuidOfPatrul = {5} AND simCardNumber = {6};
                                     """,
                                     CassandraCommands.UPDATE,
+
                                     CassandraTables.TABLETS,
                                     CassandraTables.TABLETS_USAGE_TABLE,
+
                                     CassandraFunctions.TO_TIMESTAMP.formatted( CassandraFunctions.NOW ),
+
                                     ( status.isLogout()
                                             ? ", totalActivityTime = "
                                             + abs( super.getTimeDifference(
                                                     row.getTimestamp( "startedToUse" ).toInstant(), 0 ) )
                                             : "" ),
                                     patrul.getUuid(),
-                                    super.joinWithAstrix( row.getString( "simCardNumber" ) ) ) )
+                                    super.joinWithAstrix( row.getString( "simCardNumber" ) )
+                    ) )
                     .orElse( "" );
 
     private final Function< String, Optional< Row > > checkLogin = login ->
@@ -1387,15 +1423,19 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                              WHERE uuid = {8};
                                              """,
                                             CassandraCommands.UPDATE,
+
                                             CassandraTables.TABLETS,
                                             CassandraTables.PATRULS,
+
                                             super.joinWithAstrix(
                                                     patrul
                                                             .getPatrulDateData()
                                                             .getStartedToWorkDate() ),
                                             super.joinWithAstrix( patrul.getPatrulMobileAppInfo().getSimCardNumber() ),
                                             super.joinWithAstrix( patrul.getPatrulTokenInfo().getTokenForLogin() ),
+
                                             CassandraFunctions.TO_TIMESTAMP.formatted( CassandraFunctions.NOW ),
+
                                             time,
                                             patrul.getUuid()
                                     )
@@ -1421,13 +1461,19 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                                 VALUES ( {4}, {5}, {6}, {7}, {8,number,#} );
                                                 """,
                                                 CassandraCommands.INSERT_INTO,
+
                                                 CassandraTables.TABLETS,
                                                 CassandraTables.TABLETS_USAGE_TABLE,
+
                                                 super.getALlParamsNamesForClass.apply( TabletUsage.class ),
+
                                                 super.joinWithAstrix( tabletUsage.getStartedToUse() ),
                                                 super.joinWithAstrix( tabletUsage.getLastActiveDate() ),
+
                                                 tabletUsage.getUuidOfPatrul(),
+
                                                 super.joinWithAstrix( tabletUsage.getSimCardNumber() ),
+
                                                 tabletUsage.getTotalActivityTime() )
                                 );
                             }
@@ -1445,10 +1491,14 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                                 AND simCardNumber = {5};
                                                 """,
                                                 CassandraCommands.UPDATE,
+
                                                 CassandraTables.TABLETS,
                                                 CassandraTables.TABLETS_USAGE_TABLE,
+
                                                 CassandraFunctions.TO_TIMESTAMP.formatted( CassandraFunctions.NOW ),
+
                                                 patrul.getUuid(),
+
                                                 super.joinWithAstrix( patrul.getPatrulMobileAppInfo().getSimCardNumber() ) )
                                 );
                             }
@@ -1461,12 +1511,16 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                             VALUES( {3}, {4}, {5}, {6}, {7,number,#} );
                                             """,
                                             CassandraCommands.INSERT_INTO,
+
                                             CassandraTables.TABLETS,
                                             CassandraTables.PATRULS_STATUS_TABLE,
+
                                             patrul.getUuid(),
                                             CassandraFunctions.TO_TIMESTAMP.formatted( CassandraFunctions.NOW ),
+
                                             super.joinWithAstrix( LOGIN ),
                                             super.joinWithAstrix( super.getMessage( LOGIN ) ),
+
                                             patrul.getTotalActivityTime()
                                     )
                             ).append( CassandraCommands.APPLY_BATCH );
@@ -1497,9 +1551,12 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                 WHERE uuid = {5};
                                 """,
                                 CassandraCommands.UPDATE,
+
                                 CassandraTables.TABLETS,
                                 CassandraTables.PATRULS,
+
                                 CassandraFunctions.TO_TIMESTAMP.formatted( CassandraFunctions.NOW ),
+
                                 Math.abs( patrul.getTotalActivityTime()
                                         + super.getTimeDifference(
                                                 patrul
@@ -1521,8 +1578,10 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                     WHERE uuid = {4};
                                     """,
                                     CassandraCommands.UPDATE,
+
                                     CassandraTables.TABLETS,
                                     CassandraTables.PATRULS,
+
                                     super.joinWithAstrix( patrul.getPatrulDateData().getStartedToWorkDate() ),
                                     patrul.getUuid()
                             )
@@ -1534,10 +1593,13 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                     VALUES( {3}, {4}, {5}, {6}, {7,number,#} );
                                     """,
                                     CassandraCommands.INSERT_INTO,
+
                                     CassandraTables.TABLETS,
                                     CassandraTables.PATRULS_STATUS_TABLE,
+
                                     patrul.getUuid(),
                                     CassandraFunctions.TO_TIMESTAMP.formatted( CassandraFunctions.NOW ),
+
                                     status,
                                     super.getMessage( START_TO_WORK ),
                                     patrul.getTotalActivityTime()
@@ -1569,7 +1631,8 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                 .getTaskData
                                 .apply( patrul, TaskTypes.FREE )
                                 .flatMap( apiResponseModel -> super.errorResponse(
-                                        "You were removed from task, due to fact that u r late for more then 24 hours" ) );
+                                        "You were removed from task, due to fact that u r late for more then 24 hours"
+                                ) );
                     } else {
                         return TaskInspector
                                 .getInstance()
@@ -1583,7 +1646,8 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                     return this.updatePatrul.apply( patrul )
                             .flatMap( aBoolean -> super.function(
                                     Map.of( "message", "See you soon my darling )))",
-                                            "success", this.updatePatrulStatus.apply( patrul, LOGOUT ) ) ) );
+                                            "success", this.updatePatrulStatus.apply( patrul, LOGOUT ) )
+                            ) );
                 }
 
                 else if ( status.isAccepted() ) {
@@ -1596,7 +1660,8 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                 else {
                     return super.function(
                             Map.of( "message", "Patrul: " + status,
-                                    "success", this.updatePatrulStatus.apply( patrul, status ) ) );
+                                    "success", this.updatePatrulStatus.apply( patrul, status ) )
+                    );
                 }
             } );
 
@@ -1605,7 +1670,8 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
             .flatMap( patrul -> super.function(
                     Map.of( "message", patrul.getUuid().toString(),
                             "success", this.updatePatrulStatus.apply( patrul, Status.LOGIN ),
-                            "data", Data.from( patrul ) ) ) );
+                            "data", Data.from( patrul ) ) )
+            );
 
     public final BiFunction< UUID, PatrulActivityRequest, Mono< List< TabletUsage > > > getAllUsedTablets = ( uuid, request ) ->
             super.convertValuesToParallelFlux(
@@ -1690,10 +1756,13 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                             WHERE id = 'id';
                             """,
                             CassandraCommands.UPDATE,
+
                             CassandraTables.TABLETS,
                             CassandraTables.ANDROID_VERSION_CONTROL_TABLE,
+
                             androidVersionUpdate.getVersion(),
-                            androidVersionUpdate.getLink() ) )
+                            androidVersionUpdate.getLink()
+                    ) )
                     .wasApplied()
                     ? super.function( Map.of( "message", "Last version was saved" ) )
                     : super.errorResponse( "Error during the saving of version" );
@@ -1702,7 +1771,8 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
     возвращает последнюю версию приложения
     */
     public final Supplier< Mono< ApiResponseModel > > getLastVersion = () -> super.function(
-            Map.of( "message", "you have to update to last version",
+            Map.of(
+                    "message", "you have to update to last version",
                     "data", com.ssd.mvd.gpstabletsservice.entity.Data.from(
                             AndroidVersionUpdate.generate(
                                     this.getRowFromTabletsKeyspace(
@@ -1710,7 +1780,11 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                                             "id",
                                             "id"
                                     ),
-                                    LAST ) ) ) );
+                                    LAST
+                            )
+                    )
+            )
+    );
 
     public final Function< PatrulActivityRequest, Mono< ApiResponseModel > > getTabletUsageStatistics = patrulActivityRequest ->
             super.convert( new TabletUsageStatistics() )
