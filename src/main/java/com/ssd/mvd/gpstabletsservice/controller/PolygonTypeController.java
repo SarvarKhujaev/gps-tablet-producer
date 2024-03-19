@@ -50,7 +50,8 @@ public final class PolygonTypeController extends LogInspector {
     public Mono< ApiResponseModel > deletePolygonType ( final UUID uuid ) {
         return CassandraDataControl
             .getInstance()
-            .deleteRow( CassandraTables.POLYGON_TYPE.name(),
+            .deleteRow(
+                    CassandraTables.POLYGON_TYPE.name(),
                     "uuid",
                     uuid.toString() )
             .onErrorContinue( super::logging )

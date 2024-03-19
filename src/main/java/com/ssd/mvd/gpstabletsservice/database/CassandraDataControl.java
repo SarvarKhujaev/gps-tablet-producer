@@ -284,12 +284,14 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
                     .doOnError( this::close);
 
     public final Function< UUID, Mono< PolygonType > > getPolygonTypeByUUID = uuid -> super.convert(
-            new PolygonType(
+            PolygonType.empty().generate(
                     this.getRowFromTabletsKeyspace(
                             CassandraTables.POLYGON_TYPE,
                             "uuid",
-                            uuid.toString() ) ) )
-            .doOnError( this::close);
+                            uuid.toString()
+                    )
+            ) )
+            .doOnError( this::close );
 
     public final Function< Polygon, Mono< ApiResponseModel > > updatePolygon = polygon -> this.getSession().execute(
             MessageFormat.format(

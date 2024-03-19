@@ -45,24 +45,30 @@ public final class PolygonType extends DataValidateInspector implements ObjectCo
         );
     }
 
-    private PolygonType( final UDTValue udtValue ) {
+    @Override
+    public PolygonType generate( final UDTValue udtValue ) {
         super.checkAndSetParams(
                 udtValue,
-                row1 -> {
+                udtValue1 -> {
                     this.setUuid( udtValue.getUUID( "uuid" ) );
                     this.setName( udtValue.getString( "name" ) );
                 }
         );
-    }
 
-    @Override
-    public PolygonType generate( final UDTValue udtValue ) {
-        return new PolygonType( udtValue );
+        return this;
     }
 
     @Override
     public PolygonType generate( final Row row ) {
-        return new PolygonType( row );
+        super.checkAndSetParams(
+                row,
+                row1 -> {
+                    this.setUuid( row.getUUID( "uuid" ) );
+                    this.setName( row.getString( "name" ) );
+                }
+        );
+
+        return this;
     }
 
     @Override

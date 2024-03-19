@@ -37,8 +37,8 @@ public final class PositionInfo extends DataValidateInspector implements ObjectC
         super.checkAndSetParams(
                 row,
                 row1 -> {
-                    this.setLat( row.getDouble( "latitude" ) );
-                    this.setLng( row.getDouble( "longitude" ) );
+                    this.setLat( row1.getDouble( "latitude" ) );
+                    this.setLng( row1.getDouble( "longitude" ) );
                 }
         );
 

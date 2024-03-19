@@ -1,5 +1,6 @@
 package com.ssd.mvd.gpstabletsservice.task.card;
 
+import com.ssd.mvd.gpstabletsservice.inspectors.DataValidateInspector;
 import com.ssd.mvd.gpstabletsservice.interfaces.ObjectCommonMethods;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,7 +14,7 @@ import java.util.UUID;
 /*
 Рапорт от патрульного после завершения задачи
 */
-public final class ReportForCard implements ObjectCommonMethods {
+public final class ReportForCard extends DataValidateInspector implements ObjectCommonMethods< ReportForCard > {
     public double getLan() {
         return this.lan;
     }
@@ -99,21 +100,24 @@ public final class ReportForCard implements ObjectCommonMethods {
 
     private ReportForCard () {}
 
-    public ReportForCard ( final UDTValue udtValue ) {
-        this.setLan( udtValue.getDouble( "lan" ) );
-        this.setLat( udtValue.getDouble( "lat" ) );
-
-        this.setTitle( udtValue.getString( "title" ) );
-        this.setDescription( udtValue.getString( "description" ) );
-        this.setPassportSeries( udtValue.getString( "passportSeries" ) );
-
-        this.setDate( udtValue.getTimestamp( "date" ) );
-        this.setImagesIds( udtValue.getList( "imagesIds", String.class ) );
-    }
-
     @Override
     public ReportForCard generate( final UDTValue udtValue ) {
-        return new ReportForCard( udtValue );
+        super.checkAndSetParams(
+                udtValue,
+                udtValue1 -> {
+                    this.setLan( udtValue.getDouble( "lan" ) );
+                    this.setLat( udtValue.getDouble( "lat" ) );
+
+                    this.setTitle( udtValue.getString( "title" ) );
+                    this.setDescription( udtValue.getString( "description" ) );
+                    this.setPassportSeries( udtValue.getString( "passportSeries" ) );
+
+                    this.setDate( udtValue.getTimestamp( "date" ) );
+                    this.setImagesIds( udtValue.getList( "imagesIds", String.class ) );
+                }
+        );
+
+        return this;
     }
 
     @Override
