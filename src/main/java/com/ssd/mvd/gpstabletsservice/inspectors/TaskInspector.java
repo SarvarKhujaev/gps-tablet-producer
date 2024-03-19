@@ -177,7 +177,7 @@ public final class TaskInspector extends SerDes {
             */
             case ARRIVED -> taskCommonMethods.update(
                     patrul,
-                    this.saveTaskTiming.apply( patrul, CARD_102 ),
+                    this.saveTaskTiming.apply( patrul, taskCommonMethods.getTaskCommonParams().getTaskTypes() ),
                     taskCommonMethods.getTaskCommonParams()
             );
 
@@ -187,7 +187,7 @@ public final class TaskInspector extends SerDes {
             и его ID
             */
             case ATTACHED -> patrul.update(
-                    CARD_102,
+                    taskCommonMethods.getTaskCommonParams().getTaskTypes(),
                     taskCommonMethods.getLatitude(),
                     taskCommonMethods.getLongitude(),
                     taskCommonMethods.getTaskCommonParams().getUuid().toString()
@@ -270,8 +270,10 @@ public final class TaskInspector extends SerDes {
                                                 WHERE uuid = {4};
                                                 """,
                                                 CassandraCommands.UPDATE,
+
                                                 CassandraTables.ESCORT,
                                                 CassandraTables.TUPLE_OF_CAR,
+
                                                 tuple.getUuidOfPatrul(),
                                                 tuple.getUuid()
                                         )
@@ -583,6 +585,7 @@ public final class TaskInspector extends SerDes {
                     return i;
                 }
             }
+
             return 0;
     };
 

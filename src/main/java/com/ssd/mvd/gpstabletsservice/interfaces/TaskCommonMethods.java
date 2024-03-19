@@ -45,14 +45,17 @@ public interface TaskCommonMethods< T > {
             final Patrul patrul,
             final TaskCommonParams taskCommonParams
     ) {
-        taskCommonParams.getPatruls().put( patrul.getUuid(), patrul );
+        taskCommonParams.getPatruls().remove( patrul.getUuid() );
     }
 
     default void update () {
         // в случае если количество патрульных равно количеству рапортов, то значит что таск закрыт
-        if ( this.getTaskCommonParams().checkCollectionsLengthEquality(
-                this.getTaskCommonParams().getPatruls(),
-                this.getTaskCommonParams().getReportForCardList() ) ) {
+        if (
+                this.getTaskCommonParams().checkCollectionsLengthEquality(
+                        this.getTaskCommonParams().getPatruls(),
+                        this.getTaskCommonParams().getReportForCardList()
+                )
+        ) {
             this.getTaskCommonParams().setStatus( FINISHED );
 
             /*

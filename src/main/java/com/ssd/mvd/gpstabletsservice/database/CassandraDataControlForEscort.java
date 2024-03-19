@@ -43,7 +43,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
     }
 
     private CassandraDataControlForEscort () {
-        super.logging( "CassandraDataControlForEscort is ready" );
+        super.logging( this.getClass() );
     }
 
     /*
@@ -192,8 +192,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                                 WHERE uuid = {5};
                                 """,
                                 CassandraCommands.UPDATE,
+
                                 CassandraTables.ESCORT,
                                 CassandraTables.TUPLE_OF_CAR,
+
                                 patrul.getUuid(),
                                 escortTuple.getUuid(),
                                 patrul.getPatrulUniqueValues().getUuidForEscortCar()
@@ -238,8 +240,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                                             WHERE uuid = {4};
                                             """,
                                             CassandraCommands.UPDATE,
+
                                             CassandraTables.ESCORT,
                                             CassandraTables.POLYGON_FOR_ESCORT,
+
                                             escortTuple.getUuid(),
                                             polygonForEscort1.getUuid()
                                     )
@@ -265,14 +269,15 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
 
                         super.joinWithAstrix( escortTuple.getCountries() ),
                         escortTuple.getUuidOfPolygon(),
+
                         super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ),
                         super.convertListToCassandra.apply( escortTuple.getPatrulList() )
                 )
         ).append( CassandraCommands.APPLY_BATCH );
 
         return this.getSession().execute( stringBuilder.toString() ).wasApplied()
-                ? Flux.just( super.function( Map.of( "message", "Tuple was successfully created" ) ).block() )
-                : Flux.just( super.errorResponse( "Such a tuple has already been created" ).block() );
+                ? Flux.from( super.function( Map.of( "message", "Tuple was successfully created" ) ) )
+                : Flux.from( super.errorResponse( "Such a tuple has already been created" ) );
     };
 
     private final Function< EscortTuple, Mono< ApiResponseModel > > updateEscortTuple = escortTuple ->
@@ -291,6 +296,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                             escortTuple.getUuid(),
                             super.joinWithAstrix( escortTuple.getCountries() ),
                             escortTuple.getUuidOfPolygon(),
+
                             super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ),
                             super.convertListToCassandra.apply( escortTuple.getPatrulList() ),
 
@@ -309,20 +315,28 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                             VALUES ( {3}, {4}, {5}, {6,number,#}, {7}, {8,number,#}, {9}, {10} );
                             """,
                             CassandraCommands.INSERT_INTO,
+
                             CassandraTables.ESCORT,
                             CassandraTables.POLYGON_FOR_ESCORT,
+
                             CassandraFunctions.UUID,
+
                             polygon.getUuidOfEscort(),
+
                             super.joinWithAstrix( polygon.getName() ),
                             polygon.getTotalTime(),
                             polygon.getRouteIndex(),
                             polygon.getTotalDistance(),
+
                             super.convertListOfPointsToCassandra.apply( polygon.getPointsList() ),
                             super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() ) ) )
                     .wasApplied()
                     ? super.function(
-                            Map.of( "message", "Polygon was saved",
-                            "data", Data.from( polygon.getUuid().toString() ) ) )
+                            Map.of(
+                                    "message", "Polygon was saved",
+                                    "data", Data.from( polygon.getUuid().toString() )
+                            )
+                    )
                     : super.errorResponse( "This polygon has already been saved" );
 
     private final Function< String, Mono< PolygonForEscort > > getCurrentPolygonForEscort = id -> super.convert(
@@ -340,8 +354,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                                                                     {0} {1}.{2} WHERE uuid = {3};
                                                                     """,
                                                                     CassandraCommands.DELETE,
+
                                                                     CassandraTables.ESCORT,
                                                                     CassandraTables.POLYGON_FOR_ESCORT,
+
                                                                     id
                                                             )
                                                     )
@@ -362,14 +378,19 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                                     VALUES ( {3}, {4}, {5}, {6,number,#}, {7}, {8,number,#}, {9}, {10} );
                                     """,
                                     CassandraCommands.INSERT_INTO,
+
                                     CassandraTables.ESCORT,
                                     CassandraTables.POLYGON_FOR_ESCORT,
+
                                     polygon.getUuid(),
                                     polygon.getUuidOfEscort(),
+
                                     super.joinWithAstrix( polygon.getName() ),
+
                                     polygon.getTotalTime(),
                                     polygon.getRouteIndex(),
                                     polygon.getTotalDistance(),
+
                                     super.convertListOfPointsToCassandra.apply( polygon.getPointsList() ),
                                     super.convertListOfPointsToCassandra.apply( polygon.getLatlngs() ) ) )
                     .wasApplied()
@@ -430,8 +451,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                             SET tupleOfCarsList = {3}, patrulList = {4};
                             """,
                             CassandraCommands.UPDATE,
+
                             CassandraTables.ESCORT,
                             CassandraTables.TUPLE_OF_ESCORT,
+
                             super.convertListToCassandra.apply( escortTuple.getTupleOfCarsList() ),
                             super.convertListToCassandra.apply( escortTuple.getPatrulList() )
                     )
@@ -443,7 +466,9 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                             .getRowFromTabletsKeyspace(
                                     CassandraTables.PATRULS,
                                     "uuid",
-                                    tupleOfCar.getUuidOfPatrul().toString() ) );
+                                    tupleOfCar.getUuidOfPatrul().toString()
+                            )
+            );
 
             patrul.getPatrulUniqueValues().unlinkFromEscortCar();
 
@@ -456,8 +481,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                             WHERE uuid = {4};
                             """,
                             CassandraCommands.UPDATE,
+
                             CassandraTables.TABLETS,
                             CassandraTables.PATRULS,
+
                             null,
                             patrul.getUuid()
                     )
@@ -474,8 +501,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                             WHERE uuid = {4};
                             """,
                             CassandraCommands.UPDATE,
+
                             CassandraTables.ESCORT,
                             CassandraTables.TUPLE_OF_CAR,
+
                             null,
                             tupleOfCar.getUuid()
                     )
@@ -484,7 +513,8 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
             return this.getSession().execute(
                     stringBuilder.append( CassandraCommands.APPLY_BATCH ).toString()
             ).wasApplied()
-                    ? super.function( Map.of( "message", "Car" + tupleOfCar.getGosNumber() + " was updated successfully" ) )
+                    ? super.function(
+                            Map.of( "message", "Car" + tupleOfCar.getGosNumber() + " was updated successfully" ) )
                     : super.errorResponse( "This car does not exists" );
     };
 
@@ -562,9 +592,10 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                             {0} {1}.{2} WHERE uuid = {3};
                             """,
                             CassandraCommands.DELETE,
-                            CassandraTables.ESCORT,
 
+                            CassandraTables.ESCORT,
                             CassandraTables.COUNTRIES,
+
                             countryId
                     )
             );
@@ -586,6 +617,7 @@ public final class CassandraDataControlForEscort extends CassandraConverter impl
                     super.convertClassToCassandra.apply( Country.class ),
 
                     CassandraFunctions.UUID,
+
                     super.joinWithAstrix(
                             ( !country.getFlag().isBlank()
                                     ? country.getFlag()
