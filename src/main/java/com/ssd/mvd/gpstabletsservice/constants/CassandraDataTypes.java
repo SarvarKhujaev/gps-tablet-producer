@@ -125,8 +125,6 @@ public enum CassandraDataTypes {
         INSERT INTO RiderResults (rider, race, result)
         VALUES ('Christopher Froome', 'Tour de France', 89h4m48s);
 
-
-
     Duration columns cannot be used in a table’s PRIMARY KEY.
     This limitation is due to the fact that durations cannot be ordered.
     It is effectively not possible to know if 1mo is greater than 29d without a date context.

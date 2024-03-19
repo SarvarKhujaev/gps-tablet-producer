@@ -102,8 +102,7 @@ public class DataValidateInspector extends TimeInspector {
 
                     // не активные патрульные
                     case IN_ACTIVE -> !this.checkPatrulActivity( row.getUUID( "uuid" ) )
-                            && super
-                            .getTimeDifference( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) > 24;
+                            && super.getTimeDifference( row.getTimestamp( "lastActiveDate" ).toInstant(), 1 ) > 24;
 
                     // патрульные которые которые никогда не заходили
                     case FORCE -> this.checkPatrulActivity( row.getUUID( "uuid" ) );
@@ -153,7 +152,8 @@ public class DataValidateInspector extends TimeInspector {
                 .getRowFromTabletsKeyspace(
                         tableName,
                         "id",
-                        id ) != null;
+                        id
+                ) != null;
     }
 
     protected boolean checkTracker (
@@ -168,11 +168,11 @@ public class DataValidateInspector extends TimeInspector {
                 ) == null
                 && CassandraDataControl
                 .getInstance()
-                .getSession()
-                .execute( "SELECT * FROM "
-                        + CassandraTables.TRACKERS + "."
-                        + CassandraTables.TRACKERSID
-                        + " WHERE trackersId = '" + trackerId + "';" ).one() == null;
+                .getRowFromTabletsKeyspace(
+                        CassandraTables.TRACKERSID,
+                        "trackersId",
+                        trackerId
+                ) == null;
     }
 
     protected boolean checkCarNumber (

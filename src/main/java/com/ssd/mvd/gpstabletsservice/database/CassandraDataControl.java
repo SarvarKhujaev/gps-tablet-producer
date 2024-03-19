@@ -372,7 +372,7 @@ public class CassandraDataControl extends CassandraConverter implements ServiceC
             this.getCarByUUID.apply( UUID.fromString( gosno ) )
                     .flatMap( reqCar -> {
                         if ( reqCar.getPatrulPassportSeries() == null
-                                && reqCar.getPatrulPassportSeries().equals( "null" ) ) {
+                                || reqCar.getPatrulPassportSeries().equals( "null" ) ) {
                             this.getSession().execute(
                                     MessageFormat.format(
                                             """
